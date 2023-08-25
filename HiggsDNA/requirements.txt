@@ -1,0 +1,14 @@
+pyaml
+xrootd==5.5.3
+uproot==5.0.5
+awkward
+numba
+pyarrow
+pandas
+rich
+matplotlib
+vector
+conda-pack
+tqdm
+dill
+enlighten

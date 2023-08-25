@@ -1,0 +1,7 @@
+"ZGToLLG", "ZG2JToG2L2J", "DYJetsToLL", "TTGJets", "TGJets", "LLAJJ", "TT", "WW", "WZ", "ZZ"
+"data_med", "data_fake", "mc_true", "mc_med"
+
+                 "data_fake":   ["2017"],
+                 "data_med":    ["2017"],
+                 "mc_true":     ["2017"],
+                 "mc_med":      ["2017"],

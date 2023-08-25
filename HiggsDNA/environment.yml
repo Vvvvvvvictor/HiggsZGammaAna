@@ -1,0 +1,30 @@
+name: higgs-zg-ana
+channels:
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+  - conda-forge
+  - defaults
+dependencies:
+  - awkward>=1.8
+  - conda-pack>=0.7
+  - dill>=0.3
+  - enlighten>=1.10
+  - matplotlib>=3.5
+  - numba>=0.55
+  - pandas>=1.4
+  - pip>=22.2
+  - pyaml>=21.10
+  - pyarrow>=9.0
+  - python>=3.9
+  - rich>=12.5
+  - tqdm>=4.64
+  - uproot>=4.3
+  - vector>=0.8.5
+  - xrootd>=5.1
+  - pip:
+    - correctionlib
+    - pydantic
+    - pyqt5-sip
+    - pyqtchart
+    - pyqtwebengine

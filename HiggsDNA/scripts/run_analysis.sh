@@ -1,0 +1,1 @@
+python scripts/run_analysis.py --config "metadata/zgamma.json" --log-level "DEBUG" --n_cores 5 --output_dir "cutflow/" --unretire_jobs
