@@ -1,8 +1,10 @@
 # My personal things
-HiggsDNA/*code/
 */outputs/
 */plots/
 */skimmed_ntuple
+*/test*
+test.pdf
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

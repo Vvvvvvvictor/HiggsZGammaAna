@@ -15,7 +15,7 @@ conda env create -f environment.yml -p <some_path_where_you_have_more_disk_space
 Then, activate the conda environment
 
 ```
-conda activate higgs-zg-ana
+source setup.sh
 ```
 
 You may also want to increase your disk quota at [this link](https://resources.web.cern.ch/resources/Manage/EOS/Default.aspx), otherwise you may run out of space while installing your `conda` environment.
@@ -59,7 +59,7 @@ You can find the name of variables in NanoAOD in [this link](https://cms-nanoaod
 Put this environment in HiggsDNA environment to reduce the space occupied by this program.
 ```
 cd HiggsZGammaAna/hzgml
-conda activate higgs-zg-ana
+source setup.sh
 ```
 **2. Install packages**
 
@@ -153,6 +153,7 @@ For this step, there is no need to activate the conda analysis environment.
 
 Get the CMS env first. Please make sure you have enter `HiggsZGammaAna' directory.
 ```
+cd HiggsZGammaAna/SSTest/
 scram project CMSSW CMSSW_11_3_4
 cd CMSSW_11_3_4/src
 cmsenv
