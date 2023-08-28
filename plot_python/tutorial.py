@@ -17,7 +17,7 @@ x_range = (80, 100)
 x_title = "M_{ll}(GeV)"
 y_title = "Events/GeV"
 sub_y_title = "Data/MC"
-selections = ["(H_mass<120) | (H_mass>130)", "gamma_mvaID_WP80==1", "(Z_mass>80) & (Z_mass<100)"]
+selections = ["(H_mass<120) | (H_mass>130)", "gamma_mvaID_WP80==1", "(Z_mass>80) & (Z_mass<100)", "Z_pt<10"]
 
 # Dataset list
 data_file_list = [
@@ -79,7 +79,7 @@ plot.Set(h_stack.GetYaxis(), Title=y_title)
 data_hist.Draw("E same")
 
 pads[0].Update()
-plot.Set(h_stack, Maximum=1.2*pads[0].GetFrame().GetY2())
+plot.Set(h_stack, Maximum=1.3*pads[0].GetFrame().GetY2())
 
 legend = plot.PositionedLegend(0.6, 0.10, 3, 0.015)
 plot.Set(legend, NColumns=3, TextSize=0.023)

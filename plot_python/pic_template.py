@@ -52,7 +52,7 @@ def get_ratio_hist(numerator_h, denominator_h):
     # Adjust y-axis settings
     y = ratio_h.GetYaxis()
     y.SetTitle("")
-    y.SetNdivisions(105)
+    y.SetNdivisions(505)
     y.SetTitleSize(20)
     y.SetTitleFont(43)
     y.SetTitleOffset(1.55)
