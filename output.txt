@@ -1,0 +1,2 @@
+MH.getVal() sigma_CB.getVal() alpha.getVal() n_CB.getVal() fracG1.getVal() status
+result: 124.597 1.8747 0.892764 6.83195 0.0341935 0

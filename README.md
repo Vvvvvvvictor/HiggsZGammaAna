@@ -59,7 +59,7 @@ You can find the name of variables in NanoAOD in [this link](https://cms-nanoaod
 Put this environment in HiggsDNA environment to reduce the space occupied by this program.
 ```
 cd HiggsZGammaAna/hzgml
-source setup.sh
+conda activate higgs-zg-ana
 ```
 **2. Install packages**
 
@@ -161,12 +161,7 @@ cmsenv
 There are another two package needed. And need to clone them from github.
 ```
 git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit -b 112x-comb2021
-cd HiggsAnalysis/CombinedLimit/
-cd ../../
-git clone https://github.com/cms-analysis/CombineHarvester.git HiggsAnalysis/CombineHarvester
-cd HiggsAnalysis/CombineHarvester/
-git checkout v2.0.0
-cd ../../
+git clone https://github.com/cms-analysis/CombineHarvester.git HiggsAnalysis/CombineHarvester -b v2.0.0
 scram b -j 9
 ```
 Please note that you need to initialize **each time you setup a terminal** by doing this.
@@ -176,3 +171,23 @@ cmsenv
 ```
 
 ### Scripts to run a task
+**1. Prepare the background and signal template**
+
+We can get a file(`bkg_sig_template.root`) with the bkg and sig shape in each channels and categories by running this.
+```
+python SSTest/Generate_template.py
+```
+
+**2. Run spurial signal test and find the best bkg function**
+
+Run this code:
+```
+root -l -q SSTest/SSTest.cpp
+```
+We select the best background function by spurial signal, chi square and F test. We can see the fitting result and name of the best function in the log file.(not done yet)
+
+## NOTE
+After setting up three environment(HiggsDNA, machine learning and spurial signal test), we can set up those three by running the compacted setup shell script:
+```
+source setup.sh
+```

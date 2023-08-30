@@ -51,7 +51,7 @@ void myss(){
     //RooWorkspace* w = dynamic_cast<RooWorkspace*>(fin->Get(""));
     
     int cat = 4; //1, 2, 3, 4
-    int sig = 20; //0, 1, 2, 3, 5, 10, 20
+    int sig = 0; //0, 1, 2, 3, 5, 10, 20
     //background MC template
     //double dataevents = 111926.;
     //double dataevents = 100000.;
@@ -730,8 +730,8 @@ void myss(){
     RooFitResult *model_fit;
     model_fit = model->fitTo(*dbkg,RooFit::Save(1),RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE)); //FIXME kTRUE or kFALSE
     //ofstream output("output.txt");
-	output<<"nsig.getVal() nsig.getError() nbkg.getVal() nbkg.getError() status"<<endl;
-    output<< "result: " <<nsig.getVal()<<" "<<nsig.getError()<<" "<<nbkg.getVal()<<" "<<nbkg.getError()<<" "<< model_fit->status() <<endl; model_fit->Print();
+	cout<<"nsig.getVal() nsig.getError() nbkg.getVal() nbkg.getError() status"<<endl;
+    cout<< "result: " <<nsig.getVal()<<" "<<nsig.getError()<<" "<<nbkg.getVal()<<" "<<nbkg.getError()<<" "<< model_fit->status() <<endl; model_fit->Print();
     
 
 /*
