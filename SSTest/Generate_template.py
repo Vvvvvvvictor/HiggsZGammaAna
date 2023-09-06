@@ -5,6 +5,7 @@ import ROOT
 log_path = "/afs/cern.ch/user/j/jiehan/private/hmumuml/outputs/"
 bkg_list = ["ZGToLLG", "DYJetsToLL"]
 sig_list = ["ggH"]
+data_list = ["data"]
 channels = ["zero_jet", "one_jet", "two_jet", "VH_ttH"]
 com_sel = []
 target_path = "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/bkg_sig_template.root"
@@ -34,6 +35,15 @@ for chan in channels:
             arrays = ut.ReadFile(log_path+"{}/{}.root".format(chan, sig), selections = selections)
             sig_hist, yield_h = ut.AddHist(arrays, "H_mass", sig_hist)
         sig_hist.Write(name)
+
+        name = "data_{}_cat{}".format(chan, cat)
+        data_hist = ROOT.TH1D(name,name, 160, 100, 180)
+        data_hist.Sumw2()
+        selections = selections + ["(H_mass<122) | (H_mass>128)"]
+        for i, data in enumerate(data_list):
+            arrays = ut.ReadFile(log_path+"{}/{}.root".format(chan, data), selections = selections)
+            data_hist, yield_h = ut.AddHist(arrays, "H_mass", data_hist)
+        data_hist.Write(name)
 
 print("We get background and signal template: {}".format(target_path))
 

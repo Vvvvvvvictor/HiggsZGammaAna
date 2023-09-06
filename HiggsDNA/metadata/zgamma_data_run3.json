@@ -121,6 +121,8 @@
         "HLT_Ele35_WPTight_Gsf", 
         "HLT_IsoMu24", 
         "HLT_IsoMu27",
+        "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ",  
+        "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", 
         "Photon_pt",
         "Photon_eta",
         "Photon_phi",

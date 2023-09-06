@@ -41,7 +41,7 @@ for log_dir in os.listdir(log_path):
                                     if 'w' in cutflow_t:
                                         temp[cuti] += float(line.split(':')[5].split(' ')[1])*weight
                                     else:
-                                        # print(log_file, " ", line)
+                                        print(log_file, " ", line)
                                         temp[cuti] += float(line.split(':')[5].split(' ')[1])
                                     if cuti == 9:
                                         cutflow[cutflow_t] += temp

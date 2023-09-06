@@ -212,6 +212,10 @@ class Job():
         :returns: whether the job was submitted (or is able to be submitted in the case of ``dry_run = True``)
         :rtype: bool
         """
+        if os.path.exists(self.summary_file):
+            self.status = "completed"
+            return False
+
         if reconfigure or (not self.wrote_config or not os.path.exists(self.config_file)):
             self.write_config()
 
