@@ -43,7 +43,7 @@ class DuplicatedSamplesTagger(Tagger):
                 cut = single_mu_trig & (1-double_mu_trig)
 
 
-        if "/DoubleEG/" in file or "/SingleEletron/" in file or "/EGamma/" in file:
+        if "/DoubleEG/" in file or "/SingleElectron/" in file or "/EGamma/" in file:
             double_mu_trig = self.get_double_muon_trig(data)
             single_mu_trig = self.get_single_muon_trig(data)
             double_eg_trig = self.get_double_eg_trig(data)
@@ -53,8 +53,8 @@ class DuplicatedSamplesTagger(Tagger):
             if "/DoubleEG/" in file:
                 cut = double_eg_trig & (1-(single_mu_trig | double_mu_trig))
             elif "/EGamma/" in file:
-                cut = single_eg_trig | double_eg_trig & (1-(single_mu_trig | double_mu_trig))
-            elif "/SingleEletron/" in file:
+                cut = (single_eg_trig | double_eg_trig) & (1-(single_mu_trig | double_mu_trig))
+            elif "/SingleElectron/" in file:
                 cut = single_eg_trig & (1-double_eg_trig) & (1-(single_mu_trig | double_mu_trig))
 
         if "/MuonEG/" in file:
