@@ -39,6 +39,8 @@ conda env update --file environment.yml --prune
 
 **3. Some useful note**
 
+The logic computation sequance is: 1. `&`, 2. `|`. It would be better use `()` to braket off the part combined by `|` or between each `&`.
+
 If you have some question of useage or code structure, please look at [HiggsDNA contents](https://sam-may.github.io/higgs_dna_tutorial.github.io/).
 
 The name list of dataset can find in DAS system [(example)](https://cmsweb.cern.ch/das/request?instance=prod/global&input=file+dataset%3D%2FVBFHToZG_M-125_TuneCP5_13TeV-powheg-pythia8%2FRunIISummer19UL17NanoAODv2-106X_mc2017_realistic_v8-v1%2FNANOAODSIM). Then you can put them in `metadata/samples/zgamma_tutorial.json`.

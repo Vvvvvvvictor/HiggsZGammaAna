@@ -276,7 +276,7 @@ class ZGammaTaggerData(Tagger):
         z_cands = z_cands[z_cut] # OSSF lepton pairs with m_ll > 50.
         
         has_z_cand = awkward.num(z_cands) >= 1
-        z_cands = z_cands[awkward.argsort(abs(z_cands.ZCand.mass - 91.), axis = 1)] # take the one with mass closest to mZ
+        z_cands = z_cands[awkward.argsort(abs(z_cands.ZCand.mass - 91.1876), axis = 1)] # take the one with mass closest to mZ
         z_cand = awkward.firsts(z_cands)
 
         # Add Z-related fields to array

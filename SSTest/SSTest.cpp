@@ -45,28 +45,37 @@
 using namespace RooFit;
 using namespace std;
 
-void SSTest(int cat = 2, int sig = 0, TString channel = "zero_jet", TString bkg_fun = "bern3")
+void SSTest(int cat = 1, int sig = 0, TString channel = "untagged", TString bkg_fun = "bern3")
 {
     //background MC template
-    TFile* fbkg = TFile::Open(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/bkg_sig_template.root"));
+    // TFile* fbkg = TFile::Open(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/bkg_sig_template.root"));
     TH1F* hbkg;
-    if (fbkg->GetListOfKeys()->Contains((Form("bkg_%s_cat%d",channel.Data(), cat))))
-        hbkg = (TH1F*)fbkg->Get(Form("bkg_%s_cat%d",channel.Data(), cat));
-    else
-        abort();
+    // if (fbkg->GetListOfKeys()->Contains((Form("bkg_%s_cat%d",channel.Data(), cat))))
+    //     hbkg = (TH1F*)fbkg->Get(Form("bkg_%s_cat%d",channel.Data(), cat));
+    // else
+    //     abort();
+    TFile* fbkg = TFile::Open(Form("/afs/cern.ch/user/m/mingtao/public/zgamma/SpuriousSignal/MCsamples/bkg_template_v3_cut2/bkg/bkg_0sig_cat%d.root", cat));
+    hbkg = (TH1F*)fbkg->Get(Form("mass_cat%d", cat));
     double dataevents = hbkg->Integral();
+    double mcsbevents = hbkg->Integral(0,40)+hbkg->Integral(60,160);
 	
     //signal MC
-    TFile* fsig = TFile::Open(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/bkg_sig_template.root"));
-    // TH1F* hsig = dynamic_cast<TH1F*>( fsig->Get(Form("sig_zero_jet_cat%d",cat)) );
-    TH1F* hsig = (TH1F*)( fsig->Get(Form("sig_%s_cat%d", channel.Data(), cat)) );
+    // TFile* fsig = TFile::Open(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/bkg_sig_template.root"));
+    // // TH1F* hsig = dynamic_cast<TH1F*>( fsig->Get(Form("sig_zero_jet_cat%d",cat)) );
+    // TH1F* hsig = (TH1F*)( fsig->Get(Form("sig_%s_cat%d", channel.Data(), cat)) );
+    TFile* fsig = TFile::Open(Form("/afs/cern.ch/user/m/mingtao/public/zgamma/SpuriousSignal/MCsamples/bkg_template_v3_cut2/sig/FullSig_cat%d.root", cat));
+    TH1F* hsig = (TH1F*)fsig->Get(Form("mass_cat%d_FullSig", cat));
 	double sigevents = hsig->Integral();
 
     //data side band
-    TFile* fsb = TFile::Open(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/bkg_sig_template.root"));
-    // TH1F* hsig = dynamic_cast<TH1F*>( fsig->Get(Form("sig_zero_jet_cat%d",cat)) );
-    TH1F* hsb = (TH1F*)( fsb->Get(Form("data_%s_cat%d", channel.Data(), cat)) );
+    // TFile* fsb = TFile::Open(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/bkg_sig_template.root"));
+    // // TH1F* hsig = dynamic_cast<TH1F*>( fsig->Get(Form("sig_zero_jet_cat%d",cat)) );
+    // TH1F* hsb = (TH1F*)( fsb->Get(Form("data_%s_cat%d", channel.Data(), cat)) );
+    TFile* fsb = TFile::Open(Form("/afs/cern.ch/user/m/mingtao/public/zgamma/SpuriousSignal/MCsamples/bkg_template_v3_cut2/data_sid/data_0sig_cat%d.root", cat));
+    TH1F* hsb = (TH1F*)fsb->Get(Form("mass_cat%d_data", cat));
 	double sbevents = hsb->Integral();
+
+    hbkg->Scale(sbevents/mcsbevents);
 
     cout << "\n\tFinish preparing data!!!\n" << endl;
 
@@ -77,7 +86,7 @@ void SSTest(int cat = 2, int sig = 0, TString channel = "zero_jet", TString bkg_
 
     //background function fit
     RooDataHist* dbkg = new RooDataHist("data_bin","dataset with x", mH, hbkg);
-    RooDataHist* dsb = new RooDataHist("data_bin","dataset with x", mH, hsb);
+    // RooDataHist* dsb = new RooDataHist("data_bin","dataset with x", mH, hsb);
     // cout<<"bkg hist integral "<<hbkg->Integral()<<" "<<dbkg->sumEntries()<<endl;
 
     RooRealVar nsig("nsig","nsig",0,-100*sigevents,100*sigevents);
@@ -291,23 +300,25 @@ void SSTest(int cat = 2, int sig = 0, TString channel = "zero_jet", TString bkg_
 
     TFile *f = new TFile(Form("SSTest/outputs/%s_%d_%dxsig.root", channel.Data(), cat, sig),"UPDATE"); 
     hbkg->Write(hbkg->GetName(), TObject::kOverwrite);
+    // hsb->Write(hsb->GetName(), TObject::kOverwrite);
     hsig->Write(hsig->GetName(), TObject::kOverwrite);
 
-    //background function fit
-    bkg_model_fit = bkg_model->fitTo(*dsb,RooFit::Save(1),RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE)); 
     int bkg_npars, bkg_ndof;
-    bkg_npars = bkg_model_fit->floatParsFinal().getSize();
-    bkg_ndof = 160-bkg_npars;
     RooPlot *frame_bkg;
-    frame_bkg = mH.frame(Title(Form("Data side band with %s pdf", bkg_fun.Data())));
-    dsb->plotOn(frame_bkg);
-    bkg_model->plotOn(frame_bkg);
-    bkg_model->SetName(bkg_fun);
-    bkg_model->Write(bkg_model->GetName(), TObject::kOverwrite);
-    output << "\t" << bkg_fun.Data() << "\tsb:\tnpars = " << bkg_npars << " \tchi^2 = " << frame_bkg->chiSquare(bkg_npars) << "\tprob = " << TMath::Prob(frame_bkg->chiSquare(bkg_npars)*bkg_ndof, bkg_ndof) << endl;
 
-    cout << "\t=================================" << endl;
-    cout << "\n\t Finish data side band fit\n" << endl;
+    //background function fit
+    // bkg_model_fit = bkg_model->fitTo(*dsb,RooFit::Save(1),RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE)); 
+    // bkg_npars = bkg_model_fit->floatParsFinal().getSize();
+    // bkg_ndof = 160-bkg_npars;
+    // frame_bkg = mH.frame(Title(Form("Data side band with %s pdf", bkg_fun.Data())));
+    // dsb->plotOn(frame_bkg);
+    // bkg_model->plotOn(frame_bkg);
+    // bkg_model->SetName(bkg_fun);
+    // bkg_model->Write(bkg_model->GetName(), TObject::kOverwrite);
+    // output << "\t" << bkg_fun.Data() << "\tsb:\tnpars = " << bkg_npars << " \tchi^2 = " << frame_bkg->chiSquare(bkg_npars) << "\tprob = " << TMath::Prob(frame_bkg->chiSquare(bkg_npars)*bkg_ndof, bkg_ndof) << endl;
+
+    // cout << "\t=================================" << endl;
+    // cout << "\n\t Finish data side band fit\n" << endl;
 
     //background function fit
     bkg_model_fit = bkg_model->fitTo(*dbkg,RooFit::Save(1),RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE));
@@ -356,8 +367,8 @@ void SSTest(int cat = 2, int sig = 0, TString channel = "zero_jet", TString bkg_
     signal->plotOn(frame_sig);
     signal->Write(signal->GetName(), TObject::kOverwrite);
     output << "\t" << bkg_fun.Data() << "\tsig:\tnpars = " << sig_npars << "\tchi^2 = " << frame_sig->chiSquare(sig_npars) << "\tprob = " << TMath::Prob(frame_sig->chiSquare(sig_npars)*sig_ndof, sig_ndof) << endl;
-    frame_sig->Draw();
-    gPad->Print(Form("test/shape_%s_cat%d.pdf",channel.Data(),cat));
+    // frame_sig->Draw();
+    // gPad->Print(Form("test/shape_%s_cat%d_%s.pdf",channel.Data(),cat,bkg_fun));
 
     cout << "\t=================================" << endl;
     cout << "\n\t Finish signal function fit\n" << endl;
@@ -381,7 +392,8 @@ void SSTest(int cat = 2, int sig = 0, TString channel = "zero_jet", TString bkg_
     model->SetName(Form("%s_model", bkg_fun.Data()));
     model->Write(model->GetName(), TObject::kOverwrite);
     output << "\t" << bkg_fun.Data() << "\tdata:\tnpars = " << data_npars << "\tchi^2 = " << frame_data->chiSquare(data_npars) << "\tprob = " << TMath::Prob(frame_data->chiSquare(data_npars)*data_ndof, data_ndof) << endl << "\t" << bkg_fun.Data() << "\tSS:\tnsig = " << nsig.getVal() << "\tdmc = " << nsig.getError() << "\tnbkg = " << nbkg.getVal() << "\tnbkg_err = " << nbkg.getError() << "\n" << endl;
-    // frame_data->Draw();
+    frame_data->Draw();
+    gPad->Print(Form("test/shape_%s_cat%d_%s.pdf",channel.Data(),cat,bkg_fun.Data()));
 
     // RooHist *hpull = frame_data->pullHist();
     // RooPlot *frame3 = mH.frame(Title("Pull Distribution"));
