@@ -11,7 +11,9 @@ import uproot
 import awkward
 
 import logging
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
+from higgs_dna.utils.logger_utils import simple_logger
+logger = simple_logger(__name__)
 
 from higgs_dna.samples.sample_manager import SampleManager
 from higgs_dna.samples.sample import Sample
@@ -171,7 +173,7 @@ class AnalysisManager():
                 "module_name" : "higgs_dna.analysis",
                 "function_name" : "run_analysis"
             },
-            "batch_system" : "local",
+            "batch_system" : "condor",
             "fpo" : None, # number of input files per output file (i.e. per job)
             "n_cores" : 6, # number of cores for local running
             "merge_outputs" : False,
@@ -498,7 +500,7 @@ class AnalysisManager():
         events = []
         sum_weights = 0
         for file in files:
-            with uproot.open(file, timeout = 1000) as f:
+            with uproot.open(file, timeout = 500) as f:
                 runs = f["Runs"]
                 if "genEventCount" in runs.keys() and "genEventSumw" in runs.keys():
                     sum_weights += numpy.sum(runs["genEventSumw"].array())

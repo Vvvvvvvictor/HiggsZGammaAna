@@ -6,7 +6,9 @@ import os
 import importlib
 
 import logging
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
+from higgs_dna.utils.logger_utils import simple_logger
+logger = simple_logger(__name__)
 
 from higgs_dna.constants import NOMINAL_TAG
 from higgs_dna.taggers.tagger import Tagger

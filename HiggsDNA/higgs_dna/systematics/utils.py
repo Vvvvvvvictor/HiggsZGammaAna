@@ -1,7 +1,9 @@
 import awkward
 import numpy
 import logging
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
+from higgs_dna.utils.logger_utils import simple_logger
+logger = simple_logger(__name__)
 
 def systematic_from_bins(bins, variables, central_only = False):
     """

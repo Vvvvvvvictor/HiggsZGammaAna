@@ -15,7 +15,9 @@ conda env create -f environment.yml -p <some_path_where_you_have_more_disk_space
 Then, activate the conda environment
 
 ```
-source setup.sh
+cd HiggsZGammaAna/HiggsDNA
+conda deactivate
+conda activate higgs-zg-ana
 ```
 
 You may also want to increase your disk quota at [this link](https://resources.web.cern.ch/resources/Manage/EOS/Default.aspx), otherwise you may run out of space while installing your `conda` environment.
@@ -39,7 +41,7 @@ conda env update --file environment.yml --prune
 
 **3. Some useful note**
 
-The logic computation sequance is: 1. `&`, 2. `|`. It would be better use `()` to braket off the part combined by `|` or between each `&`.
+The logic computation sequance is: 1. `&`, 2. `|`. It would be better use `()` between each `&`.
 
 If you have some question of useage or code structure, please look at [HiggsDNA contents](https://sam-may.github.io/higgs_dna_tutorial.github.io/).
 
@@ -58,16 +60,19 @@ You can find the name of variables in NanoAOD in [this link](https://cms-nanoaod
 ### Setup environment
 **1. Enter analysis environment**
 
-Put this environment in HiggsDNA environment to reduce the space occupied by this program.
+Need another envirenment, you can set up it through these codes:
 ```
 cd HiggsZGammaAna/hzgml
-conda activate higgs-zg-ana
+source scripts/install.sh
 ```
-**2. Install packages**
 
-Install the packages for machine learning(BDT and DNN).
+It would be better to put this environment in `/eos` or other disk but not `/afs`. You can set the path by changing it in the `install.sh` and `setup.sh` mentioned below. The important thing is that they are supposed to be the same in these two files.
+
+**2. Set up environment each time**
+
+You need to set up the environment each time you create a new terminal.
 ```
-pip install -r requirement.txt
+source scripts/setup.sh
 ```
 
 ### Scripts to run the tasks

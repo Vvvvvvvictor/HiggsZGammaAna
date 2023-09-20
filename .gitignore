@@ -7,6 +7,12 @@
 *test*
 test.pdf
 SSTest/CMSSW_11_3_4
+*/models/
+*/eos*/
+*/x509*
+HiggsDNA/jiehan.cc
+HiggsDNA/core*
+SSTest/bkg*
 
 
 # Byte-compiled / optimized / DLL files
@@ -169,3 +175,4 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+

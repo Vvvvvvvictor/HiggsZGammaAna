@@ -11,7 +11,9 @@ import sys
 from tqdm import tqdm
 
 import logging
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
+from higgs_dna.utils.logger_utils import simple_logger
+logger = simple_logger(__name__)
 
 from higgs_dna.job_management.jobs import Job, LocalJob, CondorJob
 from higgs_dna.utils.metis_utils import num_to_ordinal_string, do_cmd, do_cmd_timeout

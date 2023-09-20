@@ -4,7 +4,9 @@ import vector
 vector.register_awkward()
 
 import logging
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
+from higgs_dna.utils.logger_utils import simple_logger
+logger = simple_logger(__name__)
 
 def abs_cos_helicity(p1, p2):
     """

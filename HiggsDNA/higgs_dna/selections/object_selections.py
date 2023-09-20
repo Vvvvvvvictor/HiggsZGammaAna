@@ -9,7 +9,9 @@ import numba
 from higgs_dna.utils import awkward_utils
 
 import logging
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
+from higgs_dna.utils.logger_utils import simple_logger
+logger = simple_logger(__name__)
 
 def select_objects(objects, cuts = {}, clean = {}, name = "none", tagger = None):
     """
