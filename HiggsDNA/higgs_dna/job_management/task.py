@@ -12,7 +12,9 @@ import numpy
 from tqdm import tqdm
 
 import logging
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
+from higgs_dna.utils.logger_utils import simple_logger
+logger = simple_logger(__name__)
 
 from higgs_dna.job_management.jobs import Job 
 from higgs_dna.utils import awkward_utils

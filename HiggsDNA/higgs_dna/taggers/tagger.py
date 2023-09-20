@@ -2,7 +2,10 @@ import awkward
 import vector
 import json
 import logging
-logger = logging.getLogger(__name__)
+from higgs_dna.utils.logger_utils import simple_logger
+# logger = logging.getLogger(__name__)
+logger = simple_logger(__name__)
+
 
 from higgs_dna.utils import misc_utils
 

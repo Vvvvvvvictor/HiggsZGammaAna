@@ -5,7 +5,9 @@ import copy
 from tqdm import tqdm 
 
 import logging
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
+from higgs_dna.utils.logger_utils import simple_logger
+logger = simple_logger(__name__)
 
 from higgs_dna.samples.sample import Sample
 from higgs_dna.samples.file import File

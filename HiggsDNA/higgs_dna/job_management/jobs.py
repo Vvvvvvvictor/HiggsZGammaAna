@@ -3,7 +3,9 @@ import json
 import subprocess
 
 import logging
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
+from higgs_dna.utils.logger_utils import simple_logger
+logger = simple_logger(__name__)
 
 from higgs_dna.utils.metis_utils import do_cmd
 from higgs_dna.utils.misc_utils import get_HiggsDNA_base, get_HiggsDNA_conda

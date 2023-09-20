@@ -7,7 +7,9 @@ import vector
 vector.register_awkward()
 
 import logging
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
+from higgs_dna.utils.logger_utils import simple_logger
+logger = simple_logger(__name__)
 
 from higgs_dna.taggers.tagger import Tagger, NOMINAL_TAG 
 from higgs_dna.utils import awkward_utils, misc_utils

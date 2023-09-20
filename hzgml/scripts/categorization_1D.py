@@ -29,7 +29,7 @@ def getArgs():
     parser.add_argument('-n', '--nscan', type = int, default = 100, help='number of scan.')
     parser.add_argument('-b', '--nbin', type = int, default = 10, choices = [1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16], help = 'number of BDT bins.')
     parser.add_argument('--skip', action = 'store_true', default = False, help = 'skip the hadd part')
-    parser.add_argument('--minN', type = int, default = 10, help = 'minimum number of events in mass window')
+    parser.add_argument('--minN', type = int, default = 50, help = 'minimum number of events in mass window')
     parser.add_argument('-v', '--variable', action = 'store', choices = ['bdt', 'NN'], default = 'bdt', help = 'MVA variable to use')
     #parser.add_argument('--val', action = 'store_true', default = False, help = 'se validation samples for categroization')
     parser.add_argument('-t', '--transform', type = bool, default = True, help = 'use the transform scores for categroization')
@@ -239,7 +239,7 @@ def main():
         print(f'INFO: Creating output folder: "significances/{region}"')
         os.makedirs("significances/%s"%region)
     '''
-    with open('significances/bin_binaries_%s.txt'%region, 'w') as json_file:
+    with open('outputs/significances/bin_binaries_%s.txt'%region, 'w') as json_file:
         json_file.write('{:d} '.format(args.nbin))
         for i in boundaries_values:
             for j in i:
@@ -248,7 +248,7 @@ def main():
         for i in list(yields['z']):
             json_file.write('{:.4f} '.format(i))
         json_file.write('%.4f %.4f' % (s, u))
-    with open('significances/%d_%d_%s_1D_%d.json' % (shield+1, add+1, region, args.nbin), 'w') as json_file:
+    with open('outputs/significances/%d_%d_%s_1D_%d.json' % (shield+1, add+1, region, args.nbin), 'w') as json_file:
         json.dump(outs, json_file)
         for i in list(yields['z']):
             json_file.write('{:.4f}\n'.format(i))

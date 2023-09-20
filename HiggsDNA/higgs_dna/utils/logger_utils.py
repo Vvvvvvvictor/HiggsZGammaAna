@@ -42,3 +42,14 @@ def setup_logger(level="INFO", logfile=None):
 
     return logger
 
+def simple_logger(name = "higgs_dna"):
+    """
+    give a name to logger, usually __name__ is OK.
+    """
+    logger = logging.getLogger(name)
+    handler = logging.FileHandler("log")
+    handler.terminator = ''
+    logger.addHandler(handler)
+    return logger
+
+

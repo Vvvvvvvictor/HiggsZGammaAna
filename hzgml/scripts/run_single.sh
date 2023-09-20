@@ -22,17 +22,18 @@ echo "Shielded parameter is: $S . Added variables is: $A ."
 ############################
 #  Training the BDT models
 ############################
-python scripts/train_bdt.py -r $T --save -s $S -a $A
+# python scripts/train_bdt.py -r $T --save -s $S -a $A
+# python scripts/train_bdt.py -r VBF --save -s $S -a $A
 
 ###########################################
 #  Applying the BDT models to all samples
 ###########################################
-python scripts/apply_bdt.py -r $T -s $S -a $A
+# python scripts/apply_bdt.py -r $T -s $S -a $A
 
 ###########################################################
 #  Optimizing the BDT boundaries for zero-jet and two-jet
 ###########################################################
-python scripts/categorization_1D.py -r $T -b 7 -s $S -a $A
+python scripts/categorization_1D.py -r $T -b 3 -s $S -a $A
 
 ##############################################
 #  Optimizing the BDT boundaries for two-jet

@@ -68,7 +68,7 @@ class XGBoostHandler(object):
 
         self._region = region
 
-        self._inputFolder = 'skimmed_ntuples'
+        self._inputFolder = '/eos/home-j/jiehan/root/2017/skimmed_ntuples'
         self._outputFolder = 'models'
         self._chunksize = 500000
         self._branches = []
