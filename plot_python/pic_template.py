@@ -5,13 +5,14 @@ import awkward
 import os
 import re
 
-def read_file(file, tree = "inclusive", selections = []):
+def read_file(file, var = None, tree = "inclusive", selections = []):
     '''
     read file and apply selections
     selections: a list of selection(<str>). If there is '&' or '|' in one item, MUST use "()" to enclose each subitem.(exp. '(H_eta>1.5) & (H_pt>10)')
     '''
     print("Reading {}:{}...".format(file, tree))
     variabels = ["weight", "H_mass"]
+    variabels.append(var)
     decro_sel = []
     for i in selections:
         var_can = list(set([j for j in re.split('\W+', i) if "_" in j]))
@@ -24,30 +25,31 @@ def read_file(file, tree = "inclusive", selections = []):
         arrays = arrays[eval(i)]
     return arrays
 
-def get_hist(arrays, variable, name, bins, range, hist=None):
+def get_hist(arrays, variable, ratio, name, bins, range, hist=None):
     if hist is None:
         hist = ROOT.TH1D(name,name,bins,range[0],range[1])
         hist.Sumw2()
     for i in trange(0, len(arrays[variable])):
-        hist.Fill(float(arrays[variable][i]), float(arrays['weight'][i]))
+        hist.Fill(float(arrays[variable][i]), float(arrays['weight'][i])*ratio)
     hist.SetLineWidth(3)
     hist.SetMarkerStyle(0)
     yield_hist = hist.Integral()
+    print(yield_hist)
     return hist, yield_hist
 
-def get_ratio_hist(numerator_h, denominator_h):
-    ratio_h = denominator_h.Clone("ratio_h")
+def get_ratio_hist(numerator_h, denominator_h, range=(0.35, 1.65)):
+    ratio_h = numerator_h.Clone("ratio_h")
     ratio_h.SetLineColor(ROOT.kBlack)
     ratio_h.SetMarkerStyle(0)
     ratio_h.SetMarkerSize(1)
     ratio_h.SetTitle("")
-    ratio_h.SetMinimum(0.35)
-    ratio_h.SetMaximum(1.65)
+    ratio_h.SetMinimum(range[0])
+    ratio_h.SetMaximum(range[1])
     
     # Set up plot for markers and errors
     # ratio_h.Sumw2()
     ratio_h.SetStats(0)
-    ratio_h.Divide(numerator_h)
+    ratio_h.Divide(denominator_h)
 
     # Adjust y-axis settings
     y = ratio_h.GetYaxis()
