@@ -1,0 +1,1 @@
+./bin/SignalFit -i ./X_signal_250_120_HHWWgg_qqlnu.root,Input/X_signal_250_125_HHWWgg_qqlnu.root,Input/X_signal_250_130_HHWWgg_qqlnu.root -p ggF -f HHWWggTag_0 -d fTest_Tagged.dat -s empty.dat --procs ggF --changeIntLumi 1 --HHWWggLabel X250_WWgg_qqlnugg  --verbose 2 --useSSF 1

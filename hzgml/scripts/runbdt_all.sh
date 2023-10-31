@@ -40,8 +40,8 @@ echo "Shielded parameter is: $S . Added variables is: $A ."
 ###########################################################
 # python scripts/categorization_1D.py -r zero_jet -b 4 -s $S -a $A --minN 300
 # python scripts/categorization_1D.py -r one_jet -b 4 -s $S -a $A --minN 300
-# python scripts/categorization_1D.py -r two_jet -b 4 -s $S -a $A --minN 200
-python scripts/categorization_1D.py -r two_jet -b 4 --minN 200
+python scripts/categorization_1D.py -r two_jet -b 3 -s $S -a $A --minN 10
+# python scripts/categorization_1D.py -r two_jet -b 4 --minN 200
 # python scripts/categorization_1D.py -r VH_ttH -b 2 -s $S -a $A --minN 20
 
 ##############################################
