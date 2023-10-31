@@ -1,0 +1,871 @@
+/afs/cern.ch/work/z/zewang/private/flashggfit/CMSSW_10_2_13/src/flashggFinalFit/Signal/ALP_SigModel_param_UL/fit_results_runII/M30
+
+>>> random number generator seed is 123456
+Configured fallback algorithm , type Minuit2, algo Migrad, strategy 0, tolerance 0.1
+   Options for Robust Minimizer :: 
+        Tolerance  0.1
+        Strategy   0
+        Type,Algo  Minuit2,Migrad
+>>> method used is MultiDimFit
+Setting runtime-define REMOVE_CONSTANT_ZERO_POINT to 1
+Turning on runtime-define MINIMIZER_freezeDisassociatedParams
+Turning on runtime-define MINIMIZER_multiMin_hideConstants
+Turning on runtime-define MINIMIZER_multiMin_maskConstraints
+Setting runtime-define MINIMIZER_multiMin_maskChannels to 2
+Adding /afs/cern.ch/work/z/zewang/private/flashggfit/CMSSW_10_2_13/src to include path
+Adding /cvmfs/cms.cern.ch/slc7_amd64_gcc700/lcg/root/6.12.07-gnimlf5//include to include path
+Input workspace 'w': 
+
+RooWorkspace(w) w contents
+
+variables
+---------
+(CMS_IDeff_ele,CMS_IDeff_ele_In,CMS_IDeff_g,CMS_IDeff_g_In,CMS_IDeff_mu,CMS_IDeff_mu_In,CMS_channel,CMS_hgg_nuisance_deltafracright,CMS_hgg_nuisance_lep_Scale_M30_ChanEle,CMS_hgg_nuisance_lep_Scale_M30_ChanEle_In,CMS_hgg_nuisance_lep_Smear_M30_ChanEle,CMS_hgg_nuisance_lep_Smear_M30_ChanEle_In,CMS_hgg_nuisance_pho_Scale_M30_ChanEle,CMS_hgg_nuisance_pho_Scale_M30_ChanEle_In,CMS_hgg_nuisance_pho_Smear_M30_ChanEle,CMS_hgg_nuisance_pho_Smear_M30_ChanEle_In,CMS_hza_mass,CMS_pileup,CMS_pileup_In,MH,env_pdf_0_13TeV_bern3_b0,env_pdf_0_13TeV_bern3_b1,env_pdf_0_13TeV_bern3_b2,env_pdf_0_13TeV_bern3_mean,env_pdf_0_13TeV_bern3_sigma_b3,env_pdf_0_13TeV_exp1_cp1_exp1,env_pdf_0_13TeV_exp1_mean,env_pdf_0_13TeV_exp1_p1_exp1,env_pdf_0_13TeV_exp1_sigma_p1,env_pdf_0_13TeV_exp1_turnon_p1,env_pdf_0_13TeV_exp3_cp1_exp3,env_pdf_0_13TeV_exp3_cp3_exp3,env_pdf_0_13TeV_exp3_mean,env_pdf_0_13TeV_exp3_p1_exp3,env_pdf_0_13TeV_exp3_p3_exp3,env_pdf_0_13TeV_exp3_sigma_p3,env_pdf_0_13TeV_exp3_turnon_p3,env_pdf_0_13TeV_lau1_cp1_lau1,env_pdf_0_13TeV_lau1_cp2_lau1,env_pdf_0_13TeV_lau1_mean,env_pdf_0_13TeV_lau1_sigma_p1,env_pdf_0_13TeV_lau1_turnon_p1,lumi_13TeV_Correlated,lumi_13TeV_Correlated_1718,lumi_13TeV_Correlated_1718_In,lumi_13TeV_Correlated_In,lumi_13TeV_Uncorrelated_16,lumi_13TeV_Uncorrelated_16APV,lumi_13TeV_Uncorrelated_16APV_In,lumi_13TeV_Uncorrelated_16_In,lumi_13TeV_Uncorrelated_17,lumi_13TeV_Uncorrelated_17_In,lumi_13TeV_Uncorrelated_18,lumi_13TeV_Uncorrelated_18_In,n_exp_bincat0_13TeV_proc_bkg_mass,pdfindex_0_13TeV,r,shapeBkg_bkg_mass_cat0_13TeV__norm,step_b3)
+
+p.d.f.s
+-------
+SimpleGaussianConstraint::CMS_IDeff_ele_Pdf[ x=CMS_IDeff_ele mean=CMS_IDeff_ele_In sigma=1 ] = 1
+SimpleGaussianConstraint::CMS_IDeff_g_Pdf[ x=CMS_IDeff_g mean=CMS_IDeff_g_In sigma=1 ] = 1
+SimpleGaussianConstraint::CMS_IDeff_mu_Pdf[ x=CMS_IDeff_mu mean=CMS_IDeff_mu_In sigma=1 ] = 1
+SimpleGaussianConstraint::CMS_hgg_nuisance_lep_Scale_M30_ChanEle_Pdf[ x=CMS_hgg_nuisance_lep_Scale_M30_ChanEle mean=CMS_hgg_nuisance_lep_Scale_M30_ChanEle_In sigma=1 ] = 1
+SimpleGaussianConstraint::CMS_hgg_nuisance_lep_Smear_M30_ChanEle_Pdf[ x=CMS_hgg_nuisance_lep_Smear_M30_ChanEle mean=CMS_hgg_nuisance_lep_Smear_M30_ChanEle_In sigma=1 ] = 1
+SimpleGaussianConstraint::CMS_hgg_nuisance_pho_Scale_M30_ChanEle_Pdf[ x=CMS_hgg_nuisance_pho_Scale_M30_ChanEle mean=CMS_hgg_nuisance_pho_Scale_M30_ChanEle_In sigma=1 ] = 1
+SimpleGaussianConstraint::CMS_hgg_nuisance_pho_Smear_M30_ChanEle_Pdf[ x=CMS_hgg_nuisance_pho_Smear_M30_ChanEle mean=CMS_hgg_nuisance_pho_Smear_M30_ChanEle_In sigma=1 ] = 1
+SimpleGaussianConstraint::CMS_pileup_Pdf[ x=CMS_pileup mean=CMS_pileup_In sigma=1 ] = 1
+RooGaussStepBernstein::env_pdf_0_13TeV_bern3[ x=CMS_hza_mass mean=env_pdf_0_13TeV_bern3_mean sigma=env_pdf_0_13TeV_bern3_sigma_b3 stepVal=step_b3 coefList=(env_pdf_0_13TeV_bern3_b0,env_pdf_0_13TeV_bern3_b1,env_pdf_0_13TeV_bern3_b2) ] = 5.57664
+RooFFTConvPdf::env_pdf_0_13TeV_exp1_gauxexp1[ env_pdf_0_13TeV_exp1_step_exp1(CMS_hza_mass) (*) env_pdf_0_13TeV_exp1_gau_exp1(CMS_hza_mass) ] = 0.0289413
+RooGenericPdf::env_pdf_0_13TeV_exp1_step_exp1[ actualVars=(CMS_hza_mass,env_pdf_0_13TeV_exp1_turnon_p1,env_pdf_0_13TeV_exp1_p1_exp1,env_pdf_0_13TeV_exp1_cp1_exp1) formula="1e-20+(@0 > @1)*(@3*TMath::Exp(@0*@2))" ] = 0.0124729
+RooFFTConvPdf::env_pdf_0_13TeV_exp3_gauxexp3[ env_pdf_0_13TeV_exp3_step_exp3(CMS_hza_mass) (*) env_pdf_0_13TeV_exp3_gau_exp3(CMS_hza_mass) ] = 0.0299821
+RooGenericPdf::env_pdf_0_13TeV_exp3_step_exp3[ actualVars=(CMS_hza_mass,env_pdf_0_13TeV_exp3_turnon_p3,env_pdf_0_13TeV_exp3_p1_exp3,env_pdf_0_13TeV_exp3_cp1_exp3,env_pdf_0_13TeV_exp3_p3_exp3,env_pdf_0_13TeV_exp3_cp3_exp3) formula="1e-20+(@0 > @1)*(@3*TMath::Exp(@0*@2)+@5*TMath::Exp(@0*@4))" ] = 0.00388092
+RooFFTConvPdf::env_pdf_0_13TeV_lau1_gauxlau1[ env_pdf_0_13TeV_lau1_step_lau1(CMS_hza_mass) (*) env_pdf_0_13TeV_lau1_gau_lau1(CMS_hza_mass) ] = 0.0284845
+RooGenericPdf::env_pdf_0_13TeV_lau1_step_lau1[ actualVars=(CMS_hza_mass,env_pdf_0_13TeV_lau1_turnon_p1,env_pdf_0_13TeV_lau1_cp1_lau1,env_pdf_0_13TeV_lau1_cp2_lau1) formula="1e-20+(@0 > @1)*(@2*(@0)^(-4)+@3*(@0)^(-5))" ] = 4.63724e-11
+RooGaussian::gaus_g0_ggh_cat0_rv_13TeV[ x=CMS_hza_mass mean=mean_g0_ggh_cat0_rv_13TeV sigma=sig_g0_ggh_cat0_rv_13TeV ] = 1.95426e-41
+RooGaussian::gaus_g0_ggh_cat0_rv_13TeV_cat0_13TeV[ x=CMS_hza_mass mean=mean_g0_ggh_cat0_rv_13TeV_cat0_13TeV sigma=sig_g0_ggh_cat0_rv_13TeV_cat0_13TeV ] = 2.99856e-09
+RooGaussian::gaus_g0_ggh_cat0_wv_13TeV[ x=CMS_hza_mass mean=mean_g0_ggh_cat0_wv_13TeV sigma=sig_g0_ggh_cat0_wv_13TeV ] = 4.22563e-06
+RooGaussian::gaus_g0_ggh_cat0_wv_13TeV_cat0_13TeV[ x=CMS_hza_mass mean=mean_g0_ggh_cat0_wv_13TeV_cat0_13TeV sigma=sig_g0_ggh_cat0_wv_13TeV_cat0_13TeV ] = 4.52609e-06
+RooGaussian::gaus_g1_ggh_cat0_rv_13TeV[ x=CMS_hza_mass mean=mean_g1_ggh_cat0_rv_13TeV sigma=sig_g1_ggh_cat0_rv_13TeV ] = 1.53304e-08
+RooGaussian::gaus_g1_ggh_cat0_rv_13TeV_cat0_13TeV[ x=CMS_hza_mass mean=mean_g1_ggh_cat0_rv_13TeV_cat0_13TeV sigma=sig_g1_ggh_cat0_rv_13TeV_cat0_13TeV ] = 3.87282e-41
+RooGaussian::gaus_g2_ggh_cat0_rv_13TeV[ x=CMS_hza_mass mean=mean_g2_ggh_cat0_rv_13TeV sigma=sig_g2_ggh_cat0_rv_13TeV ] = 0.12575
+RooGaussian::gaus_g2_ggh_cat0_rv_13TeV_cat0_13TeV[ x=CMS_hza_mass mean=mean_g2_ggh_cat0_rv_13TeV_cat0_13TeV sigma=sig_g2_ggh_cat0_rv_13TeV_cat0_13TeV ] = 0.120847
+RooGaussian::gaus_g3_ggh_cat0_rv_13TeV[ x=CMS_hza_mass mean=mean_g3_ggh_cat0_rv_13TeV sigma=sig_g3_ggh_cat0_rv_13TeV ] = 0.125221
+RooGaussian::gaus_g3_ggh_cat0_rv_13TeV_cat0_13TeV[ x=CMS_hza_mass mean=mean_g3_ggh_cat0_rv_13TeV_cat0_13TeV sigma=sig_g3_ggh_cat0_rv_13TeV_cat0_13TeV ] = 0.122363
+RooAddPdf::hggpdfsmrel_13TeV_ggh_cat0_rv_13TeV[ frac_g0_ggh_cat0_rv_13TeV * gaus_g0_ggh_cat0_rv_13TeV + hggpdfsmrel_13TeV_ggh_cat0_rv_13TeV_recursive_fraction_gaus_g1_ggh_cat0_rv_13TeV * gaus_g1_ggh_cat0_rv_13TeV + hggpdfsmrel_13TeV_ggh_cat0_rv_13TeV_recursive_fraction_gaus_g2_ggh_cat0_rv_13TeV * gaus_g2_ggh_cat0_rv_13TeV + hggpdfsmrel_13TeV_ggh_cat0_rv_13TeV_recursive_fraction_gaus_g3_ggh_cat0_rv_13TeV * gaus_g3_ggh_cat0_rv_13TeV ] = 0.00450181
+RooAddPdf::hggpdfsmrel_13TeV_ggh_cat0_rv_13TeV_cat0_13TeV[ frac_g0_ggh_cat0_rv_13TeV_cat0_13TeV * gaus_g0_ggh_cat0_rv_13TeV_cat0_13TeV + hggpdfsmrel_13TeV_ggh_cat0_rv_13TeV_recursive_fraction_gaus_g1_ggh_cat0_rv_13TeV_cat0_13TeV * gaus_g1_ggh_cat0_rv_13TeV_cat0_13TeV + hggpdfsmrel_13TeV_ggh_cat0_rv_13TeV_recursive_fraction_gaus_g2_ggh_cat0_rv_13TeV_cat0_13TeV * gaus_g2_ggh_cat0_rv_13TeV_cat0_13TeV + hggpdfsmrel_13TeV_ggh_cat0_rv_13TeV_recursive_fraction_gaus_g3_ggh_cat0_rv_13TeV_cat0_13TeV * gaus_g3_ggh_cat0_rv_13TeV_cat0_13TeV ] = 0.0126602
+RooAddPdf::hggpdfsmrel_13TeV_ggh_cat0_wv_13TeV[ hggpdfsmrel_13TeV_ggh_cat0_wv_13TeV_recursive_fraction_gaus_g0_ggh_cat0_wv_13TeV * gaus_g0_ggh_cat0_wv_13TeV ] = 4.22563e-06
+RooAddPdf::hggpdfsmrel_13TeV_ggh_cat0_wv_13TeV_cat0_13TeV[ hggpdfsmrel_13TeV_ggh_cat0_wv_13TeV_recursive_fraction_gaus_g0_ggh_cat0_wv_13TeV_cat0_13TeV * gaus_g0_ggh_cat0_wv_13TeV_cat0_13TeV ] = 4.52609e-06
+SimpleGaussianConstraint::lumi_13TeV_Correlated_1718_Pdf[ x=lumi_13TeV_Correlated_1718 mean=lumi_13TeV_Correlated_1718_In sigma=1 ] = 1
+SimpleGaussianConstraint::lumi_13TeV_Correlated_Pdf[ x=lumi_13TeV_Correlated mean=lumi_13TeV_Correlated_In sigma=1 ] = 1
+SimpleGaussianConstraint::lumi_13TeV_Uncorrelated_16APV_Pdf[ x=lumi_13TeV_Uncorrelated_16APV mean=lumi_13TeV_Uncorrelated_16APV_In sigma=1 ] = 1
+SimpleGaussianConstraint::lumi_13TeV_Uncorrelated_16_Pdf[ x=lumi_13TeV_Uncorrelated_16 mean=lumi_13TeV_Uncorrelated_16_In sigma=1 ] = 1
+SimpleGaussianConstraint::lumi_13TeV_Uncorrelated_17_Pdf[ x=lumi_13TeV_Uncorrelated_17 mean=lumi_13TeV_Uncorrelated_17_In sigma=1 ] = 1
+SimpleGaussianConstraint::lumi_13TeV_Uncorrelated_18_Pdf[ x=lumi_13TeV_Uncorrelated_18 mean=lumi_13TeV_Uncorrelated_18_In sigma=1 ] = 1
+RooSimultaneousOpt::model_b[ indexCat=CMS_channel cat0_13TeV=pdf_bincat0_13TeV_bonly extraConstraints=() channelMasks=() ] = 5.57664
+RooSimultaneousOpt::model_s[ indexCat=CMS_channel cat0_13TeV=pdf_bincat0_13TeV extraConstraints=() channelMasks=() ] = 2.59265
+RooProdPdf::nuisancePdf[ lumi_13TeV_Uncorrelated_16_Pdf * lumi_13TeV_Uncorrelated_16APV_Pdf * lumi_13TeV_Uncorrelated_17_Pdf * lumi_13TeV_Uncorrelated_18_Pdf * lumi_13TeV_Correlated_Pdf * lumi_13TeV_Correlated_1718_Pdf * CMS_pileup_Pdf * CMS_IDeff_ele_Pdf * CMS_IDeff_mu_Pdf * CMS_IDeff_g_Pdf * CMS_hgg_nuisance_pho_Smear_M30_ChanEle_Pdf * CMS_hgg_nuisance_lep_Smear_M30_ChanEle_Pdf * CMS_hgg_nuisance_pho_Scale_M30_ChanEle_Pdf * CMS_hgg_nuisance_lep_Scale_M30_ChanEle_Pdf * CMS_hgg_nuisance_pho_Smear_M30_ChanEle_Pdf * CMS_hgg_nuisance_lep_Smear_M30_ChanEle_Pdf * CMS_hgg_nuisance_pho_Scale_M30_ChanEle_Pdf * CMS_hgg_nuisance_lep_Scale_M30_ChanEle_Pdf ] = 1
+RooProdPdf::pdf_bincat0_13TeV[ lumi_13TeV_Uncorrelated_16_Pdf * lumi_13TeV_Uncorrelated_16APV_Pdf * lumi_13TeV_Uncorrelated_17_Pdf * lumi_13TeV_Uncorrelated_18_Pdf * lumi_13TeV_Correlated_Pdf * lumi_13TeV_Correlated_1718_Pdf * CMS_pileup_Pdf * CMS_IDeff_ele_Pdf * CMS_IDeff_mu_Pdf * CMS_IDeff_g_Pdf * CMS_hgg_nuisance_pho_Smear_M30_ChanEle_Pdf * CMS_hgg_nuisance_lep_Smear_M30_ChanEle_Pdf * CMS_hgg_nuisance_pho_Scale_M30_ChanEle_Pdf * CMS_hgg_nuisance_lep_Scale_M30_ChanEle_Pdf * CMS_hgg_nuisance_pho_Smear_M30_ChanEle_Pdf * CMS_hgg_nuisance_lep_Smear_M30_ChanEle_Pdf * CMS_hgg_nuisance_pho_Scale_M30_ChanEle_Pdf * CMS_hgg_nuisance_lep_Scale_M30_ChanEle_Pdf * pdf_bincat0_13TeV_nuis * pdfbins_bincat0_13TeV ] = 2.59265
+RooProdPdf::pdf_bincat0_13TeV_bonly[ lumi_13TeV_Uncorrelated_16_Pdf * lumi_13TeV_Uncorrelated_16APV_Pdf * lumi_13TeV_Uncorrelated_17_Pdf * lumi_13TeV_Uncorrelated_18_Pdf * lumi_13TeV_Correlated_Pdf * lumi_13TeV_Correlated_1718_Pdf * CMS_pileup_Pdf * CMS_IDeff_ele_Pdf * CMS_IDeff_mu_Pdf * CMS_IDeff_g_Pdf * CMS_hgg_nuisance_pho_Smear_M30_ChanEle_Pdf * CMS_hgg_nuisance_lep_Smear_M30_ChanEle_Pdf * CMS_hgg_nuisance_pho_Scale_M30_ChanEle_Pdf * CMS_hgg_nuisance_lep_Scale_M30_ChanEle_Pdf * CMS_hgg_nuisance_pho_Smear_M30_ChanEle_Pdf * CMS_hgg_nuisance_lep_Smear_M30_ChanEle_Pdf * CMS_hgg_nuisance_pho_Scale_M30_ChanEle_Pdf * CMS_hgg_nuisance_lep_Scale_M30_ChanEle_Pdf * pdf_bincat0_13TeV_bonly_nuis * pdfbins_bincat0_13TeV ] = 5.57664
+RooAddPdf::pdf_bincat0_13TeV_bonly_nuis[ n_exp_final_bincat0_13TeV_proc_bkg_mass * shapeBkg_bkg_mass_cat0_13TeV ] = 5.57664
+RooAddPdf::pdf_bincat0_13TeV_nuis[ n_exp_final_bincat0_13TeV_proc_ggH_18_mu_hza * shapeSig_ggH_18_mu_hza_cat0_13TeV + n_exp_final_bincat0_13TeV_proc_ggH_16APV_ele_hza * shapeSig_ggH_16APV_ele_hza_cat0_13TeV + n_exp_final_bincat0_13TeV_proc_ggH_16_mu_hza * shapeSig_ggH_16_mu_hza_cat0_13TeV + n_exp_final_bincat0_13TeV_proc_ggH_16_ele_hza * shapeSig_ggH_16_ele_hza_cat0_13TeV + n_exp_final_bincat0_13TeV_proc_ggH_17_mu_hza * shapeSig_ggH_17_mu_hza_cat0_13TeV + n_exp_final_bincat0_13TeV_proc_ggH_16APV_mu_hza * shapeSig_ggH_16APV_mu_hza_cat0_13TeV + n_exp_final_bincat0_13TeV_proc_ggH_17_ele_hza * shapeSig_ggH_17_ele_hza_cat0_13TeV + n_exp_final_bincat0_13TeV_proc_ggH_18_ele_hza * shapeSig_ggH_18_ele_hza_cat0_13TeV + n_exp_final_bincat0_13TeV_proc_bkg_mass * shapeBkg_bkg_mass_cat0_13TeV ] = 2.59265
+RooProdPdf::pdfbins_bincat0_13TeV[  ] = 1
+RooMultiPdf::shapeBkg_bkg_mass_cat0_13TeV[ _pdfs=(env_pdf_0_13TeV_bern3,env_pdf_0_13TeV_exp1_gauxexp1,env_pdf_0_13TeV_exp3_gauxexp3,env_pdf_0_13TeV_lau1_gauxlau1) _index=pdfindex_0_13TeV ] = 5.57664
+RooAddPdf::shapeSig_ggH_16APV_ele_hza_cat0_13TeV[ hggpdfsmrel_13TeV_ggh_cat0_rvFrac_cat0_13TeV * hggpdfsmrel_13TeV_ggh_cat0_rv_13TeV_cat0_13TeV + [%] * hggpdfsmrel_13TeV_ggh_cat0_wv_13TeV_cat0_13TeV ] = 0.0126602
+RooAddPdf::shapeSig_ggH_16APV_mu_hza_cat0_13TeV[ hggpdfsmrel_13TeV_ggh_cat0_rvFrac_cat0_13TeV * hggpdfsmrel_13TeV_ggh_cat0_rv_13TeV_cat0_13TeV + [%] * hggpdfsmrel_13TeV_ggh_cat0_wv_13TeV_cat0_13TeV ] = 0.0126602
+RooAddPdf::shapeSig_ggH_16_ele_hza_cat0_13TeV[ hggpdfsmrel_13TeV_ggh_cat0_rvFrac_cat0_13TeV * hggpdfsmrel_13TeV_ggh_cat0_rv_13TeV_cat0_13TeV + [%] * hggpdfsmrel_13TeV_ggh_cat0_wv_13TeV_cat0_13TeV ] = 0.0126602
+RooAddPdf::shapeSig_ggH_16_mu_hza_cat0_13TeV[ hggpdfsmrel_13TeV_ggh_cat0_rvFrac_cat0_13TeV * hggpdfsmrel_13TeV_ggh_cat0_rv_13TeV_cat0_13TeV + [%] * hggpdfsmrel_13TeV_ggh_cat0_wv_13TeV_cat0_13TeV ] = 0.0126602
+RooAddPdf::shapeSig_ggH_17_ele_hza_cat0_13TeV[ hggpdfsmrel_13TeV_ggh_cat0_rvFrac_cat0_13TeV * hggpdfsmrel_13TeV_ggh_cat0_rv_13TeV_cat0_13TeV + [%] * hggpdfsmrel_13TeV_ggh_cat0_wv_13TeV_cat0_13TeV ] = 0.0126602
+RooAddPdf::shapeSig_ggH_17_mu_hza_cat0_13TeV[ hggpdfsmrel_13TeV_ggh_cat0_rvFrac_cat0_13TeV * hggpdfsmrel_13TeV_ggh_cat0_rv_13TeV_cat0_13TeV + [%] * hggpdfsmrel_13TeV_ggh_cat0_wv_13TeV_cat0_13TeV ] = 0.0126602
+RooAddPdf::shapeSig_ggH_18_ele_hza_cat0_13TeV[ hggpdfsmrel_13TeV_ggh_cat0_rvFrac_cat0_13TeV * hggpdfsmrel_13TeV_ggh_cat0_rv_13TeV_cat0_13TeV + [%] * hggpdfsmrel_13TeV_ggh_cat0_wv_13TeV_cat0_13TeV ] = 0.0126602
+RooAddPdf::shapeSig_ggH_18_mu_hza_cat0_13TeV[ hggpdfsmrel_13TeV_ggh_cat0_rvFrac * hggpdfsmrel_13TeV_ggh_cat0_rv_13TeV + [%] * hggpdfsmrel_13TeV_ggh_cat0_wv_13TeV ] = 0.00450181
+
+analytical resolution models
+----------------------------
+RooGaussModel::env_pdf_0_13TeV_exp1_gau_exp1[ x=CMS_hza_mass mean=env_pdf_0_13TeV_exp1_mean sigma=env_pdf_0_13TeV_exp1_sigma_p1 msf=1 ssf=1 ] = 0
+RooGaussModel::env_pdf_0_13TeV_exp3_gau_exp3[ x=CMS_hza_mass mean=env_pdf_0_13TeV_exp3_mean sigma=env_pdf_0_13TeV_exp3_sigma_p3 msf=1 ssf=1 ] = 6.41053e-164
+RooGaussModel::env_pdf_0_13TeV_lau1_gau_lau1[ x=CMS_hza_mass mean=env_pdf_0_13TeV_lau1_mean sigma=env_pdf_0_13TeV_lau1_sigma_p1 msf=1 ssf=1 ] = 1.25648e-105
+
+functions
+--------
+RooSpline1D::dm_g0_ggh_cat0_rv_13TeV[ xvar=MH ] = -0.191936
+RooSpline1D::dm_g0_ggh_cat0_rv_13TeV_cat0_13TeV[ xvar=MH ] = -1.30906
+RooSpline1D::dm_g0_ggh_cat0_wv_13TeV[ xvar=MH ] = -0.950668
+RooSpline1D::dm_g0_ggh_cat0_wv_13TeV_cat0_13TeV[ xvar=MH ] = -0.940333
+RooSpline1D::dm_g1_ggh_cat0_rv_13TeV[ xvar=MH ] = -1.88545
+RooSpline1D::dm_g1_ggh_cat0_rv_13TeV_cat0_13TeV[ xvar=MH ] = -0.144372
+RooSpline1D::dm_g2_ggh_cat0_rv_13TeV[ xvar=MH ] = -2.16092
+RooSpline1D::dm_g2_ggh_cat0_rv_13TeV_cat0_13TeV[ xvar=MH ] = -2.17126
+RooSpline1D::dm_g3_ggh_cat0_rv_13TeV[ xvar=MH ] = -2.16093
+RooSpline1D::dm_g3_ggh_cat0_rv_13TeV_cat0_13TeV[ xvar=MH ] = -2.21118
+RooSpline1D::frac_g0_ggh_cat0_rv_13TeV[ xvar=MH ] = 0.73027
+RooSpline1D::frac_g0_ggh_cat0_rv_13TeV_cat0_13TeV[ xvar=MH ] = 0.619057
+RooSpline1D::frac_g1_ggh_cat0_rv_13TeV[ xvar=MH ] = 0.866715
+RooSpline1D::frac_g1_ggh_cat0_rv_13TeV_cat0_13TeV[ xvar=MH ] = 0.728399
+RooSpline1D::frac_g2_ggh_cat0_rv_13TeV[ xvar=MH ] = -4.46244e-19
+RooSpline1D::frac_g2_ggh_cat0_rv_13TeV_cat0_13TeV[ xvar=MH ] = 1.16362e-12
+RooFormulaVar::hggpdfsmrel_13TeV_ggh_cat0_rvFrac[ actualVars=(CMS_hgg_nuisance_deltafracright,hggpdfsmrel_13TeV_ggh_cat0_rvFracFunc) formula="TMath::Min(@0+@1,1.0)" ] = 1
+RooSpline1D::hggpdfsmrel_13TeV_ggh_cat0_rvFracFunc[ xvar=MH ] = 1
+RooSpline1D::hggpdfsmrel_13TeV_ggh_cat0_rvFracFunc_cat0_13TeV[ xvar=MH ] = 1
+RooFormulaVar::hggpdfsmrel_13TeV_ggh_cat0_rvFrac_cat0_13TeV[ actualVars=(CMS_hgg_nuisance_deltafracright,hggpdfsmrel_13TeV_ggh_cat0_rvFracFunc_cat0_13TeV) formula="TMath::Min(@0+@1,1.0)" ] = 1
+RooRecursiveFraction::hggpdfsmrel_13TeV_ggh_cat0_rv_13TeV_recursive_fraction_gaus_g1_ggh_cat0_rv_13TeV[ list=(frac_g1_ggh_cat0_rv_13TeV,frac_g0_ggh_cat0_rv_13TeV) ] = 0.233779
+RooRecursiveFraction::hggpdfsmrel_13TeV_ggh_cat0_rv_13TeV_recursive_fraction_gaus_g1_ggh_cat0_rv_13TeV_cat0_13TeV[ list=(frac_g1_ggh_cat0_rv_13TeV_cat0_13TeV,frac_g0_ggh_cat0_rv_13TeV_cat0_13TeV) ] = 0.277479
+RooRecursiveFraction::hggpdfsmrel_13TeV_ggh_cat0_rv_13TeV_recursive_fraction_gaus_g2_ggh_cat0_rv_13TeV[ list=(frac_g2_ggh_cat0_rv_13TeV,frac_g1_ggh_cat0_rv_13TeV,frac_g0_ggh_cat0_rv_13TeV) ] = -1.60429e-20
+RooRecursiveFraction::hggpdfsmrel_13TeV_ggh_cat0_rv_13TeV_recursive_fraction_gaus_g2_ggh_cat0_rv_13TeV_cat0_13TeV[ list=(frac_g2_ggh_cat0_rv_13TeV_cat0_13TeV,frac_g1_ggh_cat0_rv_13TeV_cat0_13TeV,frac_g0_ggh_cat0_rv_13TeV_cat0_13TeV) ] = 1.20394e-13
+RooRecursiveFraction::hggpdfsmrel_13TeV_ggh_cat0_rv_13TeV_recursive_fraction_gaus_g3_ggh_cat0_rv_13TeV[ list=(1,frac_g2_ggh_cat0_rv_13TeV,frac_g1_ggh_cat0_rv_13TeV,frac_g0_ggh_cat0_rv_13TeV) ] = 0.0359509
+RooRecursiveFraction::hggpdfsmrel_13TeV_ggh_cat0_rv_13TeV_recursive_fraction_gaus_g3_ggh_cat0_rv_13TeV_cat0_13TeV[ list=(1,frac_g2_ggh_cat0_rv_13TeV_cat0_13TeV,frac_g1_ggh_cat0_rv_13TeV_cat0_13TeV,frac_g0_ggh_cat0_rv_13TeV_cat0_13TeV) ] = 0.103464
+RooRecursiveFraction::hggpdfsmrel_13TeV_ggh_cat0_wv_13TeV_recursive_fraction_gaus_g0_ggh_cat0_wv_13TeV[ list=(1) ] = 1
+RooRecursiveFraction::hggpdfsmrel_13TeV_ggh_cat0_wv_13TeV_recursive_fraction_gaus_g0_ggh_cat0_wv_13TeV_cat0_13TeV[ list=(1) ] = 1
+RooFormulaVar::mean_g0_ggh_cat0_rv_13TeV[ actualVars=(MH,dm_g0_ggh_cat0_rv_13TeV,const_ggh_cat0_13TeV_mean_pho_Scale_M30_ChanEle,CMS_hgg_nuisance_pho_Scale_M30_ChanEle,const_ggh_cat0_13TeV_mean_lep_Scale_M30_ChanEle,CMS_hgg_nuisance_lep_Scale_M30_ChanEle) formula="(@0+@1)*(1.+@2*@3+@4*@5)" ] = 124.808
+RooFormulaVar::mean_g0_ggh_cat0_rv_13TeV_cat0_13TeV[ actualVars=(MH,dm_g0_ggh_cat0_rv_13TeV_cat0_13TeV,const_ggh_cat0_13TeV_mean_lep_Scale_M30_ChanEle,CMS_hgg_nuisance_lep_Scale_M30_ChanEle) formula="(@0+@1)*(1.+@2*@3)" ] = 123.691
+RooFormulaVar::mean_g0_ggh_cat0_wv_13TeV[ actualVars=(MH,dm_g0_ggh_cat0_wv_13TeV,const_ggh_cat0_13TeV_mean_pho_Scale_M30_ChanEle,CMS_hgg_nuisance_pho_Scale_M30_ChanEle,const_ggh_cat0_13TeV_mean_lep_Scale_M30_ChanEle,CMS_hgg_nuisance_lep_Scale_M30_ChanEle) formula="(@0+@1)*(1.+@2*@3+@4*@5)" ] = 124.049
+RooFormulaVar::mean_g0_ggh_cat0_wv_13TeV_cat0_13TeV[ actualVars=(MH,dm_g0_ggh_cat0_wv_13TeV_cat0_13TeV,const_ggh_cat0_13TeV_mean_lep_Scale_M30_ChanEle,CMS_hgg_nuisance_lep_Scale_M30_ChanEle) formula="(@0+@1)*(1.+@2*@3)" ] = 124.06
+RooFormulaVar::mean_g1_ggh_cat0_rv_13TeV[ actualVars=(MH,dm_g1_ggh_cat0_rv_13TeV,const_ggh_cat0_13TeV_mean_pho_Scale_M30_ChanEle,CMS_hgg_nuisance_pho_Scale_M30_ChanEle,const_ggh_cat0_13TeV_mean_lep_Scale_M30_ChanEle,CMS_hgg_nuisance_lep_Scale_M30_ChanEle) formula="(@0+@1)*(1.+@2*@3+@4*@5)" ] = 123.115
+RooFormulaVar::mean_g1_ggh_cat0_rv_13TeV_cat0_13TeV[ actualVars=(MH,dm_g1_ggh_cat0_rv_13TeV_cat0_13TeV,const_ggh_cat0_13TeV_mean_lep_Scale_M30_ChanEle,CMS_hgg_nuisance_lep_Scale_M30_ChanEle) formula="(@0+@1)*(1.+@2*@3)" ] = 124.856
+RooFormulaVar::mean_g2_ggh_cat0_rv_13TeV[ actualVars=(MH,dm_g2_ggh_cat0_rv_13TeV,const_ggh_cat0_13TeV_mean_pho_Scale_M30_ChanEle,CMS_hgg_nuisance_pho_Scale_M30_ChanEle,const_ggh_cat0_13TeV_mean_lep_Scale_M30_ChanEle,CMS_hgg_nuisance_lep_Scale_M30_ChanEle) formula="(@0+@1)*(1.+@2*@3+@4*@5)" ] = 122.839
+RooFormulaVar::mean_g2_ggh_cat0_rv_13TeV_cat0_13TeV[ actualVars=(MH,dm_g2_ggh_cat0_rv_13TeV_cat0_13TeV,const_ggh_cat0_13TeV_mean_lep_Scale_M30_ChanEle,CMS_hgg_nuisance_lep_Scale_M30_ChanEle) formula="(@0+@1)*(1.+@2*@3)" ] = 122.829
+RooFormulaVar::mean_g3_ggh_cat0_rv_13TeV[ actualVars=(MH,dm_g3_ggh_cat0_rv_13TeV,const_ggh_cat0_13TeV_mean_pho_Scale_M30_ChanEle,CMS_hgg_nuisance_pho_Scale_M30_ChanEle,const_ggh_cat0_13TeV_mean_lep_Scale_M30_ChanEle,CMS_hgg_nuisance_lep_Scale_M30_ChanEle) formula="(@0+@1)*(1.+@2*@3+@4*@5)" ] = 122.839
+RooFormulaVar::mean_g3_ggh_cat0_rv_13TeV_cat0_13TeV[ actualVars=(MH,dm_g3_ggh_cat0_rv_13TeV_cat0_13TeV,const_ggh_cat0_13TeV_mean_lep_Scale_M30_ChanEle,CMS_hgg_nuisance_lep_Scale_M30_ChanEle) formula="(@0+@1)*(1.+@2*@3)" ] = 122.789
+ProcessNormalization::n_exp_bincat0_13TeV_proc_ggH_16APV_ele_hza[ thetaList=(lumi_13TeV_Uncorrelated_16APV,lumi_13TeV_Correlated) asymmThetaList=(CMS_pileup,CMS_IDeff_ele,CMS_IDeff_g) otherFactorList=(r) ] = 20.8912
+ProcessNormalization::n_exp_bincat0_13TeV_proc_ggH_16APV_mu_hza[ thetaList=(lumi_13TeV_Uncorrelated_16APV,lumi_13TeV_Correlated) asymmThetaList=(CMS_pileup,CMS_IDeff_mu,CMS_IDeff_g) otherFactorList=(r) ] = 31.4297
+ProcessNormalization::n_exp_bincat0_13TeV_proc_ggH_16_ele_hza[ thetaList=(lumi_13TeV_Uncorrelated_16,lumi_13TeV_Correlated) asymmThetaList=(CMS_pileup,CMS_IDeff_ele,CMS_IDeff_g) otherFactorList=(r) ] = 17.274
+ProcessNormalization::n_exp_bincat0_13TeV_proc_ggH_16_mu_hza[ thetaList=(lumi_13TeV_Uncorrelated_16,lumi_13TeV_Correlated) asymmThetaList=(CMS_pileup,CMS_IDeff_mu,CMS_IDeff_g) otherFactorList=(r) ] = 25.3977
+ProcessNormalization::n_exp_bincat0_13TeV_proc_ggH_17_ele_hza[ thetaList=(lumi_13TeV_Uncorrelated_17,lumi_13TeV_Correlated,lumi_13TeV_Correlated_1718) asymmThetaList=(CMS_pileup,CMS_IDeff_ele,CMS_IDeff_g) otherFactorList=(r) ] = 38.4464
+ProcessNormalization::n_exp_bincat0_13TeV_proc_ggH_17_mu_hza[ thetaList=(lumi_13TeV_Uncorrelated_17,lumi_13TeV_Correlated,lumi_13TeV_Correlated_1718) asymmThetaList=(CMS_pileup,CMS_IDeff_mu,CMS_IDeff_g) otherFactorList=(r) ] = 56.1289
+ProcessNormalization::n_exp_bincat0_13TeV_proc_ggH_18_ele_hza[ thetaList=(lumi_13TeV_Uncorrelated_18,lumi_13TeV_Correlated,lumi_13TeV_Correlated_1718) asymmThetaList=(CMS_pileup,CMS_IDeff_ele,CMS_IDeff_g) otherFactorList=(r) ] = 51.9374
+ProcessNormalization::n_exp_bincat0_13TeV_proc_ggH_18_mu_hza[ thetaList=(lumi_13TeV_Uncorrelated_18,lumi_13TeV_Correlated,lumi_13TeV_Correlated_1718) asymmThetaList=(CMS_pileup,CMS_IDeff_mu,CMS_IDeff_g) otherFactorList=(r) ] = 72.8563
+RooProduct::n_exp_final_bincat0_13TeV_proc_bkg_mass[ n_exp_bincat0_13TeV_proc_bkg_mass * shapeBkg_bkg_mass_cat0_13TeV__norm ] = 272
+RooProduct::n_exp_final_bincat0_13TeV_proc_ggH_16APV_ele_hza[ n_exp_bincat0_13TeV_proc_ggH_16APV_ele_hza * shapeSig_ggH_16APV_ele_hza_cat0_13TeV__norm ] = 20.8912
+RooProduct::n_exp_final_bincat0_13TeV_proc_ggH_16APV_mu_hza[ n_exp_bincat0_13TeV_proc_ggH_16APV_mu_hza * shapeSig_ggH_16APV_mu_hza_cat0_13TeV__norm ] = 31.4297
+RooProduct::n_exp_final_bincat0_13TeV_proc_ggH_16_ele_hza[ n_exp_bincat0_13TeV_proc_ggH_16_ele_hza * shapeSig_ggH_16_ele_hza_cat0_13TeV__norm ] = 17.274
+RooProduct::n_exp_final_bincat0_13TeV_proc_ggH_16_mu_hza[ n_exp_bincat0_13TeV_proc_ggH_16_mu_hza * shapeSig_ggH_16_mu_hza_cat0_13TeV__norm ] = 25.3977
+RooProduct::n_exp_final_bincat0_13TeV_proc_ggH_17_ele_hza[ n_exp_bincat0_13TeV_proc_ggH_17_ele_hza * shapeSig_ggH_17_ele_hza_cat0_13TeV__norm ] = 38.4464
+RooProduct::n_exp_final_bincat0_13TeV_proc_ggH_17_mu_hza[ n_exp_bincat0_13TeV_proc_ggH_17_mu_hza * shapeSig_ggH_17_mu_hza_cat0_13TeV__norm ] = 56.1289
+RooProduct::n_exp_final_bincat0_13TeV_proc_ggH_18_ele_hza[ n_exp_bincat0_13TeV_proc_ggH_18_ele_hza * shapeSig_ggH_18_ele_hza_cat0_13TeV__norm ] = 51.9374
+RooProduct::n_exp_final_bincat0_13TeV_proc_ggH_18_mu_hza[ n_exp_bincat0_13TeV_proc_ggH_18_mu_hza * shapeSig_ggH_18_mu_hza_cat0_13TeV__norm ] = 72.8563
+RooFormulaVar::rate_ggh_cat0_13TeV[ actualVars=() formula="(1.)" ] = 1
+RooFormulaVar::shapeSig_ggH_16APV_ele_hza_cat0_13TeV__norm[ actualVars=(rate_ggh_cat0_13TeV) formula="@0" ] = 1
+RooFormulaVar::shapeSig_ggH_16APV_mu_hza_cat0_13TeV__norm[ actualVars=(rate_ggh_cat0_13TeV) formula="@0" ] = 1
+RooFormulaVar::shapeSig_ggH_16_ele_hza_cat0_13TeV__norm[ actualVars=(rate_ggh_cat0_13TeV) formula="@0" ] = 1
+RooFormulaVar::shapeSig_ggH_16_mu_hza_cat0_13TeV__norm[ actualVars=(rate_ggh_cat0_13TeV) formula="@0" ] = 1
+RooFormulaVar::shapeSig_ggH_17_ele_hza_cat0_13TeV__norm[ actualVars=(rate_ggh_cat0_13TeV) formula="@0" ] = 1
+RooFormulaVar::shapeSig_ggH_17_mu_hza_cat0_13TeV__norm[ actualVars=(rate_ggh_cat0_13TeV) formula="@0" ] = 1
+RooFormulaVar::shapeSig_ggH_18_ele_hza_cat0_13TeV__norm[ actualVars=(rate_ggh_cat0_13TeV) formula="@0" ] = 1
+RooFormulaVar::shapeSig_ggH_18_mu_hza_cat0_13TeV__norm[ actualVars=(rate_ggh_cat0_13TeV) formula="@0" ] = 1
+RooFormulaVar::sig_g0_ggh_cat0_rv_13TeV[ actualVars=(sigma_g0_ggh_cat0_rv_13TeV,CMS_hgg_nuisance_pho_Smear_M30_ChanEle,const_ggh_cat0_13TeV_sigma_pho_Smear_M30_ChanEle,CMS_hgg_nuisance_lep_Smear_M30_ChanEle,const_ggh_cat0_13TeV_sigma_lep_Smear_M30_ChanEle) formula="@0*TMath::Max(1.e-2,(1.+@1*@2+@3*@4))" ] = 1.13123
+RooFormulaVar::sig_g0_ggh_cat0_rv_13TeV_cat0_13TeV[ actualVars=(sigma_g0_ggh_cat0_rv_13TeV_cat0_13TeV,CMS_hgg_nuisance_pho_Smear_M30_ChanEle,const_ggh_cat0_13TeV_sigma_pho_Smear_M30_ChanEle,CMS_hgg_nuisance_lep_Smear_M30_ChanEle,const_ggh_cat0_13TeV_sigma_lep_Smear_M30_ChanEle) formula="@0*TMath::Max(1.e-2,(1.+@1*@2+@3*@4))" ] = 2.29396
+RooFormulaVar::sig_g0_ggh_cat0_wv_13TeV[ actualVars=(sigma_g0_ggh_cat0_wv_13TeV,CMS_hgg_nuisance_pho_Smear_M30_ChanEle,const_ggh_cat0_13TeV_sigma_pho_Smear_M30_ChanEle,CMS_hgg_nuisance_lep_Smear_M30_ChanEle,const_ggh_cat0_13TeV_sigma_lep_Smear_M30_ChanEle) formula="@0*TMath::Max(1.e-2,(1.+@1*@2+@3*@4))" ] = 2.96093
+RooFormulaVar::sig_g0_ggh_cat0_wv_13TeV_cat0_13TeV[ actualVars=(sigma_g0_ggh_cat0_wv_13TeV_cat0_13TeV,CMS_hgg_nuisance_pho_Smear_M30_ChanEle,const_ggh_cat0_13TeV_sigma_pho_Smear_M30_ChanEle,CMS_hgg_nuisance_lep_Smear_M30_ChanEle,const_ggh_cat0_13TeV_sigma_lep_Smear_M30_ChanEle) formula="@0*TMath::Max(1.e-2,(1.+@1*@2+@3*@4))" ] = 2.97127
+RooFormulaVar::sig_g1_ggh_cat0_rv_13TeV[ actualVars=(sigma_g1_ggh_cat0_rv_13TeV,CMS_hgg_nuisance_pho_Smear_M30_ChanEle,const_ggh_cat0_13TeV_sigma_pho_Smear_M30_ChanEle,CMS_hgg_nuisance_lep_Smear_M30_ChanEle,const_ggh_cat0_13TeV_sigma_lep_Smear_M30_ChanEle) formula="@0*TMath::Max(1.e-2,(1.+@1*@2+@3*@4))" ] = 2.29963
+RooFormulaVar::sig_g1_ggh_cat0_rv_13TeV_cat0_13TeV[ actualVars=(sigma_g1_ggh_cat0_rv_13TeV_cat0_13TeV,CMS_hgg_nuisance_pho_Smear_M30_ChanEle,const_ggh_cat0_13TeV_sigma_pho_Smear_M30_ChanEle,CMS_hgg_nuisance_lep_Smear_M30_ChanEle,const_ggh_cat0_13TeV_sigma_lep_Smear_M30_ChanEle) formula="@0*TMath::Max(1.e-2,(1.+@1*@2+@3*@4))" ] = 1.13886
+RooFormulaVar::sig_g2_ggh_cat0_rv_13TeV[ actualVars=(sigma_g2_ggh_cat0_rv_13TeV,CMS_hgg_nuisance_pho_Smear_M30_ChanEle,const_ggh_cat0_13TeV_sigma_pho_Smear_M30_ChanEle,CMS_hgg_nuisance_lep_Smear_M30_ChanEle,const_ggh_cat0_13TeV_sigma_lep_Smear_M30_ChanEle) formula="@0*TMath::Max(1.e-2,(1.+@1*@2+@3*@4))" ] = 6.63907
+RooFormulaVar::sig_g2_ggh_cat0_rv_13TeV_cat0_13TeV[ actualVars=(sigma_g2_ggh_cat0_rv_13TeV_cat0_13TeV,CMS_hgg_nuisance_pho_Smear_M30_ChanEle,const_ggh_cat0_13TeV_sigma_pho_Smear_M30_ChanEle,CMS_hgg_nuisance_lep_Smear_M30_ChanEle,const_ggh_cat0_13TeV_sigma_lep_Smear_M30_ChanEle) formula="@0*TMath::Max(1.e-2,(1.+@1*@2+@3*@4))" ] = 6.57127
+RooFormulaVar::sig_g3_ggh_cat0_rv_13TeV[ actualVars=(sigma_g3_ggh_cat0_rv_13TeV,CMS_hgg_nuisance_pho_Smear_M30_ChanEle,const_ggh_cat0_13TeV_sigma_pho_Smear_M30_ChanEle,CMS_hgg_nuisance_lep_Smear_M30_ChanEle,const_ggh_cat0_13TeV_sigma_lep_Smear_M30_ChanEle) formula="@0*TMath::Max(1.e-2,(1.+@1*@2+@3*@4))" ] = 6.63233
+RooFormulaVar::sig_g3_ggh_cat0_rv_13TeV_cat0_13TeV[ actualVars=(sigma_g3_ggh_cat0_rv_13TeV_cat0_13TeV,CMS_hgg_nuisance_pho_Smear_M30_ChanEle,const_ggh_cat0_13TeV_sigma_pho_Smear_M30_ChanEle,CMS_hgg_nuisance_lep_Smear_M30_ChanEle,const_ggh_cat0_13TeV_sigma_lep_Smear_M30_ChanEle) formula="@0*TMath::Max(1.e-2,(1.+@1*@2+@3*@4))" ] = 6.57127
+RooSpline1D::sigma_g0_ggh_cat0_rv_13TeV[ xvar=MH ] = 1.13123
+RooSpline1D::sigma_g0_ggh_cat0_rv_13TeV_cat0_13TeV[ xvar=MH ] = 2.29396
+RooSpline1D::sigma_g0_ggh_cat0_wv_13TeV[ xvar=MH ] = 2.96093
+RooSpline1D::sigma_g0_ggh_cat0_wv_13TeV_cat0_13TeV[ xvar=MH ] = 2.97127
+RooSpline1D::sigma_g1_ggh_cat0_rv_13TeV[ xvar=MH ] = 2.29963
+RooSpline1D::sigma_g1_ggh_cat0_rv_13TeV_cat0_13TeV[ xvar=MH ] = 1.13886
+RooSpline1D::sigma_g2_ggh_cat0_rv_13TeV[ xvar=MH ] = 6.63907
+RooSpline1D::sigma_g2_ggh_cat0_rv_13TeV_cat0_13TeV[ xvar=MH ] = 6.57127
+RooSpline1D::sigma_g3_ggh_cat0_rv_13TeV[ xvar=MH ] = 6.63233
+RooSpline1D::sigma_g3_ggh_cat0_rv_13TeV_cat0_13TeV[ xvar=MH ] = 6.57127
+
+datasets
+--------
+RooDataSet::data_obs(CMS_hza_mass,CMS_channel)
+
+named sets
+----------
+ModelConfig_GlobalObservables:(lumi_13TeV_Uncorrelated_16_In,lumi_13TeV_Uncorrelated_16APV_In,lumi_13TeV_Uncorrelated_17_In,lumi_13TeV_Uncorrelated_18_In,lumi_13TeV_Correlated_In,lumi_13TeV_Correlated_1718_In,CMS_pileup_In,CMS_IDeff_ele_In,CMS_IDeff_mu_In,CMS_IDeff_g_In,CMS_hgg_nuisance_pho_Smear_M30_ChanEle_In,CMS_hgg_nuisance_lep_Smear_M30_ChanEle_In,CMS_hgg_nuisance_pho_Scale_M30_ChanEle_In,CMS_hgg_nuisance_lep_Scale_M30_ChanEle_In)
+ModelConfig_NuisParams:(lumi_13TeV_Uncorrelated_16,lumi_13TeV_Uncorrelated_16APV,lumi_13TeV_Uncorrelated_17,lumi_13TeV_Uncorrelated_18,lumi_13TeV_Correlated,lumi_13TeV_Correlated_1718,CMS_pileup,CMS_IDeff_ele,CMS_IDeff_mu,CMS_IDeff_g,CMS_hgg_nuisance_pho_Smear_M30_ChanEle,CMS_hgg_nuisance_lep_Smear_M30_ChanEle,CMS_hgg_nuisance_pho_Scale_M30_ChanEle,CMS_hgg_nuisance_lep_Scale_M30_ChanEle)
+ModelConfig_Observables:(CMS_hza_mass,CMS_channel)
+ModelConfig_POI:(r)
+ModelConfig_bonly_GlobalObservables:(lumi_13TeV_Uncorrelated_16_In,lumi_13TeV_Uncorrelated_16APV_In,lumi_13TeV_Uncorrelated_17_In,lumi_13TeV_Uncorrelated_18_In,lumi_13TeV_Correlated_In,lumi_13TeV_Correlated_1718_In,CMS_pileup_In,CMS_IDeff_ele_In,CMS_IDeff_mu_In,CMS_IDeff_g_In,CMS_hgg_nuisance_pho_Smear_M30_ChanEle_In,CMS_hgg_nuisance_lep_Smear_M30_ChanEle_In,CMS_hgg_nuisance_pho_Scale_M30_ChanEle_In,CMS_hgg_nuisance_lep_Scale_M30_ChanEle_In)
+ModelConfig_bonly_NuisParams:(lumi_13TeV_Uncorrelated_16,lumi_13TeV_Uncorrelated_16APV,lumi_13TeV_Uncorrelated_17,lumi_13TeV_Uncorrelated_18,lumi_13TeV_Correlated,lumi_13TeV_Correlated_1718,CMS_pileup,CMS_IDeff_ele,CMS_IDeff_mu,CMS_IDeff_g,CMS_hgg_nuisance_pho_Smear_M30_ChanEle,CMS_hgg_nuisance_lep_Smear_M30_ChanEle,CMS_hgg_nuisance_pho_Scale_M30_ChanEle,CMS_hgg_nuisance_lep_Scale_M30_ChanEle)
+ModelConfig_bonly_Observables:(CMS_hza_mass,CMS_channel)
+ModelConfig_bonly_POI:(r)
+POI:(r)
+globalObservables:(lumi_13TeV_Uncorrelated_16_In,lumi_13TeV_Uncorrelated_16APV_In,lumi_13TeV_Uncorrelated_17_In,lumi_13TeV_Uncorrelated_18_In,lumi_13TeV_Correlated_In,lumi_13TeV_Correlated_1718_In,CMS_pileup_In,CMS_IDeff_ele_In,CMS_IDeff_mu_In,CMS_IDeff_g_In,CMS_hgg_nuisance_pho_Smear_M30_ChanEle_In,CMS_hgg_nuisance_lep_Smear_M30_ChanEle_In,CMS_hgg_nuisance_pho_Scale_M30_ChanEle_In,CMS_hgg_nuisance_lep_Scale_M30_ChanEle_In)
+nuisances:(lumi_13TeV_Uncorrelated_16,lumi_13TeV_Uncorrelated_16APV,lumi_13TeV_Uncorrelated_17,lumi_13TeV_Uncorrelated_18,lumi_13TeV_Correlated,lumi_13TeV_Correlated_1718,CMS_pileup,CMS_IDeff_ele,CMS_IDeff_mu,CMS_IDeff_g,CMS_hgg_nuisance_pho_Smear_M30_ChanEle,CMS_hgg_nuisance_lep_Smear_M30_ChanEle,CMS_hgg_nuisance_pho_Scale_M30_ChanEle,CMS_hgg_nuisance_lep_Scale_M30_ChanEle)
+observables:(CMS_hza_mass,CMS_channel)
+
+generic objects
+---------------
+RooStats::ModelConfig::ModelConfig
+RooStats::ModelConfig::ModelConfig_bonly
+RooArgSet::discreteParams
+
+embedded precalculated expensive components
+-------------------------------------------
+uid = 3 key=env_pdf_0_13TeV_exp1_gauxexp1_env_pdf_0_13TeV_exp1_step_exp1_CONV_env_pdf_0_13TeV_exp1_gau_exp1_CACHEHIST_Obs[CMS_hza_mass]_BufFrac0.1_BufStrat0 value=RooDataHist::env_pdf_0_13TeV_exp1_gauxexp1_env_pdf_0_13TeV_exp1_step_exp1_CONV_env_pdf_0_13TeV_exp1_gau_exp1_CACHEHIST_Obs[CMS_hza_mass]_BufFrac0.1_BufStrat0 parameters=( env_pdf_0_13TeV_exp1_cp1_exp1=0.953827 env_pdf_0_13TeV_exp1_mean=0 env_pdf_0_13TeV_exp1_p1_exp1=-0.0396721 env_pdf_0_13TeV_exp1_sigma_p1=2.63822 env_pdf_0_13TeV_exp1_turnon_p1=100.355 )
+uid = 4 key=env_pdf_0_13TeV_exp3_gauxexp3_env_pdf_0_13TeV_exp3_step_exp3_CONV_env_pdf_0_13TeV_exp3_gau_exp3_CACHEHIST_Obs[CMS_hza_mass]_BufFrac0.1_BufStrat0 value=RooDataHist::env_pdf_0_13TeV_exp3_gauxexp3_env_pdf_0_13TeV_exp3_step_exp3_CONV_env_pdf_0_13TeV_exp3_gau_exp3_CACHEHIST_Obs[CMS_hza_mass]_BufFrac0.1_BufStrat0 parameters=( env_pdf_0_13TeV_exp3_cp1_exp3=0.172319 env_pdf_0_13TeV_exp3_cp3_exp3=0.191131 env_pdf_0_13TeV_exp3_mean=0 env_pdf_0_13TeV_exp3_p1_exp3=-0.0415255 env_pdf_0_13TeV_exp3_p3_exp3=-0.0415261 env_pdf_0_13TeV_exp3_sigma_p3=3.99999 env_pdf_0_13TeV_exp3_turnon_p3=100.81 )
+uid = 5 key=env_pdf_0_13TeV_lau1_gauxlau1_env_pdf_0_13TeV_lau1_step_lau1_CONV_env_pdf_0_13TeV_lau1_gau_lau1_CACHEHIST_Obs[CMS_hza_mass]_BufFrac0.1_BufStrat0 value=RooDataHist::env_pdf_0_13TeV_lau1_gauxlau1_env_pdf_0_13TeV_lau1_step_lau1_CONV_env_pdf_0_13TeV_lau1_gau_lau1_CACHEHIST_Obs[CMS_hza_mass]_BufFrac0.1_BufStrat0 parameters=( env_pdf_0_13TeV_lau1_cp1_lau1=4.64475e-10 env_pdf_0_13TeV_lau1_cp2_lau1=0.724008 env_pdf_0_13TeV_lau1_mean=0 env_pdf_0_13TeV_lau1_sigma_p1=4.99999 env_pdf_0_13TeV_lau1_turnon_p1=100.988 )
+Workspace has a ModelConfig for signal called 'ModelConfig', with contents:
+
+=== Using the following for ModelConfig ===
+Observables:             RooArgSet:: = (CMS_hza_mass,CMS_channel)
+Parameters of Interest:  RooArgSet:: = (r)
+Nuisance Parameters:     RooArgSet:: = (lumi_13TeV_Uncorrelated_16,lumi_13TeV_Uncorrelated_16APV,lumi_13TeV_Uncorrelated_17,lumi_13TeV_Uncorrelated_18,lumi_13TeV_Correlated,lumi_13TeV_Correlated_1718,CMS_pileup,CMS_IDeff_ele,CMS_IDeff_mu,CMS_IDeff_g,CMS_hgg_nuisance_pho_Smear_M30_ChanEle,CMS_hgg_nuisance_lep_Smear_M30_ChanEle,CMS_hgg_nuisance_pho_Scale_M30_ChanEle,CMS_hgg_nuisance_lep_Scale_M30_ChanEle)
+Global Observables:      RooArgSet:: = (lumi_13TeV_Uncorrelated_16_In,lumi_13TeV_Uncorrelated_16APV_In,lumi_13TeV_Uncorrelated_17_In,lumi_13TeV_Uncorrelated_18_In,lumi_13TeV_Correlated_In,lumi_13TeV_Correlated_1718_In,CMS_pileup_In,CMS_IDeff_ele_In,CMS_IDeff_mu_In,CMS_IDeff_g_In,CMS_hgg_nuisance_pho_Smear_M30_ChanEle_In,CMS_hgg_nuisance_lep_Smear_M30_ChanEle_In,CMS_hgg_nuisance_pho_Scale_M30_ChanEle_In,CMS_hgg_nuisance_lep_Scale_M30_ChanEle_In)
+PDF:                     RooSimultaneousOpt::model_s[ indexCat=CMS_channel cat0_13TeV=pdf_bincat0_13TeV extraConstraints=() channelMasks=() ] = 2.59265
+
+Input ModelConfig 'ModelConfig': 
+
+=== Using the following for ModelConfig ===
+Observables:             RooArgSet:: = (CMS_hza_mass,CMS_channel)
+Parameters of Interest:  RooArgSet:: = (r)
+Nuisance Parameters:     RooArgSet:: = (lumi_13TeV_Uncorrelated_16,lumi_13TeV_Uncorrelated_16APV,lumi_13TeV_Uncorrelated_17,lumi_13TeV_Uncorrelated_18,lumi_13TeV_Correlated,lumi_13TeV_Correlated_1718,CMS_pileup,CMS_IDeff_ele,CMS_IDeff_mu,CMS_IDeff_g,CMS_hgg_nuisance_pho_Smear_M30_ChanEle,CMS_hgg_nuisance_lep_Smear_M30_ChanEle,CMS_hgg_nuisance_pho_Scale_M30_ChanEle,CMS_hgg_nuisance_lep_Scale_M30_ChanEle)
+Global Observables:      RooArgSet:: = (lumi_13TeV_Uncorrelated_16_In,lumi_13TeV_Uncorrelated_16APV_In,lumi_13TeV_Uncorrelated_17_In,lumi_13TeV_Uncorrelated_18_In,lumi_13TeV_Correlated_In,lumi_13TeV_Correlated_1718_In,CMS_pileup_In,CMS_IDeff_ele_In,CMS_IDeff_mu_In,CMS_IDeff_g_In,CMS_hgg_nuisance_pho_Smear_M30_ChanEle_In,CMS_hgg_nuisance_lep_Smear_M30_ChanEle_In,CMS_hgg_nuisance_pho_Scale_M30_ChanEle_In,CMS_hgg_nuisance_lep_Scale_M30_ChanEle_In)
+PDF:                     RooSimultaneousOpt::model_s[ indexCat=CMS_channel cat0_13TeV=pdf_bincat0_13TeV extraConstraints=() channelMasks=() ] = 2.59265
+
+Set Default Value of Parameter MH To : 125
+Set Default Value of Parameter r To : 0.01
+Freezing the following parameters: RooArgSet:: = (MH)
+Adding discrete pdfindex_0_13TeV
+Saving snapshot 'clean'
+Saved snapshot 'clean'
+ bin      CMS_hza_mass       CMS_channel    weight
+   0            95.125        cat0_13TeV     0.0000000
+   1            95.375        cat0_13TeV     0.0000000
+   2            95.625        cat0_13TeV     0.0000000
+   3            95.875        cat0_13TeV     1.0000000
+   4            96.125        cat0_13TeV     1.0000000
+   5            96.375        cat0_13TeV     3.0000000
+   6            96.625        cat0_13TeV     1.0000000
+   7            96.875        cat0_13TeV     0.0000000
+   8            97.125        cat0_13TeV     2.0000000
+   9            97.375        cat0_13TeV     0.0000000
+  10            97.625        cat0_13TeV     0.0000000
+  11            97.875        cat0_13TeV     0.0000000
+  12            98.125        cat0_13TeV     2.0000000
+  13            98.375        cat0_13TeV     1.0000000
+  14            98.625        cat0_13TeV     0.0000000
+  15            98.875        cat0_13TeV     1.0000000
+  16            99.125        cat0_13TeV     3.0000000
+  17            99.375        cat0_13TeV     0.0000000
+  18            99.625        cat0_13TeV     0.0000000
+  19            99.875        cat0_13TeV     1.0000000
+  20           100.125        cat0_13TeV     1.0000000
+  21           100.375        cat0_13TeV     0.0000000
+  22           100.625        cat0_13TeV     1.0000000
+  23           100.875        cat0_13TeV     0.0000000
+  24           101.125        cat0_13TeV     2.0000000
+  25           101.375        cat0_13TeV     0.0000000
+  26           101.625        cat0_13TeV     0.0000000
+  27           101.875        cat0_13TeV     0.0000000
+  28           102.125        cat0_13TeV     2.0000000
+  29           102.375        cat0_13TeV     1.0000000
+  30           102.625        cat0_13TeV     3.0000000
+  31           102.875        cat0_13TeV     0.0000000
+  32           103.125        cat0_13TeV     3.0000000
+  33           103.375        cat0_13TeV     0.0000000
+  34           103.625        cat0_13TeV     2.0000000
+  35           103.875        cat0_13TeV     2.0000000
+  36           104.125        cat0_13TeV     4.0000000
+  37           104.375        cat0_13TeV     4.0000000
+  38           104.625        cat0_13TeV     1.0000000
+  39           104.875        cat0_13TeV     3.0000000
+  40           105.125        cat0_13TeV     2.0000000
+  41           105.375        cat0_13TeV     1.0000000
+  42           105.625        cat0_13TeV     2.0000000
+  43           105.875        cat0_13TeV     1.0000000
+  44           106.125        cat0_13TeV     0.0000000
+  45           106.375        cat0_13TeV     0.0000000
+  46           106.625        cat0_13TeV     1.0000000
+  47           106.875        cat0_13TeV     4.0000000
+  48           107.125        cat0_13TeV     2.0000000
+  49           107.375        cat0_13TeV     0.0000000
+  50           107.625        cat0_13TeV     3.0000000
+  51           107.875        cat0_13TeV     4.0000000
+  52           108.125        cat0_13TeV     2.0000000
+  53           108.375        cat0_13TeV     5.0000000
+  54           108.625        cat0_13TeV     2.0000000
+  55           108.875        cat0_13TeV     2.0000000
+  56           109.125        cat0_13TeV     1.0000000
+  57           109.375        cat0_13TeV     2.0000000
+  58           109.625        cat0_13TeV     0.0000000
+  59           109.875        cat0_13TeV     3.0000000
+  60           110.125        cat0_13TeV     3.0000000
+  61           110.375        cat0_13TeV     1.0000000
+  62           110.625        cat0_13TeV     4.0000000
+  63           110.875        cat0_13TeV     1.0000000
+  64           111.125        cat0_13TeV     1.0000000
+  65           111.375        cat0_13TeV     1.0000000
+  66           111.625        cat0_13TeV     3.0000000
+  67           111.875        cat0_13TeV     0.0000000
+  68           112.125        cat0_13TeV     1.0000000
+  69           112.375        cat0_13TeV     0.0000000
+  70           112.625        cat0_13TeV     3.0000000
+  71           112.875        cat0_13TeV     2.0000000
+  72           113.125        cat0_13TeV     4.0000000
+  73           113.375        cat0_13TeV     2.0000000
+  74           113.625        cat0_13TeV     4.0000000
+  75           113.875        cat0_13TeV     1.0000000
+  76           114.125        cat0_13TeV     1.0000000
+  77           114.375        cat0_13TeV     1.0000000
+  78           114.625        cat0_13TeV     1.0000000
+  79           114.875        cat0_13TeV     1.0000000
+  80           115.125        cat0_13TeV     4.0000000
+  81           115.375        cat0_13TeV     0.0000000
+  82           115.625        cat0_13TeV     0.0000000
+  83           115.875        cat0_13TeV     1.0000000
+  84           116.125        cat0_13TeV     3.0000000
+  85           116.375        cat0_13TeV     0.0000000
+  86           116.625        cat0_13TeV     0.0000000
+  87           116.875        cat0_13TeV     1.0000000
+  88           117.125        cat0_13TeV     1.0000000
+  89           117.375        cat0_13TeV     0.0000000
+  90           117.625        cat0_13TeV     0.0000000
+  91           117.875        cat0_13TeV     3.0000000
+  92           118.125        cat0_13TeV     2.0000000
+  93           118.375        cat0_13TeV     3.0000000
+  94           118.625        cat0_13TeV     1.0000000
+  95           118.875        cat0_13TeV     1.0000000
+  96           119.125        cat0_13TeV     1.0000000
+  97           119.375        cat0_13TeV     0.0000000
+  98           119.625        cat0_13TeV     0.0000000
+  99           119.875        cat0_13TeV     2.0000000
+ 100           120.125        cat0_13TeV     0.0000000
+ 101           120.375        cat0_13TeV     1.0000000
+ 102           120.625        cat0_13TeV     0.0000000
+ 103           120.875        cat0_13TeV     2.0000000
+ 104           121.125        cat0_13TeV     2.0000000
+ 105           121.375        cat0_13TeV     0.0000000
+ 106           121.625        cat0_13TeV     0.0000000
+ 107           121.875        cat0_13TeV     1.0000000
+ 108           122.125        cat0_13TeV     1.0000000
+ 109           122.375        cat0_13TeV     1.0000000
+ 110           122.625        cat0_13TeV     1.0000000
+ 111           122.875        cat0_13TeV     2.0000000
+ 112           123.125        cat0_13TeV     1.0000000
+ 113           123.375        cat0_13TeV     3.0000000
+ 114           123.625        cat0_13TeV     2.0000000
+ 115           123.875        cat0_13TeV     2.0000000
+ 116           124.125        cat0_13TeV     1.0000000
+ 117           124.375        cat0_13TeV     2.0000000
+ 118           124.625        cat0_13TeV     2.0000000
+ 119           124.875        cat0_13TeV     1.0000000
+ 120           125.125        cat0_13TeV     2.0000000
+ 121           125.375        cat0_13TeV     2.0000000
+ 122           125.625        cat0_13TeV     1.0000000
+ 123           125.875        cat0_13TeV     2.0000000
+ 124           126.125        cat0_13TeV     1.0000000
+ 125           126.375        cat0_13TeV     1.0000000
+ 126           126.625        cat0_13TeV     1.0000000
+ 127           126.875        cat0_13TeV     2.0000000
+ 128           127.125        cat0_13TeV     1.0000000
+ 129           127.375        cat0_13TeV     1.0000000
+ 130           127.625        cat0_13TeV     2.0000000
+ 131           127.875        cat0_13TeV     1.0000000
+ 132           128.125        cat0_13TeV     1.0000000
+ 133           128.375        cat0_13TeV     1.0000000
+ 134           128.625        cat0_13TeV     2.0000000
+ 135           128.875        cat0_13TeV     0.0000000
+ 136           129.125        cat0_13TeV     3.0000000
+ 137           129.375        cat0_13TeV     3.0000000
+ 138           129.625        cat0_13TeV     3.0000000
+ 139           129.875        cat0_13TeV     2.0000000
+ 140           130.125        cat0_13TeV     2.0000000
+ 141           130.375        cat0_13TeV     2.0000000
+ 142           130.625        cat0_13TeV     1.0000000
+ 143           130.875        cat0_13TeV     3.0000000
+ 144           131.125        cat0_13TeV     1.0000000
+ 145           131.375        cat0_13TeV     0.0000000
+ 146           131.625        cat0_13TeV     2.0000000
+ 147           131.875        cat0_13TeV     2.0000000
+ 148           132.125        cat0_13TeV     1.0000000
+ 149           132.375        cat0_13TeV     2.0000000
+ 150           132.625        cat0_13TeV     1.0000000
+ 151           132.875        cat0_13TeV     1.0000000
+ 152           133.125        cat0_13TeV     2.0000000
+ 153           133.375        cat0_13TeV     0.0000000
+ 154           133.625        cat0_13TeV     0.0000000
+ 155           133.875        cat0_13TeV     0.0000000
+ 156           134.125        cat0_13TeV     0.0000000
+ 157           134.375        cat0_13TeV     0.0000000
+ 158           134.625        cat0_13TeV     1.0000000
+ 159           134.875        cat0_13TeV     0.0000000
+ 160           135.125        cat0_13TeV     1.0000000
+ 161           135.375        cat0_13TeV     1.0000000
+ 162           135.625        cat0_13TeV     0.0000000
+ 163           135.875        cat0_13TeV     3.0000000
+ 164           136.125        cat0_13TeV     0.0000000
+ 165           136.375        cat0_13TeV     0.0000000
+ 166           136.625        cat0_13TeV     3.0000000
+ 167           136.875        cat0_13TeV     2.0000000
+ 168           137.125        cat0_13TeV     1.0000000
+ 169           137.375        cat0_13TeV     2.0000000
+ 170           137.625        cat0_13TeV     0.0000000
+ 171           137.875        cat0_13TeV     1.0000000
+ 172           138.125        cat0_13TeV     0.0000000
+ 173           138.375        cat0_13TeV     2.0000000
+ 174           138.625        cat0_13TeV     0.0000000
+ 175           138.875        cat0_13TeV     3.0000000
+ 176           139.125        cat0_13TeV     0.0000000
+ 177           139.375        cat0_13TeV     0.0000000
+ 178           139.625        cat0_13TeV     0.0000000
+ 179           139.875        cat0_13TeV     0.0000000
+ 180           140.125        cat0_13TeV     0.0000000
+ 181           140.375        cat0_13TeV     0.0000000
+ 182           140.625        cat0_13TeV     0.0000000
+ 183           140.875        cat0_13TeV     1.0000000
+ 184           141.125        cat0_13TeV     0.0000000
+ 185           141.375        cat0_13TeV     0.0000000
+ 186           141.625        cat0_13TeV     1.0000000
+ 187           141.875        cat0_13TeV     0.0000000
+ 188           142.125        cat0_13TeV     0.0000000
+ 189           142.375        cat0_13TeV     1.0000000
+ 190           142.625        cat0_13TeV     0.0000000
+ 191           142.875        cat0_13TeV     0.0000000
+ 192           143.125        cat0_13TeV     1.0000000
+ 193           143.375        cat0_13TeV     2.0000000
+ 194           143.625        cat0_13TeV     1.0000000
+ 195           143.875        cat0_13TeV     0.0000000
+ 196           144.125        cat0_13TeV     0.0000000
+ 197           144.375        cat0_13TeV     0.0000000
+ 198           144.625        cat0_13TeV     0.0000000
+ 199           144.875        cat0_13TeV     1.0000000
+ 200           145.125        cat0_13TeV     1.0000000
+ 201           145.375        cat0_13TeV     0.0000000
+ 202           145.625        cat0_13TeV     0.0000000
+ 203           145.875        cat0_13TeV     0.0000000
+ 204           146.125        cat0_13TeV     1.0000000
+ 205           146.375        cat0_13TeV     1.0000000
+ 206           146.625        cat0_13TeV     2.0000000
+ 207           146.875        cat0_13TeV     0.0000000
+ 208           147.125        cat0_13TeV     0.0000000
+ 209           147.375        cat0_13TeV     0.0000000
+ 210           147.625        cat0_13TeV     0.0000000
+ 211           147.875        cat0_13TeV     0.0000000
+ 212           148.125        cat0_13TeV     0.0000000
+ 213           148.375        cat0_13TeV     0.0000000
+ 214           148.625        cat0_13TeV     0.0000000
+ 215           148.875        cat0_13TeV     0.0000000
+ 216           149.125        cat0_13TeV     0.0000000
+ 217           149.375        cat0_13TeV     1.0000000
+ 218           149.625        cat0_13TeV     0.0000000
+ 219           149.875        cat0_13TeV     0.0000000
+ 220           150.125        cat0_13TeV     0.0000000
+ 221           150.375        cat0_13TeV     1.0000000
+ 222           150.625        cat0_13TeV     2.0000000
+ 223           150.875        cat0_13TeV     0.0000000
+ 224           151.125        cat0_13TeV     0.0000000
+ 225           151.375        cat0_13TeV     1.0000000
+ 226           151.625        cat0_13TeV     2.0000000
+ 227           151.875        cat0_13TeV     0.0000000
+ 228           152.125        cat0_13TeV     0.0000000
+ 229           152.375        cat0_13TeV     1.0000000
+ 230           152.625        cat0_13TeV     0.0000000
+ 231           152.875        cat0_13TeV     0.0000000
+ 232           153.125        cat0_13TeV     1.0000000
+ 233           153.375        cat0_13TeV     0.0000000
+ 234           153.625        cat0_13TeV     0.0000000
+ 235           153.875        cat0_13TeV     0.0000000
+ 236           154.125        cat0_13TeV     0.0000000
+ 237           154.375        cat0_13TeV     0.0000000
+ 238           154.625        cat0_13TeV     0.0000000
+ 239           154.875        cat0_13TeV     0.0000000
+ 240           155.125        cat0_13TeV     0.0000000
+ 241           155.375        cat0_13TeV     0.0000000
+ 242           155.625        cat0_13TeV     0.0000000
+ 243           155.875        cat0_13TeV     0.0000000
+ 244           156.125        cat0_13TeV     0.0000000
+ 245           156.375        cat0_13TeV     0.0000000
+ 246           156.625        cat0_13TeV     0.0000000
+ 247           156.875        cat0_13TeV     1.0000000
+ 248           157.125        cat0_13TeV     0.0000000
+ 249           157.375        cat0_13TeV     0.0000000
+ 250           157.625        cat0_13TeV     0.0000000
+ 251           157.875        cat0_13TeV     0.0000000
+ 252           158.125        cat0_13TeV     1.0000000
+ 253           158.375        cat0_13TeV     0.0000000
+ 254           158.625        cat0_13TeV     0.0000000
+ 255           158.875        cat0_13TeV     0.0000000
+ 256           159.125        cat0_13TeV     0.0000000
+ 257           159.375        cat0_13TeV     0.0000000
+ 258           159.625        cat0_13TeV     1.0000000
+ 259           159.875        cat0_13TeV     0.0000000
+ 260           160.125        cat0_13TeV     0.0000000
+ 261           160.375        cat0_13TeV     0.0000000
+ 262           160.625        cat0_13TeV     0.0000000
+ 263           160.875        cat0_13TeV     0.0000000
+ 264           161.125        cat0_13TeV     0.0000000
+ 265           161.375        cat0_13TeV     0.0000000
+ 266           161.625        cat0_13TeV     0.0000000
+ 267           161.875        cat0_13TeV     0.0000000
+ 268           162.125        cat0_13TeV     0.0000000
+ 269           162.375        cat0_13TeV     1.0000000
+ 270           162.625        cat0_13TeV     0.0000000
+ 271           162.875        cat0_13TeV     0.0000000
+ 272           163.125        cat0_13TeV     0.0000000
+ 273           163.375        cat0_13TeV     0.0000000
+ 274           163.625        cat0_13TeV     0.0000000
+ 275           163.875        cat0_13TeV     0.0000000
+ 276           164.125        cat0_13TeV     0.0000000
+ 277           164.375        cat0_13TeV     0.0000000
+ 278           164.625        cat0_13TeV     0.0000000
+ 279           164.875        cat0_13TeV     0.0000000
+ 280           165.125        cat0_13TeV     1.0000000
+ 281           165.375        cat0_13TeV     0.0000000
+ 282           165.625        cat0_13TeV     0.0000000
+ 283           165.875        cat0_13TeV     0.0000000
+ 284           166.125        cat0_13TeV     0.0000000
+ 285           166.375        cat0_13TeV     1.0000000
+ 286           166.625        cat0_13TeV     0.0000000
+ 287           166.875        cat0_13TeV     1.0000000
+ 288           167.125        cat0_13TeV     1.0000000
+ 289           167.375        cat0_13TeV     0.0000000
+ 290           167.625        cat0_13TeV     0.0000000
+ 291           167.875        cat0_13TeV     0.0000000
+ 292           168.125        cat0_13TeV     0.0000000
+ 293           168.375        cat0_13TeV     0.0000000
+ 294           168.625        cat0_13TeV     0.0000000
+ 295           168.875        cat0_13TeV     0.0000000
+ 296           169.125        cat0_13TeV     1.0000000
+ 297           169.375        cat0_13TeV     0.0000000
+ 298           169.625        cat0_13TeV     0.0000000
+ 299           169.875        cat0_13TeV     0.0000000
+ 300           170.125        cat0_13TeV     0.0000000
+ 301           170.375        cat0_13TeV     0.0000000
+ 302           170.625        cat0_13TeV     1.0000000
+ 303           170.875        cat0_13TeV     0.0000000
+ 304           171.125        cat0_13TeV     0.0000000
+ 305           171.375        cat0_13TeV     0.0000000
+ 306           171.625        cat0_13TeV     0.0000000
+ 307           171.875        cat0_13TeV     0.0000000
+ 308           172.125        cat0_13TeV     1.0000000
+ 309           172.375        cat0_13TeV     1.0000000
+ 310           172.625        cat0_13TeV     0.0000000
+ 311           172.875        cat0_13TeV     0.0000000
+ 312           173.125        cat0_13TeV     0.0000000
+ 313           173.375        cat0_13TeV     0.0000000
+ 314           173.625        cat0_13TeV     0.0000000
+ 315           173.875        cat0_13TeV     0.0000000
+ 316           174.125        cat0_13TeV     0.0000000
+ 317           174.375        cat0_13TeV     0.0000000
+ 318           174.625        cat0_13TeV     0.0000000
+ 319           174.875        cat0_13TeV     0.0000000
+ 320           175.125        cat0_13TeV     0.0000000
+ 321           175.375        cat0_13TeV     0.0000000
+ 322           175.625        cat0_13TeV     0.0000000
+ 323           175.875        cat0_13TeV     0.0000000
+ 324           176.125        cat0_13TeV     0.0000000
+ 325           176.375        cat0_13TeV     0.0000000
+ 326           176.625        cat0_13TeV     0.0000000
+ 327           176.875        cat0_13TeV     0.0000000
+ 328           177.125        cat0_13TeV     0.0000000
+ 329           177.375        cat0_13TeV     0.0000000
+ 330           177.625        cat0_13TeV     0.0000000
+ 331           177.875        cat0_13TeV     0.0000000
+ 332           178.125        cat0_13TeV     0.0000000
+ 333           178.375        cat0_13TeV     0.0000000
+ 334           178.625        cat0_13TeV     0.0000000
+ 335           178.875        cat0_13TeV     0.0000000
+ 336           179.125        cat0_13TeV     1.0000000
+ 337           179.375        cat0_13TeV     0.0000000
+ 338           179.625        cat0_13TeV     0.0000000
+ 339           179.875        cat0_13TeV     0.0000000
+[#1] INFO:Eval -- RooRealVar::setRange(lumi_13TeV_Uncorrelated_16) new range named 'optimizeBoundRange' created with bounds [-7,7]
+[#1] INFO:Eval -- RooRealVar::setRange(lumi_13TeV_Uncorrelated_16APV) new range named 'optimizeBoundRange' created with bounds [-7,7]
+[#1] INFO:Eval -- RooRealVar::setRange(lumi_13TeV_Uncorrelated_17) new range named 'optimizeBoundRange' created with bounds [-7,7]
+[#1] INFO:Eval -- RooRealVar::setRange(lumi_13TeV_Uncorrelated_18) new range named 'optimizeBoundRange' created with bounds [-7,7]
+[#1] INFO:Eval -- RooRealVar::setRange(lumi_13TeV_Correlated) new range named 'optimizeBoundRange' created with bounds [-7,7]
+[#1] INFO:Eval -- RooRealVar::setRange(lumi_13TeV_Correlated_1718) new range named 'optimizeBoundRange' created with bounds [-7,7]
+[#1] INFO:Eval -- RooRealVar::setRange(CMS_pileup) new range named 'optimizeBoundRange' created with bounds [-7,7]
+[#1] INFO:Eval -- RooRealVar::setRange(CMS_IDeff_ele) new range named 'optimizeBoundRange' created with bounds [-7,7]
+[#1] INFO:Eval -- RooRealVar::setRange(CMS_IDeff_mu) new range named 'optimizeBoundRange' created with bounds [-7,7]
+[#1] INFO:Eval -- RooRealVar::setRange(CMS_IDeff_g) new range named 'optimizeBoundRange' created with bounds [-7,7]
+SimNLL created with 1 channels, 0 generic constraints, 14 fast gaussian constraints, 0 fast poisson constraints, 0 fast group constraints, 
+do first Minimization 
+Minuit2Minimizer: Minimize with max-calls 10500 convergence for edm < 0.1 strategy 1
+Minuit2Minimizer::Minuit  - Changing default options
+             StorageLevel :               0
+MnSeedGenerator: for initial parameters FCN = -2.273736754432e-13
+MnSeedGenerator: Initial state:   - FCN = -2.273736754432e-13 Edm =     0.278444 NCalls =     83
+VariableMetric: start iterating until Edm is < 0.0001
+VariableMetric: Initial state   - FCN = -2.273736754432e-13 Edm =     0.278444 NCalls =     83
+VariableMetric: Iteration #   0 - FCN = -2.273736754432e-13 Edm =     0.278444 NCalls =     83
+VariableMetric: Iteration #   1 - FCN = -0.1880552774735 Edm =    0.0597101 NCalls =    131
+VariableMetric: Iteration #   2 - FCN = -0.2561194976575 Edm =    0.0114613 NCalls =    175
+VariableMetric: Iteration #   3 - FCN = -0.2641366614524 Edm =   0.00114671 NCalls =    219
+VariableMetric: Iteration #   4 - FCN = -0.2671341586781 Edm =  0.000997011 NCalls =    267
+VariableMetric: Iteration #   5 - FCN = -0.2678070006639 Edm =   0.00018402 NCalls =    311
+VariableMetric: Iteration #   6 - FCN = -0.2680895056062 Edm =  2.22878e-05 NCalls =    355
+VariableMetric: After Hessian   - FCN = -0.2680895056062 Edm =  4.00082e-05 NCalls =    650
+VariableMetric: Iteration #   7 - FCN = -0.2680895056062 Edm =  4.00082e-05 NCalls =    650
+Number of iterations 8
+----------> Iteration 0
+            FVAL = -2.27373675443e-13 Edm = 0.278443861414 Nfcn = 83
+            Error matrix change = 1
+            Parameters :  p0 = 0 p1 = 0 p2 = 0 p3 = 0 p4 = 0 p5 = 0 p6 = 0 p7 = 0 p8 = 0.592833 p9 = -0.143645 p10 = 0.0636941 p11 = 4.99999 p12 = 0 p13 = 0 p14 = 0 p15 = 0 p16 = 0 p17 = 0 p18 = 0.01 p19 = 272 p20 = 100.214
+----------> Iteration 1
+            FVAL = -0.188055277473 Edm = 0.0597101376858 Nfcn = 131
+            Error matrix change = 0.500988
+            Parameters :  p0 = -0.000700323 p1 = -0.0134477 p2 = -0.000513846 p3 = 0.00727317 p4 = -0.0053962 p5 = -0.000123913 p6 = -0.00343116 p7 = -0.00241107 p8 = 0.595031 p9 = -0.143168 p10 = 0.064155 p11 = 5 p12 = 0.00187663 p13 = 0.000344843 p14 = 0.000156117 p15 = 0.000191419 p16 = 0.000688619 p17 = 0.0010196 p18 = 0.021344 p19 = 270.235 p20 = 100.175
+----------> Iteration 2
+            FVAL = -0.256119497658 Edm = 0.0114612608014 Nfcn = 175
+----------> Iteration 3
+            FVAL = -0.264136661452 Edm = 0.00114670904887 Nfcn = 219
+----------> Iteration 4
+            FVAL = -0.267134158678 Edm = 0.000997011169495 Nfcn = 267
+----------> Iteration 5
+            FVAL = -0.267807000664 Edm = 0.000184020154352 Nfcn = 311
+----------> Iteration 6
+            FVAL = -0.268089505606 Edm = 2.228780953e-05 Nfcn = 355
+            Error matrix change = 0.0548074
+            Parameters :  p0 = 0.000488463 p1 = 0.000935527 p2 = -6.30144e-05 p3 = 0.0348358 p4 = -0.00418953 p5 = 0.000310465 p6 = -0.00266321 p7 = 0.000386885 p8 = 0.598343 p9 = -0.14241 p10 = 0.064913 p11 = 5 p12 = 0.000360066 p13 = -7.21284e-05 p14 = -0.000108883 p15 = -0.000133514 p16 = -0.000480308 p17 = 0.00054367 p18 = 0.0248104 p19 = 264.131 p20 = 100
+----------> Iteration 7
+            FVAL = -0.268089505606 Edm = 4.00082445719e-05 Nfcn = 650
+            Error matrix change = 0
+            Parameters :  p0 = 0.000488463 p1 = 0.000935527 p2 = -6.30144e-05 p3 = 0.0348358 p4 = -0.00418953 p5 = 0.000310465 p6 = -0.00266321 p7 = 0.000386885 p8 = 0.598343 p9 = -0.14241 p10 = 0.064913 p11 = 5 p12 = 0.000360066 p13 = -7.21284e-05 p14 = -0.000108883 p15 = -0.000133514 p16 = -0.000480308 p17 = 0.00054367 p18 = 0.0248104 p19 = 264.131 p20 = 100
+Minuit2Minimizer : Valid minimum - status = 0
+FVAL  = -0.268089505606240008
+Edm   = 4.0008244571911084e-05
+Nfcn  = 650
+CMS_IDeff_ele	  = 0.000488463	 +/-  1.00001
+CMS_IDeff_g	  = 0.000935527	 +/-  0.99996
+CMS_IDeff_mu	  = -6.30144e-05	 +/-  0.999996
+CMS_hgg_nuisance_lep_Scale_M30_ChanEle	  = 0.0348358	 +/-  0.987509	(limited)
+CMS_hgg_nuisance_lep_Smear_M30_ChanEle	  = -0.00418953	 +/-  0.990817	(limited)
+CMS_hgg_nuisance_pho_Scale_M30_ChanEle	  = 0.000310465	 +/-  0.989093	(limited)
+CMS_hgg_nuisance_pho_Smear_M30_ChanEle	  = -0.00266321	 +/-  0.990103	(limited)
+CMS_pileup	  = 0.000386885	 +/-  0.999846
+env_pdf_0_13TeV_bern3_b0	  = 0.598343	 +/-  3.00858	(limited)
+env_pdf_0_13TeV_bern3_b1	  = -0.14241	 +/-  0.721747	(limited)
+env_pdf_0_13TeV_bern3_b2	  = 0.064913	 +/-  0.33092	(limited)
+env_pdf_0_13TeV_bern3_sigma_b3	  = 5	 +/-  2.77523	(limited)
+lumi_13TeV_Correlated	  = 0.000360066	 +/-  1
+lumi_13TeV_Correlated_1718	  = -7.21284e-05	 +/-  1
+lumi_13TeV_Uncorrelated_16	  = -0.000108883	 +/-  0.999999
+lumi_13TeV_Uncorrelated_16APV	  = -0.000133514	 +/-  1
+lumi_13TeV_Uncorrelated_17	  = -0.000480308	 +/-  0.999999
+lumi_13TeV_Uncorrelated_18	  = 0.00054367	 +/-  1
+r	  = 0.0248104	 +/-  0.0223357	(limited)
+shapeBkg_bkg_mass_cat0_13TeV__norm	  = 264.131	 +/-  17.4575	(limited)
+step_b3	  = 100	 +/-  10.9943	(limited)
+Enabling channel cat0_13TeV that depends on non-const category pdfindex_0_13TeV
+Setting indices := 0 
+Enabling channel cat0_13TeV that depends on non-const category pdfindex_0_13TeV
+Minuit2Minimizer: Minimize with max-calls 2500 convergence for edm < 0.1 strategy 0
+Minuit2Minimizer::Minuit  - Changing default options
+             StorageLevel :               0
+MnSeedGenerator: for initial parameters FCN = 1.055668690242e-06
+MnSeedGenerator: Initial state:   - FCN = 1.055668690242e-06 Edm =  1.10999e-05 NCalls =     21
+VariableMetric: start iterating until Edm is < 0.0001
+VariableMetric: Initial state   - FCN = 1.055668690242e-06 Edm =  1.10999e-05 NCalls =     21
+VariableMetric: Iteration #   0 - FCN = 1.055668690242e-06 Edm =  1.10999e-05 NCalls =     21
+VariableMetric: Iteration #   1 - FCN = -2.1691304255e-05 Edm =  4.22957e-06 NCalls =     39
+Number of iterations 3
+----------> Iteration 0
+            FVAL = 1.05566869024e-06 Edm = 1.10999063527e-05 Nfcn = 21
+            Error matrix change = 1
+            Parameters :  p0 = 0.598343 p1 = -0.14241 p2 = 0.064913 p3 = 5 p4 = 100
+----------> Iteration 1
+            FVAL = -2.1691304255e-05 Edm = 4.2295697835e-06 Nfcn = 39
+            Error matrix change = 0.559585
+            Parameters :  p0 = 0.599449 p1 = -0.142407 p2 = 0.0648196 p3 = 5 p4 = 100
+----------> Iteration 2
+            FVAL = -2.1691304255e-05 Edm = 4.2295697835e-06 Nfcn = 39
+            Error matrix change = 0.559585
+            Parameters :  p0 = 0.599449 p1 = -0.142407 p2 = 0.0648196 p3 = 5 p4 = 100
+Minuit2Minimizer : Valid minimum - status = 0
+FVAL  = -2.1691304255000432e-05
+Edm   = 4.22956978350453549e-06
+Nfcn  = 39
+env_pdf_0_13TeV_bern3_b0	  = 0.599449	 +/-  0.229949	(limited)
+env_pdf_0_13TeV_bern3_b1	  = -0.142407	 +/-  0.0214047	(limited)
+env_pdf_0_13TeV_bern3_b2	  = 0.0648196	 +/-  0.0233187	(limited)
+env_pdf_0_13TeV_bern3_sigma_b3	  = 5	 +/-  2.7317	(limited)
+step_b3	  = 100	 +/-  10.7608	(limited)
+ .... Found a better fit: new NLL = 1128.94 (improvement: -2.16913e-05
+Setting indices := 1 
+[#1] INFO:Caching -- RooAbsCachedPdf::getCache(env_pdf_0_13TeV_exp1_gauxexp1) creating new cache 0x7b689c0 with pdf env_pdf_0_13TeV_exp1_step_exp1_CONV_env_pdf_0_13TeV_exp1_gau_exp1_CACHE_Obs[CMS_hza_mass] for nset (CMS_hza_mass) with code 1 from preexisting content.
+Enabling channel cat0_13TeV that depends on non-const category pdfindex_0_13TeV
+Minuit2Minimizer: Minimize with max-calls 2000 convergence for edm < 0.1 strategy 0
+Minuit2Minimizer::Minuit  - Changing default options
+             StorageLevel :               0
+MnSeedGenerator: for initial parameters FCN = 0
+[#1] INFO:NumericIntegration -- RooRealIntegral::init(env_pdf_0_13TeV_exp1_step_exp1_Int[CMS_hza_mass]) using numeric integrator RooIntegrator1D to calculate Int(CMS_hza_mass)
+MnSeedGenerator: Initial state:   - FCN =                0 Edm =      2.69331 NCalls =     17
+MnSeedGenerator: Negative G2 found - new state:   - FCN =                0 Edm =      2.69331 NCalls =     17
+VariableMetric: start iterating until Edm is < 0.0001
+VariableMetric: Initial state   - FCN =                0 Edm =      2.69331 NCalls =     17
+VariableMetric: Iteration #   0 - FCN =                0 Edm =      2.69331 NCalls =     17
+VariableMetric: Iteration #   1 - FCN =  -4.877572963882 Edm =  0.000175946 NCalls =     35
+VariableMetric: Iteration #   2 - FCN =  -4.878914794279 Edm =  4.41488e-05 NCalls =     47
+Number of iterations 4
+----------> Iteration 0
+            FVAL = 0 Edm = 2.69330806634 Nfcn = 17
+            Error matrix change = 1
+            Parameters :  p0 = 0.953827 p1 = -0.0396721 p2 = 2.63822 p3 = 100.355
+----------> Iteration 1
+            FVAL = -4.87757296388 Edm = 0.000175946295885 Nfcn = 35
+            Error matrix change = 0.520936
+            Parameters :  p0 = 0.953827 p1 = -0.040664 p2 = 3.99913 p3 = 100.355
+----------> Iteration 2
+            FVAL = -4.87891479428 Edm = 4.41488317464e-05 Nfcn = 47
+            Error matrix change = 0.319746
+            Parameters :  p0 = 0.953827 p1 = -0.0406088 p2 = 4 p3 = 100.355
+----------> Iteration 3
+            FVAL = -4.87891479428 Edm = 4.41488317464e-05 Nfcn = 47
+            Error matrix change = 0.319746
+            Parameters :  p0 = 0.953827 p1 = -0.0406088 p2 = 4 p3 = 100.355
+Minuit2Minimizer : Valid minimum - status = 0
+FVAL  = -4.87891479427867125
+Edm   = 4.41488317464448486e-05
+Nfcn  = 47
+env_pdf_0_13TeV_exp1_cp1_exp1	  = 0.953827	 +/-  0.208623	(limited)
+env_pdf_0_13TeV_exp1_p1_exp1	  = -0.0406088	 +/-  0.00334237	(limited)
+env_pdf_0_13TeV_exp1_sigma_p1	  = 4	 +/-  0.306542	(limited)
+env_pdf_0_13TeV_exp1_turnon_p1	  = 100.355	 +/-  2.13541	(limited)
+Setting indices := 2 
+[#1] INFO:Caching -- RooAbsCachedPdf::getCache(env_pdf_0_13TeV_exp3_gauxexp3) creating new cache 0x7b661b0 with pdf env_pdf_0_13TeV_exp3_step_exp3_CONV_env_pdf_0_13TeV_exp3_gau_exp3_CACHE_Obs[CMS_hza_mass] for nset (CMS_hza_mass) with code 1 from preexisting content.
+Enabling channel cat0_13TeV that depends on non-const category pdfindex_0_13TeV
+Minuit2Minimizer: Minimize with max-calls 3000 convergence for edm < 0.1 strategy 0
+Minuit2Minimizer::Minuit  - Changing default options
+             StorageLevel :               0
+MnSeedGenerator: for initial parameters FCN = 0
+[#1] INFO:NumericIntegration -- RooRealIntegral::init(env_pdf_0_13TeV_exp3_step_exp3_Int[CMS_hza_mass]) using numeric integrator RooIntegrator1D to calculate Int(CMS_hza_mass)
+MnSeedGenerator: Initial state:   - FCN =                0 Edm =   0.00294104 NCalls =     25
+MnSeedGenerator: Negative G2 found - new state:   - FCN = -4.390199819682e-06 Edm =   0.00171208 NCalls =     50
+VariableMetric: start iterating until Edm is < 0.0001
+VariableMetric: Initial state   - FCN = -4.390199819682e-06 Edm =   0.00171208 NCalls =     50
+VariableMetric: Iteration #   0 - FCN = -4.390199819682e-06 Edm =   0.00171208 NCalls =     50
+VariableMetric: Iteration #   1 - FCN = -0.001714940917282 Edm =  6.81516e-09 NCalls =     69
+Number of iterations 3
+----------> Iteration 0
+            FVAL = -4.39019981968e-06 Edm = 0.00171207537136 Nfcn = 50
+            Error matrix change = 1
+            Parameters :  p0 = 1.87044e-06 p1 = 0.191131 p2 = -0.0415255 p3 = -0.0415261 p4 = 3.99999 p5 = 100.81
+----------> Iteration 1
+            FVAL = -0.00171494091728 Edm = 6.81516264807e-09 Nfcn = 69
+            Error matrix change = 0.500002
+            Parameters :  p0 = 3.74287e-10 p1 = 0.191131 p2 = -0.0427323 p3 = -0.0417305 p4 = 4 p5 = 100.81
+----------> Iteration 2
+            FVAL = -0.00171494091728 Edm = 6.81516264807e-09 Nfcn = 69
+            Error matrix change = 0.500002
+            Parameters :  p0 = 3.74287e-10 p1 = 0.191131 p2 = -0.0427323 p3 = -0.0417305 p4 = 4 p5 = 100.81
+Minuit2Minimizer : Valid minimum - status = 0
+FVAL  = -0.00171494091728163767
+Edm   = 6.81516264807438711e-09
+Nfcn  = 69
+env_pdf_0_13TeV_exp3_cp1_exp3	  = 3.74287e-10	 +/-  0.970189	(limited)
+env_pdf_0_13TeV_exp3_cp3_exp3	  = 0.191131	 +/-  0.33086	(limited)
+env_pdf_0_13TeV_exp3_p1_exp3	  = -0.0427323	 +/-  0.330873	(limited)
+env_pdf_0_13TeV_exp3_p3_exp3	  = -0.0417305	 +/-  0.00350938	(limited)
+env_pdf_0_13TeV_exp3_sigma_p3	  = 4	 +/-  0.247236	(limited)
+env_pdf_0_13TeV_exp3_turnon_p3	  = 100.81	 +/-  2.2959	(limited)
+Setting indices := 3 
+[#1] INFO:Caching -- RooAbsCachedPdf::getCache(env_pdf_0_13TeV_lau1_gauxlau1) creating new cache 0x7b8f060 with pdf env_pdf_0_13TeV_lau1_step_lau1_CONV_env_pdf_0_13TeV_lau1_gau_lau1_CACHE_Obs[CMS_hza_mass] for nset (CMS_hza_mass) with code 1 from preexisting content.
+Enabling channel cat0_13TeV that depends on non-const category pdfindex_0_13TeV
+Minuit2Minimizer: Minimize with max-calls 2000 convergence for edm < 0.1 strategy 0
+Minuit2Minimizer::Minuit  - Changing default options
+             StorageLevel :               0
+[#1] INFO:NumericIntegration -- RooRealIntegral::init(env_pdf_0_13TeV_lau1_step_lau1_Int[CMS_hza_mass]) using numeric integrator RooIntegrator1D to calculate Int(CMS_hza_mass)
+MnSeedGenerator: for initial parameters FCN = 0.0002546020377849
+MnSeedGenerator: Initial state:   - FCN = 0.0002546020377849 Edm =  0.000304013 NCalls =     15
+MnSeedGenerator: Negative G2 found - new state:   - FCN = 0.0002546020377849 Edm =  0.000304013 NCalls =     15
+VariableMetric: start iterating until Edm is < 0.0001
+VariableMetric: Initial state   - FCN = 0.0002546020377849 Edm =  0.000304013 NCalls =     15
+VariableMetric: Iteration #   0 - FCN = 0.0002546020377849 Edm =  0.000304013 NCalls =     15
+VariableMetric: Iteration #   1 - FCN = -3.972381136919e-06 Edm =   9.0463e-13 NCalls =     29
+Number of iterations 3
+----------> Iteration 0
+            FVAL = 0.000254602037785 Edm = 0.000304013406206 Nfcn = 15
+            Error matrix change = 1
+            Parameters :  p0 = 4.76837e-07 p1 = 0.724008 p2 = 4.99999 p3 = 100.988
+----------> Iteration 1
+            FVAL = -3.97238113692e-06 Edm = 9.04629531109e-13 Nfcn = 29
+            Error matrix change = 0.500006
+            Parameters :  p0 = 2.7478e-15 p1 = 0.931696 p2 = 5 p3 = 100.988
+----------> Iteration 2
+            FVAL = -3.97238113692e-06 Edm = 9.04629531109e-13 Nfcn = 29
+            Error matrix change = 0.500006
+            Parameters :  p0 = 2.7478e-15 p1 = 0.931696 p2 = 5 p3 = 100.988
+Minuit2Minimizer : Valid minimum - status = 0
+FVAL  = -3.97238113691855688e-06
+Edm   = 9.04629531108979625e-13
+Nfcn  = 29
+env_pdf_0_13TeV_lau1_cp1_lau1	  = 2.7478e-15	 +/-  0.000934977	(limited)
+env_pdf_0_13TeV_lau1_cp2_lau1	  = 0.931696	 +/-  0.754487	(limited)
+env_pdf_0_13TeV_lau1_sigma_p1	  = 5	 +/-  1.90478	(limited)
+env_pdf_0_13TeV_lau1_turnon_p1	  = 100.988	 +/-  3.13102	(limited)
+Done 4 combinations in 0.567555 s. New discrete minimum? 0
+Minuit2Minimizer: Minimize with max-calls 17500 convergence for edm < 0.1 strategy 1
+Minuit2Minimizer::Minuit  - Changing default options
+             StorageLevel :               0
+MnSeedGenerator: for initial parameters FCN = 0
+MnSeedGenerator: Initial state:   - FCN =                0 Edm =  1.88481e-05 NCalls =     87
+VariableMetric: start iterating until Edm is < 0.0001
+VariableMetric: Initial state   - FCN =                0 Edm =  1.88481e-05 NCalls =     87
+VariableMetric: Iteration #   0 - FCN =                0 Edm =  1.88481e-05 NCalls =     87
+VariableMetric: Iteration #   1 - FCN = -1.549015835984e-05 Edm =  2.51708e-06 NCalls =    131
+VariableMetric: After Hessian   - FCN = -1.549015835984e-05 Edm =  2.84786e-06 NCalls =    426
+VariableMetric: Iteration #   2 - FCN = -1.549015835984e-05 Edm =  2.84786e-06 NCalls =    426
+Number of iterations 3
+----------> Iteration 0
+            FVAL = 0 Edm = 1.88481267354e-05 Nfcn = 87
+            Error matrix change = 1
+            Parameters :  p0 = 0.000488463 p1 = 0.000935527 p2 = -6.30144e-05 p3 = 0.0348358 p4 = -0.00418953 p5 = 0.000310465 p6 = -0.00266321 p7 = 0.000386885 p8 = 0.599449 p9 = -0.142407 p10 = 0.0648196 p11 = 5 p12 = 0.000360066 p13 = -7.21284e-05 p14 = -0.000108883 p15 = -0.000133514 p16 = -0.000480308 p17 = 0.00054367 p18 = 0.0248104 p19 = 264.131 p20 = 100
+----------> Iteration 1
+            FVAL = -1.54901583598e-05 Edm = 2.51707515265e-06 Nfcn = 131
+            Error matrix change = 0.505707
+            Parameters :  p0 = 0.000399942 p1 = -0.000143938 p2 = -0.000100048 p3 = 0.0349987 p4 = -0.00256007 p5 = 0.000357523 p6 = -0.00162961 p7 = 0.000168711 p8 = 0.599497 p9 = -0.142421 p10 = 0.0647966 p11 = 5 p12 = 0.000486712 p13 = -3.96898e-05 p14 = -8.9151e-05 p15 = -0.000109311 p16 = -0.00039324 p17 = 0.000589429 p18 = 0.0248443 p19 = 264.188 p20 = 100
+----------> Iteration 2
+            FVAL = -1.54901583598e-05 Edm = 2.84786063172e-06 Nfcn = 426
+            Error matrix change = 0
+            Parameters :  p0 = 0.000399942 p1 = -0.000143938 p2 = -0.000100048 p3 = 0.0349987 p4 = -0.00256007 p5 = 0.000357523 p6 = -0.00162961 p7 = 0.000168711 p8 = 0.599497 p9 = -0.142421 p10 = 0.0647966 p11 = 5 p12 = 0.000486712 p13 = -3.96898e-05 p14 = -8.9151e-05 p15 = -0.000109311 p16 = -0.00039324 p17 = 0.000589429 p18 = 0.0248443 p19 = 264.188 p20 = 100
+Minuit2Minimizer : Valid minimum - status = 0
+FVAL  = -1.54901583598446221e-05
+Edm   = 2.84786063171592696e-06
+Nfcn  = 426
+CMS_IDeff_ele	  = 0.000399942	 +/-  1.00001
+CMS_IDeff_g	  = -0.000143938	 +/-  1
+CMS_IDeff_mu	  = -0.000100048	 +/-  0.999996
+CMS_hgg_nuisance_lep_Scale_M30_ChanEle	  = 0.0349987	 +/-  0.987507	(limited)
+CMS_hgg_nuisance_lep_Smear_M30_ChanEle	  = -0.00256007	 +/-  0.990818	(limited)
+CMS_hgg_nuisance_pho_Scale_M30_ChanEle	  = 0.000357523	 +/-  0.989093	(limited)
+CMS_hgg_nuisance_pho_Smear_M30_ChanEle	  = -0.00162961	 +/-  0.990103	(limited)
+CMS_pileup	  = 0.000168711	 +/-  0.999849
+env_pdf_0_13TeV_bern3_b0	  = 0.599497	 +/-  3.34662	(limited)
+env_pdf_0_13TeV_bern3_b1	  = -0.142421	 +/-  0.80146	(limited)
+env_pdf_0_13TeV_bern3_b2	  = 0.0647966	 +/-  0.365907	(limited)
+env_pdf_0_13TeV_bern3_sigma_b3	  = 5	 +/-  2.77637	(limited)
+env_pdf_0_13TeV_exp1_cp1_exp1	  = 0.953827	 (fixed)
+env_pdf_0_13TeV_exp1_p1_exp1	  = -0.0396721	 (fixed)
+env_pdf_0_13TeV_exp1_sigma_p1	  = 2.63822	 (fixed)
+env_pdf_0_13TeV_exp1_turnon_p1	  = 100.355	 (fixed)
+env_pdf_0_13TeV_exp3_cp1_exp3	  = 0.172319	 (fixed)
+env_pdf_0_13TeV_exp3_cp3_exp3	  = 0.191131	 (fixed)
+env_pdf_0_13TeV_exp3_p1_exp3	  = -0.0415255	 (fixed)
+env_pdf_0_13TeV_exp3_p3_exp3	  = -0.0415261	 (fixed)
+env_pdf_0_13TeV_exp3_sigma_p3	  = 3.99999	 (fixed)
+env_pdf_0_13TeV_exp3_turnon_p3	  = 100.81	 (fixed)
+env_pdf_0_13TeV_lau1_cp1_lau1	  = 4.64475e-10	 (fixed)
+env_pdf_0_13TeV_lau1_cp2_lau1	  = 0.724008	 (fixed)
+env_pdf_0_13TeV_lau1_sigma_p1	  = 4.99999	 (fixed)
+env_pdf_0_13TeV_lau1_turnon_p1	  = 100.988	 (fixed)
+lumi_13TeV_Correlated	  = 0.000486712	 +/-  1
+lumi_13TeV_Correlated_1718	  = -3.96898e-05	 +/-  1
+lumi_13TeV_Uncorrelated_16	  = -8.9151e-05	 +/-  0.999999
+lumi_13TeV_Uncorrelated_16APV	  = -0.000109311	 +/-  1
+lumi_13TeV_Uncorrelated_17	  = -0.00039324	 +/-  0.999998
+lumi_13TeV_Uncorrelated_18	  = 0.000589429	 +/-  1
+r	  = 0.0248443	 +/-  0.0223291	(limited)
+shapeBkg_bkg_mass_cat0_13TeV__norm	  = 264.188	 +/-  17.4594	(limited)
+step_b3	  = 100	 +/-  10.9179	(limited)
+Done the full fit in 0.016968
+  [WARNING] Found [env_pdf_0_13TeV_bern3_sigma_b3] at boundary. 
+       RooRealVar::env_pdf_0_13TeV_bern3_sigma_b3 = 5 +/- 2.77637  L(1 - 5) 
+  [WARNING] Found [step_b3] at boundary. 
+       RooRealVar::step_b3 = 100 +/- 10.9179  L(100 - 115) 
+ [WARNING] After the fit some parameters are at their boundary.
+ [WARNING] Are you sure your model is correct?
+Minimized in : Real time 0:00:00, CP time 0.650
+FINAL NLL - NLL0 VALUE = -0.2681266871
+FINAL CATEGORIES: pdfindex_0_13TeV=0
+
+ --- MultiDimFit ---
+best fit parameter values: 
+   r :    +0.025
+Done in 0.01 min (cpu), 0.01 min (real)

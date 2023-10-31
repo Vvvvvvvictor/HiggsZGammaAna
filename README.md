@@ -198,3 +198,52 @@ After setting up three environment(HiggsDNA, machine learning and spurial signal
 ```
 source setup.sh
 ```
+
+## Final Fit
+### Setup environment
+**1.Setup CMSSW environment**
+```
+export SCRAM_ARCH=slc7_amd64_gcc700
+cmsrel CMSSW_10_2_13
+cd CMSSW_10_2_13/src
+cmsenv
+```
+
+**2.Install dependency package**
+```
+git clone https://github.com/jonathon-langford/HiggsAnalysis.git
+git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
+cd HiggsAnalysis/CombinedLimit
+git fetch origin
+git checkout v8.2.0
+```
+
+**3.Compile dependency package**
+```
+cd ../
+scramv1 b clean; scramv1 b
+```
+
+**4.Install Flashgg Final Fit package**
+```
+cd final_fit/
+mv flashggFinalFit CMSSW_10_2_13/src
+```
+setup CMSSW environment
+```
+cd CMSSW_10_2_13/src
+cmsenv
+cd flashggFinalFit/
+```
+
+```
+cd Signal
+make clean
+make
+```
+
+```
+cd Background
+make clean
+make
+```

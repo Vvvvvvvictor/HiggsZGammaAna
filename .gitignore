@@ -1,19 +1,25 @@
-# My personal things
+# My personal thing
+*bin
+*.eps
+*.png
+*.pdf
+*.jpg
+*.root
+*.dat
 */outputs/
 */*ntuples*/
 */plots/
 */skimmed_ntuple
-*/test*
 *test*
-test.pdf
-SSTest/CMSSW_11_3_4
-*/models/
+*/pic
+*/models
 */eos*/
 */x509*
 HiggsDNA/jiehan.cc
 HiggsDNA/core*
 SSTest/bkg*
-
+*.__afs*
+*/CMSSW*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
