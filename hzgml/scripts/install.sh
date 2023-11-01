@@ -1,6 +1,5 @@
 # include ROOT
-pythonpath=/eos/user/j/jiehan/hzgmlenv_test
-source "$pythonpath/bin/activate"
+source /eos/user/j/jiehan/hzgmlenv_test/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 
