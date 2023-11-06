@@ -419,6 +419,7 @@ def main():
         'Z_sublead_lepton_charge', 'Z_sublead_lepton_id',
         'gamma_pt', 'gamma_eta', 'gamma_phi', 'gamma_mass',
         'gamma_mvaID', 'gamma_energyErr',
+        "gamma_fsr_pt","gamma_fsr_eta","gamma_fsr_phi","gamma_fsr_mass","gamma_fsr_clean",
         'jet_1_pt', 'jet_1_eta', 'jet_1_phi', 'jet_1_mass', 'jet_1_btagDeepFlavB',
         'jet_2_pt', 'jet_2_eta', 'jet_2_phi', 'jet_2_mass', 'jet_2_btagDeepFlavB',
         'n_jets', 'n_leptons', 'n_electrons', 'n_muons', 'n_iso_photons',
@@ -440,19 +441,19 @@ def main():
     initial_events += data.shape[0]
     #data = preprocess(data)
     data = preselect(data) #TODO add cutflow
-    data = decorate(data)
+    #data = decorate(data)
     final_events += data.shape[0]
     data_zero_jet = data[(data.n_jets == 0) & (data.n_leptons < 3)]
     data_one_jet = data[(data.n_jets == 1) & (data.n_leptons < 3)]
     data_two_jet = data[(data.n_jets >= 2) & (data.n_leptons < 3)]
     data_zero_to_one_jet = data[(data.n_jets < 2) & (data.n_leptons < 3)]
     data_VH_ttH =  data[data.n_leptons >= 3]
-    data.to_root(args.output, key='inclusive', mode='a', index=False)
-    data_zero_jet.to_root(args.output, key='zero_jet', mode='a', index=False)
-    data_one_jet.to_root(args.output, key='one_jet', mode='a', index=False)
-    data_zero_to_one_jet.to_root(args.output, key='zero_to_one_jet', mode='a', index=False)
-    data_two_jet.to_root(args.output, key='two_jet', mode='a', index=False)
-    data_VH_ttH.to_root(args.output, key='VH_ttH', mode='a', index=False)
+    #data.to_root(args.output, key='inclusive', mode='a', index=False)
+    #data_zero_jet.to_root(args.output, key='zero_jet', mode='a', index=False)
+    #data_one_jet.to_root(args.output, key='one_jet', mode='a', index=False)
+    #data_zero_to_one_jet.to_root(args.output, key='zero_to_one_jet', mode='a', index=False)
+    #data_two_jet.to_root(args.output, key='two_jet', mode='a', index=False)
+    #data_VH_ttH.to_root(args.output, key='VH_ttH', mode='a', index=False)
 
     meta_data = pd.DataFrame({'initial_events': [initial_events], 'final_events': [final_events]})
     meta_data.to_root(args.output, key='MetaData', mode='a', index=False)

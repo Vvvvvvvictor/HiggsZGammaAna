@@ -19,15 +19,13 @@
         }
     ],
     "systematics": {
-        "weights": {
-            
-        },
+        "weights": {},
         "independent_collections": {}
     },
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "ggH_M125", "VBFH_M125", "WplusH_M125", "WminusH_M125", "ZH_M125", "ttH_M125"
+            "ggH_M125"
         ],
         "years": [
             "2017"
@@ -54,6 +52,10 @@
         "Z_sublead_lepton_mass",
         "Z_sublead_lepton_charge",
         "Z_sublead_lepton_id",
+        "Z_fsr_pt",
+        "Z_fsr_eta",
+        "Z_fsr_phi",
+        "Z_fsr_mass",
         "gamma_pt",
         "gamma_eta",
         "gamma_phi",
@@ -68,6 +70,11 @@
         "gamma_genPartFlav",
         "gamma_mvaID_WP80",
         "gamma_mvaID_WPL",
+        "gamma_fsr_pt",
+        "gamma_fsr_eta",
+        "gamma_fsr_phi",
+        "gamma_fsr_mass",
+        "gamma_fsr_clean",
         "jet_1_pt",
         "jet_1_eta",
         "jet_1_phi",
@@ -157,6 +164,7 @@
         "Muon_mediumId",
         "Muon_looseId",
         "Muon_highPtId",
+        "Muon_fsrPhotonIdx",
         "Electron_pt",
         "Electron_eta",
         "Electron_deltaEtaSC",
@@ -170,6 +178,14 @@
         "Electron_mvaFall17V2noIso_WP90",
         "Electron_mvaFall17V2Iso_WP80",
         "Electron_mvaFall17V2Iso_WPL",
+        "FsrPhoton_dROverEt2",
+        "FsrPhoton_electronIdx",
+        "FsrPhoton_eta",
+        "FsrPhoton_muonIdx",
+        "FsrPhoton_phi",
+        "FsrPhoton_pt",
+        "FsrPhoton_relIso03",
+        "nFsrPhoton",
         "Jet_pt",
         "Jet_eta",
         "Jet_phi",

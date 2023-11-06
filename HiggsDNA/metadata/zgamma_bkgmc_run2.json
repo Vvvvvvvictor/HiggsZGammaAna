@@ -6,10 +6,10 @@
     },
     "tag_sequence": [
         {
-            "module_name": "higgs_dna.taggers.zgamma_tagger_dy",
-            "tagger": "ZGammaTaggerDY",
+            "module_name": "higgs_dna.taggers.zgamma_tagger_MC_run2",
+            "tagger": "ZGammaTaggerMCRun2",
             "kwargs": {
-                "name": "zgamma_tagger_dy",
+                "name": "zgamma_tagger_MC_run2",
                 "options": {
                     "gen_info": {
                         "calculate": true
@@ -25,8 +25,15 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "DYJetsToLL",
-            "DYJetsToLL_amc"
+            "ZG2JToG2L2J",
+            "ZGToLLG",
+            "TT",
+            "LLAJJ",
+            "TTGJets",
+            "TGJets",
+            "WW",
+            "WZ",
+            "ZZ"
         ],
         "years": [
             "2017"
