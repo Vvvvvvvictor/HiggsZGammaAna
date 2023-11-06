@@ -1,0 +1,15 @@
+ggh_cat0__rv_13TeV --> & mh 120 & mh 125 & mh 130 \ 
+ggh_cat0__rv_13TeV dm0 & -2.00603 & -1.95603 & -1.90603 \ 
+ggh_cat0__rv_13TeV sigma0 & 2.43748 & 2.48748 & 2.53748 \ 
+ggh_cat0__rv_13TeV dm1 & -0.3172 & -0.2672 & -0.2172 \ 
+ggh_cat0__rv_13TeV sigma1 & 1.4026 & 1.40734 & 1.41208 \ 
+ggh_cat0__rv_13TeVcoeff0 & 0.357142 & 0.384642 & 0.412142 \ 
+ggh_cat0__rv_13TeV dm2 & -2.09193 & -2.14193 & -2.19193 \ 
+ggh_cat0__rv_13TeV sigma2 & 6.49193 & 6.54193 & 6.59193 \ 
+ggh_cat0__rv_13TeVcoeff1 & 0.736199 & 0.763699 & 0.791199 \ 
+ggh_cat0__rv_13TeV dm3 & -2.30807 & -2.25807 & -2.20807 \ 
+ggh_cat0__rv_13TeV sigma3 & 6.49183 & 6.54183 & 6.59183 \ 
+ggh_cat0__rv_13TeVcoeff2 & 1.79196e-57 & 1.06504e-28 & 0.00656374 \ 
+ggh_cat0__wv_13TeV --> & mh 120 & mh 125 & mh 130 \ 
+ggh_cat0__wv_13TeV dm0 & -1.01967 & -0.969672 & -0.919672 \ 
+ggh_cat0__wv_13TeV sigma0 & 2.89193 & 2.94193 & 2.99193 \ 

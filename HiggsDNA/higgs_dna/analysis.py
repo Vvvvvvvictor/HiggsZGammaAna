@@ -52,8 +52,7 @@ def run_analysis(config):
 
     ### 1. Load events ###
     t_start_load = time.time()
-    #events, sum_weights = AnalysisManager.load_events(config["files"], config["branches"])
-    events, sum_weights = AnalysisManager.load_events(config["files"], config)
+    events, sum_weights = AnalysisManager.load_events(config["files"], config["branches"], config["sample"]["is_data"])
 
     # Optional branch mapping in case you have different naming schemes, e.g. you want MET_T1smear_pt to be recast as MET_pt
     # Can be separate for data and MC
@@ -486,7 +485,7 @@ class AnalysisManager():
     #  **get_file_handler(file),
 
     @staticmethod
-    def load_events(files, config):
+    def load_events(files, branches, is_data):
         """
         Load all branches in ``branches`` from "Events" tree from all nanoAODs in ``files`` into a single zipped ``awkward.Array``.
         Also calculates and returns the sum of weights from nanoAOD "Runs" tree.        
@@ -500,7 +499,6 @@ class AnalysisManager():
         """
         events = []
         sum_weights = 0
-        branches = config["branches"]
         for file in files:
             with uproot.open(file, timeout = 500) as f:
                 runs = f["Runs"]
@@ -511,7 +509,7 @@ class AnalysisManager():
                 tree = f["Events"]
 
                 # Get events that is not duplicated
-                if config["sample"]["is_data"]:
+                if is_data:
                     duplicated_sample_remover = DuplicatedSamplesTagger(is_data=True)
                     duplicated_remove_cut = duplicated_sample_remover.calculate_selection(file, tree)
 

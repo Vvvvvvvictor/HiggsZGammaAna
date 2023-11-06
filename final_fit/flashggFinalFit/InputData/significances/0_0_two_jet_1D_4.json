@@ -1,0 +1,5 @@
+{"boundaries": [[1, 30, 58, 74]], "boundaries_values": [[0.0, 0.29, 0.57, 0.73]], "smax": 0.4437978589252218, "significance": 0.44392015863928314, "Delta_significance": 0.022793338951430177, "nscan": 100, "transform": true, "floatB": false, "nfold": 1, "minN": 10, "fine_tuned": false, "variable": "bdt", "estimate": "fullSimrw"}0.0931
+0.1675
+0.1694
+0.3628
+0.4439

@@ -4,7 +4,7 @@
               "train_variables": ["Z_cos_theta", "lep_phi","lep_cos_theta",
                                   "Z_lead_lepton_eta", "Z_sublead_lepton_eta",
                                   "gamma_eta", "l1g_deltaR", "l2g_deltaR",
-                                  "H_ptt", "gamma_mvaID"],
+                                  "H_ptt", "gamma_mvaID", "gamma_ptRelErr"],
               "preselections": ["H_mass >= 100", "H_mass <= 180"],
               "signal_preselections": ["is_center == 1"],
               "background_preselections": ["is_center == 0"],
@@ -59,9 +59,9 @@
               },
  "two_jet":  {"#+preselections": ["n_jets >= 2"],
               "inputTree": "two_jet",
-              "+train_variables": ["delta_eta_jj", "delta_phi_zgjj", "pt_balance", "pt_balance_0j",
-				                   "delta_phi_jj", "photon_zeppenfeld", "jet_1_pt", "jet_2_pt", "jet1G_deltaR", "jet2G_deltaR",
-                                   "mass_jj", "n_jets", "gamma_ptRelErr"
+              "+train_variables": ["delta_eta_jj", "delta_phi_zgjj", "pt_balance",
+				                   "delta_phi_jj", "photon_zeppenfeld", 
+                                   "jet_1_pt", "jet_2_pt", "jet1G_deltaR", "jet2G_deltaR"
                                    ],
               "params": [{"silent": 1, "eval_metric": ["logloss", "auc"], "grow_policy": "lossguide", "nthread": 4, "objective": "binary:logistic", "tree_method": "hist", "booster": "gbtree"},
                          {"silent": 1, "eval_metric": ["logloss", "auc"], "grow_policy": "lossguide", "nthread": 4, "objective": "binary:logistic", "tree_method": "hist", "booster": "gbtree"},
@@ -73,8 +73,7 @@
               "#+preselections": ["n_jets >= 2"],
               "inputTree": "two_jet",
               "+train_variables": ["delta_eta_jj", "delta_phi_zgjj", "pt_balance", "pt_balance_0j",
-                                    "delta_phi_jj", "photon_zeppenfeld", "jet_1_pt", "jet_2_pt", "jet1G_deltaR", "jet2G_deltaR",
-                                    "mass_jj", "n_jets", "gamma_ptRelErr"
+                                    "delta_phi_jj", "photon_zeppenfeld", "jet_1_pt", "jet_2_pt", "jet1G_deltaR", "jet2G_deltaR"
                                    ],
               "params": [{"silent": 1, "eval_metric": ["logloss", "auc"], "grow_policy": "lossguide", "nthread": 4, "objective": "binary:logistic", "tree_method": "hist", "booster": "gbtree"},
                          {"silent": 1, "eval_metric": ["logloss", "auc"], "grow_policy": "lossguide", "nthread": 4, "objective": "binary:logistic", "tree_method": "hist", "booster": "gbtree"},

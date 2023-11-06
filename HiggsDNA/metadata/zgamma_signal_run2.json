@@ -115,6 +115,7 @@
         "n_leptons",
         "n_electrons",
         "n_muons",
+        "n_iso_photons",
         "MET_pt",
         "MET_phi",
         "weight_central",
