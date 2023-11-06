@@ -225,6 +225,12 @@ class XGBoostHandler(object):
                 data = data[eval(p)]
             for p in self.mc_preselections:
                 data = data[eval(p)]
+        elif sample == 'DYJetsToLL':
+            data = data[data.n_iso_photons==0]
+            for p in self.background_preselections:
+                data = data[eval(p)]
+            for p in self.mc_preselections:
+                data = data[eval(p)]
         for p in self.preselections:
             data = data[eval(p)]
 
@@ -255,11 +261,19 @@ class XGBoostHandler(object):
 
         print('----------------------------------------------------------')
         if bkg_mc_list:
-            for bkg in bkg_mc_list: print('XGB INFO: Adding mc background sample: ', bkg)
-            #TODO put this to the config
-            for data in tqdm(read_root(sorted(bkg_mc_list), key=self.inputTree, columns=self._mc_branches, chunksize=self._chunksize), desc='XGB INFO: Loading training backgrounds', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
-                data = self.preselect(data, 'mc_background')
-                self.m_data_bkg = self.m_data_bkg.append(data, ignore_index=True)
+            for bkg in bkg_mc_list:
+                print('XGB INFO: Adding mc background sample: ', bkg)
+                #TODO put this to the config
+                if "DY" in bkg:
+                    branches = self._mc_branches + ["n_iso_photons"]
+                else: 
+                    branches = self._mc_branches
+                for data in tqdm(read_root(bkg, key=self.inputTree, columns=branches, chunksize=self._chunksize), desc='XGB INFO: Loading training backgrounds', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
+                    if "DY" in bkg:
+                        data = self.preselect(data, 'DYJetsToLL')
+                    else:
+                        data = self.preselect(data, 'mc_background')
+                    self.m_data_bkg = self.m_data_bkg.append(data, ignore_index=True)
         
         print('----------------------------------------------------------')
         if bkg_dd_list:

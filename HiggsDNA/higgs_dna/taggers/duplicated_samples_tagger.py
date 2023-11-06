@@ -21,7 +21,7 @@ class DuplicatedSamplesTagger(Tagger):
 
         if not self.is_data:
             logger.exception("[DuplicatedSamplesTagger : __init__] Only need to remove duplicated events in data.")
-            raise RuntimeError
+            # raise RuntimeError
 
         self.input = INPUT
     
@@ -30,6 +30,9 @@ class DuplicatedSamplesTagger(Tagger):
         hlt_branch = [x for x in self.input if x in tree.keys()]
         hlt_branch.append("run")
         data = tree.arrays(hlt_branch, library='ak', how='zip')
+
+        if not self.is_data:
+            return data.HLT_IsoMu20>=0
 
         # Only use specific events in different NanoAOD
         if "/DoubleMuon/" in file or "/SingleMuon/" in file or "/Muon/" in file:
