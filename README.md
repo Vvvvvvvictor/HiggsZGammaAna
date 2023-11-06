@@ -67,7 +67,13 @@ You can find the name of variables in NanoAOD in [this link](https://cms-nanoaod
 
 Need another envirenment, you can set up it through these codes:
 ```
-cd HiggsZGammaAna/hzgml
+source /cvmfs/sft.cern.ch/lcg/views/LCG_100/x86_64-centos7-gcc9-opt/setup.sh
+python3 -m venv /eos/(your dir)/hzgmlenv
+```
+
+You MUST make a new teminal window for the following steps, please change the `source /eos/(your dir)/hzgmlenv/bin/activate` in `scripts/install.sh`
+```
+cd HiggsZGammaAna/hzgml/
 source scripts/install.sh
 ```
 
