@@ -26,17 +26,11 @@ DEFAULT_OPTIONS = {
             [1.566, 2.5]
         ],
         "mvaID_barrel" : -0.4,
-        "mvaID_endcap" : -0.59,
+        "mvaID_endcap" : -0.58,
         "e_veto" : 0.5
     },
-    "FSRphotons" : {
-        "iso" : 1.8,
-        "eta" : 2.4,
-        "pt" : 2.0,
-        "dROverEt2" : 0.012
-    },
     "zgammas" : {
-        "relative_pt_gamma" : 0.136363636364,
+        "relative_pt_gamma" : 0.1363636,
         "mass_h" : [100., 180.],
         "mass_sum" : 185,
         "select_highest_pt_sum" : True
@@ -45,9 +39,10 @@ DEFAULT_OPTIONS = {
         "2016" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8"],
         "2016UL_preVFP" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8"],
         "2016UL_postVFP" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8"],
-        "2017" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8"],
-        "2018" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8"]
-    },
+        "2017" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8", "HLT_Ele30_WPTight_Gsf", "HLT_Ele32_WPTight_Gsf", "HLT_Ele35_WPTight_Gsf", "HLT_IsoMu24", "HLT_IsoMu27"],
+        "2018" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8"],
+        "2022" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8", "HLT_Ele30_WPTight_Gsf", "HLT_Ele32_WPTight_Gsf", "HLT_Ele35_WPTight_Gsf", "HLT_IsoMu24", "HLT_IsoMu27", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ",  "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL"]
+    }, 
     "electrons" : {
         "pt" : 7.0
     },
@@ -61,6 +56,12 @@ DEFAULT_OPTIONS = {
         "dr_electrons" : 0.4,
         "dr_muons" : 0.4,
     },
+    "FSRphotons" : {
+        "iso" : 1.8,
+        "eta" : 2.4,
+        "pt" : 2.0,
+        "dROverEt2" : 0.012
+    },
     "gen_info" : {
         "calculate" : False,
         "max_dr" : 0.2,
@@ -72,9 +73,9 @@ DEFAULT_OPTIONS = {
 # Diphoton preselection below synced with flashgg, see details in:
 #   - https://indico.cern.ch/event/1071721/contributions/4551056/attachments/2320292/3950844/HiggsDNA_DiphotonPreselectionAndSystematics_30Sep2021.pdf
 
-class ZGammaTaggerBkgmc(Tagger):
+class ZGammaTaggerMCRun2(Tagger):
     def __init__(self, name = "default_zgamma_tagger", options = {}, is_data = None, year = None):
-        super(ZGammaTaggerBkgmc, self).__init__(name, options, is_data, year)
+        super(ZGammaTaggerMCRun2, self).__init__(name, options, is_data, year)
 
         if not options:
             self.options = DEFAULT_OPTIONS
@@ -104,17 +105,11 @@ class ZGammaTaggerBkgmc(Tagger):
         else:
             rho = awkward.ones_like(events.Photon)
 
-        photon_selection = self.select_photons(
-                photons = events.Photon,
-                rho = rho,
-                options = self.options["photons"]
-        )
-
         self.overlap_removal(events=events)
 
         zgamma_selection, zgammas = self.produce_and_select_zgammas(
                 events = events,
-                photons = events.Photon[photon_selection],
+                rho = rho,
                 options = self.options["zgammas"]
         )
 
@@ -122,7 +117,6 @@ class ZGammaTaggerBkgmc(Tagger):
             zgammas = self.calculate_gen_info(zgammas, self.options["gen_info"])
 
         return zgamma_selection, zgammas 
-
 
     def overlap_removal(self, events):
         """
@@ -148,8 +142,7 @@ class ZGammaTaggerBkgmc(Tagger):
         n_iso_photons = awkward.num(iso_photons)
         awkward_utils.add_field(events, "n_iso_photons", n_iso_photons, overwrite=True)
 
-
-    def produce_and_select_zgammas(self, events, photons, options):
+    def produce_and_select_zgammas(self, events, rho, options):
         """
         Perform diphoton preselection.
         For events with more than 2 photons, more than 1 diphoton candidate
@@ -199,6 +192,22 @@ class ZGammaTaggerBkgmc(Tagger):
             data = events.Muon[muon_cut]
         )
 
+        # Photons
+        photon_selection = self.select_photons(
+                photons = events.Photon,
+                rho = rho,
+                options = self.options["photons"]
+        )
+
+        photons = events.Photon[photon_selection]
+        
+        print(awkward.num(photons))
+        
+        # lepton-photon overlap removal 
+        clean_photon_mask = object_selections.delta_R(photons, muons, 0.4) & object_selections.delta_R(photons, electrons, 0.4)
+        photons = photons[clean_photon_mask]
+        print(awkward.num(photons))
+
         # Jets
         jet_cut = jet_selections.select_jets(
             jets = events.Jet,
@@ -227,14 +236,12 @@ class ZGammaTaggerBkgmc(Tagger):
             data = events.Jet[jet_cut]
         )
 
-        # FSR photons
         FSRphoton_selection = self.select_FSRphotons(
                 FSRphotons = events.FsrPhoton,
                 electrons = electrons,
                 photons = photons,
                 options = self.options["FSRphotons"]
         )
-
         FSRphotons = awkward_utils.add_field(
             events = events,
             name = "SelectedFSRPhotons",
@@ -253,20 +260,20 @@ class ZGammaTaggerBkgmc(Tagger):
             )
 
         n_electrons = awkward.num(electrons)
+        N_e_cut = n_electrons>=2
         awkward_utils.add_field(events, "n_electrons", n_electrons, overwrite=True)
 
         n_muons = awkward.num(muons)
+        N_mu_cut = n_muons>=2
         awkward_utils.add_field(events, "n_muons", n_muons, overwrite=True)
 
         n_leptons = n_electrons + n_muons
+        N_e_mu_cut = N_e_cut | N_mu_cut
         awkward_utils.add_field(events, "n_leptons", n_leptons, overwrite=True)
 
         n_jets = awkward.num(jets)
         awkward_utils.add_field(events, "n_jets", n_jets, overwrite=True)
 
-        # lepton-photon overlap removal 
-        clean_photon_mask = object_selections.delta_R(photons, muons, 0.4) & object_selections.delta_R(photons, electrons, 0.4)
-        photons = photons[clean_photon_mask]
 
         # PDG ID
         electrons = awkward.with_field(electrons, awkward.ones_like(electrons.pt) * 11, "id")
@@ -279,48 +286,50 @@ class ZGammaTaggerBkgmc(Tagger):
 
         # self.select_fake_and_medium_photons(events=events, photons=photons)
 
+        # Make trigger cuts 
+        if self.year is not None:
+            trigger_cut = awkward.num(events.Photon) < 0 # dummy cut, all False
+            for hlt in self.options["trigger"][self.year]: # logical OR of all triggers
+                if hasattr(events, hlt):
+                    trigger_cut = (trigger_cut) | (events[hlt] == True)
+        else:
+            trigger_cut = awkward.num(events.Photon) >= 0 # dummy cut, all True
+
         # Register as `vector.Momentum4D` objects so we can do four-vector operations with them
         photons = awkward.Array(photons, with_name = "Momentum4D")
         electrons = awkward.Array(electrons, with_name = "Momentum4D")
         muons = awkward.Array(muons, with_name = "Momentum4D")
         FSRphotons = awkward.Array(FSRphotons, with_name = "Momentum4D")
 
-        #obj1 = awkward.unflatten(FSRphotons, counts = 1, axis = -1) # shape [n_events, n_obj, 1]
-        #obj2 = awkward.unflatten(muons, counts = 1, axis = 0)
-        #obj3 = awkward.unflatten(electrons, counts = 1, axis = 0)
-        #obj4 = awkward.unflatten(photons, counts = 1, axis = 0)
-        #dR1 = obj1.deltaR(obj2)
-        #dR2 = obj1.deltaR(obj3)
-        #dR3 = obj1.deltaR(obj4)
-        #print(dR1)
-        #for i in range(len(FSRphotons.muonIdx)):
-        #    if len(FSRphotons.muonIdx[i]) == 0 : continue
-        #    print(FSRphotons.muonIdx[i], "FSRPhoton pt, eta, phi:", FSRphotons.pt[i], FSRphotons.eta[i], FSRphotons.phi[i], "muon pt, eta, phi:", muons.pt[i], muons.eta[i], muons.phi[i], "electron pt, eta, phi:", electrons.pt[i], "dR(fsr, muons):", dR1[i],dR2[i],dR3[i],"photon pt:",photons.pt[i],"clean:",clean_FSRphoton_mask[i])
-        #    if i > 10000: break
-
+        #awkward_utils.add_field(events, "gamma_fsr_pt",  awkward.fill_none(FSRphotons.pt, DUMMY_VALUE))
         
         # Construct di-electron/di-muon pairs
         ee_pairs = awkward.combinations(electrons, 2, fields = ["LeadLepton", "SubleadLepton"])
-        ee_cut = (ee_pairs.LeadLepton.pt > 25) & (ee_pairs.SubleadLepton.pt > 15)
-        ee_pairs = ee_pairs[ee_cut]
+        ee_cut1 = ee_pairs.LeadLepton.pt > 25
+        ee_cut2 = ee_pairs.SubleadLepton.pt > 15
+        ee_pairs = ee_pairs[ee_cut1&ee_cut2]
+        ee_cut1 = awkward.sum(ee_cut1, axis=1) >= 1
+        ee_cut2 = awkward.sum(ee_cut2, axis=1) >= 1
 
         mm_pairs = awkward.combinations(muons, 2, fields = ["LeadLepton", "SubleadLepton"])
-        mm_cut = (mm_pairs.LeadLepton.pt > 20) & (mm_pairs.SubleadLepton.pt > 10)
-        mm_pairs = mm_pairs[mm_cut]
+        mm_cut1 = mm_pairs.LeadLepton.pt > 25
+        mm_cut2 = mm_pairs.SubleadLepton.pt > 15
+        mm_pairs = mm_pairs[mm_cut1&mm_cut2]
+        mm_cut1 = awkward.sum(mm_cut1, axis=1) >= 1
+        mm_cut2 = awkward.sum(mm_cut2, axis=1) >= 1
 
         # Concatenate these together
         z_cands = awkward.concatenate([ee_pairs, mm_pairs], axis = 1)
         z_cands["ZCand"] = z_cands.LeadLepton + z_cands.SubleadLepton # these add as 4-vectors since we registered them as "Momentum4D" objects
 
-
         # Make Z candidate-level cuts
         os_cut = z_cands.LeadLepton.charge * z_cands.SubleadLepton.charge == -1
-        mass_cut = (z_cands.ZCand.mass > 50.)
+        mass_cut = (z_cands.ZCand.mass > 80.) & (z_cands.ZCand.mass < 100.)
         z_cut = os_cut & mass_cut
         z_cands = z_cands[z_cut] # OSSF lepton pairs with m_ll > 50.
         
         has_z_cand = awkward.num(z_cands) >= 1
-        z_cands = z_cands[awkward.argsort(abs(z_cands.ZCand.mass - 91.), axis = 1)] # take the one with mass closest to mZ
+        z_cands = z_cands[awkward.argsort(abs(z_cands.ZCand.mass - 91.1876), axis = 1)] # take the one with mass closest to mZ
         z_cand = awkward.firsts(z_cands)
 
         # Add Z-related fields to array
@@ -344,20 +353,25 @@ class ZGammaTaggerBkgmc(Tagger):
 
         # Make gamma candidate-level cuts
         has_gamma_cand = awkward.num(photons) >= 1
+        print(has_gamma_cand)
         gamma_cand = awkward.firsts(photons)
         gamma_mvaID_WPL = ((gamma_cand.isScEtaEB & (gamma_cand.mvaID > self.options["photons"]["mvaID_barrel"])) | (gamma_cand.isScEtaEE & (gamma_cand.mvaID > self.options["photons"]["mvaID_endcap"])))
 
+        awkward_utils.add_field(gamma_cand, "mass", awkward.ones_like(gamma_cand.pt) * 0) #TODO: run3 BUG
 
         # Add gamma-related fields to array
-        for field in ["pt", "eta", "phi", "mass", "mvaID", "energyErr", "sieie", "hoe", "r9", "genPartFlav", "mvaID_WP80"]:
+        for field in ["pt", "eta", "phi", "mass", "mvaID", "energyErr", "sieie", "hoe", "r9", "mvaID_WP80"]:
             awkward_utils.add_field(
                 events,
                 "gamma_%s" % field,
                 awkward.fill_none(getattr(gamma_cand, field), DUMMY_VALUE)
             )
         awkward_utils.add_field(events, "gamma_mvaID_WPL",  gamma_mvaID_WPL)
-        awkward_utils.add_field(events, "gamma_chiso",  gamma_cand.pfRelIso03_chg)
-        awkward_utils.add_field(events, "gamma_alliso",  gamma_cand.pfRelIso03_all)
+        awkward_utils.add_field(events, "gamma_chiso",  gamma_cand.pfRelIso03_chg) #run2
+        awkward_utils.add_field(events, "gamma_alliso",  gamma_cand.pfRelIso03_all) #run2
+        # awkward_utils.add_field(events, "gamma_chiso",  gamma_cand.pfRelIso03_chg_quadratic) #run3
+        # awkward_utils.add_field(events, "gamma_alliso",  gamma_cand.pfRelIso03_all_quadratic) #run3
+        #awkward_utils.add_field(events, "gamma_mvaID_17",  gamma_cand.mvaID_Fall17V2) #run3
 
         # Make Higgs candidate-level cuts
         h_cand = (z_cand.ZCand + gamma_cand)
@@ -392,51 +406,71 @@ class ZGammaTaggerBkgmc(Tagger):
                 dummy_value = DUMMY_VALUE
             )
 
-        # Make trigger cuts 
-        if self.year is not None:
-            trigger_cut = awkward.num(events.Photon) < 0 # dummy cut, all False
-            for hlt in self.options["trigger"][self.year]: # logical OR of all triggers
-                if hasattr(events, hlt):
-                    trigger_cut = (trigger_cut) | (events[hlt] == True)
-        else:
-            trigger_cut = awkward.num(events.Photon) >= 0 # dummy cut, all True
-
         all_cuts = trigger_cut & has_z_cand & has_gamma_cand & sel_h_1 & sel_h_2 & sel_h_3
 
-        self.register_cuts(
-            names = ["trigger_cut", "has_z_cand", "has_gamma_cand", "sel_h_1", "sel_h_2", "sel_h_3", "all cuts"],
-            results = [trigger_cut, has_z_cand, has_gamma_cand, sel_h_1, sel_h_2, sel_h_3, all_cuts],
-            cut_type = "zgammas"
-        )
+        for cut_type in ["zgammas", "zgammas_ele", "zgammas_mu", "zgammas_w", "zgammas_ele_w", "zgammas_mu_w"]:
+            if "_w" in cut_type:
+                if hasattr(events, 'genWeight'):
+                    weighted = True
+                else:
+                    continue
+            else:
+                weighted = False
+
+            cut0 = awkward.num(events.Photon) >= 0
+
+            if "ele" in cut_type:
+                cut1 = N_e_cut
+            elif "mu" in cut_type:
+                cut1 = N_mu_cut
+            else:
+                cut1 = N_e_mu_cut
+
+            cut2 = cut1 & trigger_cut
+
+            if "ele" in cut_type:
+                cut3 = cut2 & ee_cut1
+            elif "mu" in cut_type:
+                cut3 = cut2 & mm_cut1
+            else:
+                cut3 = cut2 & (ee_cut1 | mm_cut1)
+
+            if "ele" in cut_type:
+                cut4 = cut3 & ee_cut2
+            elif "mu" in cut_type:
+                cut4 = cut3 & mm_cut2
+            else:
+                cut4 = cut3 & (ee_cut2 | mm_cut2)
+
+            cut5 = cut4 & has_gamma_cand
+
+            cut6 = cut5 & has_z_cand
+
+            cut7 = cut6 & sel_h_1
+
+            cut8 = cut7 & sel_h_2
+
+            cut9 = cut8 & sel_h_3            
+
+            self.register_event_cuts(
+                names = ["all", "N_lep_sel", "trig_cut", "lead_lep_pt_cut", "sub_lep_pt_cut", "has_g_cand", "has_z_cand", "sel_h_1", "sel_h_2", "sel_h_3"],
+                results = [cut0, cut1, cut2, cut3, cut4, cut5, cut6, cut7, cut8, cut9],
+                events = events,
+                cut_type = cut_type,
+                weighted = weighted
+            )
 
         ################## fsr recovery
-        '''
-        clean_FSRphoton_mask = object_selections.delta_R_fsrlep(FSRphotons, z_cand.LeadLepton, 0.001) & object_selections.delta_R_fsrlep(FSRphotons, z_cand.SubleadLepton, 0.001) & object_selections.delta_R_fsrGamma(FSRphotons, gamma_cand, 0.001)
+        #clean_FSRphoton_mask = object_selections.delta_R_fsrlep(FSRphotons, z_cand.LeadLepton, 0.001) & object_selections.delta_R_fsrlep(FSRphotons, z_cand.SubleadLepton, 0.001) & object_selections.delta_R_fsrGamma(FSRphotons, gamma_cand, 0.001)
+        #FSRphotons = FSRphotons[clean_FSRphoton_mask]
         
-        FSRphotons = FSRphotons[clean_FSRphoton_mask]
-        
-        z_cand_fsr = z_cand.ZCand + FSRphotons
-        
-        for field in ["pt", "eta", "phi", "mass"]:
+        FSRphotons = awkward.pad_none(FSRphotons,1)
+        for field in ["pt", "eta", "phi", "mass", "relIso03", "dROverEt2"]:
             awkward_utils.add_field(
-                events,
-                "Z_fsr_%s" % field,
-                awkward.fill_none(getattr(z_cand_fsr, field), DUMMY_VALUE)
+                events = events,
+                name = "gamma_fsr_%s" % field,
+                data = awkward.fill_none(FSRphotons[field][:,0], DUMMY_VALUE)
             )
-        
-
-        obj1 = awkward.unflatten(FSRphotons, counts = 1, axis = -1) # shape [n_events, n_obj, 1]
-        obj2 = awkward.unflatten(z_cand.LeadLepton, counts = 1, axis = 0)
-        obj3 = awkward.unflatten(z_cand.SubleadLepton, counts = 1, axis = 0)
-        obj4 = awkward.unflatten(photons, counts = 1, axis = 0)
-        dR1 = obj1.deltaR(obj2)
-        dR2 = obj1.deltaR(obj3)
-        dR3 = obj1.deltaR(obj4)
-        for i in range(len(z_cand.LeadLepton)):
-            if not all_cuts[i] : continue
-            print("PassAllCuts?:",all_cuts[i],"Lepton id, pt", z_cand.LeadLepton.id[i], z_cand.LeadLepton.pt[i],z_cand.SubleadLepton.pt[i],"FSR photon Idx, pt, eta, phi:",FSRphotons.muonIdx[i], FSRphotons.pt[i], FSRphotons.eta[i], FSRphotons.phi[i], "dR(fsr, lep1), dR(fsr, lep2), dR(fsr, pho):", dR1[i],dR2[i],dR3[i],"photon pt:",photons.pt[i],"Z mass w/o fsr", z_cand.ZCand.mass[i],"clean:",clean_FSRphoton_mask[i])
-            if i > 10000: break
-        '''
 
         elapsed_time = time.time() - start
         logger.debug("[ZGammaTagger] %s, syst variation : %s, total time to execute select_zgammas: %.6f s" % (self.name, self.current_syst, elapsed_time))
@@ -463,7 +497,7 @@ class ZGammaTaggerBkgmc(Tagger):
     #     # select control photons that don't pass the full ID but pass ID that one of cut inverted, which means this cut is inverted
     #     # also the fake photon enriched region
     #     # use photon_selection to identified the type of events
-    #     medium_and_control_cut = ((bitmap & mask1) == mask1) | ((bitmap & (mask2 + (3<<12))) == mask2) | ((bitmap & (mask3 + (3<<10))) == mask3) | ((bitmap & mask6) == mask6)
+    #     medium_and_control_cut = ((bitmap & mask1) == mask1) | ((bitmap & (mask2 + (3<<12))) == mask2) | ((bitmap & (mask3 + (3<<10))) == mask3) | ((bitmap & (mask4 + (3<<8))) == mask4) | ((bitmap & mask6) == mask6)
     #     selected_medium_or_control_photons = photons[medium_and_control_cut] # append the medium and control photons
 
     #     pass_selection1 = awkward.num(selected_medium_or_control_photons) >= 1  # select medium and control photons without fake photon
@@ -479,7 +513,7 @@ class ZGammaTaggerBkgmc(Tagger):
     #         (((bitmap & (mask4 + (3<<8))) == mask4) << 3) + 
     #         (((bitmap & (mask5 + (3<<6))) == mask5) << 4) + 
     #         (((bitmap & mask5) == mask5) << 5) + 
-    #         (((bitmap & mask6 == mask6) & ((bitmap & mask5) != mask5)) << 6)
+    #         ((((bitmap & mask6) == mask6) & ((bitmap & mask5) != mask5)) << 6)
     #     )
     #     awkward_utils.add_field(events, "photon_selection", awkward.fill_none(photon_selection, -1))
     #     #pass_selection1 && photon_selection==1 or 5 or 7 -> build ture template from MC and data template from data
@@ -495,23 +529,7 @@ class ZGammaTaggerBkgmc(Tagger):
     #             awkward.fill_none(getattr(med_cand, field), DUMMY_VALUE)
     #         )
     #     awkward_utils.add_field(events, "photon_chiso",  awkward.fill_none(med_cand.pfRelIso03_chg, DUMMY_VALUE))
-
-    #     isprompt_mask = (1 << 0)  #isPrompt
-    #     isdirectprompttaudecayproduct_mask = (1 << 5)  #isDirectPromptTauDecayProduct
-    #     isfromhardprocess_mask = (1 << 8)  #isPrompt
-
-    #     if hasattr(events, 'nGenPart') and hasattr(med_cand,'genPartIdx'):
-    #         match_gen = awkward.local_index(events.GenPart, axis=1) == med_cand.genPartIdx
-
-    #         genpart_cut = (events.GenPart.pt > 5) & (abs(events.GenPart.pdgId) == 22) 
-    #         photon_isprompt = (med_cand.genPartIdx >=0) &  ((events.GenPart[match_gen].statusFlags & isprompt_mask == isprompt_mask) | (events.GenPart[match_gen].statusFlags & isdirectprompttaudecayproduct_mask == isdirectprompttaudecayproduct_mask) | (events.GenPart[match_gen].statusFlags & isfromhardprocess_mask == isfromhardprocess_mask)) & (awkward.sum(~object_selections.delta_R(events.GenPart[genpart_cut], med_cand, 0.3), axis=1) >= 1)
-
-    #         photon_isprompt = awkward.sum(photon_isprompt, axis=1)
-    #         awkward_utils.add_field(events, "photon_isprompt",  awkward.fill_none(photon_isprompt, -1))
-
-    #         awkward_utils.add_field(events, "photon_genPartFlav",  awkward.fill_none(med_cand.genPartFlav, -1))
-
-
+    
     def calculate_gen_info(self, zgammas, options):
         """
         Calculate gen info, adding the following fields to the events array:
@@ -559,8 +577,8 @@ class ZGammaTaggerBkgmc(Tagger):
 
         # eta
         #eta_cut = Tagger.get_range_cut(abs(photons.eta), options["eta"]) | (photons.isScEtaEB | photons.isScEtaEE)
-        eta_cut = (photons.isScEtaEB | photons.isScEtaEE)
-        # eta_cut = ((photons.isScEtaEB & (photons.mvaID > options["mvaID_barrel"])) | (photons.isScEtaEE & (photons.mvaID > options["mvaID_endcap"])))
+        # eta_cut = (photons.isScEtaEB | photons.isScEtaEE) & photons.mvaID_WP80
+        eta_cut = ((photons.isScEtaEB & (photons.mvaID > options["mvaID_barrel"])) | (photons.isScEtaEE & (photons.mvaID > options["mvaID_endcap"])))
 
         # electron veto
         e_veto_cut = photons.electronVeto > options["e_veto"]
@@ -578,7 +596,6 @@ class ZGammaTaggerBkgmc(Tagger):
 
         return all_cuts
 
-
     def select_FSRphotons(self, FSRphotons, electrons, photons, options):
         FSR_pt_cut = FSRphotons.pt > options["pt"]
         FSR_eta_cut = abs(FSRphotons.eta) < options["eta"]
@@ -586,16 +603,9 @@ class ZGammaTaggerBkgmc(Tagger):
         FSR_iso_cut = FSRphotons.relIso03 < options["iso"]
         FSR_dROverEt2_cut = FSRphotons.dROverEt2 < options["dROverEt2"]
 
-
-
-        #clean_FSRphoton_mask = object_selections.delta_R(FSRphotons, electrons, 0.001) & object_selections.delta_R(FSRphotons, photons, 0.001)
-
-        FSR_all_cuts = FSR_pt_cut & FSR_eta_cut & FSR_iso_cut & FSR_dROverEt2_cut #& clean_FSRphoton_mask
+        FSR_all_cuts = FSR_pt_cut & FSR_eta_cut & FSR_iso_cut & FSR_dROverEt2_cut
 
         return FSR_all_cuts
-
-
-
 
 # Below is an example of how the diphoton preselection could be performed with an explicit loop (C++ style) 
 # that is compiled with numba for increased performance.

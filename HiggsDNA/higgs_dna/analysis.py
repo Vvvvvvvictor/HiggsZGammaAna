@@ -509,13 +509,19 @@ class AnalysisManager():
                 tree = f["Events"]
 
                 # Get events that is not duplicated
-                duplicated_sample_remover = DuplicatedSamplesTagger(is_data=is_data)
-                duplicated_remove_cut = duplicated_sample_remover.calculate_selection(file, tree)
+                if is_data:
+                    duplicated_sample_remover = DuplicatedSamplesTagger(is_data=True)
+                    duplicated_remove_cut = duplicated_sample_remover.calculate_selection(file, tree)
 
-                trimmed_branches = [x for x in branches if x in tree.keys()]
-                events_file = tree.arrays(trimmed_branches, library = "ak", how = "zip") #TODO: There is a bug here.
+                    trimmed_branches = [x for x in branches if x in tree.keys()]
+                    events_file = tree.arrays(trimmed_branches, library = "ak", how = "zip") #TODO: There is a bug here.
 
-                events_file = events_file[duplicated_remove_cut]
+                    events_file = events_file[duplicated_remove_cut]
+                else:
+                    trimmed_branches = [x for x in branches if x in tree.keys()]
+                    events_file = tree.arrays(trimmed_branches, library = "ak", how = "zip") #TODO: There is a bug here.
+
+                    events_file = events_file
                 logger.debug("Load samples: sample type: %s" % events_file.type)
 
                 events.append(events_file)

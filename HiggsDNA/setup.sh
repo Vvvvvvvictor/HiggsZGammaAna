@@ -1,2 +1,4 @@
 python -m pip install correctionlib
-gzip -d jsonpog-integration/POG/*/*/*.gz 
+python -m pip install fsspec
+python -m pip install parquet_to_root
+#gzip -d jsonpog-integration/POG/*/*/*.gz 
