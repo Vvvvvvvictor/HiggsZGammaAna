@@ -1,6 +1,6 @@
 {"common":   {"train_signal": ["ggH", "VBF"],
               "train_dd_background": [],
-              "train_mc_background": ["data"],
+              "train_mc_background": ["ZGToLLG", "DYJetsToLL", "LLAJJ", "TT", "WW", "WZ", "ZZ"],
               "train_variables": ["Z_cos_theta", "lep_phi","lep_cos_theta",
                                   "Z_lead_lepton_eta", "Z_sublead_lepton_eta",
                                   "gamma_eta", "l1g_deltaR", "l2g_deltaR",
