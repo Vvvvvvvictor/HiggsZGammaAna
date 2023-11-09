@@ -1,4 +1,4 @@
-outdir="/afs/cern.ch/work/z/zewang/private/HZGamma/signal"
+outdir="/afs/cern.ch/work/z/zewang/private/HZGamma/signal2"
 
 python scripts/run_analysis.py --config "metadata/zgamma_signal.json" --log-level "DEBUG" --n_cores 5 --output_dir $outdir --unretire_jobs --short
 

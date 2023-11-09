@@ -437,6 +437,13 @@ class ZGammaTaggerBkgmc(Tagger):
             print("PassAllCuts?:",all_cuts[i],"Lepton id, pt", z_cand.LeadLepton.id[i], z_cand.LeadLepton.pt[i],z_cand.SubleadLepton.pt[i],"FSR photon Idx, pt, eta, phi:",FSRphotons.muonIdx[i], FSRphotons.pt[i], FSRphotons.eta[i], FSRphotons.phi[i], "dR(fsr, lep1), dR(fsr, lep2), dR(fsr, pho):", dR1[i],dR2[i],dR3[i],"photon pt:",photons.pt[i],"Z mass w/o fsr", z_cand.ZCand.mass[i],"clean:",clean_FSRphoton_mask[i])
             if i > 10000: break
         '''
+        FSRphotons = awkward.pad_none(FSRphotons,1)
+        for field in ["pt", "eta", "phi", "mass", "relIso03", "dROverEt2"]:
+            awkward_utils.add_field(
+                events = events,
+                name = "gamma_fsr_%s" % field,
+                data = awkward.fill_none(FSRphotons[field][:,0], DUMMY_VALUE)
+            )
 
         elapsed_time = time.time() - start
         logger.debug("[ZGammaTagger] %s, syst variation : %s, total time to execute select_zgammas: %.6f s" % (self.name, self.current_syst, elapsed_time))

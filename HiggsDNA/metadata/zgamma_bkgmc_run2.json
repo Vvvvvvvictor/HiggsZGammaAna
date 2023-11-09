@@ -6,10 +6,10 @@
     },
     "tag_sequence": [
         {
-            "module_name": "higgs_dna.taggers.zgamma_tagger_MC_run2",
-            "tagger": "ZGammaTaggerMCRun2",
+            "module_name": "higgs_dna.taggers.zgamma_tagger_run2",
+            "tagger": "ZGammaTaggerRun2",
             "kwargs": {
-                "name": "zgamma_tagger_MC_run2",
+                "name": "zgamma_tagger_run2",
                 "options": {
                     "gen_info": {
                         "calculate": true
@@ -25,7 +25,8 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "ZGToLLG"
+            "DYJetsToLL",
+            "DYJetsToLL_amc"
         ],
         "years": [
             "2017"
@@ -66,11 +67,6 @@
         "gamma_genPartFlav",
         "gamma_mvaID_WP80",
         "gamma_mvaID_WPL",
-        "gamma_fsr_pt",
-        "gamma_fsr_eta",
-        "gamma_fsr_phi",
-        "gamma_fsr_mass",
-        "gamma_fsr_clean",
         "gamma_fsr_pt",
         "gamma_fsr_eta",
         "gamma_fsr_phi",
