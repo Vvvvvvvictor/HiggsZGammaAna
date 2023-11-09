@@ -177,9 +177,12 @@ class ZGammaTaggerData(Tagger):
 
         photons = events.Photon[photon_selection]
         
+        print(awkward.num(photons))
+        
         # lepton-photon overlap removal 
         clean_photon_mask = object_selections.delta_R(photons, muons, 0.4) & object_selections.delta_R(photons, electrons, 0.4)
         photons = photons[clean_photon_mask]
+        print(awkward.num(photons))
 
         # Jets
         jet_cut = jet_selections.select_jets(
@@ -315,6 +318,7 @@ class ZGammaTaggerData(Tagger):
 
         # Make gamma candidate-level cuts
         has_gamma_cand = awkward.num(photons) >= 1
+        print(has_gamma_cand)
         gamma_cand = awkward.firsts(photons)
         gamma_mvaID_WPL = ((gamma_cand.isScEtaEB & (gamma_cand.mvaID > self.options["photons"]["mvaID_barrel"])) | (gamma_cand.isScEtaEE & (gamma_cand.mvaID > self.options["photons"]["mvaID_endcap"])))
 

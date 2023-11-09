@@ -29,6 +29,12 @@ DEFAULT_OPTIONS = {
         "mvaID_endcap" : -0.59,
         "e_veto" : 0.5
     },
+    "FSRphotons" : {
+        "iso" : 1.8,
+        "eta" : 2.4,
+        "pt" : 2.0,
+        "dROverEt2" : 0.012
+    },
     "zgammas" : {
         "relative_pt_gamma" : 0.136363636364,
         "mass_h" : [100., 180.],
@@ -221,6 +227,21 @@ class ZGammaTaggerBkgmc(Tagger):
             data = events.Jet[jet_cut]
         )
 
+        # FSR photons
+        FSRphoton_selection = self.select_FSRphotons(
+                FSRphotons = events.FsrPhoton,
+                electrons = electrons,
+                photons = photons,
+                options = self.options["FSRphotons"]
+        )
+
+        FSRphotons = awkward_utils.add_field(
+            events = events,
+            name = "SelectedFSRPhotons",
+            data = events.FsrPhoton[FSRphoton_selection]
+        )
+        FSRphotons = awkward.with_field(FSRphotons, awkward.ones_like(FSRphotons.pt) * 0.0, "mass")
+
         # Add object fields to events array
         for objects, name in zip([electrons, muons, jets], ["electron", "muon", "jet"]):
             awkward_utils.add_object_fields(
@@ -243,7 +264,6 @@ class ZGammaTaggerBkgmc(Tagger):
         n_jets = awkward.num(jets)
         awkward_utils.add_field(events, "n_jets", n_jets, overwrite=True)
 
-
         # lepton-photon overlap removal 
         clean_photon_mask = object_selections.delta_R(photons, muons, 0.4) & object_selections.delta_R(photons, electrons, 0.4)
         photons = photons[clean_photon_mask]
@@ -263,6 +283,21 @@ class ZGammaTaggerBkgmc(Tagger):
         photons = awkward.Array(photons, with_name = "Momentum4D")
         electrons = awkward.Array(electrons, with_name = "Momentum4D")
         muons = awkward.Array(muons, with_name = "Momentum4D")
+        FSRphotons = awkward.Array(FSRphotons, with_name = "Momentum4D")
+
+        #obj1 = awkward.unflatten(FSRphotons, counts = 1, axis = -1) # shape [n_events, n_obj, 1]
+        #obj2 = awkward.unflatten(muons, counts = 1, axis = 0)
+        #obj3 = awkward.unflatten(electrons, counts = 1, axis = 0)
+        #obj4 = awkward.unflatten(photons, counts = 1, axis = 0)
+        #dR1 = obj1.deltaR(obj2)
+        #dR2 = obj1.deltaR(obj3)
+        #dR3 = obj1.deltaR(obj4)
+        #print(dR1)
+        #for i in range(len(FSRphotons.muonIdx)):
+        #    if len(FSRphotons.muonIdx[i]) == 0 : continue
+        #    print(FSRphotons.muonIdx[i], "FSRPhoton pt, eta, phi:", FSRphotons.pt[i], FSRphotons.eta[i], FSRphotons.phi[i], "muon pt, eta, phi:", muons.pt[i], muons.eta[i], muons.phi[i], "electron pt, eta, phi:", electrons.pt[i], "dR(fsr, muons):", dR1[i],dR2[i],dR3[i],"photon pt:",photons.pt[i],"clean:",clean_FSRphoton_mask[i])
+        #    if i > 10000: break
+
         
         # Construct di-electron/di-muon pairs
         ee_pairs = awkward.combinations(electrons, 2, fields = ["LeadLepton", "SubleadLepton"])
@@ -276,6 +311,7 @@ class ZGammaTaggerBkgmc(Tagger):
         # Concatenate these together
         z_cands = awkward.concatenate([ee_pairs, mm_pairs], axis = 1)
         z_cands["ZCand"] = z_cands.LeadLepton + z_cands.SubleadLepton # these add as 4-vectors since we registered them as "Momentum4D" objects
+
 
         # Make Z candidate-level cuts
         os_cut = z_cands.LeadLepton.charge * z_cands.SubleadLepton.charge == -1
@@ -372,6 +408,42 @@ class ZGammaTaggerBkgmc(Tagger):
             results = [trigger_cut, has_z_cand, has_gamma_cand, sel_h_1, sel_h_2, sel_h_3, all_cuts],
             cut_type = "zgammas"
         )
+
+        ################## fsr recovery
+        '''
+        clean_FSRphoton_mask = object_selections.delta_R_fsrlep(FSRphotons, z_cand.LeadLepton, 0.001) & object_selections.delta_R_fsrlep(FSRphotons, z_cand.SubleadLepton, 0.001) & object_selections.delta_R_fsrGamma(FSRphotons, gamma_cand, 0.001)
+        
+        FSRphotons = FSRphotons[clean_FSRphoton_mask]
+        
+        z_cand_fsr = z_cand.ZCand + FSRphotons
+        
+        for field in ["pt", "eta", "phi", "mass"]:
+            awkward_utils.add_field(
+                events,
+                "Z_fsr_%s" % field,
+                awkward.fill_none(getattr(z_cand_fsr, field), DUMMY_VALUE)
+            )
+        
+
+        obj1 = awkward.unflatten(FSRphotons, counts = 1, axis = -1) # shape [n_events, n_obj, 1]
+        obj2 = awkward.unflatten(z_cand.LeadLepton, counts = 1, axis = 0)
+        obj3 = awkward.unflatten(z_cand.SubleadLepton, counts = 1, axis = 0)
+        obj4 = awkward.unflatten(photons, counts = 1, axis = 0)
+        dR1 = obj1.deltaR(obj2)
+        dR2 = obj1.deltaR(obj3)
+        dR3 = obj1.deltaR(obj4)
+        for i in range(len(z_cand.LeadLepton)):
+            if not all_cuts[i] : continue
+            print("PassAllCuts?:",all_cuts[i],"Lepton id, pt", z_cand.LeadLepton.id[i], z_cand.LeadLepton.pt[i],z_cand.SubleadLepton.pt[i],"FSR photon Idx, pt, eta, phi:",FSRphotons.muonIdx[i], FSRphotons.pt[i], FSRphotons.eta[i], FSRphotons.phi[i], "dR(fsr, lep1), dR(fsr, lep2), dR(fsr, pho):", dR1[i],dR2[i],dR3[i],"photon pt:",photons.pt[i],"Z mass w/o fsr", z_cand.ZCand.mass[i],"clean:",clean_FSRphoton_mask[i])
+            if i > 10000: break
+        '''
+        FSRphotons = awkward.pad_none(FSRphotons,1)
+        for field in ["pt", "eta", "phi", "mass", "relIso03", "dROverEt2"]:
+            awkward_utils.add_field(
+                events = events,
+                name = "gamma_fsr_%s" % field,
+                data = awkward.fill_none(FSRphotons[field][:,0], DUMMY_VALUE)
+            )
 
         elapsed_time = time.time() - start
         logger.debug("[ZGammaTagger] %s, syst variation : %s, total time to execute select_zgammas: %.6f s" % (self.name, self.current_syst, elapsed_time))
@@ -512,6 +584,25 @@ class ZGammaTaggerBkgmc(Tagger):
         )
 
         return all_cuts
+
+
+    def select_FSRphotons(self, FSRphotons, electrons, photons, options):
+        FSR_pt_cut = FSRphotons.pt > options["pt"]
+        FSR_eta_cut = abs(FSRphotons.eta) < options["eta"]
+
+        FSR_iso_cut = FSRphotons.relIso03 < options["iso"]
+        FSR_dROverEt2_cut = FSRphotons.dROverEt2 < options["dROverEt2"]
+
+
+
+        #clean_FSRphoton_mask = object_selections.delta_R(FSRphotons, electrons, 0.001) & object_selections.delta_R(FSRphotons, photons, 0.001)
+
+        FSR_all_cuts = FSR_pt_cut & FSR_eta_cut & FSR_iso_cut & FSR_dROverEt2_cut #& clean_FSRphoton_mask
+
+        return FSR_all_cuts
+
+
+
 
 # Below is an example of how the diphoton preselection could be performed with an explicit loop (C++ style) 
 # that is compiled with numba for increased performance.

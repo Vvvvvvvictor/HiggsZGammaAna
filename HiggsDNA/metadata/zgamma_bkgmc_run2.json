@@ -6,10 +6,10 @@
     },
     "tag_sequence": [
         {
-            "module_name": "higgs_dna.taggers.zgamma_tagger_bkgmc",
-            "tagger": "ZGammaTaggerBkgmc",
+            "module_name": "higgs_dna.taggers.zgamma_tagger_run2",
+            "tagger": "ZGammaTaggerRun2",
             "kwargs": {
-                "name": "zgamma_tagger_bkgmc",
+                "name": "zgamma_tagger_run2",
                 "options": {
                     "gen_info": {
                         "calculate": true
@@ -25,12 +25,8 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "ggH_M125",
-            "VBFH_M125",
-            "WplusH_M125",
-            "WminusH_M125",
-            "ZH_M125",
-            "ttH_M125"
+            "DYJetsToLL",
+            "DYJetsToLL_amc"
         ],
         "years": [
             "2017"
@@ -57,10 +53,6 @@
         "Z_sublead_lepton_mass",
         "Z_sublead_lepton_charge",
         "Z_sublead_lepton_id",
-        "Z_fsr_pt",
-        "Z_fsr_eta",
-        "Z_fsr_phi",
-        "Z_fsr_mass",
         "gamma_pt",
         "gamma_eta",
         "gamma_phi",
@@ -79,7 +71,8 @@
         "gamma_fsr_eta",
         "gamma_fsr_phi",
         "gamma_fsr_mass",
-        "gamma_fsr_clean",
+        "gamma_fsr_relIso03",
+        "gamma_fsr_dROverEt2",
         "jet_1_pt",
         "jet_1_eta",
         "jet_1_phi",
@@ -169,7 +162,6 @@
         "Muon_mediumId",
         "Muon_looseId",
         "Muon_highPtId",
-        "Muon_fsrPhotonIdx",
         "Electron_pt",
         "Electron_eta",
         "Electron_deltaEtaSC",

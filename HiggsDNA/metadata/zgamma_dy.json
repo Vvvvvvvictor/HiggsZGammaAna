@@ -19,15 +19,14 @@
         }
     ],
     "systematics": {
-        "weights": {
-            
-        },
+        "weights": {},
         "independent_collections": {}
     },
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "DYJetsToLL", "DYJetsToLL_amc"
+            "DYJetsToLL",
+            "DYJetsToLL_amc"
         ],
         "years": [
             "2017"
