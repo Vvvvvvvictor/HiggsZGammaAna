@@ -260,7 +260,10 @@ class ZGammaTaggerData(Tagger):
             for hlt in self.options["mmtrigger"][self.year]: # logical OR of all triggers
                 if hasattr(events, hlt):
                     mm_trigger_cut = (mm_trigger_cut) | (events[hlt] == True)
+            trigger_cut = ee_trigger_cut | mm_trigger_cut
         else:
+            ee_trigger_cut = awkward.num(events.Photon) >= 0 # dummy cut, all False
+            mm_trigger_cut = awkward.num(events.Photon) >= 0 # dummy cut, all False
             trigger_cut = awkward.num(events.Photon) >= 0 # dummy cut, all True
 
         # Register as `vector.Momentum4D` objects so we can do four-vector operations with them
@@ -397,7 +400,7 @@ class ZGammaTaggerData(Tagger):
             elif "mu" in cut_type:
                 cut2 = cut1 & mm_trigger_cut
             else:
-                cut2 = cut1 & (ee_trigger_cut | mm_trigger_cut)
+                cut2 = cut1 & trigger_cut
 
             if "ele" in cut_type:
                 cut3 = cut2 & ee_cut1
