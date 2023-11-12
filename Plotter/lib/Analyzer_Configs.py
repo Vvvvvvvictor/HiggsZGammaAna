@@ -3,12 +3,11 @@ import sys
 from ROOT import *
 
 class Analyzer_Config:
-    def __init__(self, channel, year, region, mva):
+    def __init__(self, channel, year, region):
         self.channel            = channel
         self.year               = year
         self.version            = 'UL'
         self.region             = region
-        self.mva                = mva
         self.sample_loc         = 'NONE'
         self.out_dir            = 'NONE'
         self.out_region_name    = 'NONE'
@@ -46,7 +45,7 @@ class Analyzer_Config:
                 self.BDT_filename     = "/publicfs/cms/user/wangzebing/ALP/Analysis_code/MVA/weight/nodR/model_ALP_BDT_param_2016.pkl"
                 #mvaCut = 0.8365
             elif self.year == '2017':
-                self.sample_loc       = '/afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/Plot/Data/2017'
+                self.sample_loc       = '/afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/Plotter/Data/2017'
                 self.out_dir          = 'plots_17UL'
                 self.root_output_name = "HZGamma_plot_data17_{0}.root".format(self.out_region_name)
                 self.BDT_filename     = "/publicfs/cms/user/wangzebing/ALP/Analysis_code/MVA/weight/nodR/model_ALP_BDT_param_2017.pkl"

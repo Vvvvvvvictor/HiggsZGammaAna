@@ -32,7 +32,7 @@ tdrstyle.setTDRStyle()
 def main():
 
     # Setup the plot configuration
-    analyzer_cfg = AC.Analyzer_Config('inclusive', args.year, args.region, args.mva)
+    analyzer_cfg = AC.Analyzer_Config('inclusive', args.year, args.region)
     analyzer_cfg.Print_Config()
     plot_cfg = PC.Plot_Config(analyzer_cfg, args.year)
     # creat output files
