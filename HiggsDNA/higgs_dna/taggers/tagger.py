@@ -168,15 +168,16 @@ class Tagger():
 
         for name, result in zip(names, results):
             if awkward.count(result) > 0:
-                if weighted:
-                    individual_eff = float(awkward.sum(events[result].genWeight)) / float(awkward.count(events[result].genWeight))
-                    yields = float(awkward.sum(events[result].genWeight))
-                else:
-                    individual_eff = float(awkward.sum(result)) / float(awkward.count(result))
-                    yields = float(awkward.sum(result))
-            else:
-                individual_eff = 0.
                 yields = 0
+                individual_eff = 0
+                if weighted:
+                    yields = float(awkward.sum(events[result].genWeight))
+                    if yields > 0:
+                        individual_eff = float(awkward.sum(events[result].genWeight)) / float(awkward.count(events[result].genWeight))
+                else:
+                    yields = float(awkward.sum(result))
+                    if yields > 0:
+                        individual_eff = float(awkward.sum(result)) / float(awkward.count(result))
             self.cut_summary[cut_type][name] = {
                     "individual_eff" : float(individual_eff) 
                     #TODO: add eff as N-1 cut

@@ -313,8 +313,8 @@ class ZGammaTaggerRun2(Tagger):
         ee_cut2 = awkward.sum(ee_cut2, axis=1) >= 1
 
         mm_pairs = awkward.combinations(muons, 2, fields = ["LeadLepton", "SubleadLepton"])
-        mm_cut1 = mm_pairs.LeadLepton.pt > 25
-        mm_cut2 = mm_pairs.SubleadLepton.pt > 15
+        mm_cut1 = mm_pairs.LeadLepton.pt > 20
+        mm_cut2 = mm_pairs.SubleadLepton.pt > 10
         mm_pairs = mm_pairs[mm_cut1&mm_cut2]
         mm_cut1 = awkward.sum(mm_cut1, axis=1) >= 1
         mm_cut2 = awkward.sum(mm_cut2, axis=1) >= 1
@@ -325,7 +325,8 @@ class ZGammaTaggerRun2(Tagger):
 
         # Make Z candidate-level cuts
         os_cut = z_cands.LeadLepton.charge * z_cands.SubleadLepton.charge == -1
-        mass_cut = (z_cands.ZCand.mass > 80.) & (z_cands.ZCand.mass < 100.)
+        # mass_cut = (z_cands.ZCand.mass > 80.) & (z_cands.ZCand.mass < 100.)
+        mass_cut = z_cands.ZCand.mass > 50.
         z_cut = os_cut & mass_cut
         z_cands = z_cands[z_cut] # OSSF lepton pairs with m_ll > 50.
         

@@ -3,12 +3,12 @@
               "train_mc_background": ["ZGToLLG", "DYJetsToLL", "LLAJJ", "TT", "WW", "WZ", "ZZ"],
               "train_variables": ["Z_cos_theta", "lep_phi","lep_cos_theta",
                                   "Z_lead_lepton_eta", "Z_sublead_lepton_eta",
-                                  "gamma_eta", "l1g_deltaR", "l2g_deltaR",
+                                  "gamma_eta", "l1g_deltaR", "l2g_deltaR", "H_relpt",
                                   "H_ptt", "gamma_mvaID", "gamma_ptRelErr"],
               "preselections": ["H_mass >= 100", "H_mass <= 180"],
               "signal_preselections": ["is_center == 1"],
-              "background_preselections": ["is_center == 0"],
-              "mc_preselections": ["gamma_mvaID_WP80 == 1"],
+              "background_preselections": [],
+              "mc_preselections": ["gamma_mvaID_WPL == 1"],
               "randomIndex": "event", "weight": "weight"
               },
  "VH_ttH":  {"#+preselections": ["n_leptons >= 3"],
@@ -57,7 +57,8 @@
                          {"silent": 1, "eval_metric": ["logloss", "auc"], "grow_policy": "lossguide", "nthread": 4, "objective": "binary:logistic", "tree_method": "hist", "booster": "gbtree"}
                          ]
               },
- "two_jet":  {"#+preselections": ["n_jets >= 2"],
+ "two_jet":  {"train_signal": ["VBF", "ggH"],
+              "#+preselections": ["n_jets >= 2"],
               "inputTree": "two_jet",
               "+train_variables": ["delta_eta_jj", "delta_phi_zgjj", "pt_balance",
 				                   "delta_phi_jj", "photon_zeppenfeld", 
