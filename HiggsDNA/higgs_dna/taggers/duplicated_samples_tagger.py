@@ -79,7 +79,9 @@ class DuplicatedSamplesTagger(Tagger):
         return cut
 
     def get_double_muon_trig(self, data, year):
-        if year == "2017":
+        if year == "2016":
+            return data.HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL | data.HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ
+        elif year == "2017":
             return data.HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL | data.HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ | data.HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8
         elif year == "2018":
             return data.HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL | data.HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ | data.HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8 | data.HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8 | data.HLT_Mu37_TkMu27
@@ -88,7 +90,9 @@ class DuplicatedSamplesTagger(Tagger):
     
 
     def get_single_muon_trig(self, data, year):
-        if year == "2017":
+        if year == "2016":
+            return data.HLT_IsoMu20 | data.HLT_IsoMu24 | data.HLT_IsoMu27 | data.HLT_Mu50 | data.HLT_Mu55 | data.HLT_Mu15_IsoVVVL_PFHT600
+        elif year == "2017":
             return data.HLT_IsoMu20 | data.HLT_IsoMu24 | data.HLT_IsoMu27 | data.HLT_Mu50 | data.HLT_IsoMu24_eta2p1
         elif year == "2018":
             return data.HLT_IsoMu20 | data.HLT_IsoMu24 | data.HLT_IsoMu27 | data.HLT_Mu50 | data.HLT_Mu55 | data.HLT_IsoMu24_eta2p1 | data.HLT_Mu15_IsoVVVL_PFHT450 | data.HLT_Mu15_IsoVVVL_PFHT600 | data.HLT_Mu50_IsoVVVL_PFHT450
@@ -97,16 +101,20 @@ class DuplicatedSamplesTagger(Tagger):
 
 
     def get_double_eg_trig(self, data, year):
-        if year == "2017":
+        if year == "2016":
+            return data.HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ | data.HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL
+        elif year == "2017":
             return data.HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ | data.HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL
         elif year == "2018":
-            return data.HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ | data.HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL | data.HLT_DoubleEle25_CaloIdL_MW | data.HLT_DoublePhoton70 | data.HLT_Diphoton30_18_R9IdL_AND_HE_AND_IsoCaloId | data.HLT_Diphoton30_18_R9IdL_AND_HE_AND_IsoCaloId_Mass55 | data.HLT_Diphoton30_22_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass90 | data.HLT_Diphoton30_22_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass95
+            return data.HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ | data.HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL | data.HLT_DoubleEle25_CaloIdL_MW | data.HLT_DoublePhoton70 | data.HLT_Diphoton30_22_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass90 | data.HLT_Diphoton30_22_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass95
         else:
             return data.HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ | data.HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL | data.HLT_DoubleEle25_CaloIdL_MW | data.HLT_DoublePhoton70 | data.HLT_Diphoton30_18_R9IdL_AND_HE_AND_IsoCaloId | data.HLT_Diphoton30_18_R9IdL_AND_HE_AND_IsoCaloId_Mass55 | data.HLT_Diphoton30_22_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass90 | data.HLT_Diphoton30_22_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass95
 
 
     def get_single_eg_trig(self, data, year):
-        if year == "2017":
+        if year == "2016":
+            return data.HLT_Ele27_WPTight_Gsf | data.HLT_Ele115_CaloIdVT_GsfTrkIdT | data.HLT_Ele15_IsoVVVL_PFHT600
+        elif year == "2017":
             return data.HLT_Ele27_WPTight_Gsf | data.HLT_Ele32_WPTight_Gsf_L1DoubleEG | data.HLT_Ele35_WPTight_Gsf
         elif year == "2018":
             return data.HLT_Ele27_WPTight_Gsf | data.HLT_Ele28_WPTight_Gsf | data.HLT_Ele32_WPTight_Gsf | data.HLT_Ele32_WPTight_Gsf_L1DoubleEG | data.HLT_Ele35_WPTight_Gsf | data.HLT_Ele20_WPLoose_Gsf | data.HLT_Ele115_CaloIdVT_GsfTrkIdT | data.HLT_Ele135_CaloIdVT_GsfTrkIdT | data.HLT_Ele15_IsoVVVL_PFHT450 | data.HLT_Ele15_IsoVVVL_PFHT600 | data.HLT_Ele50_IsoVVVL_PFHT450 | data.HLT_Ele30_WPTight_Gsf 
@@ -115,7 +123,9 @@ class DuplicatedSamplesTagger(Tagger):
 
     
     def get_muon_eg_trig(self, data, year):
-        if year == "2017":
+        if year == "2016":
+            return data.HLT_Mu17_Photon30_IsoCaloId
+        elif year == "2017":
             return data.HLT_Mu17_Photon30_IsoCaloId
         elif year == "2018":
             return data.HLT_Mu17_Photon30_IsoCaloId

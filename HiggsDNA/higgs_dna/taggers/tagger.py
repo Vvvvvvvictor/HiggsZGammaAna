@@ -171,6 +171,10 @@ class Tagger():
                 yields = 0
                 individual_eff = 0
                 if weighted:
+                    if float(awkward.count(events[result].genWeight)) > 0.:
+                        individual_eff = float(awkward.sum(events[result].genWeight)) / float(awkward.count(events[result].genWeight))
+                    else:
+                        individual_eff = 0.
                     yields = float(awkward.sum(events[result].genWeight))
                     if yields > 0:
                         individual_eff = float(awkward.sum(events[result].genWeight)) / float(awkward.count(events[result].genWeight))

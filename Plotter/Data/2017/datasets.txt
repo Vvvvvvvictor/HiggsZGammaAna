@@ -1,0 +1,17 @@
+data            /afs/cern.ch/work/z/zewang/private/HZGamma/data_run2_2017/Data_2017/merged_nominal.parquet
+ZGToLLG         /afs/cern.ch/work/z/zewang/private/HZGamma/bkgmc_run2_2017/ZGToLLG_2017/merged_nominal.parquet
+DYJetsToLL      /afs/cern.ch/work/z/zewang/private/HZGamma/bkgmc_run2_2017/DYJetsToLL_amc_2017/merged_nominal.parquet
+ZG2JToG2L2J     /afs/cern.ch/work/z/zewang/private/HZGamma/bkgmc_run2_2017/ZG2JToG2L2J_2017/merged_nominal.parquet
+TT              /afs/cern.ch/work/z/zewang/private/HZGamma/bkgmc_run2_2017/TT_2017/merged_nominal.parquet
+TTGJets         /afs/cern.ch/work/z/zewang/private/HZGamma/bkgmc_run2_2017/TTGJets_2017/merged_nominal.parquet
+TGJets          /afs/cern.ch/work/z/zewang/private/HZGamma/bkgmc_run2_2017/TGJets_2017/merged_nominal.parquet
+LLAJJ           /afs/cern.ch/work/z/zewang/private/HZGamma/bkgmc_run2_2017/LLAJJ_2017/merged_nominal.parquet
+WW              /afs/cern.ch/work/z/zewang/private/HZGamma/bkgmc_run2_2017/WW_2017/merged_nominal.parquet
+ZZ              /afs/cern.ch/work/z/zewang/private/HZGamma/bkgmc_run2_2017/ZZ_2017/merged_nominal.parquet
+WZ              /afs/cern.ch/work/z/zewang/private/HZGamma/bkgmc_run2_2017/WZ_2017/merged_nominal.parquet
+ggH             /afs/cern.ch/work/z/zewang/private/HZGamma/signal_run2_2017/ggH_M125_2017/merged_nominal.parquet
+VBFH            /afs/cern.ch/work/z/zewang/private/HZGamma/signal_run2_2017/VBFH_M125_2017/merged_nominal.parquet
+WplusH          /afs/cern.ch/work/z/zewang/private/HZGamma/signal_run2_2017/WplusH_M125_2017/merged_nominal.parquet
+WminusH         /afs/cern.ch/work/z/zewang/private/HZGamma/signal_run2_2017/WminusH_M125_2017/merged_nominal.parquet
+ZH              /afs/cern.ch/work/z/zewang/private/HZGamma/signal_run2_2017/ZH_M125_2017/merged_nominal.parquet
+ttH             /afs/cern.ch/work/z/zewang/private/HZGamma/signal_run2_2017/ttH_M125_2017/merged_nominal.parquet

@@ -174,6 +174,7 @@ class AnalysisManager():
                 "function_name" : "run_analysis"
             },
             "batch_system" : "condor",
+            #"batch_system" : "local",
             "fpo" : None, # number of input files per output file (i.e. per job)
             "n_cores" : 6, # number of cores for local running
             "merge_outputs" : False,
