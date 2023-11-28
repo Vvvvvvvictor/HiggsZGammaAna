@@ -1,0 +1,28 @@
+Executable = scripts/runbatch_ZreFit.sh
+Universe = vanilla
+Log = ./out_log/runCondor_$(Cluster)_$(Process).log
+Output = ./out_log/runCondor_$(Cluster)_$(Process).out
+Error = ./out_log/runCondor_$(Cluster)_$(Process).err
++JobFlavour = "longlunch"
+should_transfer_files   = YES
+when_to_transfer_output = ON_EXIT
+Arguments = 1
+Queue
+Arguments = 2
+Queue
+Arguments = 3
+Queue
+Arguments = 4
+Queue
+Arguments = 5
+Queue
+Arguments = 6
+Queue
+Arguments = 7
+Queue
+Arguments = 8
+Queue
+Arguments = 9
+Queue
+Arguments = 10
+Queue

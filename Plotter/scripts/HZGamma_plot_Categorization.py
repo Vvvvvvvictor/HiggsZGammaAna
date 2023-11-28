@@ -73,6 +73,10 @@ def main():
 
             #print(getattr(ntup,'Z_pt'))
 
+            # remove DY duplicate
+            if ("DY" in sample) and (ntup.n_iso_photons > 0):
+                continue
+
             if not (ntup.n_jets >=2 and ntup.n_leptons < 3):
                 continue
 

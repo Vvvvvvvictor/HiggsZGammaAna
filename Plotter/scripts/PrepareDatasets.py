@@ -55,6 +55,7 @@ def PrepareDatasets():
         processCmd(cmd, quiet=0)
 
     if 'WminusH' in samples.keys() and 'WplusH' in samples.keys():
+        cmd_input = ' '
         cmd = 'hadd -f {outpath}/WH.root {input_file}'.format(outpath=File_output, input_file=cmd_input.join(['{}/{}.root'.format(File_output, 'WminusH'), '{}/{}.root'.format(File_output, 'WplusH')]))
         processCmd(cmd, quiet=0)
 

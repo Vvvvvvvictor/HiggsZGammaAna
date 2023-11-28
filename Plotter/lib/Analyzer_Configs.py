@@ -3,7 +3,7 @@ import sys
 from ROOT import *
 
 class Analyzer_Config:
-    def __init__(self, channel, year, region):
+    def __init__(self, channel, year, region=''):
         self.channel            = channel
         self.year               = year
         self.version            = 'UL'

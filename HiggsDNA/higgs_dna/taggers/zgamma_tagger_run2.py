@@ -280,6 +280,10 @@ class ZGammaTaggerRun2(Tagger):
         electrons = awkward.with_field(electrons, awkward.ones_like(electrons.pt) * 11, "id")
         muons = awkward.with_field(muons, awkward.ones_like(muons.pt) * 13, "id")
 
+        # leptons ptE_error
+        electrons = awkward.with_field(electrons, electrons.energyErr, "ptE_error")
+        muons = awkward.with_field(muons, muons.ptErr, "ptE_error")
+
         # Sort objects by pt
         photons = photons[awkward.argsort(photons.pt, ascending=False, axis=1)]
         electrons = electrons[awkward.argsort(electrons.pt, ascending=False, axis=1)]
@@ -335,8 +339,8 @@ class ZGammaTaggerRun2(Tagger):
         z_cand = awkward.firsts(z_cands)
 
         # Add Z-related fields to array
-        for field in ["pt", "eta", "phi", "mass", "charge", "id"]:
-            if not field in ["charge", "id"]:
+        for field in ["pt", "eta", "phi", "mass", "charge", "id", "ptE_error"]:
+            if not field in ["charge", "id", "ptE_error"]:
                 awkward_utils.add_field(
                         events,
                         "Z_%s" % field,
@@ -552,11 +556,41 @@ class ZGammaTaggerRun2(Tagger):
         If no match is found for a given reco/gen photon, it will be given values of -999. 
         """
         gen_hzg = gen_selections.select_x_to_yz(zgammas.GenPart, 25, 23, 22)
+
+        print("DEBUG: bing", gen_hzg.fields)
         
         awkward_utils.add_object_fields(
                 events = zgammas,
                 name = "GenHzgHiggs",
                 objects = gen_hzg.GenParent,
+                n_objects = 1
+        )
+
+        awkward_utils.add_object_fields(
+                events = zgammas,
+                name = "GenHzgLeadGenChild",
+                objects = gen_hzg.LeadGenChild,
+                n_objects = 1
+        )
+
+        awkward_utils.add_object_fields(
+                events = zgammas,
+                name = "GenHzgSubleadGenChild",
+                objects = gen_hzg.SubleadGenChild,
+                n_objects = 1
+        )
+
+        awkward_utils.add_object_fields(
+                events = zgammas,
+                name = "GenHzgLeadGenChildChild1",
+                objects = gen_hzg.LeadGenChildChild1,
+                n_objects = 1
+        )
+
+        awkward_utils.add_object_fields(
+                events = zgammas,
+                name = "GenHzgLeadGenChildChild2",
+                objects = gen_hzg.LeadGenChildChild2,
                 n_objects = 1
         )
 

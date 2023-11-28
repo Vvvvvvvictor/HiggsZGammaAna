@@ -23,3 +23,46 @@ The main code is ```scripts/HZGamma_plot_Categorization.py```, which has all the
 ```
 python scripts/HZGamma_plot_Categorization.py -y [dataset year] --region [default:full] [--ln] [--ele]
 ```
+
+## HZGamma Z Constrain Refit
+
+**1. Prepare input Gen dataset**
+Prepare the input ggH/VBFH Gen datasets, which includes the generator level informations about H->Zg->llg. You need to run the HiggsDNA and keep the generator level informations without any cuts. Once you got the ```.parquet``` file, you could write the path into ```.Data/2017/ZReFit/datasets.txt```. Then run:
+
+```
+python scripts/PrepareDatasets.py -i ./Data/2017/ZReFit/datasets.txt -o ./Data/2017/ZReFit/data_genZ
+```
+
+, which will convert ```.parquet``` to root files for the next processing.
+
+**2. Get the Z true lineshape for the fit**
+
+Get the fitted Z true lineshape using CB+3Gauss functions. You need the specify the input root file, which contain the generator level informations (produced by the first step), using parameter ```--genFile```. You should also specify the output path using parameter ```-o```, the channels using ```-c```. The default fitting is unbin fit, you could also use parameter ```--binningFit``` to speed up the fit.
+
+```
+python scripts/HZGamma_ZReFit.py --trueLineshapeFit --genFile ./Data/2017/ZReFit/data_genZ/ggH.root -o ./Data/2017/ZReFit/ -c ele/mu  (--binningFit --nBins 100)
+```
+
+**3. Do the Z Constrain Refit**
+You could use ```--verbose``` to remove all the output information, but be sure there is no bug in your fit before you use it! Parameter ```--sampleName``` specified which sample you want to fit,. The default setting is ggH.
+
+```
+python scripts/HZGamma_ZReFit.py --doReFit --truelineshape ./Data/2017/ZReFit
+```
+
+You could also split the job by using ```--nJobs``` and ```--iJob```. After that, you could submit these jobs into Condor to speed up the refit. But, remember to modify the conda init to your own env in ```scripts/runbatch_ZreFit.jdl```.
+
+```
+condor_submit scripts/runbatch_ZreFit.jdl
+```
+Once all the jobs finished, hadd all the jobs.
+```
+hadd -f ggH.root ggH_job*.root
+```
+
+
+**4. Plot the Z Constrain Refit Results**
+
+```
+python scripts/HZGamma_ZReFit.py --plotReFit -c ele/mu
+```

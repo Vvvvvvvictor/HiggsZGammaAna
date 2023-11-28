@@ -111,7 +111,9 @@
         "MET_pt",
         "MET_phi",
         "weight_central",
-        "event"
+        "run",
+        "event",
+        "luminosityBlock"
     ],
     "branches": [
         "L1PreFiringWeight_Nom",
@@ -207,6 +209,7 @@
         "genWeight",
         "run",
         "event",
+        "luminosityBlock",
         "fixedGridRhoAll"
     ]
 }
