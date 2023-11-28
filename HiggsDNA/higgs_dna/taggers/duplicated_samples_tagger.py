@@ -117,9 +117,9 @@ class DuplicatedSamplesTagger(Tagger):
         elif year == "2017":
             return data.HLT_Ele27_WPTight_Gsf | data.HLT_Ele32_WPTight_Gsf_L1DoubleEG | data.HLT_Ele35_WPTight_Gsf
         elif year == "2018":
-            return data.HLT_Ele27_WPTight_Gsf | data.HLT_Ele32_WPTight_Gsf | data.HLT_Ele32_WPTight_Gsf_L1DoubleEG | data.HLT_Ele35_WPTight_Gsf | data.HLT_Ele20_WPLoose_Gsf | data.HLT_Ele115_CaloIdVT_GsfTrkIdT | data.HLT_Ele135_CaloIdVT_GsfTrkIdT | data.HLT_Ele15_IsoVVVL_PFHT450 | data.HLT_Ele15_IsoVVVL_PFHT600 | data.HLT_Ele50_IsoVVVL_PFHT450
+            return data.HLT_Ele27_WPTight_Gsf | data.HLT_Ele28_WPTight_Gsf | data.HLT_Ele32_WPTight_Gsf | data.HLT_Ele32_WPTight_Gsf_L1DoubleEG | data.HLT_Ele35_WPTight_Gsf | data.HLT_Ele20_WPLoose_Gsf | data.HLT_Ele115_CaloIdVT_GsfTrkIdT | data.HLT_Ele135_CaloIdVT_GsfTrkIdT | data.HLT_Ele15_IsoVVVL_PFHT450 | data.HLT_Ele15_IsoVVVL_PFHT600 | data.HLT_Ele50_IsoVVVL_PFHT450 | data.HLT_Ele30_WPTight_Gsf 
         else:
-            return data.HLT_Ele27_WPTight_Gsf | data.HLT_Ele28_WPTight_Gsf | data.HLT_Ele32_WPTight_Gsf | data.HLT_Ele32_WPTight_Gsf_L1DoubleEG | data.HLT_Ele35_WPTight_Gsf | data.HLT_Ele20_WPLoose_Gsf | data.HLT_Ele115_CaloIdVT_GsfTrkIdT | data.HLT_Ele135_CaloIdVT_GsfTrkIdT | data.HLT_Ele15_IsoVVVL_PFHT450 | data.HLT_Ele15_IsoVVVL_PFHT600 | data.HLT_Ele50_IsoVVVL_PFHT450 #| data.HLT_Ele30_WPTight_Gsf 
+            return data.HLT_Ele27_WPTight_Gsf | data.HLT_Ele28_WPTight_Gsf | data.HLT_Ele32_WPTight_Gsf | data.HLT_Ele32_WPTight_Gsf_L1DoubleEG | data.HLT_Ele35_WPTight_Gsf | data.HLT_Ele20_WPLoose_Gsf | data.HLT_Ele115_CaloIdVT_GsfTrkIdT | data.HLT_Ele135_CaloIdVT_GsfTrkIdT | data.HLT_Ele15_IsoVVVL_PFHT450 | data.HLT_Ele15_IsoVVVL_PFHT600 | data.HLT_Ele50_IsoVVVL_PFHT450 | data.HLT_Ele30_WPTight_Gsf 
 
     
     def get_muon_eg_trig(self, data, year):

@@ -317,8 +317,8 @@ class ZGammaTaggerRun2(Tagger):
         ee_cut2 = awkward.sum(ee_cut2, axis=1) >= 1
 
         mm_pairs = awkward.combinations(muons, 2, fields = ["LeadLepton", "SubleadLepton"])
-        mm_cut1 = mm_pairs.LeadLepton.pt > 25
-        mm_cut2 = mm_pairs.SubleadLepton.pt > 15
+        mm_cut1 = mm_pairs.LeadLepton.pt > 20
+        mm_cut2 = mm_pairs.SubleadLepton.pt > 10
         mm_pairs = mm_pairs[mm_cut1&mm_cut2]
         mm_cut1 = awkward.sum(mm_cut1, axis=1) >= 1
         mm_cut2 = awkward.sum(mm_cut2, axis=1) >= 1

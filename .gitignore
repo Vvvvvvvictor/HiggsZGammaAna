@@ -1,5 +1,7 @@
 # My personal thing
 .vscode
+*/*.cc
+*/*log*
 *bin
 *.eps
 *.png

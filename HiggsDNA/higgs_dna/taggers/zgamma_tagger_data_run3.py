@@ -35,13 +35,21 @@ DEFAULT_OPTIONS = {
         "mass_sum" : 185,
         "select_highest_pt_sum" : True
     },
-    "trigger" : {
+    "eetrigger" : {
         "2016" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8"],
         "2016UL_preVFP" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8"],
         "2016UL_postVFP" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8"],
         "2017" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8", "HLT_Ele30_WPTight_Gsf", "HLT_Ele32_WPTight_Gsf", "HLT_Ele35_WPTight_Gsf", "HLT_IsoMu24", "HLT_IsoMu27"],
         "2018" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8"],
-        "2022" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8", "HLT_Ele30_WPTight_Gsf", "HLT_Ele32_WPTight_Gsf", "HLT_Ele35_WPTight_Gsf", "HLT_IsoMu24", "HLT_IsoMu27", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ",  "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL"]
+        "2022" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Ele30_WPTight_Gsf", "HLT_Ele32_WPTight_Gsf", "HLT_Ele35_WPTight_Gsf"]
+    }, 
+    "mmtrigger" : {
+        "2016" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8"],
+        "2016UL_preVFP" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8"],
+        "2016UL_postVFP" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8"],
+        "2017" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8", "HLT_Ele30_WPTight_Gsf", "HLT_Ele32_WPTight_Gsf", "HLT_Ele35_WPTight_Gsf", "HLT_IsoMu24", "HLT_IsoMu27"],
+        "2018" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8"],
+        "2022" : ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8", "HLT_IsoMu24", "HLT_IsoMu27", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ",  "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL"]
     }, 
     "electrons" : {
         "pt" : 7.0
@@ -244,10 +252,18 @@ class ZGammaTaggerData(Tagger):
         # Make trigger cuts 
         if self.year is not None:
             trigger_cut = awkward.num(events.Photon) < 0 # dummy cut, all False
-            for hlt in self.options["trigger"][self.year]: # logical OR of all triggers
+            ee_trigger_cut = awkward.num(events.Photon) < 0 # dummy cut, all False
+            mm_trigger_cut = awkward.num(events.Photon) < 0 # dummy cut, all False
+            for hlt in self.options["eetrigger"][self.year]: # logical OR of all triggers
                 if hasattr(events, hlt):
-                    trigger_cut = (trigger_cut) | (events[hlt] == True)
+                    ee_trigger_cut = (ee_trigger_cut) | (events[hlt] == True)
+            for hlt in self.options["mmtrigger"][self.year]: # logical OR of all triggers
+                if hasattr(events, hlt):
+                    mm_trigger_cut = (mm_trigger_cut) | (events[hlt] == True)
+            trigger_cut = ee_trigger_cut | mm_trigger_cut
         else:
+            ee_trigger_cut = awkward.num(events.Photon) >= 0 # dummy cut, all False
+            mm_trigger_cut = awkward.num(events.Photon) >= 0 # dummy cut, all False
             trigger_cut = awkward.num(events.Photon) >= 0 # dummy cut, all True
 
         # Register as `vector.Momentum4D` objects so we can do four-vector operations with them
@@ -264,8 +280,8 @@ class ZGammaTaggerData(Tagger):
         ee_cut2 = awkward.sum(ee_cut2, axis=1) >= 1
 
         mm_pairs = awkward.combinations(muons, 2, fields = ["LeadLepton", "SubleadLepton"])
-        mm_cut1 = mm_pairs.LeadLepton.pt > 25
-        mm_cut2 = mm_pairs.SubleadLepton.pt > 15
+        mm_cut1 = mm_pairs.LeadLepton.pt > 20
+        mm_cut2 = mm_pairs.SubleadLepton.pt > 10
         mm_pairs = mm_pairs[mm_cut1&mm_cut2]
         mm_cut1 = awkward.sum(mm_cut1, axis=1) >= 1
         mm_cut2 = awkward.sum(mm_cut2, axis=1) >= 1
@@ -379,7 +395,12 @@ class ZGammaTaggerData(Tagger):
             else:
                 cut1 = N_e_mu_cut
 
-            cut2 = cut1 & trigger_cut
+            if "ele" in cut_type:
+                cut2 = cut1 & ee_trigger_cut
+            elif "mu" in cut_type:
+                cut2 = cut1 & mm_trigger_cut
+            else:
+                cut2 = cut1 & trigger_cut
 
             if "ele" in cut_type:
                 cut3 = cut2 & ee_cut1

@@ -25,7 +25,8 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "DYJetsToLL_amc"
+            "DYJetsToLL", "ZGToLLG", "TT", "LLAJJ", "ZG2JToG2L2J", "TTGJets", "TGJets", "WW", "WZ", 
+            "ZZ"
         ],
         "years": [
             "2017"
