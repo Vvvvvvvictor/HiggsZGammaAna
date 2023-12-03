@@ -204,6 +204,7 @@
         "genWeight",
         "run",
         "event",
+        "luminosityBlock",
         "fixedGridRhoAll"
     ]
 }

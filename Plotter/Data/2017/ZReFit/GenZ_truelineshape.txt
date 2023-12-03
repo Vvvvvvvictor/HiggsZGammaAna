@@ -1,0 +1,13 @@
+meanCB	91.25652
+sigmaCB	3.03906
+alphaCB	1.90543
+nCB	1.56106
+meanGauss1	90.61989
+meanGauss2	91.36887
+meanGauss3	94.74007
+sigmaGauss1	0.50000
+sigmaGauss2	1.03544
+sigmaGauss3	10.36859
+f1	0.76408
+f2	0.60910
+f3	0.88980

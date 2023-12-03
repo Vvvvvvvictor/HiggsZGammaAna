@@ -60,6 +60,10 @@ If you want to get the golden json, these files, `/eos/user/c/cmsdqm/www/CAF/cer
 
 You can find the name of variables in NanoAOD in [this link](https://cms-nanoaod-integration.web.cern.ch/autoDoc/NanoAODv11/2022postEE/doc_Muon_Run2022G-PromptNanoAODv11_v1-v2.html)
 
+## Z Constrain Refit
+
+See details in ```Plotter```.
+
 ## Machine learning for categorization
 
 ### Setup environment
