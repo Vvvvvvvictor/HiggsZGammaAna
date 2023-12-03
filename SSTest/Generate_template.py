@@ -2,9 +2,9 @@ import utils as ut
 import uproot, uproot3
 import ROOT
 
-log_path = "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/outputs/"
-bkg_list = ["ZGToLLG", "DYJetsToLL", "LLAJJ", "TT"]
-sig_list = ["ggH"]
+log_path = "/eos/home-j/jiehan/root/2017/outputs/"
+bkg_list = ["ZGToLLG"]
+sig_list = ["ggH", "VBF"]
 data_list = ["data"]
 # channels = ["zero_jet", "one_jet", "two_jet", "VH_ttH"]
 channels = ["two_jet"]
@@ -22,7 +22,7 @@ for chan in channels:
         selections = com_sel + ["(bdt_score_t>{}) & (bdt_score_t<{})".format(binaries[cat], binaries[cat+1])]
 
         name = "bkg_{}_cat{}".format(chan, cat)
-        bkg_hist = ROOT.TH1D(name,name, 80, 100, 180)
+        bkg_hist = ROOT.TH1D(name,name, 65, 105, 170)
         bkg_hist.Sumw2()
         for i, bkg in enumerate(bkg_list):
             arrays = ut.ReadFile(log_path+"{}/{}.root".format(chan, bkg), selections = selections)
@@ -30,7 +30,7 @@ for chan in channels:
         bkg_hist.Write(name)
 
         name = "sig_{}_cat{}".format(chan, cat)
-        sig_hist = ROOT.TH1D(name,name, 80, 100, 180)
+        sig_hist = ROOT.TH1D(name,name, 65, 105, 170)
         sig_hist.Sumw2()
         for i, sig in enumerate(sig_list):
             arrays = ut.ReadFile(log_path+"{}/{}.root".format(chan, sig), selections = selections)
@@ -38,7 +38,7 @@ for chan in channels:
         sig_hist.Write(name)
 
         name = "data_{}_cat{}".format(chan, cat)
-        data_hist = ROOT.TH1D(name,name, 80, 100, 180)
+        data_hist = ROOT.TH1D(name,name, 65, 105, 170)
         data_hist.Sumw2()
         selections = selections + ["(H_mass<120) | (H_mass>130)"]
         for i, data in enumerate(data_list):

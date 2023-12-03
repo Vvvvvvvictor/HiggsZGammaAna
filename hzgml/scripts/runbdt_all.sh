@@ -23,7 +23,7 @@ echo "Shielded parameter is: $S . Added variables is: $A ."
 ############################
 # python scripts/train_bdt.py -r zero_jet --save -s $S -a $A
 # python scripts/train_bdt.py -r one_jet --save -s $S -a $A
-python scripts/train_bdt.py -r two_jet --save -s $S -a $A
+# python scripts/train_bdt.py -r two_jet --save -s $S -a $A
 # python scripts/train_bdt.py -r VBF --save -s $S -a $A
 # python scripts/train_bdt.py -r VH_ttH --save -s $S -a $A
 
@@ -32,7 +32,7 @@ python scripts/train_bdt.py -r two_jet --save -s $S -a $A
 ###########################################
 # python scripts/apply_bdt.py -r zero_jet -s $S -a $A
 # python scripts/apply_bdt.py -r one_jet -s $S -a $A
-python scripts/apply_bdt.py -r two_jet -s $S -a $A
+# python scripts/apply_bdt.py -r two_jet -s $S -a $A
 # python scripts/apply_bdt.py -r VH_ttH -s $S -a $A
 
 ###########################################################
@@ -40,7 +40,7 @@ python scripts/apply_bdt.py -r two_jet -s $S -a $A
 ###########################################################
 # python scripts/categorization_1D.py -r zero_jet -b 4 -s $S -a $A --minN 300
 # python scripts/categorization_1D.py -r one_jet -b 4 -s $S -a $A --minN 300
-python scripts/categorization_1D.py -r two_jet -b 3 -s $S -a $A --minN 100
+python scripts/categorization_1D.py -r two_jet -b 4 -s $S -a $A --minN 3
 # python scripts/categorization_1D.py -r two_jet -b 4 --minN 200
 # python scripts/categorization_1D.py -r VH_ttH -b 2 -s $S -a $A --minN 20
 
