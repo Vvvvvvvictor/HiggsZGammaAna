@@ -199,6 +199,7 @@ We can get a file(`bkg_sig_template.root`) with the bkg and sig shape in each ch
 ```
 python SSTest/Generate_template.py
 ```
+You need to modify the range of the hist and make sure it is the same as that in `SSTest.cpp` or `SSTest_core_function.cpp`.
 
 **2. Run spurial signal test and find the best bkg function**
 
@@ -206,6 +207,18 @@ Run this code:
 ```
 root -l -q SSTest/SSTest.cpp
 ```
+There is some option in `SSTest.cpp`, cat: which category of this channel to test, channel: one_jet and something similar, sig: How many times of signal injected, bkg_fun: function used to discribe background.
+
+Also a Spurious signal test based on core function method is provided:
+```
+root -l -q SSTest/SSTest_core_function.cpp
+```
+There is some option in `SSTest_core_function.cpp`, cat: which category of this channel to test, channel: one_jet and something similar, sig: How many times of signal injected.
+
+for the background function for fitting, we can change inside the codes.
+
+**Take care that the observed variable in this code should be `CMS_hzg_mass`, because this is the name used in `ZGMCShape.root`. We should use the same name, or we would fail.**
+
 We select the best background function by spurial signal, chi square and F test. We can see the fitting result and name of the best function in the log file.(not done yet)
 
 ## NOTE

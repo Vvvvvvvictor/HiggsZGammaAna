@@ -2,7 +2,7 @@ import utils as ut
 import uproot, uproot3
 import ROOT
 
-log_path = "/eos/home-j/jiehan/root/2017/outputs/"
+log_path = "/afs/cern.ch/user/j/jiehan/public/InputData/"
 bkg_list = ["ZGToLLG"]
 sig_list = ["ggH", "VBF"]
 data_list = ["data"]
@@ -40,7 +40,7 @@ for chan in channels:
         name = "data_{}_cat{}".format(chan, cat)
         data_hist = ROOT.TH1D(name,name, 65, 105, 170)
         data_hist.Sumw2()
-        selections = selections + ["(H_mass<120) | (H_mass>130)"]
+        selections = selections + ["(H_mass<122) | (H_mass>128)"]
         for i, data in enumerate(data_list):
             arrays = ut.ReadFile(log_path+"{}/{}.root".format(chan, data), selections = selections)
             data_hist, yield_h = ut.AddHist(arrays, "H_mass", data_hist)

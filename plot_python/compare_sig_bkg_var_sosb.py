@@ -9,17 +9,19 @@ print("Starting to run the tutorial of plotting in Higgs to Z Gamma analysis")
 print("=====================================================================")
 
 # Basic set of picture's content
-mc_legend = ["SM ZG", "DYJets", "LWK ZG", "TT", "Diboson"]
+# mc_legend = ["SM ZG", "DYJets", "LWK ZG", "TT", "Diboson"]
+mc_legend = []
+data_legend = ["Data"]
 sig_legend = []
 channel = "two_jet"
-var = "pt_balance"
-bins = 100
-x_range = (0, 1)
+var = "H_mass"
+bins = 80
+x_range = (100, 180)
 ratio = 200
-x_title = "P_{T} balance without jets"
+x_title = "M_{ll#gamma}(GeV/c^{2})"
 y_title = "Events/{:.2f}".format((x_range[1]-x_range[0])/bins)
 sub_y_title = "S/#sqrt{B}"
-selections = [ "gamma_mvaID_WP80==1"]
+selections = ["gamma_mvaID_WPL==1"]
 
 # Dataset list
 sig_file_list = [
@@ -30,12 +32,18 @@ sig_file_list = [
     "/eos/home-j/jiehan/root/2017/skimmed_ntuples/ZH/2017.root",
     "/eos/home-j/jiehan/root/2017/skimmed_ntuples/ttH/2017.root"
 ]
+# mc_file_list = [
+#     "/eos/home-j/jiehan/root/2017/skimmed_ntuples/ZGToLLG/2017.root",
+#     "/eos/home-j/jiehan/root/2017/skimmed_ntuples/DYJetsToLL/2017.root",
+#     "/eos/home-j/jiehan/root/2017/skimmed_ntuples/LLAJJ/2017.root",
+#     "/eos/home-j/jiehan/root/2017/skimmed_ntuples/TT/2017.root",
+#     ["/eos/home-j/jiehan/root/2017/skimmed_ntuples/WW/2017.root", "/eos/home-j/jiehan/root/2017/skimmed_ntuples/WZ/2017.root", "/eos/home-j/jiehan/root/2017/skimmed_ntuples/ZZ/2017.root"]
+# ]
 mc_file_list = [
-    "/eos/home-j/jiehan/root/2017/skimmed_ntuples/ZGToLLG/2017.root",
-    "/eos/home-j/jiehan/root/2017/skimmed_ntuples/DYJetsToLL/2017.root",
-    "/eos/home-j/jiehan/root/2017/skimmed_ntuples/LLAJJ/2017.root",
-    "/eos/home-j/jiehan/root/2017/skimmed_ntuples/TT/2017.root",
-    ["/eos/home-j/jiehan/root/2017/skimmed_ntuples/WW/2017.root", "/eos/home-j/jiehan/root/2017/skimmed_ntuples/WZ/2017.root", "/eos/home-j/jiehan/root/2017/skimmed_ntuples/ZZ/2017.root"]
+
+]
+data_file_list = [
+    "/eos/home-j/jiehan/root/2017/skimmed_ntuples/data/2017.root"
 ]
 
 # Set initial style
@@ -78,15 +86,35 @@ for i, bkg in enumerate(mc_file_list):
     plot.Set(file_hist, LineWidth=0, FillColor=ROOT.TColor.GetColorDark(i+2))
     h_stack.Add(file_hist)
 
+data_hists = ROOT.TH1D("","",bins,x_range[0],x_range[1])
+data_yields = []
+
+for i, data in enumerate(data_file_list):
+    if isinstance(data, list):
+        for sub_data in data:
+            arrays = pic.read_file(sub_bkg, var, channel, selections)
+            if data_hist in globals():
+                data_hist, yields = pic.get_hist_data(arrays, var, 1, "data_{}".format(i), bins, x_range, data_hist)
+            else:
+                data_hist, yields = pic.get_hist_data(arrays, var, 1, "data_{}".format(i), bins, x_range)
+    else: 
+        arrays = pic.read_file(data, var, channel, selections)
+        data_hist, yields = pic.get_hist_data(arrays, var, 1, "data_{}".format(i), bins, x_range)
+    data_hists.Add(data_hist)
+    data_yields.append(yields)
+    plot.Set(data_hist, LineWidth=0, FillColor=ROOT.TColor.GetColorDark(i+2))
+    h_stack.Add(data_hist)
+
 print("==============================")
 print("Finish reading skimmed ntuples")
 print("==============================")
 
-rp = pic.get_S_over_sqrtB(sig_hist, mc_hist, ratio, (0.,0.05))
+# rp = pic.get_S_over_sqrtB(sig_hist, mc_hist, ratio, (0.,0.05))
+rp = pic.get_S_over_sqrtB(sig_hist, data_hists, ratio, (0.,0.05))
 
 c1.Update()
 pads[0].cd()
-plot.Set(pads[0], Logy=1)
+plot.Set(pads[0], Logy=0)
 h_stack.Draw("hist")
 plot.Set(h_stack.GetXaxis(), LabelSize=0)
 plot.Set(h_stack.GetYaxis(), Title=y_title)
@@ -101,6 +129,8 @@ plot.Set(legend, NColumns=3, TextSize=0.023)
 legend.AddEntry("sig", "sigx{:.0f}({:.2f})".format(ratio, sum(sig_yields)), "lep")
 for i in range(len(mc_file_list)):
     legend.AddEntry("mc_{}".format(i), mc_legend[i]+"({:.2f})".format(mc_yields[i]), "f")
+for i in range(len(data_file_list)):
+    legend.AddEntry("data_{}".format(i), data_legend[i]+"({:.2f})".format(data_yields[i]), "f")
 legend.Draw()
 
 print("========================")

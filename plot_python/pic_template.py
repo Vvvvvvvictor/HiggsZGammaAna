@@ -35,9 +35,26 @@ def get_hist(arrays, variable, ratio, name, bins, range, hist=None):
         hist.Fill(float(arrays[variable][i]), float(arrays['weight'][i])*ratio)
     hist.SetLineWidth(3)
     hist.SetMarkerStyle(0)
-    yield_hist = (hist.Integral() - yields) / ratio
-    print(yield_hist)
-    return hist, yield_hist
+    yield_inte = hist.Integral()
+    yield_sing = (yield_inte - yields)# / ratio
+    print(yield_sing)
+    return hist, yield_sing, yield_inte
+
+def get_hist_sb(arrays, variable, ratio, name, bins, range, blind_range, hist=None):
+    if hist is None:
+        hist = ROOT.TH1D(name,name,bins,range[0],range[1])
+        hist.Sumw2()
+    yields = hist.Integral()
+    for i in trange(0, len(arrays[variable])):
+        if (arrays["H_mass"][i]>blind_range[1] and arrays["H_mass"][i]<blind_range[0]):
+            continue
+        hist.Fill(float(arrays[variable][i]), float(arrays['weight'][i])*ratio)
+    hist.SetLineWidth(3)
+    hist.SetMarkerStyle(0)
+    yield_inte = hist.Integral()
+    yield_sing = (yield_inte - yields)# / ratio
+    print(yield_sing)
+    return hist, yield_sing, yield_inte
 
 def get_ratio_hist(numerator_h, denominator_h, range=(0.35, 1.65)):
     ratio_h = numerator_h.Clone("ratio_h")
