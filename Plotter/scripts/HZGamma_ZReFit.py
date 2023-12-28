@@ -153,7 +153,7 @@ def get_GenZ_lineshape(filename, treeName, outpath):
 
 
 def ZConstrainReFit(treeName, outpath, splitJobs):
-    analyzer_cfg = AC.Analyzer_Config('ggH', args.year)
+    analyzer_cfg = AC.Analyzer_Config('inclusive', args.year)
     analyzer_cfg.Print_Config()
     analyzer_cfg.out_dir = "{}/data_Zrefit".format(outpath)
     analyzer_cfg.plot_output_path = "{}/ZRefit_plots".format(outpath)

@@ -60,6 +60,62 @@ class GoldenJsonTagger(Tagger):
                 results = [cut]
         )
 
+        self.Get_ProcessedLumi(events, cut)
+
         return cut, events
+
+
+    def Get_ProcessedLumi(self, events, cut):
+
+        events_golden = events[cut]
+        lumiBlocks = events_golden.luminosityBlock
+        runs = events_golden.run
+        events = events_golden.event
+
+        # dic to store the final results
+        result_dict = {}
+
+        # find runs
+        unique_values_runs = set(awkward.to_list(runs))
+
+        for unique_run in unique_values_runs:
+            mask = (runs == unique_run)  
+            filtered_lumiBlocks = lumiBlocks[mask] 
+            filtered_events = events[mask] 
+
+            filtered_lumiBlocks_list = awkward.to_list(filtered_lumiBlocks)
+
+            #print("unique_run", unique_run, "mask", mask, "filtered_lumiBlocks_list:", filtered_lumiBlocks_list , "event:", awkward.to_list(filtered_events))
+            filtered_lumiBlocks_list.sort()
+            #print(filtered_lumiBlocks_list)
+
+            # find the lumiBlock range
+            ranges = []
+            start = filtered_lumiBlocks_list[0]
+            for i in range(1, len(filtered_lumiBlocks_list)):
+                if filtered_lumiBlocks_list[i] - filtered_lumiBlocks_list[i - 1] > 1:
+                    if start == filtered_lumiBlocks_list[i - 1]:
+                        ranges.append([start, start])
+                    else:
+                        ranges.append([start, filtered_lumiBlocks_list[i - 1]])
+                    start = filtered_lumiBlocks_list[i]
+            #print("ranges,", ranges)
+            if start == filtered_lumiBlocks_list[-1]:
+                ranges.append([start, start])
+            else:
+                ranges.append([start, filtered_lumiBlocks_list[-1]])
+
+            if str(unique_run) not in result_dict:
+                result_dict[str(unique_run)] = [ranges]
+            else:
+                result_dict[str(unique_run)].append(ranges)
+
+        for key in result_dict.keys():
+            if len(result_dict[key]) == 1:
+                result_dict[key] = result_dict[key][0]
+
+        print("[[INFO]] Processed Lumi:",  result_dict)
+
+
 
 

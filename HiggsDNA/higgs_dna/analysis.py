@@ -173,8 +173,8 @@ class AnalysisManager():
                 "module_name" : "higgs_dna.analysis",
                 "function_name" : "run_analysis"
             },
-            # "batch_system" : "condor",
-            "batch_system" : "local",
+            "batch_system" : "condor",
+            #"batch_system" : "local",
             "fpo" : None, # number of input files per output file (i.e. per job)
             "n_cores" : 5, # number of cores for local running
             "merge_outputs" : False,

@@ -60,6 +60,30 @@ If you want to get the golden json, these files, `/eos/user/c/cmsdqm/www/CAF/cer
 
 You can find the name of variables in NanoAOD in [this link](https://cms-nanoaod-integration.web.cern.ch/autoDoc/NanoAODv11/2022postEE/doc_Muon_Run2022G-PromptNanoAODv11_v1-v2.html)
 
+## processed lumi check
+
+The processed lumi information will be printed in the log file with "[[INFO]] Processed Lumi:" as prefix. The code ```scripts/CheckProcessedLumi.py``` can grab these information from the log files and combine them into a final file named "processedLumi.json".
+
+Then, run the lumi check command:
+
+1. Load cms enviornment using cmsenv.
+2. Set the brilcal environment:
+```
+export PATH=$HOME/.local/bin:/cvmfs/cms-bril.cern.ch/brilconda3/bin:$PATH
+```
+3. Install the latest version of brilcalc
+```
+pip install --user --upgrade brilws
+```
+Sometime you may get a strange error. Then try to uninstall the brilcalc and then reinstall it. Somehow it works many times.
+```
+pip uninstall -y brilws
+```
+4. Get the luminosity:
+```
+brilcalc lumi --normtag /cvmfs/cms-bril.cern.ch/cms-lumi-pog/Normtags/normtag_PHYSICS.json -u /fb  -i <JSON FILE PATH>/processedLumis.json
+```
+
 ## Z Constrain Refit
 
 See details in ```Plotter```.

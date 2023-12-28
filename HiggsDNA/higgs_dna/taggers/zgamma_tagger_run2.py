@@ -317,8 +317,8 @@ class ZGammaTaggerRun2(Tagger):
         ee_cut2 = awkward.sum(ee_cut2, axis=1) >= 1
 
         mm_pairs = awkward.combinations(muons, 2, fields = ["LeadLepton", "SubleadLepton"])
-        mm_cut1 = mm_pairs.LeadLepton.pt > 20
-        mm_cut2 = mm_pairs.SubleadLepton.pt > 10
+        mm_cut1 = mm_pairs.LeadLepton.pt > 25
+        mm_cut2 = mm_pairs.SubleadLepton.pt > 15
         mm_pairs = mm_pairs[mm_cut1&mm_cut2]
         mm_cut1 = awkward.sum(mm_cut1, axis=1) >= 1
         mm_cut2 = awkward.sum(mm_cut2, axis=1) >= 1
@@ -361,6 +361,7 @@ class ZGammaTaggerRun2(Tagger):
         has_gamma_cand = (awkward.num(photons) >= 1) #& (events.n_iso_photons == 0) # only for dy samples
         gamma_cand = awkward.firsts(photons)
         gamma_mvaID_WPL = ((gamma_cand.isScEtaEB & (gamma_cand.mvaID > self.options["photons"]["mvaID_barrel"])) | (gamma_cand.isScEtaEE & (gamma_cand.mvaID > self.options["photons"]["mvaID_endcap"])))
+        gamma_e_veto = gamma_cand.electronVeto > self.options["photons"]["e_veto"]
 
         awkward_utils.add_field(gamma_cand, "mass", awkward.ones_like(gamma_cand.pt) * 0) #TODO: run3 BUG
 
@@ -374,6 +375,7 @@ class ZGammaTaggerRun2(Tagger):
         awkward_utils.add_field(events, "gamma_mvaID_WPL",  gamma_mvaID_WPL)
         awkward_utils.add_field(events, "gamma_chiso",  gamma_cand.pfRelIso03_chg) #run2
         awkward_utils.add_field(events, "gamma_alliso",  gamma_cand.pfRelIso03_all) #run2
+        awkward_utils.add_field(events, "gamma_e_veto",  gamma_e_veto)
         # awkward_utils.add_field(events, "gamma_chiso",  gamma_cand.pfRelIso03_chg_quadratic) #run3
         # awkward_utils.add_field(events, "gamma_alliso",  gamma_cand.pfRelIso03_all_quadratic) #run3
         #awkward_utils.add_field(events, "gamma_mvaID_17",  gamma_cand.mvaID_Fall17V2) #run3
@@ -412,6 +414,24 @@ class ZGammaTaggerRun2(Tagger):
             )
 
         all_cuts = trigger_cut & has_z_cand & has_gamma_cand & sel_h_1 & sel_h_2 & sel_h_3
+        
+        # bing with control regions
+        var_CR1 = gamma_mvaID_WPL
+        var_CR2 = gamma_e_veto
+        SR = (var_CR1) & (var_CR2)
+        CR1 = (~var_CR1) & (var_CR2)
+        CR2 = (var_CR1) & (~var_CR2)
+        CR3 = (~var_CR1) & (~var_CR2)
+        SR = awkward.fill_none(SR, value = False)
+        CR1 = awkward.fill_none(CR1, value = False)
+        CR2 = awkward.fill_none(CR2, value = False)
+        CR3 = awkward.fill_none(CR3, value = False)
+        regions = awkward.where(SR, 0, awkward.where(CR1, 1, awkward.where(CR2, 2, awkward.where(CR3, 3, -999))))
+        #for i in range(5000):
+        #    print("SR1:", SR1[i], "SR:", SR[i], "CR1:", CR1[i], "CR2", CR2[i], "CR3", CR3[i], "regions:", regions[i])
+        awkward_utils.add_field(events, "regions",  regions)
+        
+
 
         for cut_type in ["zgammas", "zgammas_ele", "zgammas_mu", "zgammas_w", "zgammas_ele_w", "zgammas_mu_w"]:
             if "_w" in cut_type:
@@ -626,7 +646,8 @@ class ZGammaTaggerRun2(Tagger):
         use_central_nano = options["use_central_nano"] # indicates whether we are using central nanoAOD (with some branches that are necessary for full diphoton preselection missing) or custom nanoAOD (with these branches added)
 
 
-        all_cuts = pt_cut & eta_cut & e_veto_cut
+        #all_cuts = pt_cut & eta_cut & e_veto_cut
+        all_cuts = pt_cut # bing for CR selection
 
         self.register_cuts(
                 names = ["pt", "eta", "e_veto", "all"],

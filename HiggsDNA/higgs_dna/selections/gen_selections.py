@@ -26,13 +26,11 @@ def select_x_to_yz(gen_part, x_pdgId, y_pdgId, z_pdgId):
     if z_pdgId is None:
         z_pdgId = abs(gen_part.pdgId)
         
-    for i in gen_part[2]:
-        print("DEBUG: bing", i)
     # select H->Zg and sort according to the pdgID (leading for Z, subleading for photon)
     gen_yz_from_x = gen_part[(((abs(gen_part.pdgId) == y_pdgId) | (abs(gen_part.pdgId) == z_pdgId)) & (abs(gen_part.pdgId[gen_part.genPartIdxMother]) == x_pdgId)) | ( (((abs(gen_part.pdgId) == 11)|(abs(gen_part.pdgId) == 13)|(abs(gen_part.pdgId) == 15))&(abs(gen_part.pdgId[gen_part.genPartIdxMother]) == y_pdgId)&(abs(gen_part.pdgId[gen_part.genPartIdxMother[gen_part.genPartIdxMother]]) == x_pdgId)) )]
     gen_yz_from_x = gen_yz_from_x[awkward.argsort(abs(gen_yz_from_x.pdgId), ascending = False, axis = 1)]
 
-    
+    '''
     print("DEBUG: bing", gen_yz_from_x.fields)
     print("DEBUG: bing", gen_yz_from_x)
     for i in gen_yz_from_x[1]:
@@ -43,6 +41,7 @@ def select_x_to_yz(gen_part, x_pdgId, y_pdgId, z_pdgId):
     print("DEBUG: bing")
     for i in gen_yz_from_x[3]:
         print("DEBUG: bing", i)
+    '''
     
 
     # Make all pairs of y's and z's that decay from x

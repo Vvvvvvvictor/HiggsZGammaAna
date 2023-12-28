@@ -67,6 +67,9 @@ def main():
             
             weight = ntup.weight_central
             #weight = ntup.weight
+            if ntup.regions != 1:
+                continue
+
 
             if  args.region == "SR" and (ntup.H_m>135. or ntup.H_m<115.): continue
             if  args.region == "CR" and (ntup.H_m<135. and ntup.H_m>115.): continue
@@ -77,8 +80,11 @@ def main():
             if ("DY" in sample) and (ntup.n_iso_photons > 0):
                 continue
 
-            if not (ntup.n_jets >=2 and ntup.n_leptons < 3):
+            if ("ZGToLLG" in sample) and (ntup.n_iso_photons < 1):
                 continue
+
+            #if not (ntup.n_jets >=2 and ntup.n_leptons < 3):
+            #    continue
 
             for var_name in var_names:
                 histos[var_name][sample].Fill( getattr(ntup,var_name), weight )

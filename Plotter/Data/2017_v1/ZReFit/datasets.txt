@@ -1,0 +1,2 @@
+ggH             /afs/cern.ch/work/z/zewang/private/HZGamma/signal_run2_2017_GenZShape/ggH_M125_2017/merged_nominal.parquet
+VBFH            /afs/cern.ch/work/z/zewang/private/HZGamma/signal_run2_2017_GenZShape/VBFH_M125_2017/merged_nominal.parquet

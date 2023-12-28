@@ -25,7 +25,12 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "ggH_M125", "VBFH_M125", "WplusH_M125", "WminusH_M125", "ZH_M125", "ttH_M125"
+            "ggH_M125",
+            "VBFH_M125",
+            "WplusH_M125",
+            "WminusH_M125",
+            "ZH_M125",
+            "ttH_M125"
         ],
         "years": [
             "2017"
@@ -77,6 +82,7 @@
         "gamma_genPartFlav",
         "gamma_mvaID_WP80",
         "gamma_mvaID_WPL",
+        "gamma_e_veto",
         "gamma_fsr_pt",
         "gamma_fsr_eta",
         "gamma_fsr_phi",
@@ -146,6 +152,7 @@
         "n_iso_photons",
         "MET_pt",
         "MET_phi",
+        "regions",
         "weight_central",
         "run",
         "event",
@@ -156,16 +163,17 @@
         "btagWeight_DeepCSVB",
         "btagWeight_CSVV2",
         "genWeight",
-        "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ",
-        "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8",
+        "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL",
+        "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ",
         "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8",
-        "HLT_Ele30_WPTight_Gsf",
-        "HLT_Ele32_WPTight_Gsf",
+        "HLT_Ele27_WPTight_Gsf",
+        "HLT_Ele32_WPTight_Gsf_L1DoubleEG",
         "HLT_Ele35_WPTight_Gsf",
+        "HLT_IsoMu20",
         "HLT_IsoMu24",
         "HLT_IsoMu27",
-        "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ",
-        "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL",
+        "HLT_Mu50",
+        "HLT_IsoMu24_eta2p1",
         "Photon_pt",
         "Photon_eta",
         "Photon_phi",

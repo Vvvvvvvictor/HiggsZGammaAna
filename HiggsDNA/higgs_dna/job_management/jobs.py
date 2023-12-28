@@ -291,9 +291,9 @@ class CondorJob(Job):
 
     """
     REQUESTS = {
-            "REQ_MEMORY" : 4096, # request 4GB of memory
-            "REQ_DISK" : 10000, # request ~10GB of disk
-            "REQ_NCPUS" : 1 # just 1 CPU
+            "REQ_MEMORY" : 8192, # request 8GB of memory
+            "REQ_DISK" : 20000, # request ~20GB of disk
+            "REQ_NCPUS" : 2 # just 2 CPU
     }
 
     def write_condor_files(self):
