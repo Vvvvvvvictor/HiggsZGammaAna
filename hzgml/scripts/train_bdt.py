@@ -30,9 +30,9 @@ def getArgs():
     parser.add_argument('-f', '--fold', action='store', type=int, nargs='+', choices=[0, 1, 2, 3], default=[0, 1, 2, 3], help='specify the fold for training')
     parser.add_argument('-p', '--params', action='store', type=dict, default=None, help='json string.') #type=json.loads
     parser.add_argument('--save', action='store_true', help='Save model weights to HDF5 file')
-    parser.add_argument('--corr', action='store_true', default=False, help='Plot corelation between each training variables')
+    parser.add_argument('--corr', action='store_true', default=True, help='Plot corelation between each training variables')
     parser.add_argument('--importance', action='store_true', default=True, help='Plot importance of variables, parameter "gain" is recommanded')
-    parser.add_argument('--roc', action='store_true', default=False, help='Plot ROC')
+    parser.add_argument('--roc', action='store_true', default=True, help='Plot ROC')
     parser.add_argument('--skopt', action='store_true', default=False, help='Run hyperparameter tuning using skopt')
     parser.add_argument('--skopt-plot', action='store_true', default=False, help='Plot skopt results')
 
@@ -98,11 +98,13 @@ class XGBoostHandler(object):
 
         self.inputTree = 'inclusive'
         self.train_signal = []
+        self.train_data_background = []
         self.train_mc_background = []
         self.train_dd_background = []
         self.train_variables = []
         self.preselections = []
         self.mc_preselections = []
+        self.data_preselections = []
         self.signal_preselections = []
         self.background_preselections = []
         self.randomIndex = 'eventNumber'
@@ -188,6 +190,7 @@ class XGBoostHandler(object):
 
     def checkConfig(self):
         if not self.train_signal: print('ERROR: no training signal!!')
+        if not self.train_data_background: print('ERROR: no data side band training background!!')
         if not self.train_mc_background: print('ERROR: no MC training background!!')
         if not self.train_dd_background: print('ERROR: no data-driven training background!!')
         if not self.train_variables: print('ERROR: no training variables!!')
@@ -220,6 +223,11 @@ class XGBoostHandler(object):
         elif sample == 'background':
             for p in self.background_preselections:
                 data = data[eval(p)]
+        elif sample == 'data':
+            for p in self.background_preselections:
+                data = data[eval(p)]
+            for p in self.data_preselections:
+                data = data[eval(p)]
         elif sample == 'mc_background':
             for p in self.background_preselections:
                 data = data[eval(p)]
@@ -238,7 +246,7 @@ class XGBoostHandler(object):
 
     def readData(self):
 
-        sig_list, bkg_mc_list, bkg_dd_list = [], [], []
+        sig_list, bkg_mc_list, bkg_dd_list, bkg_data_list = [], [], [], []
         for sig_cat in self.train_signal:
             sig_cat_folder = self._inputFolder + '/' + sig_cat
             for sig in os.listdir(sig_cat_folder):
@@ -251,6 +259,10 @@ class XGBoostHandler(object):
             bkg_cat_folder = self._inputFolder + '/' + bkg_cat
             for bkg in os.listdir(bkg_cat_folder):
                 if bkg.endswith('.root'): bkg_mc_list.append(bkg_cat_folder + '/' + bkg)
+        for bkg_cat in self.train_data_background:
+            bkg_cat_folder = self._inputFolder + '/' + bkg_cat
+            for bkg in os.listdir(bkg_cat_folder):
+                if bkg.endswith('.root'): bkg_data_list.append(bkg_cat_folder + '/' + bkg)
 
         print('-------------------------------------------------')
         for sig in sig_list: print('XGB INFO: Adding signal sample: ', sig)
@@ -283,6 +295,14 @@ class XGBoostHandler(object):
                 data = self.preselect(data, 'background')
                 self.m_data_bkg = self.m_data_bkg.append(data, ignore_index=True)
 
+        print('----------------------------------------------------------')
+        if bkg_data_list:
+            for bkg in bkg_data_list: print('XGB INFO: Adding data side band background sample: ', bkg)
+            #TODO put this to the config
+            for data in tqdm(read_root(sorted(bkg_data_list), key=self.inputTree, columns=self._branches, chunksize=self._chunksize), desc='XGB INFO: Loading training backgrounds', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
+                data = self.preselect(data, 'background')
+                self.m_data_bkg = self.m_data_bkg.append(data, ignore_index=True)
+
     def plot_corr(self, data_type):
         if not os.path.isdir("plots/corr/"):
             os.makedirs("plots/corr/")
@@ -291,7 +311,7 @@ class XGBoostHandler(object):
         else:
             data = self.m_data_bkg
         columns = list(data.columns)
-        for rem in ("is_center", "weight", "event"):
+        for rem in ("is_center", "weight", "event", "gamma_mvaID_WP80", "gamma_mvaID_WPL", "n_iso_photons"):
             if rem in columns:
                 columns.remove(rem)
                 data = data.drop(rem, axis=1)

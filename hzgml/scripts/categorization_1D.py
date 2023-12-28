@@ -104,7 +104,8 @@ def gettingsig(region, variable, boundaries, transform, estimate):
     yields['s/b'] = yields['sig']/yields['bkg']
     yields['s^2/b'] = yields['sig']*yields['sig']/yields['bkg']
 
-    print(yields)
+    for i in yields:
+        print(yields[i])
 
     z = np.sqrt((yields['z']**2).sum())
     u = np.sqrt((yields['z']**2 * yields['u']**2).sum())/z

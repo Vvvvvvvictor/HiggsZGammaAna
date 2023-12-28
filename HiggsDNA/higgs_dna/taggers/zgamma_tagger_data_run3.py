@@ -107,6 +107,9 @@ class ZGammaTaggerData(Tagger):
         else:
             rho = awkward.ones_like(events.Photon)
 
+        if not self.is_data:
+            self.overlap_removal(events=events)
+
         zgamma_selection, zgammas = self.produce_and_select_zgammas(
                 events = events,
                 rho = rho,
@@ -117,6 +120,30 @@ class ZGammaTaggerData(Tagger):
             zgammas = self.calculate_gen_info(zgammas, self.options["gen_info"])
 
         return zgamma_selection, zgammas 
+
+        def overlap_removal(self, events):
+        """
+        Select isolation photons in events
+        Add number of isolation photons (n_iso_photons) in output .parquet file to indetify thé overlap events
+        """
+        
+        """
+        statusFlags usage: (events.GenPart.statusFlags // numpy.power(2, i)) % 2 == 1
+        "statusFlags" is a number with 14 bits. 
+        Filling "1" on corresponding digit when the particle meets one of the 14 conditions, else remaining "0".
+        Echo paticles can meet more than one kind of condition, thus, more than one digit in "statusFlags" is "1".
+        """
+        iso_photons_cut = (events.GenPart.pdgId == 22) & (events.GenPart.pt > 15) & (abs(events.GenPart.eta) < 2.6) & (( (events.GenPart.statusFlags // numpy.power(2, 0)) % 2 == 1 ) | ( (events.GenPart.statusFlags // numpy.power(2, 8)) % 2 == 1 ))
+        iso_photons = events.GenPart[iso_photons_cut]
+
+        truth_objects_cut =  (events.GenPart.pdgId != 22) & (events.GenPart.pt > 5) & ( (events.GenPart.statusFlags // numpy.power(2, 8)) % 2 == 1 ) 
+        truth_objects = events.GenPart[truth_objects_cut]
+
+        iso_cut = object_selections.delta_R(iso_photons, truth_objects, 0.05)
+        iso_photons = iso_photons[iso_cut]
+
+        n_iso_photons = awkward.num(iso_photons)
+        awkward_utils.add_field(events, "n_iso_photons", n_iso_photons, overwrite=True)
 
     def produce_and_select_zgammas(self, events, rho, options):
         """

@@ -22,6 +22,7 @@ def read_file(file, var = None, tree = "inclusive", selections = []):
         decro_sel.append(i)
     arrays = uproot.open(file+':'+tree).arrays(variabels,library='ak')
     for i in decro_sel:
+        print(i)
         arrays = arrays[eval(i)]
     return arrays
 
@@ -29,13 +30,31 @@ def get_hist(arrays, variable, ratio, name, bins, range, hist=None):
     if hist is None:
         hist = ROOT.TH1D(name,name,bins,range[0],range[1])
         hist.Sumw2()
+    yields = hist.Integral()
     for i in trange(0, len(arrays[variable])):
         hist.Fill(float(arrays[variable][i]), float(arrays['weight'][i])*ratio)
     hist.SetLineWidth(3)
     hist.SetMarkerStyle(0)
-    yield_hist = hist.Integral()
-    print(yield_hist)
-    return hist, yield_hist
+    yield_inte = hist.Integral()
+    yield_sing = (yield_inte - yields)# / ratio
+    print(yield_sing)
+    return hist, yield_sing, yield_inte
+
+def get_hist_sb(arrays, variable, ratio, name, bins, range, blind_range, hist=None):
+    if hist is None:
+        hist = ROOT.TH1D(name,name,bins,range[0],range[1])
+        hist.Sumw2()
+    yields = hist.Integral()
+    for i in trange(0, len(arrays[variable])):
+        if (arrays["H_mass"][i]>blind_range[1] and arrays["H_mass"][i]<blind_range[0]):
+            continue
+        hist.Fill(float(arrays[variable][i]), float(arrays['weight'][i])*ratio)
+    hist.SetLineWidth(3)
+    hist.SetMarkerStyle(0)
+    yield_inte = hist.Integral()
+    yield_sing = (yield_inte - yields)# / ratio
+    print(yield_sing)
+    return hist, yield_sing, yield_inte
 
 def get_ratio_hist(numerator_h, denominator_h, range=(0.35, 1.65)):
     ratio_h = numerator_h.Clone("ratio_h")
@@ -71,3 +90,43 @@ def get_ratio_hist(numerator_h, denominator_h, range=(0.35, 1.65)):
     x.SetLabelSize(20)
 
     return ratio_h
+
+def get_S_over_sqrtB(hist_s, hist_b, ratio, yrange=(0., 0.5)):
+    hist_sosb = hist_s.Clone("hist_sosb")
+    hist_sosb.Reset()
+    hist_sosb.SetLineColor(ROOT.kBlack)
+    hist_sosb.SetMarkerStyle(0)
+    hist_sosb.SetMarkerSize(1)
+    hist_sosb.SetTitle("")
+    hist_sosb.SetMinimum(yrange[0])
+    hist_sosb.SetMaximum(yrange[1])
+
+    for i in range(hist_s.GetNbinsX()):
+        s_bin_content = hist_s.GetBinContent(i) / ratio
+        b_bin_content = hist_b.GetBinContent(i)
+        
+        # Avoid division by zero
+        if b_bin_content > 0:
+            ssqrtoverb = s_bin_content / (b_bin_content**0.5)
+            hist_sosb.SetBinContent(i, ssqrtoverb)
+
+    # Adjust y-axis settings
+    y = hist_sosb.GetYaxis()
+    y.SetTitle("")
+    y.SetNdivisions(505)
+    y.SetTitleSize(20)
+    y.SetTitleFont(43)
+    y.SetTitleOffset(1.55)
+    y.SetLabelFont(43)
+    y.SetLabelSize(20)
+
+    # Adjust x-axis settings
+    x = hist_sosb.GetXaxis()
+    x.SetTitle("")
+    x.SetTitleSize(30)
+    x.SetTitleFont(43)
+    x.SetTitleOffset(1.00)
+    x.SetLabelFont(43)
+    x.SetLabelSize(20)
+    
+    return hist_sosb
