@@ -89,7 +89,7 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     RooDataHist* dsb = new RooDataHist("data_bin","dataset with x", mH, hsb);
     // cout<<"bkg hist integral "<<hbkg->Integral()<<" "<<dbkg->sumEntries()<<endl;
 
-    RooRealVar nsig("nsig","nsig",0,-100*sigevents,100*sigevents);
+    RooRealVar nsig("nsig","nsig",sigevents,-100*sigevents,100*sigevents);
     //nsig.setConstant(kTRUE);
 	RooRealVar nbkg("nbkg","nbkg",dataevents, 0.01*dataevents, 2*dataevents);
 
@@ -192,7 +192,7 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     RooRealVar p3_exp3(Form("p3_exp3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("p3_exp3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),-6.5070e-02,-0.5,0.);
     RooRealVar cp3_exp3(Form("cp3_exp3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cp3_exp3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),5.9216e-01,0,1.);
 
-    RooRealVar sigma_exp5(Form("sigma_exp5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("sigma_exp5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),4.12,3.,6);
+    RooRealVar sigma_exp5(Form("sigma_exp5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("sigma_exp5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),4.12,2.,8);
     RooRealVar turnon_exp5(Form("turnon_exp5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("turnon_exp5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),107.21,103.,110);
     RooRealVar p1_exp5(Form("p1_exp5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("p1_exp5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),-5.1816e-02,-0.1,0.);
     RooRealVar cp1_exp5(Form("cp1_exp5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cp1_exp5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),0.5,0.0,1.);
@@ -359,13 +359,13 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     // frame3->Draw();
     gPad->Print(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/test/mc_bkg_shape_%s_cat%d_%s.pdf",channel.Data(),cat,bkg_fun.Data()));
 
-    RooAbsCollection *m_bkgParameters = bkg_model->getParameters(RooArgSet())->selectByAttrib("Constant", false);
-    TIterator *it = m_bkgParameters->createIterator();
-    for (RooRealVar *p = (RooRealVar *)it->Next(); p != 0; p = (RooRealVar *)it->Next()) {
-        p->setConstant(kTRUE);
-    }
+    // RooAbsCollection *m_bkgParameters = bkg_model->getParameters(RooArgSet())->selectByAttrib("Constant", false);
+    // TIterator *it = m_bkgParameters->createIterator();
+    // for (RooRealVar *p = (RooRealVar *)it->Next(); p != 0; p = (RooRealVar *)it->Next()) {
+    //     p->setConstant(kTRUE);
+    // }
 
-    mean.setConstant(kTRUE); sigma_b1.setConstant(kTRUE); sigma_b2.setConstant(kTRUE); sigma_b3.setConstant(kTRUE); sigma_b4.setConstant(kTRUE); sigma_b5.setConstant(kTRUE); step_b1.setConstant(kTRUE); step_b2.setConstant(kTRUE); step_b3.setConstant(kTRUE); step_b4.setConstant(kTRUE); step_b5.setConstant(kTRUE); p0.setConstant(kTRUE); b1p1.setConstant(kTRUE); b2p2.setConstant(kTRUE); b3p1.setConstant(kTRUE); b3p2.setConstant(kTRUE); b3p3.setConstant(kTRUE); b4p1.setConstant(kTRUE); b4p2.setConstant(kTRUE); b4p3.setConstant(kTRUE); b4p4.setConstant(kTRUE); b5p1.setConstant(kTRUE); b5p2.setConstant(kTRUE); b5p3.setConstant(kTRUE); b5p4.setConstant(kTRUE); b5p5.setConstant(kTRUE); sigma_pow1.setConstant(kTRUE); turnon_pow1.setConstant(kTRUE); p1_pow1.setConstant(kTRUE); cp1_pow1.setConstant(kTRUE); sigma_pow3.setConstant(kTRUE); turnon_pow3.setConstant(kTRUE); p1_pow3.setConstant(kTRUE); cp1_pow3.setConstant(kTRUE); p3_pow3.setConstant(kTRUE); cp3_pow3.setConstant(kTRUE); sigma_pow5.setConstant(kTRUE); turnon_pow5.setConstant(kTRUE); p1_pow5.setConstant(kTRUE); cp1_pow5.setConstant(kTRUE); p3_pow5.setConstant(kTRUE); cp3_pow5.setConstant(kTRUE); p5_pow5.setConstant(kTRUE); cp5_pow5.setConstant(kTRUE); sigma_lau1.setConstant(kTRUE); turnon_lau1.setConstant(kTRUE); cl1_lau1.setConstant(kTRUE); cl2_lau1.setConstant(kTRUE); sigma_lau2.setConstant(kTRUE); turnon_lau2.setConstant(kTRUE); cl1_lau2.setConstant(kTRUE); cl2_lau2.setConstant(kTRUE); cl3_lau2.setConstant(kTRUE); sigma_lau3.setConstant(kTRUE); turnon_lau3.setConstant(kTRUE); cl1_lau3.setConstant(kTRUE); cl2_lau3.setConstant(kTRUE); cl3_lau3.setConstant(kTRUE); cl4_lau3.setConstant(kTRUE); sigma_lau4.setConstant(kTRUE); turnon_lau4.setConstant(kTRUE); cl1_lau4.setConstant(kTRUE); cl2_lau4.setConstant(kTRUE); cl3_lau4.setConstant(kTRUE); cl4_lau4.setConstant(kTRUE); cl5_lau4.setConstant(kTRUE); sigma_lau5.setConstant(kTRUE); turnon_lau5.setConstant(kTRUE); cl1_lau5.setConstant(kTRUE); cl2_lau5.setConstant(kTRUE); cl3_lau5.setConstant(kTRUE); cl4_lau5.setConstant(kTRUE); cl5_lau5.setConstant(kTRUE); cl6_lau5.setConstant(kTRUE); sigma_exp1.setConstant(kTRUE); turnon_exp1.setConstant(kTRUE); p1_exp1.setConstant(kTRUE); cp1_exp1.setConstant(kTRUE); sigma_exp3.setConstant(kTRUE); turnon_exp3.setConstant(kTRUE); p1_exp3.setConstant(kTRUE); cp1_exp3.setConstant(kTRUE); p3_exp3.setConstant(kTRUE); cp3_exp3.setConstant(kTRUE); sigma_exp5.setConstant(kTRUE); turnon_exp5.setConstant(kTRUE); p1_exp5.setConstant(kTRUE); cp1_exp5.setConstant(kTRUE); p3_exp5.setConstant(kTRUE); cp3_exp5.setConstant(kTRUE); p5_exp5.setConstant(kTRUE); cp5_exp5.setConstant(kTRUE); 
+    // mean.setConstant(kTRUE); sigma_b1.setConstant(kTRUE); sigma_b2.setConstant(kTRUE); sigma_b3.setConstant(kTRUE); sigma_b4.setConstant(kTRUE); sigma_b5.setConstant(kTRUE); step_b1.setConstant(kTRUE); step_b2.setConstant(kTRUE); step_b3.setConstant(kTRUE); step_b4.setConstant(kTRUE); step_b5.setConstant(kTRUE); p0.setConstant(kTRUE); b1p1.setConstant(kTRUE); b2p2.setConstant(kTRUE); b3p1.setConstant(kTRUE); b3p2.setConstant(kTRUE); b3p3.setConstant(kTRUE); b4p1.setConstant(kTRUE); b4p2.setConstant(kTRUE); b4p3.setConstant(kTRUE); b4p4.setConstant(kTRUE); b5p1.setConstant(kTRUE); b5p2.setConstant(kTRUE); b5p3.setConstant(kTRUE); b5p4.setConstant(kTRUE); b5p5.setConstant(kTRUE); sigma_pow1.setConstant(kTRUE); turnon_pow1.setConstant(kTRUE); p1_pow1.setConstant(kTRUE); cp1_pow1.setConstant(kTRUE); sigma_pow3.setConstant(kTRUE); turnon_pow3.setConstant(kTRUE); p1_pow3.setConstant(kTRUE); cp1_pow3.setConstant(kTRUE); p3_pow3.setConstant(kTRUE); cp3_pow3.setConstant(kTRUE); sigma_pow5.setConstant(kTRUE); turnon_pow5.setConstant(kTRUE); p1_pow5.setConstant(kTRUE); cp1_pow5.setConstant(kTRUE); p3_pow5.setConstant(kTRUE); cp3_pow5.setConstant(kTRUE); p5_pow5.setConstant(kTRUE); cp5_pow5.setConstant(kTRUE); sigma_lau1.setConstant(kTRUE); turnon_lau1.setConstant(kTRUE); cl1_lau1.setConstant(kTRUE); cl2_lau1.setConstant(kTRUE); sigma_lau2.setConstant(kTRUE); turnon_lau2.setConstant(kTRUE); cl1_lau2.setConstant(kTRUE); cl2_lau2.setConstant(kTRUE); cl3_lau2.setConstant(kTRUE); sigma_lau3.setConstant(kTRUE); turnon_lau3.setConstant(kTRUE); cl1_lau3.setConstant(kTRUE); cl2_lau3.setConstant(kTRUE); cl3_lau3.setConstant(kTRUE); cl4_lau3.setConstant(kTRUE); sigma_lau4.setConstant(kTRUE); turnon_lau4.setConstant(kTRUE); cl1_lau4.setConstant(kTRUE); cl2_lau4.setConstant(kTRUE); cl3_lau4.setConstant(kTRUE); cl4_lau4.setConstant(kTRUE); cl5_lau4.setConstant(kTRUE); sigma_lau5.setConstant(kTRUE); turnon_lau5.setConstant(kTRUE); cl1_lau5.setConstant(kTRUE); cl2_lau5.setConstant(kTRUE); cl3_lau5.setConstant(kTRUE); cl4_lau5.setConstant(kTRUE); cl5_lau5.setConstant(kTRUE); cl6_lau5.setConstant(kTRUE); sigma_exp1.setConstant(kTRUE); turnon_exp1.setConstant(kTRUE); p1_exp1.setConstant(kTRUE); cp1_exp1.setConstant(kTRUE); sigma_exp3.setConstant(kTRUE); turnon_exp3.setConstant(kTRUE); p1_exp3.setConstant(kTRUE); cp1_exp3.setConstant(kTRUE); p3_exp3.setConstant(kTRUE); cp3_exp3.setConstant(kTRUE); sigma_exp5.setConstant(kTRUE); turnon_exp5.setConstant(kTRUE); p1_exp5.setConstant(kTRUE); cp1_exp5.setConstant(kTRUE); p3_exp5.setConstant(kTRUE); cp3_exp5.setConstant(kTRUE); p5_exp5.setConstant(kTRUE); cp5_exp5.setConstant(kTRUE); 
 
     cout << "\t=================================\n";
     cout << "\n\tFinish background function fit\n" << endl;
@@ -410,21 +410,7 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     // asimov dataset fit
     RooAddPdf* model = new RooAddPdf("model","model",RooArgList(*signal, *bkg_model),RooArgList(nsig,nbkg));
     RooFitResult *model_fit;
-    model_fit = model->fitTo(*ddata,RooFit::Save(1),RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kFALSE)); //FIXME kTRUE or kFALSE
-    ss = nsig.getVal();
-    dss = nsig.getError();
-    model_fit = model->fitTo(*ddata,RooFit::Save(1),RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE)); //FIXME kTRUE or kFALSE
-    dmc = nsig.getError();
-    tot_err = sqrt(dss*dss+ss*ss);
-    delta = abs(ss)-2*dmc;
-    if (delta<0) ss_cor = 0;
-    else{
-        if (ss>0) ss_cor = delta;
-        else ss_cor = -1. * delta;
-    }
-    if (delta > 0.2 * dss) status = "Fail";
-    int data_npars = model_fit->floatParsFinal().getSize();
-    int data_ndof = 65-data_npars;
+    int data_npars, data_ndof;
 
     TCanvas *canv = new TCanvas();
     RooPlot *frame_data = mH.frame();
@@ -436,16 +422,45 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     pad1->Draw();
     pad2->Draw();
     pad1->cd();
-    // if(ss < 0) frame_data->SetMinimum(ss);
+
+    model_fit = model->fitTo(*ddata,RooFit::Save(1),RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE)); //FIXME kTRUE or kFALSE
+    dmc = nsig.getError();
+    data_npars = model_fit->floatParsFinal().getSize();
+    data_ndof = 65-data_npars;
     ddata->plotOn(frame_data, Name("data"), DataError(RooAbsData::SumW2));
     RooHist *plotdata = (RooHist*)frame_data->getObject(frame_data->numItems()-1);
-    // model->plotOn(frame_data, Name("signal"), Components(sigPdf->GetName()), LineStyle(ELineStyle::kDashed), LineColor(kGreen));
-    model->plotOn(frame_data, Name("background"), Components(bkg_model->GetName()), LineStyle(ELineStyle::kDashed), LineColor(kRed));
-    model->plotOn(frame_data, Name("fit"));
-    RooCurve* nomBkgCurve = (RooCurve*)frame_data->getObject(frame_data->numItems()-1);
-
+    model->plotOn(frame_data, Name("fitmcweight"));
     chi2 = frame_data->chiSquare(data_npars);
     prob = TMath::Prob(chi2*data_ndof, data_ndof);
+    frame_data->remove("fitmcweight");
+    output << "\t" << bkg_fun.Data() << "\tdata(MC):\tnpars = " << data_npars << "\tchi^2 = " << chi2 << "\tprob = " << prob << endl;
+
+    model_fit = model->fitTo(*ddata,RooFit::Save(1),RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kFALSE)); //FIXME kTRUE or kFALSE
+    ss = nsig.getVal();
+    dss = nsig.getError();
+    tot_err = sqrt(dss*dss+ss*ss);
+    delta = abs(ss)-2*dmc;
+    if (delta<0) ss_cor = 0;
+    else{
+        if (ss>0) ss_cor = delta;
+        else ss_cor = -1. * delta;
+    }
+    if (delta > 0.2 * dss) status = "Fail";
+
+    data_npars = model_fit->floatParsFinal().getSize();
+    data_ndof = 65-data_npars;
+
+    // if(ss < 0) frame_data->SetMinimum(ss);
+    // ddata->plotOn(frame_data, Name("data"), DataError(RooAbsData::SumW2));
+    model->plotOn(frame_data, Name("fit"));
+    RooCurve* nomBkgCurve = (RooCurve*)frame_data->getObject(frame_data->numItems()-1);
+    chi2 = frame_data->chiSquare(data_npars);
+    prob = TMath::Prob(chi2*data_ndof, data_ndof);
+
+    // RooHist *plotdata = (RooHist*)frame_data->getObject(frame_data->numItems()-1);
+    // model->plotOn(frame_data, Name("signal"), Components(sigPdf->GetName()), LineStyle(ELineStyle::kDashed), LineColor(kGreen));
+    model->plotOn(frame_data, Name("background"), Components(bkg_model->GetName()), LineStyle(ELineStyle::kDashed), LineColor(kRed));
+
     if(prob<0.05) status="Fail";
     model->SetName(Form("%s_model", bkg_fun.Data()));
     frame_data->SetTitle(Form("Pesudo data with with x%d signal, prob: %.3f", sig, prob));
@@ -454,8 +469,8 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     frame_data->SetTitleSize(0.056, "Y");
     frame_data->SetTitleOffset(0.75, "Y");
     // model->Write(model->GetName(), TObject::kOverwrite);
-    output << "\t" << bkg_fun.Data() << "\tdata:\tnpars = " << data_npars << "\tchi^2 = " << chi2 << "\tprob = " << prob << endl;
-    output << "\t" << bkg_fun.Data() << "\tSS:\tnsig = " << ss << "/" << nsig.getVal() << "\tdmc = " << dmc << "\tss_cor = " << ss_cor << "\tdss = " << dss << "\ttot_err = " << tot_err << "\tstatus = " << status.Data() << "\n" << endl;
+    output << "\t" << bkg_fun.Data() << "\tdata(Psu):\tnpars = " << data_npars << "\tchi^2 = " << chi2 << "\tprob = " << prob << endl;
+    output << "\t" << bkg_fun.Data() << "\tSS:\tnsig = " << ss << "\tdmc = " << dmc << "\tss_cor = " << ss_cor << "\tdss = " << dss << "\ttot_err = " << tot_err << "\tstatus = " << status.Data() << "\n" << endl;
     // output << "\tnbkg = " << nbkg.getVal() << "\tnbkg_err = " << nbkg.getError() << "\n" << endl;
 
     TLegend *leg = new TLegend(0.6,0.65,0.88,0.88);
@@ -476,7 +491,7 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     for (int ipoint=0; ipoint<npoints; ++ipoint) {
         plotdata->GetPoint(ipoint, xtmp,ytmp);
         double bkgval = nomBkgCurve->interpolate(xtmp);
-        if ((xtmp > 122 ) && ( xtmp < 128) ) continue;
+        // if ((xtmp > 122 ) && ( xtmp < 128) ) continue;
         double errhi = plotdata->GetErrorYhigh(ipoint);
         double errlow = plotdata->GetErrorYlow(ipoint);
 

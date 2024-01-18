@@ -23,6 +23,8 @@
 #include "RooProdPdf.h"
 #include "RooNumConvPdf.h"
 #include "RooGaussModel.h"
+#include "RooEffProd.h"
+#include "RooFormulaVar.h"
 
 #include "boost/algorithm/string/split.hpp"
 #include "boost/algorithm/string/classification.hpp"
@@ -59,6 +61,12 @@ PdfModelBuilder::PdfModelBuilder():
   recognisedPdfTypes.push_back("PowerLawStepxGau");
   recognisedPdfTypes.push_back("LaurentStepxGau");
   recognisedPdfTypes.push_back("ExponentialStepxGau");
+  
+  recognisedPdfTypes.push_back("BernsteinxZGMCShape");
+  recognisedPdfTypes.push_back("ExponentialZGMCShape");
+  recognisedPdfTypes.push_back("PowerLawZGMCShape");
+  recognisedPdfTypes.push_back("LaurentZGMCShape");
+
 
   wsCache = new RooWorkspace("PdfModelBuilderCache");
 
@@ -1230,6 +1238,329 @@ RooAbsPdf* PdfModelBuilder::getLaurentStepxGau(string prefix, int order, int cat
 	return NULL;
   }
 }
+
+RooAbsPdf* PdfModelBuilder::getBernsteinxZGMCShape(string prefix, int order){
+  
+  //bing add ZGMCShape
+  TFile *ZGMC_file = new TFile("../ZGMCShape/ZGMCShape.root");
+  RooWorkspace *w = (RooWorkspace *)ZGMC_file->Get("w");
+  RooAbsPdf *ZGMCShape = w->pdf("ZGMCShape");
+
+  RooArgList *coeffList = new RooArgList();
+  //coeffList->add(RooConst(1.0)); // no need for cnstant in this interface
+  for (int i=0; i<order; i++){
+    string name = Form("%s_p%d",prefix.c_str(),i);
+    //params.insert(pair<string,RooRealVar*>(name, new RooRealVar(name.c_str(),name.c_str(),1.0,0.,5.)));
+    RooRealVar *param = new RooRealVar(name.c_str(),name.c_str(),0.1*(i+1),-5.,5.);
+    RooFormulaVar *form = new RooFormulaVar(Form("%s_sq",name.c_str()),Form("%s_sq",name.c_str()),"@0*@0",RooArgList(*param));
+    params.insert(pair<string,RooRealVar*>(name,param));
+    prods.insert(pair<string,RooFormulaVar*>(name,form));
+    coeffList->add(*prods[name]);
+  }
+  if (order==1) {
+	  RooBernsteinFast<1> *bern = new RooBernsteinFast<1>(prefix.c_str(),prefix.c_str(),*obs_var,*coeffList);
+    RooEffProd *bernZGMC = new RooEffProd(Form("%s_bern1xZG",prefix.c_str()),Form("%s_bern1xZG",prefix.c_str()), *ZGMCShape, *bern);
+    return bernZGMC;
+    //return bern;
+  } else if (order==2) {
+	  RooBernsteinFast<2> *bern = new RooBernsteinFast<2>(prefix.c_str(),prefix.c_str(),*obs_var,*coeffList);
+    RooEffProd *bernZGMC = new RooEffProd(Form("%s_bern2xZG",prefix.c_str()),Form("%s_bern2xZG",prefix.c_str()), *ZGMCShape, *bern);
+    return bernZGMC;
+    //return bern;
+  } else if (order==3) {
+	  RooBernsteinFast<3> *bern = new RooBernsteinFast<3>(prefix.c_str(),prefix.c_str(),*obs_var,*coeffList);
+    RooEffProd *bernZGMC = new RooEffProd(Form("%s_bern3xZG",prefix.c_str()),Form("%s_bern3xZG",prefix.c_str()), *ZGMCShape, *bern);
+    return bernZGMC;
+    //return bern;
+ } 
+  else if (order==4) {
+	  RooBernsteinFast<4> *bern = new RooBernsteinFast<4>(prefix.c_str(),prefix.c_str(),*obs_var,*coeffList);
+    RooEffProd *bernZGMC = new RooEffProd(Form("%s_bern4xZG",prefix.c_str()),Form("%s_bern4xZG",prefix.c_str()), *ZGMCShape, *bern);
+    return bernZGMC;
+    //return bern;
+  } else if (order==5) {
+	  RooBernsteinFast<5> *bern = new RooBernsteinFast<5>(prefix.c_str(),prefix.c_str(),*obs_var,*coeffList);
+    RooEffProd *bernZGMC = new RooEffProd(Form("%s_bern5xZG",prefix.c_str()),Form("%s_bern5xZG",prefix.c_str()), *ZGMCShape, *bern);
+    return bernZGMC;
+    //return bern;
+  } else if (order==6) {
+    RooBernsteinFast<6> *bern = new RooBernsteinFast<6>(prefix.c_str(),prefix.c_str(),*obs_var,*coeffList);
+    RooEffProd *bernZGMC = new RooEffProd(Form("%s_bern6xZG",prefix.c_str()),Form("%s_bern6xZG",prefix.c_str()), *ZGMCShape, *bern);
+    return bernZGMC;
+    //return bern;
+   } else if (order==7) {
+  	RooBernsteinFast<7> *bern = new RooBernsteinFast<7>(prefix.c_str(),prefix.c_str(),*obs_var,*coeffList);
+  	return bern;
+  } else {
+	return NULL;
+  }
+
+  //return bern;
+  //bkgPdfs.insert(pair<string,RooAbsPdf*>(bern->GetName(),bern));
+
+}
+
+RooAbsPdf* PdfModelBuilder::getExponentialZGMCShape(string prefix, int order){
+  //bing add ZGMCShape
+  TFile *ZGMC_file = new TFile("../ZGMCShape/ZGMCShape.root");
+  RooWorkspace *w = (RooWorkspace *)ZGMC_file->Get("w");
+  RooAbsPdf *ZGMCShape = w->pdf("ZGMCShape");
+
+  if(order%2==0) return NULL;
+  
+  double par1_exp1, par1_exp3, par3_exp3, par1_exp5, par3_exp5, par5_exp5, par1_exp7, par3_exp7, par5_exp7, par7_exp7;
+  double par1_hexp1, par1_hexp3, par3_hexp3, par1_hexp5, par3_hexp5, par5_hexp5, par1_hexp7, par3_hexp7, par5_hexp7, par7_hexp7;
+  double par1_lexp1, par1_lexp3, par3_lexp3, par1_lexp5, par3_lexp5, par5_lexp5, par1_lexp7, par3_lexp7, par5_lexp7, par7_lexp7;
+  double coeff1_exp1, coeff1_exp3, coeff3_exp3, coeff1_exp5, coeff3_exp5, coeff5_exp5, coeff1_exp7, coeff3_exp7, coeff5_exp7, coeff7_exp7;
+  double coeff1_hexp1, coeff1_hexp3, coeff3_hexp3, coeff1_hexp5, coeff3_hexp5, coeff5_hexp5, coeff1_hexp7, coeff3_hexp7, coeff5_hexp7, coeff7_hexp7;
+  double coeff1_lexp1, coeff1_lexp3, coeff3_lexp3, coeff1_lexp5, coeff3_lexp5, coeff5_lexp5, coeff1_lexp7, coeff3_lexp7, coeff5_lexp7, coeff7_lexp7;
+
+  if(order==1){
+  par1_exp1 = -0.1;          par1_lexp1 = -0.2;    par1_hexp1 = 0.;
+  coeff1_exp1 = 0.9;          coeff1_lexp1 = -100.;    coeff1_hexp1 = 100.;
+  }
+  else if(order==3){
+  par1_exp3 = -0.1;      par1_lexp3 = -0.2;    par1_hexp3 = 0.;
+  coeff1_exp3 = 0.9;      coeff1_lexp3 = -100.;    coeff1_hexp3 = 100.;
+  par3_exp3 = -0.001;      par3_lexp3 = -0.5;      par3_hexp3 = 0.;
+  coeff3_exp3 = 0.4;      coeff3_lexp3 = -100.;    coeff3_hexp3 = 100.;
+  } 
+  else if(order==5)
+  {
+  par1_exp5 = -0.1;          par1_lexp5 = -0.2;    par1_hexp5 = 0.;
+  coeff1_exp5 = 3.;       coeff1_lexp5 = -100.;    coeff1_hexp5 = 100.;
+  par3_exp5 = -0.001;          par3_lexp5 = -0.5;    par3_hexp5 = 0.;
+  coeff3_exp5 = 0.2; coeff3_lexp5 = -100.;    coeff3_hexp5 = 100.;
+  par5_exp5 = -0.001;      par5_lexp5 = -0.7;      par5_hexp5 = 0.;
+  coeff5_exp5 = -0.2; coeff5_lexp5 = -100.;    coeff5_hexp5 = 100.;
+  }
+  else if(order==7)
+  {
+  par1_exp7 = -0.1;          par1_lexp7 = -0.2;    par1_hexp7 = 0.;
+  coeff1_exp7 = 0.9;       coeff1_lexp7 = -100.;    coeff1_hexp7 = 100.;
+  par3_exp7 = -0.001;          par3_lexp7 = -0.5;    par3_hexp7 = 0.;
+  coeff3_exp7 = 0.4; coeff3_lexp7 = -100.;    coeff3_hexp7 = 100.;
+  par5_exp7 = -0.005;      par5_lexp7 = -0.7;      par5_hexp7 = 0.;
+  coeff5_exp7 = 0.1; coeff5_lexp7 = -100.;    coeff5_hexp7 = 100.;
+  par7_exp7 = -0.005;      par7_lexp7 = -1.0;      par7_hexp7 = 0.;
+  coeff7_exp7 = 0.01; coeff7_lexp7 = -100.;    coeff7_hexp7 = 100.;
+  }
+  
+    if (order==1) {
+      RooRealVar *p1 = new RooRealVar(Form("%s_p1_exp1",prefix.c_str()),Form("%s_p1_exp1",prefix.c_str()),par1_exp1,par1_lexp1,par1_hexp1);
+      RooRealVar *cp1 = new RooRealVar(Form("%s_cp1_exp1",prefix.c_str()),Form("%s_cp1_exp1",prefix.c_str()),coeff1_exp1,coeff1_lexp1,coeff1_hexp1);
+      RooFormulaVar *exp = new RooFormulaVar(Form("%s_exp1",prefix.c_str()),Form("%s_exp1",prefix.c_str()), "@2*TMath::Exp(@0*@1)", RooArgList(*obs_var,*p1,*cp1));
+      
+      RooEffProd *expZGMC = new RooEffProd(Form("%s_exp1xZG",prefix.c_str()),Form("%s_exp1xZG",prefix.c_str()), *ZGMCShape, *exp);
+      return expZGMC;
+  } else if (order==3) {
+      RooRealVar *p1 = new RooRealVar(Form("%s_p1_exp3",prefix.c_str()),Form("%s_p1_exp3",prefix.c_str()),par1_exp3,par1_lexp3, par1_hexp3);
+      RooRealVar *cp1 = new RooRealVar(Form("%s_cp1_exp3",prefix.c_str()),Form("%s_cp1_exp3",prefix.c_str()),coeff1_exp3,coeff1_lexp3,coeff1_hexp3);
+      RooRealVar *p3 = new RooRealVar(Form("%s_p3_exp3",prefix.c_str()),Form("%s_p3_exp3",prefix.c_str()),par3_exp3,par3_lexp3, par3_hexp3);
+      RooRealVar *cp3 = new RooRealVar(Form("%s_cp3_exp3",prefix.c_str()),Form("%s_cp3_exp3",prefix.c_str()),coeff3_exp3,coeff3_lexp3,coeff3_hexp3);
+      RooFormulaVar *exp = new RooFormulaVar(Form("%s_exp3",prefix.c_str()),Form("%s_exp3",prefix.c_str()), "@2*TMath::Exp(@0*@1)+@4*TMath::Exp(@0*@3)", RooArgList(*obs_var,*p1,*cp1,*p3,*cp3));
+
+      RooEffProd *expZGMC = new RooEffProd(Form("%s_exp3xZG",prefix.c_str()),Form("%s_exp3xZG",prefix.c_str()), *ZGMCShape, *exp);
+      return expZGMC;
+  } else if (order==5) {
+      RooRealVar *p1 = new RooRealVar(Form("%s_p1_exp5",prefix.c_str()),Form("%s_p1_exp5",prefix.c_str()),par1_exp5,par1_lexp5, par1_hexp5);
+      RooRealVar *cp1 = new RooRealVar(Form("%s_cp1_exp5",prefix.c_str()),Form("%s_cp1_exp5",prefix.c_str()),coeff1_exp5,coeff1_lexp5,coeff1_hexp5);
+      RooRealVar *p3 = new RooRealVar(Form("%s_p3_exp5",prefix.c_str()),Form("%s_p3_exp5",prefix.c_str()),par3_exp5,par3_lexp5, par3_hexp5);
+      RooRealVar *cp3 = new RooRealVar(Form("%s_cp3_exp5",prefix.c_str()),Form("%s_cp3_exp5",prefix.c_str()),coeff3_exp5,coeff3_lexp5,coeff3_hexp5);
+      RooRealVar *p5 = new RooRealVar(Form("%s_p5_exp5",prefix.c_str()),Form("%s_p5_exp5",prefix.c_str()),par5_exp5,par5_lexp5, par5_hexp5);
+      RooRealVar *cp5 = new RooRealVar(Form("%s_cp5_exp5",prefix.c_str()),Form("%s_cp5_exp5",prefix.c_str()),coeff5_exp5,coeff5_lexp5,coeff5_hexp5);
+      RooFormulaVar *exp = new RooFormulaVar(Form("%s_exp5",prefix.c_str()),Form("%s_exp5",prefix.c_str()), "@2*TMath::Exp(@0*@1)+@4*TMath::Exp(@0*@3)+@6*TMath::Exp(@0*@5)", RooArgList(*obs_var,*p1,*cp1,*p3,*cp3,*p5,*cp5));
+      
+      RooEffProd *expZGMC = new RooEffProd(Form("%s_exp5xZG",prefix.c_str()),Form("%s_exp5xZG",prefix.c_str()), *ZGMCShape, *exp);
+      return expZGMC;
+  } else if (order==7) {
+      RooRealVar *p1 = new RooRealVar(Form("%s_p1_exp7",prefix.c_str()),Form("%s_p1_exp7",prefix.c_str()),par1_exp7,par1_lexp7, par1_hexp7);
+      RooRealVar *cp1 = new RooRealVar(Form("%s_cp1_exp7",prefix.c_str()),Form("%s_cp1_exp7",prefix.c_str()),coeff1_exp7,coeff1_lexp7,coeff1_hexp7);
+      RooRealVar *p3 = new RooRealVar(Form("%s_p3_exp7",prefix.c_str()),Form("%s_p3_exp7",prefix.c_str()),par3_exp7,par3_lexp7, par3_hexp7);
+      RooRealVar *cp3 = new RooRealVar(Form("%s_cp3_exp7",prefix.c_str()),Form("%s_cp3_exp7",prefix.c_str()),coeff3_exp7,coeff3_lexp7,coeff3_hexp7);
+      RooRealVar *p5 = new RooRealVar(Form("%s_p5_exp7",prefix.c_str()),Form("%s_p5_exp7",prefix.c_str()),par5_exp7,par5_lexp7, par5_hexp7);
+      RooRealVar *cp5 = new RooRealVar(Form("%s_cp5_exp7",prefix.c_str()),Form("%s_cp5_exp7",prefix.c_str()),coeff5_exp7,coeff5_lexp7,coeff5_hexp7);
+      RooRealVar *p7 = new RooRealVar(Form("%s_p7_exp7",prefix.c_str()),Form("%s_p7_exp7",prefix.c_str()),par7_exp7,par7_lexp7, par7_hexp7);
+      RooRealVar *cp7 = new RooRealVar(Form("%s_cp7_exp7",prefix.c_str()),Form("%s_cp7_exp7",prefix.c_str()),coeff7_exp7,coeff7_lexp7,coeff7_hexp7);
+      RooFormulaVar *exp = new RooFormulaVar(Form("%s_exp7",prefix.c_str()),Form("%s_exp7",prefix.c_str()), "@2*TMath::Exp(@0*@1)+@4*TMath::Exp(@0*@3)+@6*TMath::Exp(@0*@5)+@8*TMath::Exp(@0*@7)", RooArgList(*obs_var,*p1,*cp1,*p3,*cp3,*p5,*cp5,*p7,*cp7));
+      
+      RooEffProd *expZGMC = new RooEffProd(Form("%s_exp7xZG",prefix.c_str()),Form("%s_exp7xZG",prefix.c_str()), *ZGMCShape, *exp);
+      return expZGMC;
+  }
+    else {
+  return NULL;
+  }
+}
+
+
+RooAbsPdf* PdfModelBuilder::getPowerLawZGMCShape(string prefix, int order){
+  
+  //bing add ZGMCShape
+  TFile *ZGMC_file = new TFile("../ZGMCShape/ZGMCShape.root");
+  RooWorkspace *w = (RooWorkspace *)ZGMC_file->Get("w");
+  RooAbsPdf *ZGMCShape = w->pdf("ZGMCShape");
+
+  if(order%2==0) return NULL;
+  double par1_pow1, par1_pow3, par3_pow3, par1_pow5, par3_pow5, par5_pow5, par1_pow7, par3_pow7, par5_pow7, par7_pow7;
+  double par1_hpow1, par1_hpow3, par3_hpow3, par1_hpow5, par3_hpow5, par5_hpow5, par1_hpow7, par3_hpow7, par5_hpow7, par7_hpow7;
+  double par1_lpow1, par1_lpow3, par3_lpow3, par1_lpow5, par3_lpow5, par5_lpow5, par1_lpow7, par3_lpow7, par5_lpow7, par7_lpow7;
+  double coeff1_pow1, coeff1_pow3, coeff3_pow3, coeff1_pow5, coeff3_pow5, coeff5_pow5, coeff1_pow7, coeff3_pow7, coeff5_pow7, coeff7_pow7;
+  double coeff1_hpow1, coeff1_hpow3, coeff3_hpow3, coeff1_hpow5, coeff3_hpow5, coeff5_hpow5, coeff1_hpow7, coeff3_hpow7, coeff5_hpow7, coeff7_hpow7;
+  double coeff1_lpow1, coeff1_lpow3, coeff3_lpow3, coeff1_lpow5, coeff3_lpow5, coeff5_lpow5, coeff1_lpow7, coeff3_lpow7, coeff5_lpow7, coeff7_lpow7;
+
+  if(order==1){
+  par1_pow1 = -1.;          par1_lpow1 = -10.;    par1_hpow1 = 5.;
+  coeff1_pow1 = 1.; coeff1_lpow1 = -10.;    coeff1_hpow1 = 10.;
+  }
+  else if(order==3){
+  par1_pow3 = 2.;      par1_lpow3 = 1.;    par1_hpow3 = 3.;
+  coeff1_pow3 = 0.0001; coeff1_lpow3 = 0.;    coeff1_hpow3 = 0.001;
+  par3_pow3 = -2.;      par3_lpow3 = -3;      par3_hpow3 = -1.;
+  coeff3_pow3 = 0.99; coeff3_lpow3 = 0.9;    coeff3_hpow3 = 1.;
+  } 
+  else if(order==5)
+  {
+  par1_pow5 = -1.;          par1_lpow5 = -10.;    par1_hpow5 = 5.;
+  coeff1_pow5 = 1.;       coeff1_lpow5 = -10.;    coeff1_hpow5 = 10.;
+  par3_pow5 = -1.;          par3_lpow5 = -10.;    par3_hpow5 = 5.;
+  coeff3_pow5 = 1.; coeff3_lpow5 = -10.;    coeff3_hpow5 = 10.;
+  par5_pow5 = -1.;      par5_lpow5 = -10.;      par5_hpow5 = 5.;
+  coeff5_pow5 = 1.; coeff5_lpow5 = -10.;    coeff5_hpow5 = 10.;
+  }
+  else if(order==7)
+   {
+  par1_pow7 = -1.;          par1_lpow7 = -10.;    par1_hpow7 = 5.;
+  coeff1_pow7 = 1.;       coeff1_lpow7 = -10.;    coeff1_hpow7 = 10.;
+  par3_pow7 = -1.;          par3_lpow7 = -10.;    par3_hpow7 = 5.;
+  coeff3_pow7 = 1.; coeff3_lpow7 = -10.;    coeff3_hpow7 = 10.;
+  par5_pow7 = -1.;      par5_lpow7 = -10.;      par5_hpow7 = 5.;
+  coeff5_pow7 = 1.; coeff5_lpow7 = -10.;    coeff5_hpow7 = 10.;
+  par7_pow7 = -1.;      par7_lpow7 = -10.;      par7_hpow7 = 5.;
+  coeff7_pow7 = 1.; coeff7_lpow7 = -10.;    coeff7_hpow7 = 10.;
+  }
+  
+    if (order==1) {
+      RooRealVar *p1 = new RooRealVar(Form("%s_p1_pow1",prefix.c_str()),Form("%s_p1_pow1",prefix.c_str()),par1_pow1,par1_lpow1,par1_hpow1);
+      RooRealVar *cp1 = new RooRealVar(Form("%s_cp1_pow1",prefix.c_str()),Form("%s_cp1_pow1",prefix.c_str()),coeff1_pow1,coeff1_lpow1,coeff1_hpow1);
+    	RooGenericPdf *pows = new RooGenericPdf(Form("%s_pow1",prefix.c_str()),Form("%s_pow1",prefix.c_str()), "@2*(@0)^(@1)", RooArgList(*obs_var,*p1,*cp1));
+
+      RooEffProd *powZGMC = new RooEffProd(Form("%s_pow1xZG",prefix.c_str()),Form("%s_pow1xZG",prefix.c_str()), *ZGMCShape, *pows);
+      return powZGMC;
+  } else if (order==3) {
+      RooRealVar *p1 = new RooRealVar(Form("%s_p1_pow3",prefix.c_str()),Form("%s_p1_pow3",prefix.c_str()),par1_pow3,par1_lpow3,par1_hpow3);
+      RooRealVar *cp1 = new RooRealVar(Form("%s_cp1_pow3",prefix.c_str()),Form("%s_cp1_pow3",prefix.c_str()),coeff1_pow3,coeff1_lpow3,coeff1_hpow3);
+      RooRealVar *p3 = new RooRealVar(Form("%s_p3_pow3",prefix.c_str()),Form("%s_p3_pow3",prefix.c_str()),par3_pow3,par3_lpow3,par3_hpow3);
+      RooRealVar *cp3 = new RooRealVar(Form("%s_cp3_pow3",prefix.c_str()),Form("%s_cp3_pow3",prefix.c_str()),coeff3_pow3,coeff3_lpow3,coeff3_hpow3);
+    	RooGenericPdf *pows = new RooGenericPdf(Form("%s_pow3",prefix.c_str()),Form("%s_pow3",prefix.c_str()), "@2*(@0)^(@1)+@4*(@0)^(@3)", RooArgList(*obs_var,*p1,*cp1,*p3,*cp3));
+
+      RooEffProd *powZGMC = new RooEffProd(Form("%s_pow3xZG",prefix.c_str()),Form("%s_pow3xZG",prefix.c_str()), *ZGMCShape, *pows);
+      return powZGMC;
+  } else if (order==5) {
+      RooRealVar *p1 = new RooRealVar(Form("%s_p1_pow5",prefix.c_str()),Form("%s_p1_pow5",prefix.c_str()),par1_pow5,par1_lpow5,par1_hpow5);
+      RooRealVar *cp1 = new RooRealVar(Form("%s_cp1_pow5",prefix.c_str()),Form("%s_cp1_pow5",prefix.c_str()),coeff1_pow5,coeff1_lpow5,coeff1_hpow5);
+      RooRealVar *p3 = new RooRealVar(Form("%s_p3_pow5",prefix.c_str()),Form("%s_p3_pow5",prefix.c_str()),par3_pow5,par3_lpow5,par3_hpow5);
+      RooRealVar *cp3 = new RooRealVar(Form("%s_cp3_pow5",prefix.c_str()),Form("%s_cp3_pow5",prefix.c_str()),coeff3_pow5,coeff3_lpow5,coeff3_hpow5);
+      RooRealVar *p5 = new RooRealVar(Form("%s_p5_pow5",prefix.c_str()),Form("%s_p5_pow5",prefix.c_str()),par5_pow5,par5_lpow5,par5_hpow5);
+      RooRealVar *cp5 = new RooRealVar(Form("%s_cp5_pow5",prefix.c_str()),Form("%s_cp5_pow5",prefix.c_str()),coeff5_pow5,coeff5_lpow5,coeff5_hpow5);
+    	RooGenericPdf *pows = new RooGenericPdf(Form("%s_pow5",prefix.c_str()),Form("%s_pow5",prefix.c_str()), "@2*(@0)^(@1)+@4*(@0)^(@3)+@6*(@0)^(@5)", RooArgList(*obs_var,*p1,*cp1,*p3,*cp3,*p5,*cp5));
+      
+      RooEffProd *powZGMC = new RooEffProd(Form("%s_pow5xZG",prefix.c_str()),Form("%s_pow5xZG",prefix.c_str()), *ZGMCShape, *pows);
+      return powZGMC;
+  } else if (order==7) {
+      RooRealVar *p1 = new RooRealVar(Form("%s_p1_pow7",prefix.c_str()),Form("%s_p1_pow7",prefix.c_str()),par1_pow7,par1_lpow7,par1_hpow7);
+      RooRealVar *cp1 = new RooRealVar(Form("%s_cp1_pow7",prefix.c_str()),Form("%s_cp1_pow7",prefix.c_str()),coeff1_pow7,coeff1_lpow7,coeff1_hpow7);
+      RooRealVar *p3 = new RooRealVar(Form("%s_p3_pow7",prefix.c_str()),Form("%s_p3_pow7",prefix.c_str()),par3_pow7,par3_lpow7,par3_hpow7);
+      RooRealVar *cp3 = new RooRealVar(Form("%s_cp3_pow7",prefix.c_str()),Form("%s_cp3_pow7",prefix.c_str()),coeff3_pow7,coeff3_lpow7,coeff3_hpow7);
+      RooRealVar *p5 = new RooRealVar(Form("%s_p5_pow7",prefix.c_str()),Form("%s_p5_pow7",prefix.c_str()),par5_pow7,par5_lpow7,par5_hpow7);
+      RooRealVar *cp5 = new RooRealVar(Form("%s_cp5_pow7",prefix.c_str()),Form("%s_cp5_pow7",prefix.c_str()),coeff5_pow7,coeff5_lpow7,coeff5_hpow7);
+      RooRealVar *p7 = new RooRealVar(Form("%s_p7_pow7",prefix.c_str()),Form("%s_p7_pow7",prefix.c_str()),par7_pow7,par7_lpow7,par7_hpow7);
+      RooRealVar *cp7 = new RooRealVar(Form("%s_cp7_pow7",prefix.c_str()),Form("%s_cp7_pow7",prefix.c_str()),coeff7_pow7,coeff7_lpow7,coeff7_hpow7);
+    	RooGenericPdf *pows = new RooGenericPdf(Form("%s_pow7",prefix.c_str()),Form("%s_pow7",prefix.c_str()), "@2*(@0)^(@1)+@4*(@0)^(@3)+@6*(@0)^(@5)+@8*(@0)^(@7)", RooArgList(*obs_var,*p1,*cp1,*p3,*cp3,*p5,*cp5,*p7,*cp7));
+      
+      RooEffProd *powZGMC = new RooEffProd(Form("%s_pow7xZG",prefix.c_str()),Form("%s_pow7xZG",prefix.c_str()), *ZGMCShape, *pows);
+      return powZGMC;
+  } else {
+	return NULL;
+  }
+}
+
+RooAbsPdf* PdfModelBuilder::getLaurentZGMCShape(string prefix, int order){
+ 
+  //bing add ZGMCShape
+  TFile *ZGMC_file = new TFile("../ZGMCShape/ZGMCShape.root");
+  RooWorkspace *w = (RooWorkspace *)ZGMC_file->Get("w");
+  RooAbsPdf *ZGMCShape = w->pdf("ZGMCShape");
+
+  double coeff1_lau1, coeff2_lau1, coeff1_lau2, coeff2_lau2, coeff3_lau2, coeff1_lau3, coeff2_lau3, coeff3_lau3, coeff4_lau3, coeff1_lau4, coeff2_lau4, coeff3_lau4, coeff4_lau4, coeff5_lau4; 
+  double coeff1_hlau1, coeff2_hlau1, coeff1_hlau2, coeff2_hlau2, coeff3_hlau2, coeff1_hlau3, coeff2_hlau3, coeff3_hlau3, coeff4_hlau3, coeff1_hlau4, coeff2_hlau4, coeff3_hlau4, coeff4_hlau4, coeff5_hlau4; 
+  double coeff1_llau1, coeff2_llau1, coeff1_llau2, coeff2_llau2, coeff3_llau2, coeff1_llau3, coeff2_llau3, coeff3_llau3, coeff4_llau3, coeff1_llau4, coeff2_llau4, coeff3_llau4, coeff4_llau4, coeff5_llau4; 
+
+  if(order==1){
+  coeff1_lau1 = 0.1; coeff1_llau1 = -100.;    coeff1_hlau1 = 100.;
+  coeff2_lau1 = 0.5; coeff2_llau1 = -100.;    coeff2_hlau1 = 100.;
+  }
+  else if(order==2){
+  coeff1_lau2 = 0.01; coeff1_llau2 = -100.;    coeff1_hlau2 = 100.;
+  coeff2_lau2 = 0.5; coeff2_llau2 = -100.;    coeff2_hlau2 = 100.;
+  coeff3_lau2 = 0.01; coeff3_llau2 = -100.;    coeff3_hlau2 = 100.;
+  } 
+  else if(order==3)
+  {
+  coeff1_lau3 = -1.1; coeff1_llau3 = -100.;    coeff1_hlau3 = 100.;
+  coeff2_lau3 = 70.0; coeff2_llau3 = -100.;    coeff2_hlau3 = 100.;
+  coeff3_lau3 = 0.005; coeff3_llau3 = -100.;    coeff3_hlau3 = 100.;
+  coeff4_lau3 = -20.; coeff4_llau3 = -100.;    coeff4_hlau3 =100.;
+  }
+  else if(order==4)
+  {
+  coeff1_lau4 = 0.1; coeff1_llau4 = -100.;    coeff1_hlau4 = 100.;
+  coeff2_lau4 = 0.5; coeff2_llau4 = -100.;    coeff2_hlau4 = 100.;
+  coeff3_lau4 = 0.01; coeff3_llau4 = -100.;    coeff3_hlau4 = 100.;
+  coeff4_lau4 = 0.5; coeff4_llau4 = -100.;    coeff4_hlau4 =100.;
+  coeff5_lau4 = 0.5; coeff5_llau4 = -100.;    coeff5_hlau4 =100.;
+  }
+
+    if (order==1) {
+      RooRealVar *cp1 = new RooRealVar(Form("%s_cp1_lau1",prefix.c_str()),Form("%s_cp1_lau1",prefix.c_str()),coeff1_lau1,coeff1_llau1,coeff1_hlau1);
+      RooRealVar *cp2 = new RooRealVar(Form("%s_cp2_lau1",prefix.c_str()),Form("%s_cp2_lau1",prefix.c_str()),coeff2_lau1,coeff2_llau1,coeff2_hlau1);
+      RooGenericPdf *lau= new RooGenericPdf(Form("%s_lau1",prefix.c_str()),Form("%s_lau1",prefix.c_str()), "@1*(@0)^(-4)+@2*(@0)^(-5)", RooArgList(*obs_var,*cp1,*cp2));
+
+      RooEffProd *lauZGMC = new RooEffProd(Form("%s_lau1xZG",prefix.c_str()),Form("%s_lau1xZG",prefix.c_str()), *ZGMCShape, *lau);
+      return lauZGMC;
+  } else if (order==2) {
+      RooRealVar *cp1 = new RooRealVar(Form("%s_cp1_lau2",prefix.c_str()),Form("%s_cp1_lau2",prefix.c_str()),coeff1_lau2,coeff1_llau2,coeff1_hlau2);
+      RooRealVar *cp2 = new RooRealVar(Form("%s_cp1_lau2",prefix.c_str()),Form("%s_cp1_lau2",prefix.c_str()),coeff2_lau2,coeff2_llau2,coeff2_hlau2);
+      RooRealVar *cp3 = new RooRealVar(Form("%s_cp3_lau2",prefix.c_str()),Form("%s_cp3_lau2",prefix.c_str()),coeff3_lau2,coeff3_llau2,coeff3_hlau2);
+      RooGenericPdf *lau = new RooGenericPdf(Form("%s_lau2",prefix.c_str()),Form("%s_lau2",prefix.c_str()), "@1*(@0)^(-4)+@2*(@0)^(-5)+@3*(@0)^(-3)", RooArgList(*obs_var,*cp1,*cp2,*cp3));
+
+      RooEffProd *lauZGMC = new RooEffProd(Form("%s_lau2xZG",prefix.c_str()),Form("%s_lau2xZG",prefix.c_str()), *ZGMCShape, *lau);
+      return lauZGMC;
+  } else if (order==3) {
+      RooRealVar *cp1 = new RooRealVar(Form("%s_cp1_lau3",prefix.c_str()),Form("%s_cp1_lau3",prefix.c_str()),coeff1_lau3,coeff1_llau3,coeff1_hlau3);
+      RooRealVar *cp2 = new RooRealVar(Form("%s_cp2_lau3",prefix.c_str()),Form("%s_cp2_lau3",prefix.c_str()),coeff2_lau3,coeff2_llau3,coeff2_hlau3);
+      RooRealVar *cp3 = new RooRealVar(Form("%s_cp3_lau3",prefix.c_str()),Form("%s_cp3_lau3",prefix.c_str()),coeff3_lau3,coeff3_llau3,coeff3_hlau3);
+      RooRealVar *cp4 = new RooRealVar(Form("%s_cp4_lau3",prefix.c_str()),Form("%s_cp4_lau3",prefix.c_str()),coeff4_lau3,coeff4_llau3,coeff4_hlau3);
+      RooGenericPdf *lau = new RooGenericPdf(Form("%s_lau3",prefix.c_str()),Form("%s_lau3",prefix.c_str()), "@1*(@0)^(-4)+@2*(@0)^(-5)+@3*(@0)^(-3)+@4*(@0)^(-6)", RooArgList(*obs_var,*cp1,*cp2,*cp3,*cp4));
+
+      RooEffProd *lauZGMC = new RooEffProd(Form("%s_lau3xZG",prefix.c_str()),Form("%s_lau3xZG",prefix.c_str()), *ZGMCShape, *lau);
+      return lauZGMC;
+  } 
+  else if (order==4) {
+      RooRealVar *cp1 = new RooRealVar(Form("%s_cp1_lau4",prefix.c_str()),Form("%s_cp1_lau4",prefix.c_str()),coeff1_lau4,coeff1_llau4,coeff1_hlau4);
+      RooRealVar *cp2 = new RooRealVar(Form("%s_cp2_lau4",prefix.c_str()),Form("%s_cp2_lau4",prefix.c_str()),coeff2_lau4,coeff2_llau4,coeff2_hlau4);
+      RooRealVar *cp3 = new RooRealVar(Form("%s_cp3_lau4",prefix.c_str()),Form("%s_cp3_lau4",prefix.c_str()),coeff3_lau4,coeff3_llau4,coeff3_hlau4);
+      RooRealVar *cp4 = new RooRealVar(Form("%s_cp4_lau4",prefix.c_str()),Form("%s_cp4_lau4",prefix.c_str()),coeff4_lau4,coeff4_llau4,coeff4_hlau4);
+      RooRealVar *cp5 = new RooRealVar(Form("%s_cp5_lau4",prefix.c_str()),Form("%s_cp5_lau4",prefix.c_str()),coeff5_lau4,coeff5_llau4,coeff5_hlau4);
+      RooGenericPdf *lau = new RooGenericPdf(Form("%s_lau4",prefix.c_str()),Form("%s_lau4",prefix.c_str()), "@1*(@0)^(-4)+@2*(@0)^(-5)+@3*(@0)^(-3)+@4*(@0)^(-6)+@5*(@0)^(-7)", RooArgList(*obs_var,*cp1,*cp2,*cp3,*cp4,*cp5));
+
+      RooEffProd *lauZGMC = new RooEffProd(Form("%s_lau3xZG",prefix.c_str()),Form("%s_lau3xZG",prefix.c_str()), *ZGMCShape, *lau);
+      return lauZGMC;
+  } 
+   else {
+	return NULL;
+  }
+}
+
 
 RooAbsPdf* PdfModelBuilder::getKeysPdf(string prefix){
   if (!keysPdfAttributesSet){

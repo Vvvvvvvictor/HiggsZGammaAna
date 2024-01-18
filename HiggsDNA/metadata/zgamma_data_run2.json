@@ -28,7 +28,7 @@
             "Data"
         ],
         "years": [
-            "2017"
+            "2016", "2017", "2018"
         ]
     },
     "variables_of_interest": [
@@ -120,15 +120,23 @@
         "btagWeight_DeepCSVB",
         "btagWeight_CSVV2",
         "genWeight",
+        "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL",
+        "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ",
         "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL",
         "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ",
         "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8",
+        "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8",
+        "HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL",
+        "HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ",
         "HLT_Ele27_WPTight_Gsf",
+        "HLT_Ele30_WPTight_Gsf",
+        "HLT_Ele32_WPTight_Gsf",
         "HLT_Ele32_WPTight_Gsf_L1DoubleEG",
         "HLT_Ele35_WPTight_Gsf",
         "HLT_IsoMu20",
         "HLT_IsoMu24",
         "HLT_IsoMu27",
+        "HLT_IsoTkMu24",
         "HLT_Mu50",
         "HLT_IsoMu24_eta2p1",
         "Photon_pt",
@@ -166,6 +174,7 @@
         "Muon_phi",
         "Muon_mass",
         "Muon_charge",
+        "Muon_ptErr",
         "Muon_pfRelIso03_all",
         "Muon_sip3d",
         "Muon_dxy",
@@ -181,6 +190,8 @@
         "Electron_deltaEtaSC",
         "Electron_phi",
         "Electron_mass",
+        "Electron_energyErr",
+        "Electron_ptErr",
         "Electron_charge",
         "Electron_pfRelIso03_all",
         "Electron_dxy",

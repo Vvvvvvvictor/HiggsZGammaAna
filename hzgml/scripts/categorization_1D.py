@@ -50,6 +50,8 @@ def gettingsig(region, variable, boundaries, transform, estimate):
 
     yields = pd.DataFrame({'sig': [0.]*nbin,
                           'sig_err': [0.]*nbin,
+                          'sig_tot': [0.]*nbin,
+                          'sig_tot_err': [0.]*nbin,
                           'data_sid': [0.]*nbin,
                           'data_sid_err': [0.]*nbin,
                           'bkgmc_sid': [0.]*nbin,
@@ -61,16 +63,20 @@ def gettingsig(region, variable, boundaries, transform, estimate):
                           'ggH': [0.]*nbin,
                           'ggH_err': [0.]*nbin})
 
-    for category in ['sig', 'VBF', 'ggH', "data_sid", "bkgmc_sid", "bkgmc_cen"]:
+    for category in ['sig', 'VBF', 'ggH', "data_sid", "bkgmc_sid", "bkgmc_cen", "sig_tot"]:
 
-        for data in tqdm(read_root(f'/eos/home-j/jiehan/root/2017/outputs/{region}/{"bkgmc" if "bkgmc" in category else "data" if "data" in category else category}.root', key='test', columns=[f"{variable}_score{'_t' if transform else ''}", 'H_mass', 'weight', 'event'], chunksize=500000), desc=f'Loading {category}', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
+        for data in tqdm(read_root(f'/afs/cern.ch/user/j/jiehan/public/two_jet_samples/{region}/{"bkgmc" if "bkgmc" in category else "data" if "data" in category else "sig" if "sig" in category else category}.root', key='test', columns=[f"{variable}_score{'_t' if transform else ''}", 'H_mass', 'weight', 'event'], chunksize=500000), desc=f'Loading {category}', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
     
             if 'sid' in category:
-                data = data[(data.H_mass >= 100) & (data.H_mass <= 180) & ((data.H_mass < 120) | (data.H_mass > 130))]
+                data = data[(data.H_mass >= 100) & (data.H_mass <= 180) & ((data.H_mass < 122) | (data.H_mass > 128))]
+                data['w'] = data.weight
+
+            elif 'tot' in category:
+                data = data[(data.H_mass >= 105) & (data.H_mass <= 170)]
                 data['w'] = data.weight
 
             else:
-                data = data[(data.H_mass >= 120) & (data.H_mass <= 130)]
+                data = data[(data.H_mass >= 122) & (data.H_mass <= 128)]
                 data['w'] = data.weight
            
             # print(data)
@@ -101,8 +107,6 @@ def gettingsig(region, variable, boundaries, transform, estimate):
     yields['z'] = zs[0]
     yields['u'] = zs[1]
     yields['VBF purity [%]'] = yields['VBF']/yields['sig']*100
-    yields['s/b'] = yields['sig']/yields['bkg']
-    yields['s^2/b'] = yields['sig']*yields['sig']/yields['bkg']
 
     for i in yields:
         print(yields[i])
@@ -116,14 +120,14 @@ def gettingsig(region, variable, boundaries, transform, estimate):
 
 def categorizing(region, variable, sigs, bkgs, nscan, minN, transform, nbin, floatB, n_fold, fold, earlystop, estimate):
 
-    f_sig = TFile('/eos/home-j/jiehan/root/2017/outputs/%s/sig.root' % (region))
+    f_sig = TFile('/afs/cern.ch/user/j/jiehan/public/two_jet_samples/%s/sig.root' % (region))
     t_sig = f_sig.Get('test')
  
     if estimate in ["fullSim", "fullSimrw"]:
-        f_bkgmc = TFile('/eos/home-j/jiehan/root/2017/outputs/%s/bkgmc.root' % (region))
+        f_bkgmc = TFile('/afs/cern.ch/user/j/jiehan/public/two_jet_samples/%s/bkgmc.root' % (region))
         t_bkgmc = f_bkgmc.Get('test')
     if estimate in ["fullSimrw", "data_sid"]:
-        f_data_sid = TFile('/eos/home-j/jiehan/root/2017/outputs/%s/data.root' % (region))
+        f_data_sid = TFile('/afs/cern.ch/user/j/jiehan/public/two_jet_samples/%s/data.root' % (region))
         t_data_sid = f_data_sid.Get('test')
 
     h_sig = TH1F('h_sig','h_sig',nscan,0,1)
@@ -191,14 +195,14 @@ def main():
     if not args.skip:
         siglist=''
         for sig in sigs:
-            if os.path.isfile('/eos/home-j/jiehan/root/2017/outputs/%s/%s.root'% (region,sig)): siglist+=' /eos/home-j/jiehan/root/2017/outputs/%s/%s.root'% (region,sig)
-        os.system("hadd -f /eos/home-j/jiehan/root/2017/outputs/%s/sig.root"%(region)+siglist)
+            if os.path.isfile('/afs/cern.ch/user/j/jiehan/public/two_jet_samples/%s/%s.root'% (region,sig)): siglist+=' /afs/cern.ch/user/j/jiehan/public/two_jet_samples/%s/%s.root'% (region,sig)
+        os.system("hadd -f /afs/cern.ch/user/j/jiehan/public/two_jet_samples/%s/sig.root"%(region)+siglist)
 
     if not args.skip:
         bkglist=''
         for bkg in bkgs:
-            if os.path.isfile('/eos/home-j/jiehan/root/2017/outputs/%s/%s.root'% (region,bkg)): bkglist+=' /eos/home-j/jiehan/root/2017/outputs/%s/%s.root'% (region,bkg)
-        os.system("hadd -f /eos/home-j/jiehan/root/2017/outputs/%s/bkgmc.root"%(region)+bkglist)
+            if os.path.isfile('/afs/cern.ch/user/j/jiehan/public/two_jet_samples/%s/%s.root'% (region,bkg)): bkglist+=' /afs/cern.ch/user/j/jiehan/public/two_jet_samples/%s/%s.root'% (region,bkg)
+        os.system("hadd -f /afs/cern.ch/user/j/jiehan/public/two_jet_samples/%s/bkgmc.root"%(region)+bkglist)
 
 
     n_fold = args.nfold
@@ -211,7 +215,7 @@ def main():
         boundaries_values.append(bound_value)
         smaxs.append(smax)
 
-    # boundaries_values.append([0.00, 0.01, 0.04, 0.13])
+    # boundaries_values.append([0.00, 0.29, 0.57, 0.73])
 
     smax = sum(smaxs)/n_fold
     print('Averaged significance: ', smax)
@@ -240,7 +244,7 @@ def main():
         print(f'INFO: Creating output folder: "significances/{region}"')
         os.makedirs("significances/%s"%region)
     '''
-    with open('/eos/home-j/jiehan/root/2017/outputs/significances/bin_binaries_%s.txt'%region, 'w') as json_file:
+    with open('/afs/cern.ch/user/j/jiehan/public/two_jet_samples/significances/bin_binaries_%s.txt'%region, 'w') as json_file:
         json_file.write('{:d} '.format(args.nbin))
         for i in boundaries_values:
             for j in i:
@@ -249,7 +253,7 @@ def main():
         for i in list(yields['z']):
             json_file.write('{:.4f} '.format(i))
         json_file.write('%.4f %.4f' % (s, u))
-    with open('/eos/home-j/jiehan/root/2017/outputs/significances/%d_%d_%s_1D_%d.json' % (shield+1, add+1, region, args.nbin), 'w') as json_file:
+    with open('/afs/cern.ch/user/j/jiehan/public/two_jet_samples/significances/%d_%d_%s_1D_%d.json' % (shield+1, add+1, region, args.nbin), 'w') as json_file:
         json.dump(outs, json_file)
         for i in list(yields['z']):
             json_file.write('{:.4f}\n'.format(i))

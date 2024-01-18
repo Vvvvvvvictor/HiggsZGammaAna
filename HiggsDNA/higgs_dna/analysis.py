@@ -174,7 +174,7 @@ class AnalysisManager():
                 "function_name" : "run_analysis"
             },
             # "batch_system" : "condor",
-            "batch_system" : "local",
+            "batch_system" : "condor",
             "fpo" : None, # number of input files per output file (i.e. per job)
             "n_cores" : 5, # number of cores for local running
             "merge_outputs" : False,
@@ -506,34 +506,42 @@ class AnalysisManager():
         is_data = config["sample"]["is_data"]
 
         for file in files:
-            with uproot.open(file, timeout = 500) as f:
-                runs = f["Runs"]
-                if "genEventCount" in runs.keys() and "genEventSumw" in runs.keys():
-                    sum_weights += numpy.sum(runs["genEventSumw"].array())
-                elif "genEventCount_" in runs.keys() and "genEventSumw_" in runs.keys():
-                    sum_weights += numpy.sum(runs["genEventSumw_"].array())
-                tree = f["Events"]
+            try:
+                f = uproot.open(file, timeout = 60)
+            except Exception:
+                if (os.system(f"xrdcp '{file}' '/tmp/jiehan/{os.path.basename(file)}'")):
+                    raise RuntimeError("xrdcp failed")
+                f = uproot.open(f'/tmp/jiehan/{os.path.basename(file)}')
 
-                # Get events that is not duplicated
-                if is_data:
-                    duplicated_sample_remover = DuplicatedSamplesTagger(is_data=True)
-                    duplicated_remove_cut = duplicated_sample_remover.calculate_selection(file, tree, config["sample"]["year"])
+            runs = f["Runs"]
+            if "genEventCount" in runs.keys() and "genEventSumw" in runs.keys():
+                sum_weights += numpy.sum(runs["genEventSumw"].array())
+            elif "genEventCount_" in runs.keys() and "genEventSumw_" in runs.keys():
+                sum_weights += numpy.sum(runs["genEventSumw_"].array())
+            tree = f["Events"]
 
-                    trimmed_branches = [x for x in branches if x in tree.keys()]
-                    events_file = tree.arrays(trimmed_branches, library = "ak", how = "zip") #TODO: There is a bug here.
+            # Get events that is not duplicated
+            if is_data:
+                duplicated_sample_remover = DuplicatedSamplesTagger(is_data=True)
+                duplicated_remove_cut = duplicated_sample_remover.calculate_selection(file, tree, config["sample"]["year"])
 
-                    events_file = events_file[duplicated_remove_cut]
-                else:
-                    trimmed_branches = [x for x in branches if x in tree.keys()]
-                    events_file = tree.arrays(trimmed_branches, library = "ak", how = "zip") #TODO: There is a bug here.
+                trimmed_branches = [x for x in branches if x in tree.keys()]
+                events_file = tree.arrays(trimmed_branches, library = "ak", how = "zip") #TODO: There is a bug here.
 
-                    events_file = events_file
+                events_file = events_file[duplicated_remove_cut]
+            else:
+                trimmed_branches = [x for x in branches if x in tree.keys()]
+                events_file = tree.arrays(trimmed_branches, library = "ak", how = "zip") #TODO: There is a bug here.
 
-                logger.debug("Load samples: sample type: %s" % events_file.type)
+                events_file = events_file
 
-                events.append(events_file)
+            f.close()
 
-                logger.debug("[AnalysisManager : load_events] Loaded %d events from file '%s'." % (len(events_file), file))
+            logger.debug("Load samples: sample type: %s" % events_file.type)
+
+            events.append(events_file)
+
+            logger.debug("[AnalysisManager : load_events] Loaded %d events from file '%s'." % (len(events_file), file))
 
         events = awkward.concatenate(events)
         return events, sum_weights

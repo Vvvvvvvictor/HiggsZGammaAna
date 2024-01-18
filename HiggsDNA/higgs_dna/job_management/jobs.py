@@ -172,6 +172,14 @@ class Job():
         lines.append("with open(config_file, 'r') as f_in:")
         lines.append("    config = json.load(f_in)")
         lines.append("")
+        # lines.append("files = config['files']")
+        # lines.append("for i in range(len(files)):")
+        # lines.append("    file = files[i]")
+        # lines.append("    localfile = os.path.join(os.getcwd(), os.path.basename(file))")
+        # lines.append("    if os.system('xrdcp \\'%s\\' \\'%s\\'' % (file, localfile)):")
+        # lines.append("        raise RuntimeError('xrdcp failed')")
+        # lines.append("    files[i] = 'file:' + localfile")
+        # lines.appendO("")
         lines.append("run_analysis(config)") # FIXME: not compatible if another function is specified
 
         if os.path.exists(self.python_executable_file):

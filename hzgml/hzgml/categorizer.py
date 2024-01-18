@@ -14,11 +14,12 @@ def calc_sig(sig, bkg,s_err,b_err):
 
   #Counting experiment
   significance = sqrt(2*((ntot * log(ntot/bkg)) - sig)) # why a 2 is here
-  #significance = sig / sqrt(bkg)
+#   significance = sig / sqrt(bkg)
 
   #error on significance
   numer = sqrt((log(ntot/bkg)*s_err)**2 + ((log(1+(sig/bkg)) - (sig/bkg))*b_err)**2)
   uncert = (numer/significance)
+#   uncert = sqrt((s_err**2/bkg) + (significance/2/bkg*b_err)**2)
 
   return significance, uncert
 

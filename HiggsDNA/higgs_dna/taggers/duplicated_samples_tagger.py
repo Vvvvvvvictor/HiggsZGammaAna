@@ -33,8 +33,10 @@ class DuplicatedSamplesTagger(Tagger):
 
         logger.debug("Duplicated_samples:  events fileds %s" % data.fields)
 
+        cut = data.HLT_IsoMu20>=0
+        
         if not self.is_data:
-            return data.HLT_IsoMu20>=0
+            return cut
 
         # Only use specific events in different NanoAOD
         if "/DoubleMuon/" in file or "/SingleMuon/" in file or "/Muon/" in file:
