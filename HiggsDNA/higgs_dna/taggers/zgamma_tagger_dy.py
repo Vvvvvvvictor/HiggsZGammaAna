@@ -279,12 +279,13 @@ class ZGammaTaggerDY(Tagger):
 
         # Make Z candidate-level cuts
         os_cut = z_cands.LeadLepton.charge * z_cands.SubleadLepton.charge == -1
-        mass_cut = (z_cands.ZCand.mass > 50.)
+        mass_cut = (z_cands.ZCand.mass > 80.) & (z_cands.ZCand.mass < 100.)
+        # mass_cut = (z_cands.ZCand.mass > 50.)
         z_cut = os_cut & mass_cut
         z_cands = z_cands[z_cut] # OSSF lepton pairs with m_ll > 50.
         
         has_z_cand = awkward.num(z_cands) >= 1
-        z_cands = z_cands[awkward.argsort(abs(z_cands.ZCand.mass - 91.), axis = 1)] # take the one with mass closest to mZ
+        z_cands = z_cands[awkward.argsort(abs(z_cands.ZCand.mass - 91.1876), axis = 1)] # take the one with mass closest to mZ
         z_cand = awkward.firsts(z_cands)
 
         # Add Z-related fields to array
@@ -493,7 +494,7 @@ class ZGammaTaggerDY(Tagger):
 
         # eta
         #eta_cut = Tagger.get_range_cut(abs(photons.eta), options["eta"]) | (photons.isScEtaEB | photons.isScEtaEE)
-        eta_cut = (photons.isScEtaEB | photons.isScEtaEE)
+        eta_cut = (photons.isScEtaEB | photons.isScEtaEE) & photons.mvaID_WP80
         # eta_cut = ((photons.isScEtaEB & (photons.mvaID > options["mvaID_barrel"])) | (photons.isScEtaEE & (photons.mvaID > options["mvaID_endcap"])))
 
         # electron veto

@@ -1,0 +1,4 @@
+ <<< Combine >>> 
+>>> random number generator seed is 123456
+Will use a-priori expected background instead of a-posteriori one.
+>>> method used is AsymptoticLimits

@@ -1,0 +1,238 @@
+7236
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::Sqrts
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::CMS_hzg_mass
+3620
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing dataset data_mass_cat0
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::Sqrts
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::CMS_hzg_mass
+1134
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing dataset data_mass_cat0
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::Sqrts
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::CMS_hzg_mass
+1239
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing dataset data_mass_cat0
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::Sqrts
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::CMS_hzg_mass
+350
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing dataset data_mass_cat0
+open /eos/home-j/jiehan/root/2017/outputs/two_jet/sig.root success!
+Entries:  48792
+[[ INFO ]] prepare Higgs mass: 120
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::Sqrts
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::IntLumi
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::CMS_hzg_mass
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::CMS_hzg_weight
+###################################################
+  1) 0x640b430 RooRealVar::   CMS_hzg_mass = 120  L(105 - 170)  "CMS_hzg_mass"
+  2) 0x644a060 RooRealVar:: CMS_hzg_weight = 450000  L(-100000 - 1e+06)  "CMS_hzg_weight"
+###################################################
+DataStore ggh_120_13TeV_cat0 (ggh_120_13TeV_cat0)
+  Contains 12410 entries
+  Observables: 
+    1)  CMS_hzg_mass = 118.619  L(105 - 170)  "CMS_hzg_mass"
+  Dataset variable "CMS_hzg_weight" is interpreted as the event weight
+<class 'ROOT.RooArgSet'>
+###################################################
+[#1] INFO:InputArguments -- RooAbsData::plotOn(ggh_120_13TeV_cat0) INFO: dataset has non-integer weights, auto-selecting SumW2 errors instead of Poisson errors
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing dataset ggh_120_13TeV_cat0
+[[ INFO ]] prepare Higgs mass: 125
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::Sqrts
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::IntLumi
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::CMS_hzg_mass
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::CMS_hzg_weight
+###################################################
+  1) 0x6419790 RooRealVar::   CMS_hzg_mass = 125  L(105 - 170)  "CMS_hzg_mass"
+  2) 0x640b430 RooRealVar:: CMS_hzg_weight = 450000  L(-100000 - 1e+06)  "CMS_hzg_weight"
+###################################################
+DataStore ggh_125_13TeV_cat0 (ggh_125_13TeV_cat0)
+  Contains 12410 entries
+  Observables: 
+    1)  CMS_hzg_mass = 123.619  L(105 - 170)  "CMS_hzg_mass"
+  Dataset variable "CMS_hzg_weight" is interpreted as the event weight
+<class 'ROOT.RooArgSet'>
+###################################################
+[#1] INFO:InputArguments -- RooAbsData::plotOn(ggh_125_13TeV_cat0) INFO: dataset has non-integer weights, auto-selecting SumW2 errors instead of Poisson errors
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing dataset ggh_125_13TeV_cat0
+[[ INFO ]] prepare Higgs mass: 130
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::Sqrts
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::IntLumi
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::CMS_hzg_mass
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::CMS_hzg_weight
+###################################################
+  1) 0x6414300 RooRealVar::   CMS_hzg_mass = 130  L(105 - 170)  "CMS_hzg_mass"
+  2) 0x6419790 RooRealVar:: CMS_hzg_weight = 450000  L(-100000 - 1e+06)  "CMS_hzg_weight"
+###################################################
+DataStore ggh_130_13TeV_cat0 (ggh_130_13TeV_cat0)
+  Contains 12410 entries
+  Observables: 
+    1)  CMS_hzg_mass = 128.619  L(105 - 170)  "CMS_hzg_mass"
+  Dataset variable "CMS_hzg_weight" is interpreted as the event weight
+<class 'ROOT.RooArgSet'>
+###################################################
+[#1] INFO:InputArguments -- RooAbsData::plotOn(ggh_130_13TeV_cat0) INFO: dataset has non-integer weights, auto-selecting SumW2 errors instead of Poisson errors
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing dataset ggh_130_13TeV_cat0
+[[ INFO ]] prepare Higgs mass: 120
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::Sqrts
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::IntLumi
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::CMS_hzg_mass
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::CMS_hzg_weight
+###################################################
+  1) 0x7473560 RooRealVar::   CMS_hzg_mass = 120  L(105 - 170)  "CMS_hzg_mass"
+  2) 0x6414300 RooRealVar:: CMS_hzg_weight = 450000  L(-100000 - 1e+06)  "CMS_hzg_weight"
+###################################################
+DataStore ggh_120_13TeV_cat0 (ggh_120_13TeV_cat0)
+  Contains 5739 entries
+  Observables: 
+    1)  CMS_hzg_mass = 113.762  L(105 - 170)  "CMS_hzg_mass"
+  Dataset variable "CMS_hzg_weight" is interpreted as the event weight
+<class 'ROOT.RooArgSet'>
+###################################################
+[#1] INFO:InputArguments -- RooAbsData::plotOn(ggh_120_13TeV_cat0) INFO: dataset has non-integer weights, auto-selecting SumW2 errors instead of Poisson errors
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing dataset ggh_120_13TeV_cat0
+[[ INFO ]] prepare Higgs mass: 125
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::Sqrts
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::IntLumi
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::CMS_hzg_mass
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::CMS_hzg_weight
+###################################################
+  1) 0x6fb9e00 RooRealVar::   CMS_hzg_mass = 125  L(105 - 170)  "CMS_hzg_mass"
+  2) 0x7473560 RooRealVar:: CMS_hzg_weight = 450000  L(-100000 - 1e+06)  "CMS_hzg_weight"
+###################################################
+DataStore ggh_125_13TeV_cat0 (ggh_125_13TeV_cat0)
+  Contains 5739 entries
+  Observables: 
+    1)  CMS_hzg_mass = 118.762  L(105 - 170)  "CMS_hzg_mass"
+  Dataset variable "CMS_hzg_weight" is interpreted as the event weight
+<class 'ROOT.RooArgSet'>
+###################################################
+[#1] INFO:InputArguments -- RooAbsData::plotOn(ggh_125_13TeV_cat0) INFO: dataset has non-integer weights, auto-selecting SumW2 errors instead of Poisson errors
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing dataset ggh_125_13TeV_cat0
+[[ INFO ]] prepare Higgs mass: 130
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::Sqrts
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::IntLumi
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::CMS_hzg_mass
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::CMS_hzg_weight
+###################################################
+  1) 0x644a060 RooRealVar::   CMS_hzg_mass = 130  L(105 - 170)  "CMS_hzg_mass"
+  2) 0x6fb9e00 RooRealVar:: CMS_hzg_weight = 450000  L(-100000 - 1e+06)  "CMS_hzg_weight"
+###################################################
+DataStore ggh_130_13TeV_cat0 (ggh_130_13TeV_cat0)
+  Contains 5739 entries
+  Observables: 
+    1)  CMS_hzg_mass = 123.762  L(105 - 170)  "CMS_hzg_mass"
+  Dataset variable "CMS_hzg_weight" is interpreted as the event weight
+<class 'ROOT.RooArgSet'>
+###################################################
+[#1] INFO:InputArguments -- RooAbsData::plotOn(ggh_130_13TeV_cat0) INFO: dataset has non-integer weights, auto-selecting SumW2 errors instead of Poisson errors
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing dataset ggh_130_13TeV_cat0
+[[ INFO ]] prepare Higgs mass: 120
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::Sqrts
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::IntLumi
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::CMS_hzg_mass
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::CMS_hzg_weight
+###################################################
+  1) 0x6cc5030 RooRealVar::   CMS_hzg_mass = 120  L(105 - 170)  "CMS_hzg_mass"
+  2) 0x644a060 RooRealVar:: CMS_hzg_weight = 450000  L(-100000 - 1e+06)  "CMS_hzg_weight"
+###################################################
+DataStore ggh_120_13TeV_cat0 (ggh_120_13TeV_cat0)
+  Contains 12473 entries
+  Observables: 
+    1)  CMS_hzg_mass = 110.337  L(105 - 170)  "CMS_hzg_mass"
+  Dataset variable "CMS_hzg_weight" is interpreted as the event weight
+<class 'ROOT.RooArgSet'>
+###################################################
+[#1] INFO:InputArguments -- RooAbsData::plotOn(ggh_120_13TeV_cat0) INFO: dataset has non-integer weights, auto-selecting SumW2 errors instead of Poisson errors
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing dataset ggh_120_13TeV_cat0
+[[ INFO ]] prepare Higgs mass: 125
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::Sqrts
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::IntLumi
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::CMS_hzg_mass
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::CMS_hzg_weight
+###################################################
+  1) 0x6cc7e80 RooRealVar::   CMS_hzg_mass = 125  L(105 - 170)  "CMS_hzg_mass"
+  2) 0x6cc5030 RooRealVar:: CMS_hzg_weight = 450000  L(-100000 - 1e+06)  "CMS_hzg_weight"
+###################################################
+DataStore ggh_125_13TeV_cat0 (ggh_125_13TeV_cat0)
+  Contains 12473 entries
+  Observables: 
+    1)  CMS_hzg_mass = 115.337  L(105 - 170)  "CMS_hzg_mass"
+  Dataset variable "CMS_hzg_weight" is interpreted as the event weight
+<class 'ROOT.RooArgSet'>
+###################################################
+[#1] INFO:InputArguments -- RooAbsData::plotOn(ggh_125_13TeV_cat0) INFO: dataset has non-integer weights, auto-selecting SumW2 errors instead of Poisson errors
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing dataset ggh_125_13TeV_cat0
+[[ INFO ]] prepare Higgs mass: 130
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::Sqrts
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::IntLumi
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::CMS_hzg_mass
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::CMS_hzg_weight
+###################################################
+  1) 0x747bc00 RooRealVar::   CMS_hzg_mass = 130  L(105 - 170)  "CMS_hzg_mass"
+  2) 0x6cc7e80 RooRealVar:: CMS_hzg_weight = 450000  L(-100000 - 1e+06)  "CMS_hzg_weight"
+###################################################
+DataStore ggh_130_13TeV_cat0 (ggh_130_13TeV_cat0)
+  Contains 12473 entries
+  Observables: 
+    1)  CMS_hzg_mass = 120.337  L(105 - 170)  "CMS_hzg_mass"
+  Dataset variable "CMS_hzg_weight" is interpreted as the event weight
+<class 'ROOT.RooArgSet'>
+###################################################
+[#1] INFO:InputArguments -- RooAbsData::plotOn(ggh_130_13TeV_cat0) INFO: dataset has non-integer weights, auto-selecting SumW2 errors instead of Poisson errors
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing dataset ggh_130_13TeV_cat0
+[[ INFO ]] prepare Higgs mass: 120
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::Sqrts
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::IntLumi
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::CMS_hzg_mass
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::CMS_hzg_weight
+###################################################
+  1) 0x6cc1310 RooRealVar::   CMS_hzg_mass = 120  L(105 - 170)  "CMS_hzg_mass"
+  2) 0x747bc00 RooRealVar:: CMS_hzg_weight = 450000  L(-100000 - 1e+06)  "CMS_hzg_weight"
+###################################################
+DataStore ggh_120_13TeV_cat0 (ggh_120_13TeV_cat0)
+  Contains 17740 entries
+  Observables: 
+    1)  CMS_hzg_mass = 119.788  L(105 - 170)  "CMS_hzg_mass"
+  Dataset variable "CMS_hzg_weight" is interpreted as the event weight
+<class 'ROOT.RooArgSet'>
+###################################################
+[#1] INFO:InputArguments -- RooAbsData::plotOn(ggh_120_13TeV_cat0) INFO: dataset has non-integer weights, auto-selecting SumW2 errors instead of Poisson errors
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing dataset ggh_120_13TeV_cat0
+[[ INFO ]] prepare Higgs mass: 125
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::Sqrts
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::IntLumi
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::CMS_hzg_mass
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::CMS_hzg_weight
+###################################################
+  1) 0x6fa3390 RooRealVar::   CMS_hzg_mass = 125  L(105 - 170)  "CMS_hzg_mass"
+  2) 0x6cc1310 RooRealVar:: CMS_hzg_weight = 450000  L(-100000 - 1e+06)  "CMS_hzg_weight"
+###################################################
+DataStore ggh_125_13TeV_cat0 (ggh_125_13TeV_cat0)
+  Contains 17740 entries
+  Observables: 
+    1)  CMS_hzg_mass = 124.788  L(105 - 170)  "CMS_hzg_mass"
+  Dataset variable "CMS_hzg_weight" is interpreted as the event weight
+<class 'ROOT.RooArgSet'>
+###################################################
+[#1] INFO:InputArguments -- RooAbsData::plotOn(ggh_125_13TeV_cat0) INFO: dataset has non-integer weights, auto-selecting SumW2 errors instead of Poisson errors
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing dataset ggh_125_13TeV_cat0
+[[ INFO ]] prepare Higgs mass: 130
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::Sqrts
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::IntLumi
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::CMS_hzg_mass
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing RooRealVar::CMS_hzg_weight
+###################################################
+  1) 0x6fa72b0 RooRealVar::   CMS_hzg_mass = 130  L(105 - 170)  "CMS_hzg_mass"
+  2) 0x6fa3390 RooRealVar:: CMS_hzg_weight = 450000  L(-100000 - 1e+06)  "CMS_hzg_weight"
+###################################################
+DataStore ggh_130_13TeV_cat0 (ggh_130_13TeV_cat0)
+  Contains 17740 entries
+  Observables: 
+    1)  CMS_hzg_mass = 129.788  L(105 - 170)  "CMS_hzg_mass"
+  Dataset variable "CMS_hzg_weight" is interpreted as the event weight
+<class 'ROOT.RooArgSet'>
+###################################################
+[#1] INFO:InputArguments -- RooAbsData::plotOn(ggh_130_13TeV_cat0) INFO: dataset has non-integer weights, auto-selecting SumW2 errors instead of Poisson errors
+[#1] INFO:ObjectHandling -- RooWorkspace::import(CMS_hzg_workspace) importing dataset ggh_130_13TeV_cat0
+./HZGamma_BkgModel_UL already exist
+/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/final_fit/CMSSW_10_2_13/src/flashggFinalFit/Signal
+./HZGamma_SigModel_UL already exist

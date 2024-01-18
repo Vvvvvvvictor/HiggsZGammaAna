@@ -35,11 +35,39 @@ DEFAULT_OPTIONS = {
         "mass_sum" : 185,
         "select_highest_pt_sum" : True
     },
+    "single_muon_trigger":{
+        "2016":["HLT_IsoMu24", "HLT_IsoTkMu24"],
+        "2017":["HLT_IsoMu27"],
+        "2018":["HLT_IsoMu24"],
+        "2022":["HLT_IsoMu24"],
+        "2023":["HLT_IsoMu24"]
+    },
+    "single_ele_trigger":{
+        "2016":["HLT_Ele27_WPTight_Gsf"],
+        "2017":["HLT_Ele32_WPTight_Gsf_L1DoubleEG"],
+        "2018":["HLT_Ele32_WPTight_Gsf"],
+        "2022":["HLT_Ele30_WPTight_Gsf"],
+        "2023":["HLT_Ele30_WPTight_Gsf"]
+    },
+    "double_muon_trigger":{
+        "2016":["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ", "HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ"],
+        "2017":["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8"],
+        "2018":["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8"],
+        "2022":["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8"],
+        "2023":["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8"]
+    },
+    "double_ele_trigger":{
+        "2016":["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ"],
+        "2017":["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL"],
+        "2018":["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL"],
+        "2022":["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL"],
+        "2023":["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL"]
+    },
     "trigger" : {
         "2016" : ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ", "HLT_IsoMu20", "HLT_IsoMu24", "HLT_IsoMu27", "HLT_Mu50", "HLT_Mu55", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL", "HLT_Ele27_WPTight_Gsf"],
         "2016UL_preVFP" : ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ", "HLT_IsoMu20", "HLT_IsoMu24", "HLT_IsoMu27", "HLT_Mu50", "HLT_Mu55", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL", "HLT_Ele27_WPTight_Gsf"],
         "2016UL_postVFP" : ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ", "HLT_IsoMu20", "HLT_IsoMu24", "HLT_IsoMu27", "HLT_Mu50", "HLT_Mu55", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL", "HLT_Ele27_WPTight_Gsf"],
-        "2017" : ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8", "HLT_Ele27_WPTight_Gsf", "HLT_Ele32_WPTight_Gsf_L1DoubleEG", "HLT_Ele35_WPTight_Gsf", "HLT_IsoMu20", "HLT_IsoMu24", "HLT_IsoMu27", "HLT_Mu50", "HLT_IsoMu24_eta2p1"],
+        "2017" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8", "HLT_Ele27_WPTight_Gsf", "HLT_Ele32_WPTight_Gsf_L1DoubleEG", "HLT_Ele35_WPTight_Gsf", "HLT_IsoMu20", "HLT_IsoMu24", "HLT_IsoMu27", "HLT_Mu50", "HLT_IsoMu24_eta2p1"],
         "2018" : ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8", "HLT_Mu37_TkMu27", "HLT_IsoMu20", "HLT_IsoMu24", "HLT_IsoMu27", "HLT_Mu50", "HLT_Mu55", "HLT_IsoMu24_eta2p1", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL", "HLT_DoubleEle25_CaloIdL_MW", "HLT_Ele27_WPTight_Gsf", "HLT_Ele32_WPTight_Gsf", "HLT_Ele32_WPTight_Gsf_L1DoubleEG", "HLT_Ele35_WPTight_Gsf", "HLT_Ele20_WPLoose_Gsf"],
         "2022" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8", "HLT_Ele30_WPTight_Gsf", "HLT_Ele32_WPTight_Gsf", "HLT_Ele35_WPTight_Gsf", "HLT_IsoMu24", "HLT_IsoMu27", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ",  "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL"]
     }, 
@@ -49,6 +77,20 @@ DEFAULT_OPTIONS = {
     "muons" : {
         "pt" : 5.0
     },
+    "lead_ele_pt":{
+        "2016": 30,
+        "2017": 35,
+        "2018": 35,
+        "2022": 30,
+        "2023": 30
+    },
+    "lead_mu_pt":{
+        "2016": 25,
+        "2017": 28,
+        "2018": 25,
+        "2022": 25,
+        "2023": 25
+    }
     "jets" : {
         "pt" : 30.0,
         "eta" : 4.7,
@@ -275,7 +317,6 @@ class ZGammaTaggerRun2(Tagger):
         n_jets = awkward.num(jets)
         awkward_utils.add_field(events, "n_jets", n_jets, overwrite=True)
 
-
         # PDG ID
         electrons = awkward.with_field(electrons, awkward.ones_like(electrons.pt) * 11, "id")
         muons = awkward.with_field(muons, awkward.ones_like(muons.pt) * 13, "id")
@@ -329,8 +370,8 @@ class ZGammaTaggerRun2(Tagger):
 
         # Make Z candidate-level cuts
         os_cut = z_cands.LeadLepton.charge * z_cands.SubleadLepton.charge == -1
-        #mass_cut = (z_cands.ZCand.mass > 80.) & (z_cands.ZCand.mass < 100.)
-        mass_cut = (z_cands.ZCand.mass > 50.)
+        mass_cut = (z_cands.ZCand.mass > 81.) & (z_cands.ZCand.mass < 101.)
+        # mass_cut = (z_cands.ZCand.mass > 50.)
         z_cut = os_cut & mass_cut
         z_cands = z_cands[z_cut] # OSSF lepton pairs with m_ll > 50.
         

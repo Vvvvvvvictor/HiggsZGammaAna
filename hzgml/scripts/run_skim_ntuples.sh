@@ -44,9 +44,9 @@ echo "==============STARTED=============="
 
 # mkdir -p /eos/home-j/jiehan/root/2017/skimmed_ntuples/LLAJJ/ /eos/home-j/jiehan/root/2017/skimmed_ntuples/TT/ /eos/home-j/jiehan/root/2017/skimmed_ntuples/WW/ /eos/home-j/jiehan/root/2017/skimmed_ntuples/WZ/ /eos/home-j/jiehan/root/2017/skimmed_ntuples/ZZ/
 # python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/2017/mva_based/background/LLAJJ_2017/merged_nominal.parquet -o /eos/home-j/jiehan/root/2017/skimmed_ntuples/LLAJJ/2017.root
-python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/2017/mva_based/background/TT_2017/merged_nominal.parquet -o /eos/home-j/jiehan/root/2017/skimmed_ntuples/TT/2017.root
-python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/2017/mva_based/background/WW_2017/merged_nominal.parquet -o /eos/home-j/jiehan/root/2017/skimmed_ntuples/WW/2017.root
-python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/2017/mva_based/background/WZ_2017/merged_nominal.parquet -o /eos/home-j/jiehan/root/2017/skimmed_ntuples/WZ/2017.root
-python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/2017/mva_based/background/ZZ_2017/merged_nominal.parquet -o /eos/home-j/jiehan/root/2017/skimmed_ntuples/ZZ/2017.root
+# python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/2017/mva_based/background/TT_2017/merged_nominal.parquet -o /eos/home-j/jiehan/root/2017/skimmed_ntuples/TT/2017.root
+# python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/2017/mva_based/background/WW_2017/merged_nominal.parquet -o /eos/home-j/jiehan/root/2017/skimmed_ntuples/WW/2017.root
+# python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/2017/mva_based/background/WZ_2017/merged_nominal.parquet -o /eos/home-j/jiehan/root/2017/skimmed_ntuples/WZ/2017.root
+# python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/2017/mva_based/background/ZZ_2017/merged_nominal.parquet -o /eos/home-j/jiehan/root/2017/skimmed_ntuples/ZZ/2017.root
 
 echo "==============FINISHED==========="
