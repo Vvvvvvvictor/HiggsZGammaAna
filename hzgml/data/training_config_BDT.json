@@ -1,4 +1,4 @@
-{"common":   {"train_signal": ["VBF", "ggH"],
+{"common":   {"train_signal": ["ggH", "VBF"],
               "train_dd_background": [],
               "train_mc_background": [],
               "train_data_background": ["data"],
@@ -7,9 +7,9 @@
                                 "gamma_eta", "l1g_deltaR", "l2g_deltaR",
                                 "H_ptt", "gamma_mvaID", "gamma_ptRelErr"
                                 ],
-              "preselections": ["H_mass >= 100", "H_mass <= 180"],
+              "preselections": ["H_mass >= 100", "H_mass <= 180", "gamma_mvaID_WPL == 1"],
               "signal_preselections": ["is_center == 1"],
-              "background_preselections": ["is_center == 0", "gamma_mvaID_WP80 == 1"],
+              "background_preselections": ["is_center == 0"],
               "data_preselections": [],
               "mc_preselections": [],
               "randomIndex": "event", "weight": "weight"

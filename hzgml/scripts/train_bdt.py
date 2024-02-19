@@ -74,6 +74,7 @@ class XGBoostHandler(object):
         self._branches = []
         self._sig_branches = []
         self._mc_branches = []
+        self._data_branches = []
 
         self.m_data_sig = pd.DataFrame()
         self.m_data_bkg = pd.DataFrame()
@@ -163,6 +164,8 @@ class XGBoostHandler(object):
 
             self._mc_branches = list( set(self.train_variables) | set([p.split()[0].replace("(", "") for p in self.preselections]) | set([p.split()[0].replace("(", "") for p in self.mc_preselections]) | set([p.split()[0].replace("(", "") for p in self.signal_preselections]) | set([p.split()[0].replace("(", "") for p in self.background_preselections]) | set([self.randomIndex, self.weight]))
 
+            self._mc_branches = list( set(self.train_variables) | set([p.split()[0].replace("(", "") for p in self.preselections]) | set([p.split()[0].replace("(", "") for p in self.data_preselections]) | set([p.split()[0].replace("(", "") for p in self.signal_preselections]) | set([p.split()[0].replace("(", "") for p in self.background_preselections]) | set([self.randomIndex, self.weight]))
+
             self._sig_branches = list( set(self.train_variables) | set([p.split()[0].replace("(", "") for p in self.preselections]) | set([p.split()[0].replace("(", "") for p in self.mc_preselections]) | set([p.split()[0].replace("(", "") for p in self.signal_preselections]) | set([self.randomIndex, self.weight]))
 
 
@@ -170,6 +173,7 @@ class XGBoostHandler(object):
             self.train_variables = [x.replace('noexpand:', '') for x in self.train_variables]
             self.preselections = [x.replace('noexpand:', '') for x in self.preselections]
             self.mc_preselections = [x.replace('noexpand:', '') for x in self.mc_preselections]
+            self.data_preselections = [x.replace('noexpand:', '') for x in self.data_preselections]
             self.signal_preselections = [x.replace('noexpand:', '') for x in self.signal_preselections]
             self.background_preselections = [x.replace('noexpand:', '') for x in self.background_preselections]
             self.randomIndex = self.randomIndex.replace('noexpand:', '')
@@ -181,6 +185,8 @@ class XGBoostHandler(object):
                 self.signal_preselections = ['data.' + p for p in self.signal_preselections]
             if self.mc_preselections:
                 self.mc_preselections = ['data.' + p for p in self.mc_preselections]
+            if self.data_preselections:
+                self.data_preselections = ['data.' + p for p in self.data_preselections]
             if self.background_preselections:
                 self.background_preselections = ['data.' + p for p in self.background_preselections]
 
@@ -444,7 +450,7 @@ class XGBoostHandler(object):
     def plotFeaturesImportance(self, fold=0, save=True, show=False, type='gain'):
         """Plot feature importance. Type can be 'weight', 'gain' or 'cover'"""
 
-        xgb.plot_importance(booster=self.m_bst[fold], importance_type=type)
+        xgb.plot_importance(booster=self.m_bst[fold], importance_type=type, show_values=show)
         plt.tight_layout()
 
         if save:
@@ -452,7 +458,7 @@ class XGBoostHandler(object):
             if not os.path.isdir('plots/feature_importance'):
                 os.makedirs('plots/feature_importance')
             # save figure
-            plt.savefig('plots/feature_importance/%d_BDT_%s_%d.pdf' % (self._shield+1, self._region, fold))
+            plt.savefig('plots/feature_importance/%d_BDT_%s_%d.png' % (self._shield+1, self._region, fold))
 
         if show: plt.show()
 
@@ -563,7 +569,7 @@ class XGBoostHandler(object):
                 Real(0.7, 1, name='subsample'),
                 Real(0.01, 0.4, name='eta'),
                 Integer(200, 400, name='max_bin'),
-                Integer(5, 20, name='max_depth'),
+                Integer(5, 20, name='max_depth')
         ]
 
         def objective(param):
@@ -695,11 +701,6 @@ def main():
     configPath = args.config
     xgb = XGBoostHandler(configPath, args.region)
 
-    if args.skopt_plot: 
-        for i in args.fold:
-            xgb.skoptPlot(i)
-        return
-
     if args.inputFolder: xgb.setInputFolder(args.inputFolder)
     if args.outputFolder: xgb.setOutputFolder(args.outputFolder)
     if args.params: xgb.setParams(args.params)
@@ -743,6 +744,11 @@ def main():
         xgb.transformScore(i)
 
         if args.save: xgb.save(i)
+    
+    if args.skopt_plot: 
+        for i in args.fold:
+            xgb.skoptPlot(i)
+        return
 
     print('------------------------------------------------------------------------------')
     print('Finished training.')

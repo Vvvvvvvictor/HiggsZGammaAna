@@ -63,14 +63,14 @@ DEFAULT_OPTIONS = {
         "2022":["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL"],
         "2023":["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL"]
     },
-    "trigger" : {
-        "2016" : ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ", "HLT_IsoMu20", "HLT_IsoMu24", "HLT_IsoMu27", "HLT_Mu50", "HLT_Mu55", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL", "HLT_Ele27_WPTight_Gsf"],
-        "2016UL_preVFP" : ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ", "HLT_IsoMu20", "HLT_IsoMu24", "HLT_IsoMu27", "HLT_Mu50", "HLT_Mu55", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL", "HLT_Ele27_WPTight_Gsf"],
-        "2016UL_postVFP" : ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ", "HLT_IsoMu20", "HLT_IsoMu24", "HLT_IsoMu27", "HLT_Mu50", "HLT_Mu55", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL", "HLT_Ele27_WPTight_Gsf"],
-        "2017" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8", "HLT_Ele27_WPTight_Gsf", "HLT_Ele32_WPTight_Gsf_L1DoubleEG", "HLT_Ele35_WPTight_Gsf", "HLT_IsoMu20", "HLT_IsoMu24", "HLT_IsoMu27", "HLT_Mu50", "HLT_IsoMu24_eta2p1"],
-        "2018" : ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8", "HLT_Mu37_TkMu27", "HLT_IsoMu20", "HLT_IsoMu24", "HLT_IsoMu27", "HLT_Mu50", "HLT_Mu55", "HLT_IsoMu24_eta2p1", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL", "HLT_DoubleEle25_CaloIdL_MW", "HLT_Ele27_WPTight_Gsf", "HLT_Ele32_WPTight_Gsf", "HLT_Ele32_WPTight_Gsf_L1DoubleEG", "HLT_Ele35_WPTight_Gsf", "HLT_Ele20_WPLoose_Gsf"],
-        "2022" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8", "HLT_Ele30_WPTight_Gsf", "HLT_Ele32_WPTight_Gsf", "HLT_Ele35_WPTight_Gsf", "HLT_IsoMu24", "HLT_IsoMu27", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ",  "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL"]
-    }, 
+    # "trigger" : {
+    #     "2016" : ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ", "HLT_IsoMu20", "HLT_IsoMu24", "HLT_IsoMu27", "HLT_Mu50", "HLT_Mu55", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL", "HLT_Ele27_WPTight_Gsf"],
+    #     "2016UL_preVFP" : ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ", "HLT_IsoMu20", "HLT_IsoMu24", "HLT_IsoMu27", "HLT_Mu50", "HLT_Mu55", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL", "HLT_Ele27_WPTight_Gsf"],
+    #     "2016UL_postVFP" : ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ", "HLT_IsoMu20", "HLT_IsoMu24", "HLT_IsoMu27", "HLT_Mu50", "HLT_Mu55", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL", "HLT_Ele27_WPTight_Gsf"],
+    #     "2017" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8", "HLT_Ele27_WPTight_Gsf", "HLT_Ele32_WPTight_Gsf_L1DoubleEG", "HLT_Ele35_WPTight_Gsf", "HLT_IsoMu20", "HLT_IsoMu24", "HLT_IsoMu27", "HLT_Mu50", "HLT_IsoMu24_eta2p1"],
+    #     "2018" : ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8", "HLT_Mu37_TkMu27", "HLT_IsoMu20", "HLT_IsoMu24", "HLT_IsoMu27", "HLT_Mu50", "HLT_Mu55", "HLT_IsoMu24_eta2p1", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL", "HLT_DoubleEle25_CaloIdL_MW", "HLT_Ele27_WPTight_Gsf", "HLT_Ele32_WPTight_Gsf", "HLT_Ele32_WPTight_Gsf_L1DoubleEG", "HLT_Ele35_WPTight_Gsf", "HLT_Ele20_WPLoose_Gsf"],
+    #     "2022" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8", "HLT_Ele30_WPTight_Gsf", "HLT_Ele32_WPTight_Gsf", "HLT_Ele35_WPTight_Gsf", "HLT_IsoMu24", "HLT_IsoMu27", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ",  "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL"]
+    # }, 
     "electrons" : {
         "pt" : 7.0
     },
@@ -90,7 +90,7 @@ DEFAULT_OPTIONS = {
         "2018": 25,
         "2022": 25,
         "2023": 25
-    }
+    },
     "jets" : {
         "pt" : 30.0,
         "eta" : 4.7,
@@ -332,15 +332,6 @@ class ZGammaTaggerRun2(Tagger):
 
         # self.select_fake_and_medium_photons(events=events, photons=photons)
 
-        # Make trigger cuts 
-        if self.year is not None:
-            trigger_cut = awkward.num(events.Photon) < 0 # dummy cut, all False
-            for hlt in self.options["trigger"][self.year]: # logical OR of all triggers
-                if hasattr(events, hlt):
-                    trigger_cut = (trigger_cut) | (events[hlt] == True)
-        else:
-            trigger_cut = awkward.num(events.Photon) >= 0 # dummy cut, all True
-
         # Register as `vector.Momentum4D` objects so we can do four-vector operations with them
         photons = awkward.Array(photons, with_name = "Momentum4D")
         electrons = awkward.Array(electrons, with_name = "Momentum4D")
@@ -349,20 +340,48 @@ class ZGammaTaggerRun2(Tagger):
 
         #awkward_utils.add_field(events, "gamma_fsr_pt",  awkward.fill_none(FSRphotons.pt, DUMMY_VALUE))
         
+        # Make trigger cuts 
+        if self.year is not None:
+            single_ele_trigger_cut = awkward.num(events.Photon) < 0 # dummy cut, all False
+            double_ele_trigger_cut = awkward.num(events.Photon) < 0
+            single_mu_trigger_cut = awkward.num(events.Photon) < 0
+            double_mu_trigger_cut = awkward.num(events.Photon) < 0 
+            for hlt in self.options["single_ele_trigger"][self.year]:
+                if hasattr(events, hlt):
+                    single_ele_trigger_cut = (single_ele_trigger_cut) | (events[hlt] == True)
+            for hlt in self.options["double_ele_trigger"][self.year]: # logical OR of all triggers
+                if hasattr(events, hlt):
+                    double_ele_trigger_cut = (double_ele_trigger_cut) | (events[hlt] == True)
+            for hlt in self.options["single_muon_trigger"][self.year]: # logical OR of all triggers
+                if hasattr(events, hlt):
+                    single_mu_trigger_cut = (single_mu_trigger_cut) | (events[hlt] == True)
+            for hlt in self.options["double_muon_trigger"][self.year]: # logical OR of all triggers
+                if hasattr(events, hlt):
+                    double_mu_trigger_cut = (double_mu_trigger_cut) | (events[hlt] == True)
+        else:
+            single_ele_trigger_cut = awkward.num(events.Photon) > 0 # dummy cut, all True
+            double_ele_trigger_cut = awkward.num(events.Photon) > 0
+            single_mu_trigger_cut = awkward.num(events.Photon) > 0
+            double_mu_trigger_cut = awkward.num(events.Photon) > 0
+
         # Construct di-electron/di-muon pairs
         ee_pairs = awkward.combinations(electrons, 2, fields = ["LeadLepton", "SubleadLepton"])
-        ee_cut1 = ee_pairs.LeadLepton.pt > 25
-        ee_cut2 = ee_pairs.SubleadLepton.pt > 15
-        ee_pairs = ee_pairs[ee_cut1&ee_cut2]
-        ee_cut1 = awkward.sum(ee_cut1, axis=1) >= 1
-        ee_cut2 = awkward.sum(ee_cut2, axis=1) >= 1
+        if self.year is not None:
+            e_cut = ee_pairs.LeadLepton.pt > self.options["lead_ele_pt"][self.year]
+        else:
+            e_cut = ee_pairs.LeadLepton.pt > 25
+        ee_cut = (ee_pairs.LeadLepton.pt > 25) & (ee_pairs.SubleadLepton.pt > 15)
+        ee_pairs = ee_pairs[(double_ele_trigger_cut & ee_cut) | (single_ele_trigger_cut & e_cut)]
+        ele_cut = awkward.num(ee_pairs) >= 1
 
         mm_pairs = awkward.combinations(muons, 2, fields = ["LeadLepton", "SubleadLepton"])
-        mm_cut1 = mm_pairs.LeadLepton.pt > 25
-        mm_cut2 = mm_pairs.SubleadLepton.pt > 15
-        mm_pairs = mm_pairs[mm_cut1&mm_cut2]
-        mm_cut1 = awkward.sum(mm_cut1, axis=1) >= 1
-        mm_cut2 = awkward.sum(mm_cut2, axis=1) >= 1
+        if self.year is not None:
+            m_cut = mm_pairs.LeadLepton.pt > self.options["lead_mu_pt"][self.year]
+        else:
+            m_cut = mm_pairs.LeadLepton.pt > 20
+        mm_cut = (mm_pairs.LeadLepton.pt > 20) & (mm_pairs.SubleadLepton.pt > 10)
+        mm_pairs = mm_pairs[(double_mu_trigger_cut & mm_cut) | (single_mu_trigger_cut & m_cut)]
+        muon_cut = awkward.num(mm_pairs) >= 1
 
         # Concatenate these together
         z_cands = awkward.concatenate([ee_pairs, mm_pairs], axis = 1)
@@ -370,7 +389,7 @@ class ZGammaTaggerRun2(Tagger):
 
         # Make Z candidate-level cuts
         os_cut = z_cands.LeadLepton.charge * z_cands.SubleadLepton.charge == -1
-        mass_cut = (z_cands.ZCand.mass > 81.) & (z_cands.ZCand.mass < 101.)
+        mass_cut = (z_cands.ZCand.mass > 80.) & (z_cands.ZCand.mass < 100.)
         # mass_cut = (z_cands.ZCand.mass > 50.)
         z_cut = os_cut & mass_cut
         z_cands = z_cands[z_cut] # OSSF lepton pairs with m_ll > 50.
@@ -454,7 +473,7 @@ class ZGammaTaggerRun2(Tagger):
                 dummy_value = DUMMY_VALUE
             )
 
-        all_cuts = trigger_cut & has_z_cand & has_gamma_cand & sel_h_1 & sel_h_2 & sel_h_3
+        all_cuts = has_z_cand & has_gamma_cand & sel_h_1 & sel_h_2 & sel_h_3
         
         # bing with control regions
         var_CR1 = gamma_mvaID_WPL
@@ -471,7 +490,6 @@ class ZGammaTaggerRun2(Tagger):
         #for i in range(5000):
         #    print("SR1:", SR1[i], "SR:", SR[i], "CR1:", CR1[i], "CR2", CR2[i], "CR3", CR3[i], "regions:", regions[i])
         awkward_utils.add_field(events, "regions",  regions)
-        
 
 
         for cut_type in ["zgammas", "zgammas_ele", "zgammas_mu", "zgammas_w", "zgammas_ele_w", "zgammas_mu_w"]:
@@ -490,27 +508,36 @@ class ZGammaTaggerRun2(Tagger):
             elif "mu" in cut_type:
                 cut1 = N_mu_cut
             else:
-                cut1 = N_e_mu_cut
+                cut1 = N_mu_cut | N_e_cut
 
-            cut2 = cut1 & trigger_cut
-
-            if "ele" in cut_type:
-                cut3 = cut2 & ee_cut1
-            elif "mu" in cut_type:
-                cut3 = cut2 & mm_cut1
-            else:
-                cut3 = cut2 & (ee_cut1 | mm_cut1)
+            cut2 = cut1 & (single_mu_trigger_cut | single_mu_trigger_cut | double_ele_trigger_cut | double_mu_trigger_cut)
 
             if "ele" in cut_type:
-                cut4 = cut3 & ee_cut2
+                cut3 = cut2 & ele_cut
             elif "mu" in cut_type:
-                cut4 = cut3 & mm_cut2
+                cut3 = cut2 & muon_cut
             else:
-                cut4 = cut3 & (ee_cut2 | mm_cut2)
+                cut3 = cut2 & (ele_cut | muon_cut)
 
-            cut5 = cut4 & has_gamma_cand
+            # if "ele" in cut_type:
+            #     cut3 = cut2 & ee_cut1
+            # elif "mu" in cut_type:
+            #     cut3 = cut2 & mm_cut1
+            # else:
+            #     cut3 = cut2 & (ee_cut1 | mm_cut1)
 
-            cut6 = cut5 & has_z_cand
+            # if "ele" in cut_type:
+            #     cut4 = cut3 & ee_cut2
+            # elif "mu" in cut_type:
+            #     cut4 = cut3 & mm_cut2
+            # else:
+            #     cut4 = cut3 & (ee_cut2 | mm_cut2)
+
+            cut4 = cut3 & has_gamma_cand
+
+            cut5 = cut4 & (awkward.sum(os_cut, axis=1)>0)
+
+            cut6 = cut4 & has_z_cand
 
             cut7 = cut6 & sel_h_1
 
@@ -519,18 +546,20 @@ class ZGammaTaggerRun2(Tagger):
             cut9 = cut8 & sel_h_3            
 
             self.register_event_cuts(
-                names = ["all", "N_lep_sel", "trig_cut", "lead_lep_pt_cut", "sub_lep_pt_cut", "has_g_cand", "has_z_cand", "sel_h_1", "sel_h_2", "sel_h_3"],
+                # names = ["all", "N_lep_sel", "trig_cut", "lead_lep_pt_cut", "sub_lep_pt_cut", "has_g_cand", "has_z_cand", "sel_h_1", "sel_h_2", "sel_h_3"],
+                # results = [cut0, cut1, cut2, cut3, cut4, cut5, cut6, cut7, cut8, cut9],
+                names = ["all", "N_lep_sel", "trig_cut", "lep_pt_cut", "has_g_cand", "os_cut", "has_z_cand", "sel_h_1", "sel_h_2", "sel_h_3"],
                 results = [cut0, cut1, cut2, cut3, cut4, cut5, cut6, cut7, cut8, cut9],
                 events = events,
                 cut_type = cut_type,
                 weighted = weighted
             )
 
-        self.register_cuts(
-            names = ["trigger_cut", "has_z_cand", "has_gamma_cand", "sel_h_1", "sel_h_2", "sel_h_3", "all cuts"],
-            results = [trigger_cut, has_z_cand, has_gamma_cand, sel_h_1, sel_h_2, sel_h_3, all_cuts],
-            cut_type = "zgammas_unweighted"
-        )
+        # self.register_cuts(
+        #     names = ["has_z_cand", "has_gamma_cand", "sel_h_1", "sel_h_2", "sel_h_3", "all cuts"],
+        #     results = [has_z_cand, has_gamma_cand, sel_h_1, sel_h_2, sel_h_3, all_cuts],
+        #     cut_type = "zgammas_unweighted"
+        # )
         ################## fsr recovery
         #clean_FSRphoton_mask = object_selections.delta_R_fsrlep(FSRphotons, z_cand.LeadLepton, 0.001) & object_selections.delta_R_fsrlep(FSRphotons, z_cand.SubleadLepton, 0.001) & object_selections.delta_R_fsrGamma(FSRphotons, gamma_cand, 0.001)
         #FSRphotons = FSRphotons[clean_FSRphoton_mask]
@@ -678,8 +707,8 @@ class ZGammaTaggerRun2(Tagger):
 
         # eta
         #eta_cut = Tagger.get_range_cut(abs(photons.eta), options["eta"]) | (photons.isScEtaEB | photons.isScEtaEE)
-        # eta_cut = (photons.isScEtaEB | photons.isScEtaEE) & photons.mvaID_WP80
-        eta_cut = ((photons.isScEtaEB & (photons.mvaID > options["mvaID_barrel"])) | (photons.isScEtaEE & (photons.mvaID > options["mvaID_endcap"])))
+        eta_cut = (photons.isScEtaEB | photons.isScEtaEE) & (photons.mvaID_WP80>0)
+        # eta_cut = ((photons.isScEtaEB & (photons.mvaID > options["mvaID_barrel"])) | (photons.isScEtaEE & (photons.mvaID > options["mvaID_endcap"])))
 
         # electron veto
         e_veto_cut = photons.electronVeto > options["e_veto"]
@@ -687,8 +716,8 @@ class ZGammaTaggerRun2(Tagger):
         use_central_nano = options["use_central_nano"] # indicates whether we are using central nanoAOD (with some branches that are necessary for full diphoton preselection missing) or custom nanoAOD (with these branches added)
 
 
-        #all_cuts = pt_cut & eta_cut & e_veto_cut
-        all_cuts = pt_cut # bing for CR selection
+        all_cuts = pt_cut & eta_cut & e_veto_cut
+        # all_cuts = pt_cut # bing for CR selection
 
         self.register_cuts(
                 names = ["pt", "eta", "e_veto", "all"],

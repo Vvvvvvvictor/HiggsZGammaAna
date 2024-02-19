@@ -13,7 +13,7 @@ DEFAULT_ELECTRONS = {
         "etasc" : 2.5,
         "dxy" : 0.5,
         "dz" : 1.0,
-        "id" : "WP90",
+        "id" : "WPL",
         #"dr_photons" : 0.2,
         "veto_transition" : False
 }

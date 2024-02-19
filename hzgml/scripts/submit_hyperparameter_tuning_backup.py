@@ -11,7 +11,7 @@ def getArgs():
     parser = ArgumentParser(description="Hyperparameter tuning.")
     parser.add_argument('-r', '--region', action='store', nargs="+", default=["zero_jet", "one_jet", "two_jet", "VBF"], help='Regions to run.')
     parser.add_argument('-f', '--fold', action='store', type=int, nargs='+', choices=[0, 1, 2, 3], default=[0, 1, 2, 3], help='specify the fold for training')
-    parser.add_argument('-a', '--algorithm', action='store', choices=["bdt", "NN"], default="bdt", help='Which ML algorithm.')
+    parser.add_argument('-a', '--algorithm', action='store', choices=["bdt", "NN"], default="NN", help='Which ML algorithm.')
     parser.add_argument('-m', '--mode', action='store', choices=["skopt", "config"], default="skopt", help='To optimize the hypaeparameters with skopt, or do the usual training with config')
     return  parser.parse_args()
 
@@ -19,13 +19,28 @@ def main():
 
     args=getArgs()
 
-    # CONDA_PREFIX = os.getenv("CONDA_PREFIX").replace("/envs/hmumuml", "")
+    CONDA_PREFIX = os.getenv("CONDA_PREFIX").replace("/envs/hmumuml", "")
 
     createScript(f'scripts/submit_hyperparameter_tuning_{args.algorithm}_{args.mode}.sh', f"""#!/bin/bash
 
 initdir=$1
 region=$2
 fold=$3
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('{CONDA_PREFIX}/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "{CONDA_PREFIX}/etc/profile.d/conda.sh" ]; then
+        . "{CONDA_PREFIX}/etc/profile.d/conda.sh"
+    else
+        export PATH="{CONDA_PREFIX}/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
 
 cd $initdir
 source scripts/setup.sh

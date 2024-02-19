@@ -25,6 +25,7 @@ from higgs_dna.utils.misc_utils import load_config, update_dict, is_json_seriali
 from higgs_dna.constants import NOMINAL_TAG, CENTRAL_WEIGHT, BRANCHES
 from higgs_dna.utils.metis_utils import do_cmd
 from higgs_dna.taggers.duplicated_samples_tagger import DuplicatedSamplesTagger
+from higgs_dna.taggers.mc_overlap_tagger import MCOverlapTagger
 
 
 def run_analysis(config):
@@ -486,6 +487,16 @@ class AnalysisManager():
     #  **get_file_handler(file),
 
     @staticmethod
+    def get_file_handler(filename):
+        xrootd_src = filename.startswith("root://")
+        if not xrootd_src:
+            return {"file_handler": uproot.MultithreadedFileSource} # otherwise the memory maps overload available Vmem
+        elif xrootd_src:
+            # uncomment below for MultithreadedXRootDSource
+            return {"xrootd_handler": uproot.source.xrootd.MultithreadedXRootDSource}
+        return {}
+
+    @staticmethod
     def load_events(config):
         """
         Load all branches in ``branches`` from "Events" tree from all nanoAODs in ``files`` into a single zipped ``awkward.Array``.
@@ -507,11 +518,11 @@ class AnalysisManager():
 
         for file in files:
             try:
-                f = uproot.open(file, timeout = 60)
+                f = uproot.open(file, **get_file_handler(file), timeout = 300)
             except Exception:
-                if (os.system(f"xrdcp '{file}' '/tmp/jiehan/{os.path.basename(file)}'")):
+                if (os.system(f"xrdcp '{file}' '/tmp/{os.getpid()}/{os.path.basename(file)}'")):
                     raise RuntimeError("xrdcp failed")
-                f = uproot.open(f'/tmp/jiehan/{os.path.basename(file)}')
+                f = uproot.open(f'/tmp/{os.getpid()}/{os.path.basename(file)}')
 
             runs = f["Runs"]
             if "genEventCount" in runs.keys() and "genEventSumw" in runs.keys():
@@ -522,7 +533,7 @@ class AnalysisManager():
 
             # Get events that is not duplicated
             if is_data:
-                duplicated_sample_remover = DuplicatedSamplesTagger(is_data=True)
+                duplicated_sample_remover = DuplicatedSamplesTagger(is_data=is_data)
                 duplicated_remove_cut = duplicated_sample_remover.calculate_selection(file, tree, config["sample"]["year"])
 
                 trimmed_branches = [x for x in branches if x in tree.keys()]
@@ -530,10 +541,13 @@ class AnalysisManager():
 
                 events_file = events_file[duplicated_remove_cut]
             else:
+                mc_overlap_remover = MCOverlapTagger(is_data=is_data)
+                overlap_cut = mc_overlap_remover.overlap_selection(file, tree)
+
                 trimmed_branches = [x for x in branches if x in tree.keys()]
                 events_file = tree.arrays(trimmed_branches, library = "ak", how = "zip") #TODO: There is a bug here.
 
-                events_file = events_file
+                events_file = events_file[overlap_cut]
 
             f.close()
 

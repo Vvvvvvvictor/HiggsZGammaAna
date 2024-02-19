@@ -18,6 +18,11 @@ echo "==================================================="
 echo "num: $2"
 echo "==================================================="
 echo "Shielded parameter is: $S . Added variables is: $A ."
+
+
+# python scripts/train_bdt.py -r two_jet --skopt-plot --params '{"silent": 1, "eval_metric": ["logloss", "auc"], "grow_policy": "lossguide", "nthread": 4, "objective": "binary:logistic", "tree_method": "hist", "booster": "gbtree", "alpha": 0.5144783323380544, "colsample_bytree": 0.9588358073169332, "gamma": 3.3537213020169725, "max_delta_step": 19.5023193765768, "min_child_weight": 77.0, "subsample": 0.9644739775053346, "eta": 0.01681114970710191, "max_bin": 330.0, "max_depth": 6.0}'
+
+
 ############################
 #  Training the BDT models
 ############################

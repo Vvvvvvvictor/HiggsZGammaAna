@@ -9,16 +9,17 @@ print("Starting to run the tutorial of plotting in Higgs to Z Gamma analysis")
 print("=====================================================================")
 
 # Basic set of picture's content
-ratio = 500
-mc_legend = ["SM ZG", "DYJets", "LWK ZG", "TT", "Diboson"]
+ratio = 1
+mc_legend = ["SM ZG", "DYJets", "EWK ZG", "TT", "Diboson"]
 sig_legend = ["sig", "ggH", "VBF"]
-path = "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/final_fit/CMSSW_10_2_13/src/flashggFinalFit/InputData/outputs/"
+# path = "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/final_fit/CMSSW_10_2_13/src/flashggFinalFit/InputData/outputs/"
+path = "/eos/home-j/jiehan/root/2017/outputs/"
 channel = "two_jet"
 tree = "test"
 var = "bdt_score_t"
 bins = 100
 x_range = (0, 1)
-blind_range = (122, 128)
+blind_range = (120, 130)
 x_title = "BDT score"
 y_title = "Events/{:.2f}".format((x_range[1]-x_range[0])/bins)
 sub_y_title = "S/#sqrt{B^{MC}_{scale}}"
@@ -26,7 +27,7 @@ selections = []
 
 # Dataset list
 sig_file_list = [
-    ["ggH.root", "VBF.root", "WminusH.root", "WplusH.root", "ZH.root", "ttH.root"],
+    ["sig.root"],
     "ggH.root",
     "VBF.root"
 ]
@@ -51,36 +52,38 @@ print("Finish setting picture style")
 print("============================")
 
 # get hists
-data_sb_yields, mc_sb_yields = 0, 0
-for i, bkg in enumerate(mc_file_list):
-    if isinstance(bkg, list):
-        for sub_bkg in bkg:
-            arrays = pic.read_file(path+channel+"/"+sub_bkg, var, tree, selections)
-            if file_hist in globals():
-                file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range, file_hist)
-            else:
-                file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range)
-    else: 
-        arrays = pic.read_file(path+channel+"/"+bkg, var, tree, selections)
-        file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range)
-    mc_sb_yields = mc_sb_yields + yields
+# data_sb_yields, mc_sb_yields = 0, 0
+# for i, bkg in enumerate(mc_file_list):
+#     if isinstance(bkg, list):
+#         for sub_bkg in bkg:
+#             arrays = pic.read_file(path+channel+"/"+sub_bkg, var, tree, selections)
+#             if file_hist in globals():
+#                 file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range, file_hist)
+#             else:
+#                 file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range)
+#     else: 
+#         arrays = pic.read_file(path+channel+"/"+bkg, var, tree, selections)
+#         file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range)
+#     mc_sb_yields = mc_sb_yields + yields
 
-for data in data_file_list:
-    if isinstance(data, list):
-        for sub_data in data:
-            arrays = pic.read_file(path+channel+"/"+sub_data, var, tree, selections)
-            if file_hist in globals():
-                file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range, file_hist)
-            else:
-                file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range)
-    else: 
-        arrays = pic.read_file(path+channel+"/"+data, var, tree, selections)
-        file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range)
-    data_sb_yields = data_sb_yields + yields
+# for data in data_file_list:
+#     if isinstance(data, list):
+#         for sub_data in data:
+#             arrays = pic.read_file(path+channel+"/"+sub_data, var, tree, selections)
+#             if file_hist in globals():
+#                 file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range, file_hist)
+#             else:
+#                 file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range)
+#     else: 
+#         arrays = pic.read_file(path+channel+"/"+data, var, tree, selections)
+#         file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range)
+#     data_sb_yields = data_sb_yields + yields
 
-sb_ratio = data_sb_yields / mc_sb_yields
+# sb_ratio = data_sb_yields / mc_sb_yields
 
-selections+=["H_mass<128", "H_mass>122"]
+sb_ratio=1.
+
+selections+=["H_mass<130", "H_mass>120"]
 
 sig_yields, sig_hist_list = [], []
 for i, sig in enumerate(sig_file_list):
@@ -100,7 +103,7 @@ for i, sig in enumerate(sig_file_list):
 
 h_stack = ROOT.THStack()
 mc_hist = ROOT.TH1D("","",bins,x_range[0],x_range[1])
-mc_yields = []
+mc_yields, mc_hist_list = [], []
 
 for i, bkg in enumerate(mc_file_list):
     if isinstance(bkg, list):
@@ -114,8 +117,11 @@ for i, bkg in enumerate(mc_file_list):
         arrays = pic.read_file(path+channel+"/"+bkg, var, tree, selections)
         file_hist, _, yields = pic.get_hist(arrays, var, sb_ratio, "mc_{}".format(i), bins, x_range)
     mc_hist.Add(file_hist)
-    mc_yields.append(yields*sb_ratio)
+    mc_hist_list.append(file_hist)
+    mc_yields.append(yields)
+for i, file_hist in enumerate(mc_hist_list):
     plot.Set(file_hist, LineWidth=0, FillColor=ROOT.TColor.GetColorDark(i+2))
+    file_hist.Scale(1./sum(mc_yields))
     h_stack.Add(file_hist)
 
 print("==============================")
@@ -131,18 +137,20 @@ h_stack.Draw("hist")
 plot.Set(h_stack.GetXaxis(), LabelSize=0)
 plot.Set(h_stack.GetYaxis(), Title=y_title)
 for sig_hist in sig_hist_list:
+    sig_hist.Scale(1./sig_yields[0])
     sig_hist.Draw("hist same")
 plot.Set(sig_hist, MarkerStyle=1, MarkerSize=3)
 
 pads[0].Update()
+plot.Set(h_stack, Maximum=0.1)
 # plot.Set(h_stack, Maximum=1.3*pads[0].GetFrame().GetY2())
 
-legend = plot.PositionedLegend(0.65, 0.10, 3, 0.015)
-plot.Set(legend, NColumns=3, TextSize=0.023)
+legend = plot.PositionedLegend(0.75, 0.30, 3, 0.015)
+plot.Set(legend, NColumns=2, TextSize=0.045, TextFont=62)
 for i in range(len(sig_hist_list)):
-    legend.AddEntry("sig_{}".format(i), sig_legend[i]+"x{:.0f}({:.2f})".format(ratio, sig_yields[i]), "l")
+    legend.AddEntry("sig_{}".format(i), sig_legend[i]+"({:4.2f})".format(sig_yields[i]), "l")
 for i in range(len(mc_file_list)):
-    legend.AddEntry("mc_{}".format(i), mc_legend[i]+"({:.2f})".format(mc_yields[i]), "f")
+    legend.AddEntry("mc_{}".format(i), mc_legend[i]+"({:4.2f})".format(mc_yields[i]), "f")
 legend.Draw()
 
 print("========================")

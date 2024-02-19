@@ -204,11 +204,14 @@ class categorizer(object):
 
             nsig, dsig = self.h_sig.IntegralAndError(bl, br)
             nbkg, dbkg = self.h_bkg.IntegralAndError(bl, br)
+            # temp_nbkg = nbkg
             if self.reweight and nbkg != 0:
                 if self.h_bkg_rw_den.Integral(bl, br) == 0: print("what!!!", bl, br)
                 nbkg, dbkg = nbkg*self.h_bkg_rw_num.Integral(bl, br)/self.h_bkg_rw_den.Integral(bl, br), dbkg*self.h_bkg_rw_num.Integral(bl, br)/self.h_bkg_rw_den.Integral(bl, br)
-
+                
             if nbkg < minN: return -1, -1
+
+            # print(bl, br, nbkg, temp_nbkg, self.h_bkg_rw_num.Integral(bl, br), self.h_bkg_rw_den.Integral(bl, br), sep=", ")
 
             z, u = calc_sig(nsig, nbkg, dsig, dbkg)
 

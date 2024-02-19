@@ -235,8 +235,9 @@ class ApplyXGBHandler(object):
             if category == "DYJetsToLL":
                 data = data[data.n_iso_photons == 0]
             if category != "data_fake" and category != "mc_true" and category != "mc_med":
-                data = data[data.gamma_mvaID_WP80 > 0] #TODO: check this one
-                # data = data[data.gamma_mvaID_WPL > 0] #TODO: check this one
+                pass
+                # data = data[data.gamma_mvaID_WP80 > 0] #TODO: check this one
+                data = data[data.gamma_mvaID_WPL > 0] #TODO: check this one
             out_data = pd.DataFrame()
 
             for i in range(4):

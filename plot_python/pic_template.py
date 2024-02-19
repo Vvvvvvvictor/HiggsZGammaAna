@@ -11,11 +11,12 @@ def read_file(file, var = None, tree = "inclusive", selections = []):
     selections: a list of selection(<str>). If there is '&' or '|' in one item, MUST use "()" to enclose each subitem.(exp. '(H_eta>1.5) & (H_pt>10)')
     '''
     print("Reading {}:{}...".format(file, tree))
-    variabels = ["weight", "H_mass"]
+    variabels = ["weight", "H_mass", "event"]
     variabels.append(var)
     decro_sel = []
     for i in selections:
-        var_can = list(set([j for j in re.split('\W+', i) if "_" in j]))
+        var_can = list(set([j for j in re.split('\W+', i) if not j.isdigit()]))
+        # print(var_can)
         variabels += var_can
         for j in var_can:
             i = i.replace(j, "arrays."+j)
@@ -104,6 +105,7 @@ def get_S_over_sqrtB(hist_s, hist_b, ratio, yrange=(0., 0.5)):
     for i in range(hist_s.GetNbinsX()):
         s_bin_content = hist_s.GetBinContent(i) / ratio
         b_bin_content = hist_b.GetBinContent(i)
+        # print(s_bin_content, b_bin_content, sep=", ")
         
         # Avoid division by zero
         if b_bin_content > 0:

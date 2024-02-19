@@ -26,12 +26,36 @@ def getArgs():
     parser.add_argument('--chunksize', type=int, default=500000, help='size to process at a time') 
     return  parser.parse_args()
 
+def true_delta_phi(delta_phi):
+    if delta_phi > math.pi:
+        return 2 * math.pi - delta_phi
+    return delta_phi
+
 def compute_is_center(x):
 
-    if (x.H_mass >= 120 and x.H_mass <= 130): return 1
+    if (x.H_mass >= 122 and x.H_mass <= 128): return 1
     else: return 0
 
 # others
+
+def compute_Z_cosTheta(x):
+    Z = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.Z_pt, x.Z_eta, x.Z_phi, x.Z_mass)
+    H = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.H_pt, x.H_eta, x.H_phi, x.H_mass)
+    M, mll = x.H_mass, x.Z_mass
+    lZ = math.sqrt((H.Dot(Z) / M) ** 2 - mll ** 2)
+
+    H_transverse_beta = TLorentzVector(H.Px(), H.Py(), H.Pz(), H.E()).BoostVector()
+    H_transverse_beta.SetZ(0)
+    hH = Math.VectorUtil.boost(H, -H_transverse_beta)
+    hPz, hE = hH.Pz(), hH.E()
+    q = Math.LorentzVector("ROOT::Math::PxPyPzE4D<float>")(0, 0, (hPz + hE) / 2, (hE + hPz) / 2)
+    q = Math.VectorUtil.boost(q, H_transverse_beta)
+    qbar = Math.LorentzVector("ROOT::Math::PxPyPzE4D<float>")(0, 0, (hPz - hE) / 2, (hE - hPz) / 2)
+    qbar = Math.VectorUtil.boost(qbar, H_transverse_beta)
+
+    cosTheta = (qbar - q).Dot(Z)/(M * lZ)
+
+    return cosTheta
 
 def compute_l_costheta(x):
     if (x.Z_lead_lepton_charge < 0 and x.Z_sublead_lepton_charge > 0): 
@@ -83,7 +107,7 @@ def compute_l_phi(x):
     beamAxis = TVector3 (0, 0, 1)
     Z3_BH = Z_BH.Vect().Unit()
     NSC_BH = - (Z3_BH.Cross(beamAxis)).Unit()
-    Z_beta = TLorentzVector(Z_BH.Px(), Z_BH.Py(), Z_BH.Pz(), Z_BH.E()).BoostVector()
+    # Z_beta = TLorentzVector(Z_BH.Px(), Z_BH.Py(), Z_BH.Pz(), Z_BH.E()).BoostVector()
 
     tmpSgnPhi1 = Z3_BH.Dot(N1_BH.Cross(NSC_BH))
     sgnPhi1 = 0.
@@ -126,10 +150,11 @@ def compute_Z_prodAngle(x):
 
     Z = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.Z_pt, x.Z_eta, x.Z_phi, x.Z_mass)
     H = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.H_pt, x.H_eta, x.H_phi, x.H_mass)
-    # gamma = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.gamma_pt, x.gamma_eta, x.gamma_phi, x.gamma_mass)
+    gamma = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.gamma_pt, x.gamma_eta, x.gamma_phi, x.gamma_mass)
     H_beta = TLorentzVector(H.Px(), H.Py(), H.Pz(), H.E()).BoostVector()
-    a = Math.VectorUtil.boost(Z, -H_beta).Vect()
-    return a.Unit().Dot(H_beta.Unit())
+    Z_BH = Math.VectorUtil.boost(Z, -H_beta).Vect()
+    gamma_BH = Math.VectorUtil.boost(gamma, -H_beta).Vect()
+    return Z_BH.Unit().Dot(H_beta.Unit())
 
 def compute_gamma_relEerror(x):
 
@@ -204,6 +229,7 @@ def compute_H_ptt(x):
 
     return abs(Z.Px() * gamma.Py() - gamma.Px() * Z.Py()) / (Z - gamma).Pt() * 2.0
 
+
 def compute_H_al(x):
     
     Z = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.Z_pt, x.Z_eta, x.Z_phi, x.Z_mass)
@@ -239,23 +265,21 @@ def compute_delta_eta_jj(x):
 
 def compute_delta_phi_jj(x):
 
-    if x.n_jets < 2:
-        return -9999
-    else:
-        return abs(x.jet_1_phi-x.jet_2_phi)
+    if x.n_jets >= 2:
+        return true_delta_phi(abs(x.jet_1_phi-x.jet_2_phi))
+    return -9999
 
 def compute_delta_phi_zg_jj(x):
 
-    if x.n_jets < 2:
-        return -9999
-    else:
+    if x.n_jets >= 2:
         Z = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.Z_pt, x.Z_eta, x.Z_phi, x.Z_mass)
         gamma = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.gamma_pt, x.gamma_eta, x.gamma_phi, x.gamma_mass)
         zg = Z+gamma
         Jets_1 = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.jet_1_pt, x.jet_1_eta, x.jet_1_phi, x.jet_1_mass)
         Jets_2 = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.jet_2_pt, x.jet_2_eta, x.jet_2_phi, x.jet_2_mass)
         j1j2 = Jets_1+Jets_2
-        return abs(zg.Phi()-j1j2.Phi())
+        return true_delta_phi(abs(zg.Phi()-j1j2.Phi()))
+    return -9999
 
 def compute_photon_zeppenfeld(x):
 
@@ -301,13 +325,13 @@ def compute_pt_balance_1j(x):
         total = Z+gamma+Jets_1
         return total.Pt()/(x.Z_pt+x.gamma_pt+x.jet_1_pt)
 
-def compute_Delta_Phi(x, var, min_jet=0):
+def compute_Delta_Phi(x, var = "gamma_phi", min_jet=0):
 
     if min_jet:
         if x.n_jets < min_jet: return -9999
-        return getattr(x, "jet_%d_phi" % min_jet) - x.gamma_phi
+        return true_delta_phi(abs(getattr(x, "jet_%d_phi" % min_jet) - x.gamma_phi))
     else:
-        return getattr(x, var) - x.gamma_phi
+        return true_delta_phi(abs(getattr(x, var) - x.gamma_phi))
 
 def compute_Delta_R(x, min_jet=0):
 
@@ -363,7 +387,7 @@ def decorate(data):
     data['l_rapCM'] = data.apply(lambda x:compute_l_rapCM(x), axis=1)
     data['HZ_deltaRap'] = data.apply(lambda x:compute_HZ_deltaRap(x), axis=1)
     data['l_cosProdAngle'] = data.apply(lambda x:compute_l_prodAngle(x), axis=1)
-    data['Z_cos_theta'] = data.apply(lambda x:compute_Z_prodAngle(x), axis=1)
+    data['Z_cosProdAngle'] = data.apply(lambda x:compute_Z_prodAngle(x), axis=1)
     data['ll_deltaR'] = data.apply(lambda x:compute_ll_deltaR(x), axis=1)
     data['leadLG_deltaR'] = data.apply(lambda x:compute_leadLG_deltaR(x), axis=1)
     data['ZG_deltaR'] = data.apply(lambda x:compute_ZG_deltaR(x), axis=1)
@@ -383,6 +407,7 @@ def decorate(data):
     data['H_ptt'] = data.apply(lambda x: compute_H_ptt(x), axis=1)
     data['H_al'] = data.apply(lambda x: compute_H_al(x), axis=1)
     data['H_bt'] = data.apply(lambda x: compute_H_bt(x), axis=1)
+    data['Z_cos_theta'] = data.apply(lambda x:compute_Z_cosTheta(x), axis=1)
     data['lep_cos_theta'] = data.apply(lambda x: compute_l_costheta(x), axis=1)
     data['lep_phi'] = data.apply(lambda x: compute_l_phi(x), axis=1)
     data['l1g_deltaR'] = data.apply(lambda x: compute_dR1lg(x), axis=1) 
@@ -441,22 +466,22 @@ def main():
     initial_events += data.shape[0]
     #data = preprocess(data)
     data = preselect(data) #TODO add cutflow
-    #data = decorate(data)
+    data = decorate(data)
     final_events += data.shape[0]
     data_zero_jet = data[(data.n_jets == 0) & (data.n_leptons < 3)]
     data_one_jet = data[(data.n_jets == 1) & (data.n_leptons < 3)]
     data_two_jet = data[(data.n_jets >= 2) & (data.n_leptons < 3)]
     data_zero_to_one_jet = data[(data.n_jets < 2) & (data.n_leptons < 3)]
     data_VH_ttH =  data[data.n_leptons >= 3]
-    #data.to_root(args.output, key='inclusive', mode='a', index=False)
-    #data_zero_jet.to_root(args.output, key='zero_jet', mode='a', index=False)
-    #data_one_jet.to_root(args.output, key='one_jet', mode='a', index=False)
-    #data_zero_to_one_jet.to_root(args.output, key='zero_to_one_jet', mode='a', index=False)
-    #data_two_jet.to_root(args.output, key='two_jet', mode='a', index=False)
-    #data_VH_ttH.to_root(args.output, key='VH_ttH', mode='a', index=False)
+    data.to_root(args.output, key='inclusive', mode='a', index=False)
+    data_zero_jet.to_root(args.output, key='zero_jet', mode='a', index=False)
+    data_one_jet.to_root(args.output, key='one_jet', mode='a', index=False)
+    data_zero_to_one_jet.to_root(args.output, key='zero_to_one_jet', mode='a', index=False)
+    data_two_jet.to_root(args.output, key='two_jet', mode='a', index=False)
+    data_VH_ttH.to_root(args.output, key='VH_ttH', mode='a', index=False)
 
-    meta_data = pd.DataFrame({'initial_events': [initial_events], 'final_events': [final_events]})
-    meta_data.to_root(args.output, key='MetaData', mode='a', index=False)
+    # meta_data = pd.DataFrame({'initial_events': [initial_events], 'final_events': [final_events]})
+    # meta_data.to_root(args.output, key='MetaData', mode='a', index=False)
 
     print("Finished!!! Have gotten the skimmed data in {:s}".format(args.output))
 

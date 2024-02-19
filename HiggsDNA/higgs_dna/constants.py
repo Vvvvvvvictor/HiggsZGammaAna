@@ -7,19 +7,22 @@ NOMINAL_TAG = "nominal" # name of the nominal events (relevant when we have mult
 
 LUMI = {
     "2016" : 35.9,
-    "2016UL_preVFP" : 19.48, 
-    "2016UL_postVFP" : 16.76, 
+    "2016UL_preVFP" : 19.51, 
+    "2016UL_postVFP" : 16.80, 
     "2017" : 41.48,
     "2018" : 59.83,
-    "2022" : 19
+    "2022" : 35.18,
+    "2023" : 27.14
 }
 
 GOLDEN_JSON = {
+    "2016" : "metadata/golden_json/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt",
     "2016UL_preVFP" : "metadata/golden_json/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt",
     "2016UL_postVFP" : "metadata/golden_json/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt",
     "2017" : "metadata/golden_json/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt",
     "2018" : "metadata/golden_json/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt",
-    "2022" : "metadata/golden_json/Cert_Collisions2022_355100_362760_Golden.json"
+    "2022" : "metadata/golden_json/Cert_Collisions2022_355100_362760_Golden.json",
+    "2023" : "metadata/golden_json/Cert_Collisions2023_366442_370790_Golden.json"
 }
 
 # nanoAOD branches to always include
@@ -43,6 +46,9 @@ BRANCHES = {
         "2022" : [
             "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ"
         ],
+        "2023" : [
+            "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ"
+        ],
         "any" : ["event", "run", "luminosityBlock"]
     },
     "mc" : {
@@ -53,6 +59,7 @@ BRANCHES = {
         "2017" : [],
         "2018" : [],
         "2022" : [],
+        "2023" : [],
         "any" : ["event", "run", "luminosityBlock"]
     }
 }
