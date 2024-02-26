@@ -16,7 +16,8 @@ from ROOT import Math, TVector2, TVector3, TLorentzVector
 import numpy as np
 #import time
 import pandas as pd
-from root_pandas import *
+import uproot
+# from root_pandas import *
 from tqdm import tqdm
 
 def getArgs():
@@ -154,7 +155,7 @@ def compute_Z_prodAngle(x):
     H_beta = TLorentzVector(H.Px(), H.Py(), H.Pz(), H.E()).BoostVector()
     Z_BH = Math.VectorUtil.boost(Z, -H_beta).Vect()
     gamma_BH = Math.VectorUtil.boost(gamma, -H_beta).Vect()
-    return Z_BH.Unit().Dot(H_beta.Unit())
+    return Z_BH.Unit().Dot(H.Vect().Unit())
 
 def compute_gamma_relEerror(x):
 
@@ -473,12 +474,19 @@ def main():
     data_two_jet = data[(data.n_jets >= 2) & (data.n_leptons < 3)]
     data_zero_to_one_jet = data[(data.n_jets < 2) & (data.n_leptons < 3)]
     data_VH_ttH =  data[data.n_leptons >= 3]
-    data.to_root(args.output, key='inclusive', mode='a', index=False)
-    data_zero_jet.to_root(args.output, key='zero_jet', mode='a', index=False)
-    data_one_jet.to_root(args.output, key='one_jet', mode='a', index=False)
-    data_zero_to_one_jet.to_root(args.output, key='zero_to_one_jet', mode='a', index=False)
-    data_two_jet.to_root(args.output, key='two_jet', mode='a', index=False)
-    data_VH_ttH.to_root(args.output, key='VH_ttH', mode='a', index=False)
+    with uproot.recreate(args.output) as f:
+        f['inclusive'] = data
+        f['zero_jet'] = data_zero_jet
+        f['one_jet'] = data_one_jet
+        f['zero_to_one_jet'] = data_zero_to_one_jet
+        f['two_jet'] = data_two_jet
+        f['VH_ttH'] = data_VH_ttH
+    # data.to_root(args.output, key='inclusive', mode='a', index=False)
+    # data_zero_jet.to_root(args.output, key='zero_jet', mode='a', index=False)
+    # data_one_jet.to_root(args.output, key='one_jet', mode='a', index=False)
+    # data_zero_to_one_jet.to_root(args.output, key='zero_to_one_jet', mode='a', index=False)
+    # data_two_jet.to_root(args.output, key='two_jet', mode='a', index=False)
+    # data_VH_ttH.to_root(args.output, key='VH_ttH', mode='a', index=False)
 
     # meta_data = pd.DataFrame({'initial_events': [initial_events], 'final_events': [final_events]})
     # meta_data.to_root(args.output, key='MetaData', mode='a', index=False)

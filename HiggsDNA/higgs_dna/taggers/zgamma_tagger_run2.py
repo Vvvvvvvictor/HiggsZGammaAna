@@ -707,7 +707,8 @@ class ZGammaTaggerRun2(Tagger):
 
         # eta
         #eta_cut = Tagger.get_range_cut(abs(photons.eta), options["eta"]) | (photons.isScEtaEB | photons.isScEtaEE)
-        eta_cut = (photons.isScEtaEB | photons.isScEtaEE) & (photons.mvaID_WP80>0)
+        eta_cut = (photons.isScEtaEB | photons.isScEtaEE) 
+        id_cut = photons.mvaID_WP80 == 1
         # eta_cut = ((photons.isScEtaEB & (photons.mvaID > options["mvaID_barrel"])) | (photons.isScEtaEE & (photons.mvaID > options["mvaID_endcap"])))
 
         # electron veto
@@ -716,12 +717,12 @@ class ZGammaTaggerRun2(Tagger):
         use_central_nano = options["use_central_nano"] # indicates whether we are using central nanoAOD (with some branches that are necessary for full diphoton preselection missing) or custom nanoAOD (with these branches added)
 
 
-        all_cuts = pt_cut & eta_cut & e_veto_cut
+        all_cuts = pt_cut & eta_cut & id_cut & e_veto_cut
         # all_cuts = pt_cut # bing for CR selection
 
         self.register_cuts(
-                names = ["pt", "eta", "e_veto", "all"],
-                results = [pt_cut, eta_cut, e_veto_cut, all_cuts],
+                names = ["pt", "eta", "id", "e_veto", "all"],
+                results = [pt_cut, eta_cut, id_cut, e_veto_cut, all_cuts],
                 cut_type = "photon"
         )
 

@@ -9,33 +9,37 @@ print("Starting to run the tutorial of plotting in Higgs to Z Gamma analysis")
 print("=====================================================================")
 
 # Basic set of picture's content
-mc_legend = ["SM ZG", "DYJets", "LWK ZG", "TT", "Diboson"]
+mc_legend = [
+    # "SM ZG", "DYJets", "LWK ZG", "TT", "Diboson"
+    "ggH"
+    ]
 sig_legend = []
-channel = "zero_jet"
-var = "pt_balance_0j"
+channel = "two_jet"
+var = "photon_zeppenfeld"
 bins = 100
-x_range = (0, 1)
-ratio = 500
-x_title = "P_{T} balance without jets"
+x_range = (0, 5)
+ratio = 1
+x_title = "P_{T} balance with jets"
 y_title = "Events/{:.2f}".format((x_range[1]-x_range[0])/bins)
 sub_y_title = "Sigx{}/Bkg".format(ratio)
-selections = [ "gamma_mvaID_WPL==1"]
+selections = [ "gamma_mvaID_WP80==1"]
 
 # Dataset list
 sig_file_list = [
-    "/eos/home-j/jiehan/root/2017/skimmed_ntuples/ggH/2017.root",
-    "/eos/home-j/jiehan/root/2017/skimmed_ntuples/VBF/2017.root",
-    "/eos/home-j/jiehan/root/2017/skimmed_ntuples/WminusH/2017.root",
-    "/eos/home-j/jiehan/root/2017/skimmed_ntuples/WplusH/2017.root",
-    "/eos/home-j/jiehan/root/2017/skimmed_ntuples/ZH/2017.root",
-    "/eos/home-j/jiehan/root/2017/skimmed_ntuples/ttH/2017.root"
+    # "/eos/home-j/jiehan/root/2017/skimmed_ntuples/ggH/2017.root",
+    "/eos/home-j/jiehan/root/2017/skimmed_ntuples/VBF/2017.root"
+    # "/eos/home-j/jiehan/root/2017/skimmed_ntuples/WminusH/2017.root",
+    # "/eos/home-j/jiehan/root/2017/skimmed_ntuples/WplusH/2017.root",
+    # "/eos/home-j/jiehan/root/2017/skimmed_ntuples/ZH/2017.root",
+    # "/eos/home-j/jiehan/root/2017/skimmed_ntuples/ttH/2017.root"
 ]
 mc_file_list = [
-    "/eos/home-j/jiehan/root/2017/skimmed_ntuples/ZGToLLG/2017.root",
-    "/eos/home-j/jiehan/root/2017/skimmed_ntuples/DYJetsToLL/2017.root",
-    "/eos/home-j/jiehan/root/2017/skimmed_ntuples/LLAJJ/2017.root",
-    "/eos/home-j/jiehan/root/2017/skimmed_ntuples/TT/2017.root",
-    ["/eos/home-j/jiehan/root/2017/skimmed_ntuples/WW/2017.root", "/eos/home-j/jiehan/root/2017/skimmed_ntuples/WZ/2017.root", "/eos/home-j/jiehan/root/2017/skimmed_ntuples/ZZ/2017.root"]
+    # "/eos/home-j/jiehan/root/2017/skimmed_ntuples/ZGToLLG/2017.root",
+    # "/eos/home-j/jiehan/root/2017/skimmed_ntuples/DYJetsToLL/2017.root",
+    # "/eos/home-j/jiehan/root/2017/skimmed_ntuples/LLAJJ/2017.root",
+    # "/eos/home-j/jiehan/root/2017/skimmed_ntuples/TT/2017.root",
+    # ["/eos/home-j/jiehan/root/2017/skimmed_ntuples/WW/2017.root", "/eos/home-j/jiehan/root/2017/skimmed_ntuples/WZ/2017.root", "/eos/home-j/jiehan/root/2017/skimmed_ntuples/ZZ/2017.root"]
+    "/eos/home-j/jiehan/root/2017/skimmed_ntuples/ggH/2017.root"
 ]
 
 # Set initial style
@@ -52,9 +56,9 @@ sig_yields = []
 for sig in sig_file_list:
     arrays = pic.read_file(sig, var, channel, selections)
     if "sig_hist" in globals():
-        sig_hist, yields = pic.get_hist(arrays, var, ratio, "sig", bins, x_range, sig_hist)
+        sig_hist, yields, _ = pic.get_hist(arrays, var, ratio, "sig", bins, x_range, sig_hist)
     else:
-        sig_hist, yields = pic.get_hist(arrays, var, ratio, "sig", bins, x_range)
+        sig_hist, yields, _ = pic.get_hist(arrays, var, ratio, "sig", bins, x_range)
     sig_yields.append(yields)
     
 
@@ -67,12 +71,12 @@ for i, bkg in enumerate(mc_file_list):
         for sub_bkg in bkg:
             arrays = pic.read_file(sub_bkg, var, channel, selections)
             if file_hist in globals():
-                file_hist, yields = pic.get_hist(arrays, var, 1, "mc_{}".format(i), bins, x_range, file_hist)
+                file_hist, yields, _ = pic.get_hist(arrays, var, 1, "mc_{}".format(i), bins, x_range, file_hist)
             else:
-                file_hist, yields = pic.get_hist(arrays, var, 1, "mc_{}".format(i), bins, x_range)
+                file_hist, yields, _ = pic.get_hist(arrays, var, 1, "mc_{}".format(i), bins, x_range)
     else: 
         arrays = pic.read_file(bkg, var, channel, selections)
-        file_hist, yields = pic.get_hist(arrays, var, 1, "mc_{}".format(i), bins, x_range)
+        file_hist, yields, _ = pic.get_hist(arrays, var, 1, "mc_{}".format(i), bins, x_range)
     mc_hist.Add(file_hist)
     mc_yields.append(yields)
     plot.Set(file_hist, LineWidth=0, FillColor=ROOT.TColor.GetColorDark(i+2))
@@ -87,7 +91,7 @@ rp_err = pic.get_ratio_hist(mc_hist, mc_hist, (0,1))
 
 c1.Update()
 pads[0].cd()
-plot.Set(pads[0], Logy=1)
+# plot.Set(pads[0], Logy=1)
 h_stack.Draw("hist")
 plot.Set(h_stack.GetXaxis(), LabelSize=0)
 plot.Set(h_stack.GetYaxis(), Title=y_title)

@@ -48,7 +48,7 @@ def getArgs():
 
     return  parser.parse_args()
 
-def gettingsig(region, variable, boundaries_VBF, boundaries, transform, estimate):
+def gettingsig(region, variable, vb, boundaries_VBF, boundaries, transform, estimate):
 
     nbin = len(boundaries[0]) + len(boundaries_VBF[0])
 
@@ -101,7 +101,7 @@ def gettingsig(region, variable, boundaries_VBF, boundaries, transform, estimate
         
                     data_s = data[data.event % len(boundaries) == i]
         
-                    data_ss = data_s[data_s[f"{variable}_score_VBF{'_t' if transform else ''}"] < boundaries_VBF[i][0]]
+                    data_ss = data_s[data_s[f"{variable}_score_VBF{'_t' if transform else ''}"] < vb]
         
                     for j in range(len(boundaries[i])):
         
@@ -112,14 +112,15 @@ def gettingsig(region, variable, boundaries_VBF, boundaries, transform, estimate
                         yields[category][j] += sum(data_sss.w)
                         yields[category+'_err'][j] = np.sqrt(yields[category+'_err'][j]**2 + sum(data_sss.w**2))
         
-        
+                    data_ss = data_s[data_s[f"{variable}_score_VBF{'_t' if transform else ''}"] >= vb]
+
                     for j in range(len(boundaries_VBF[i])):
         
-                        data_ss = data_s[data_s[f"{variable}_score_VBF{'_t' if transform else ''}"] >= boundaries_VBF[i][j]]
-                        if j != len(boundaries_VBF[i]) - 1: data_ss = data_ss[data_ss[f"{variable}_score_VBF{'_t' if transform else ''}"] < boundaries_VBF[i][j+1]]
+                        data_sss = data_ss[data_ss[f"{variable}_score{'_t' if transform else ''}"] >= boundaries_VBF[i][j]]
+                        if j != len(boundaries_VBF[i]) - 1: data_sss = data_sss[data_sss[f"{variable}_score{'_t' if transform else ''}"] < boundaries_VBF[i][j+1]]
         
-                        yields[category][j + len(boundaries[i])] += sum(data_ss.w)
-                        yields[category+'_err'][j + len(boundaries[i])] = np.sqrt(yields[category+'_err'][j]**2 + sum(data_ss.w**2))
+                        yields[category][j + len(boundaries[i])] += sum(data_sss.w)
+                        yields[category+'_err'][j + len(boundaries[i])] = np.sqrt(yields[category+'_err'][j]**2 + sum(data_sss.w**2))
 
 
     if estimate == "data_sid":
@@ -200,20 +201,33 @@ def categorizing(region, variable, sigs, bkgs, nscan, nscanvbf, minN, transform,
     fitboundary = 0.5
     fitboundary_g = 0.5
 
-    if estimate == "data_sid":
-        h_data_sid.Scale(0.20)
-        cgz = categorizer(h_sig, h_data_sid)
-    elif estimate == "fullSimrw":
-        cgz = categorizer(h_sig, h_data_sid, h_bkg_rw_num=h_bkgmc_cen, h_bkg_rw_den=h_bkgmc_sid)
-    elif estimate == "fullSim":
-        cgz = categorizer(h_sig, h_bkgmc_cen)
-    cgz.smooth(int(fitboundary * nscanvbf + 1), nscanvbf)
-
     zmax, boundaries_VBF, boundaries = 0, -1, -1
-    for vb in tqdm(range(5, 95), ncols=90):
+    for vb in tqdm(range(5, 60), ncols=55):
 
-        boundaries_VBF, zv = cgz.fit(vb, nscanvbf, nvbf, minN=minN, earlystop=earlystop)
-        if boundaries_VBF == -1: break 
+        h_sig_v = projectionY(h_sig_raw, vb, nscanvbf+1, f"h_sig_v_{vb}", nscan, 0, 1)
+        if estimate in ["fullSim", "fullSimrw"]:
+            h_bkgmc_cen_v = projectionY(h_bkgmc_cen_raw, vb, nscanvbf+1, f"h_bkgmc_cen_v_{vb}", nscan, 0, 1)
+        if estimate in ["fullSimrw"]:
+            h_bkgmc_sid_v = projectionY(h_bkgmc_sid_raw, vb, nscanvbf+1, f"h_bkgmc_sid_v_{vb}", nscan, 0, 1)
+        if estimate in ["fullSimrw", "data_sid"]:
+            h_data_sid_v = projectionY(h_data_sid_raw, vb, nscanvbf+1, f"h_data_sid_v_{vb}", nscan, 0, 1)
+
+        if estimate == "data_sid":
+            h_data_sid_v.Scale(0.20)
+            cgz = categorizer(h_sig_v, h_data_sid_v)
+        elif estimate == "fullSimrw":
+            cgz = categorizer(h_sig_v, h_data_sid_v, h_bkg_rw_num=h_bkgmc_cen_v, h_bkg_rw_den=h_bkgmc_sid_v)
+        elif estimate == "fullSim":
+            cgz = categorizer(h_sig_v, h_bkgmc_cen_v)
+
+        h_sig_v.Delete()
+        if estimate in ["fullSimrw", "data_sid"]: h_data_sid_v.Delete()
+        if estimate in ["fullSimrw"]: h_bkgmc_sid_v.Delete()
+        if estimate in ["fullSim", "fullSimrw"]: h_bkgmc_cen_v.Delete()
+
+        cgz.smooth(int(fitboundary * nscan + 1), nscan)
+        boundaries_VBF, zv = cgz.fit(1, nscan, nvbf, minN=minN, earlystop=earlystop)
+        if boundaries_VBF == -1: continue
 
         h_sig_g = projectionY(h_sig_raw, 1, vb-1, f"h_sig_g_{vb}", nscan, 0, 1)
         if estimate in ["fullSim", "fullSimrw"]:
@@ -242,13 +256,14 @@ def categorizing(region, variable, sigs, bkgs, nscan, nscanvbf, minN, transform,
  
         z = sqrt(zv**2 + zg**2)
         if z >= zmax:
-            zmax, boundaries_VBF_max, boundaries_max = z, boundaries_VBF, boundaries
+            vb_max, zmax, boundaries_VBF_max, boundaries_max = vb, z, boundaries_VBF, boundaries
 
-    boundaries_VBF_values = [(i-1.)/nscanvbf for i in boundaries_VBF_max]
+    boundaries_VBF_values = [(i-1.)/nscan for i in boundaries_VBF_max]
     boundaries_values = [(i-1.)/nscan for i in boundaries_max]
 
     print('=========================================================================')
     print('Fold number ', fold)
+    print('ggF vs VBF binary: ', vb_max)
     print('VBF boundaries: ', boundaries_VBF_values)
     print('ggF boundaries: ', boundaries_values)
     print('Total significane by fit: ', zmax)
@@ -256,26 +271,28 @@ def categorizing(region, variable, sigs, bkgs, nscan, nscanvbf, minN, transform,
 
     # get the significance estimated from the unfitted histogram
     nbkg = []
-    for i in range(len(boundaries_VBF_max)):
+
+    for i in range(len(boundaries_max)):
         if estimate in ["fullSim", "fullSimrw"]:
-            nbkgmc_cen, dbkgmc_cen = hist_integral(h_bkgmc_cen_raw, boundaries_VBF_max[i], boundaries_VBF_max[i+1]-1 if i != len(boundaries_VBF_max)-1 else nscanvbf+1, 1, nscan+1)
+            nbkgmc_cen, dbkgmc_cen = hist_integral(h_bkgmc_cen_raw, 1, vb_max-1, boundaries_max[i], boundaries_max[i+1]-1 if i != len(boundaries_max)-1 else nscan+1)
         if estimate in ["fullSimrw"]:
-           nbkgmc_sid, dbkgmc_sid = hist_integral(h_bkgmc_sid_raw, boundaries_VBF_max[i], boundaries_VBF_max[i+1]-1 if i != len(boundaries_VBF_max)-1 else nscanvbf+1, 1, nscan+1)
+           nbkgmc_sid, dbkgmc_sid = hist_integral(h_bkgmc_sid_raw, 1, vb_max-1, boundaries_max[i], boundaries_max[i+1]-1 if i != len(boundaries_max)-1 else nscan+1)
         if estimate in ["fullSimrw", "data_sid"]:
-            ndata_sid, ddata_sid = hist_integral(h_data_sid_raw, boundaries_VBF_max[i], boundaries_VBF_max[i+1]-1 if i != len(boundaries_VBF_max)-1 else nscanvbf+1, 1, nscan+1)
+            ndata_sid, ddata_sid = hist_integral(h_data_sid_raw, 1, vb_max-1, boundaries_max[i], boundaries_max[i+1]-1 if i != len(boundaries_max)-1 else nscan+1)
         if estimate == "data_sid":
             nbkg.append((ndata_sid*0.20, ddata_sid*0.20))
         elif estimate == "fullSimrw":
             nbkg.append((ndata_sid*nbkgmc_cen/nbkgmc_sid, ddata_sid*nbkgmc_cen/nbkgmc_sid))
         elif estimate == "fullSim":
             nbkg.append((nbkgmc_cen, dbkgmc_cen))
-    for i in range(len(boundaries_max)):
+            
+    for i in range(len(boundaries_VBF_max)):
         if estimate in ["fullSim", "fullSimrw"]:
-            nbkgmc_cen, dbkgmc_cen = hist_integral(h_bkgmc_cen_raw, 1, boundaries_VBF_max[0]-1, boundaries_max[i], boundaries_max[i+1]-1 if i != len(boundaries_max)-1 else nscan+1)
+            nbkgmc_cen, dbkgmc_cen = hist_integral(h_bkgmc_cen_raw, vb_max, nscanvbf+1, boundaries_VBF_max[i], boundaries_VBF_max[i+1]-1 if i != len(boundaries_VBF_max)-1 else nscan+1)
         if estimate in ["fullSimrw"]:
-           nbkgmc_sid, dbkgmc_sid = hist_integral(h_bkgmc_sid_raw, 1, boundaries_VBF_max[0]-1, boundaries_max[i], boundaries_max[i+1]-1 if i != len(boundaries_max)-1 else nscan+1)
+           nbkgmc_sid, dbkgmc_sid = hist_integral(h_bkgmc_sid_raw, vb_max, nscanvbf+1, boundaries_VBF_max[i], boundaries_VBF_max[i+1]-1 if i != len(boundaries_VBF_max)-1 else nscan+1)
         if estimate in ["fullSimrw", "data_sid"]:
-            ndata_sid, ddata_sid = hist_integral(h_data_sid_raw, 1, boundaries_VBF_max[0]-1, boundaries_max[i], boundaries_max[i+1]-1 if i != len(boundaries_max)-1 else nscan+1)
+            ndata_sid, ddata_sid = hist_integral(h_data_sid_raw, vb_max, nscanvbf+1, boundaries_VBF_max[i], boundaries_VBF_max[i+1]-1 if i != len(boundaries_VBF_max)-1 else nscan+1)
         if estimate == "data_sid":
             nbkg.append((ndata_sid*0.20, ddata_sid*0.20))
         elif estimate == "fullSimrw":
@@ -284,10 +301,11 @@ def categorizing(region, variable, sigs, bkgs, nscan, nscanvbf, minN, transform,
             nbkg.append((nbkgmc_cen, dbkgmc_cen))
 
     nsig = []
-    for i in range(len(boundaries_VBF_max)):
-        nsig.append(hist_integral(h_sig_raw, boundaries_VBF_max[i], boundaries_VBF_max[i+1]-1 if i != len(boundaries_VBF_max)-1 else nscanvbf+1, 1, nscan+1))
+
     for i in range(len(boundaries_max)):
-        nsig.append(hist_integral(h_sig_raw, 1, boundaries_VBF_max[0]-1, boundaries_max[i], boundaries_max[i+1]-1 if i != len(boundaries_max)-1 else nscan+1))
+        nsig.append(hist_integral(h_sig_raw, 1, vb_max-1, boundaries_max[i], boundaries_max[i+1]-1 if i != len(boundaries_max)-1 else nscan+1))
+    for i in range(len(boundaries_VBF_max)):
+        nsig.append(hist_integral(h_sig_raw, vb_max, nscanvbf+1, boundaries_VBF_max[i], boundaries_VBF_max[i+1]-1 if i != len(boundaries_VBF_max)-1 else nscan+1))
 
     zs = [ calc_sig(nsig[i][0], nbkg[i][0], nsig[i][1], nbkg[i][1]) for i in range(len(nsig))]
     z, u = sum_z(zs)
@@ -295,7 +313,7 @@ def categorizing(region, variable, sigs, bkgs, nscan, nscanvbf, minN, transform,
     print('Significance from raw event yields in categorization set: ', z)
     print('=========================================================================')
 
-    return boundaries_VBF_max, boundaries_VBF_values, boundaries_max, boundaries_values, zmax, z
+    return vb_max, boundaries_VBF_max, boundaries_VBF_values, boundaries_max, boundaries_values, zmax, z
 
 def hist_integral(hist,i,j,k=-999,l=-999):
     err = ctypes.c_double() #Double()
@@ -316,7 +334,7 @@ def main():
 
     sigs = ['ggH','VBF','WminusH','WplusH','ZH','ttH']
 
-    bkgs = ['DYJetsToLL', 'ZGToLLG']
+    bkgs = ["ZGToLLG", "DYJetsToLL", "LLAJJ", "TT", "WW", "WZ", "ZZ"]
 
     region = args.region
 
@@ -346,19 +364,20 @@ def main():
     smaxs_raw = []
     for j in range(n_fold):
         out = categorizing(region, variable, sigs, bkgs, nscan, nscanvbf, args.minN, args.transform, args.nbin if not args.floatB else args.nbin + 1, args.vbf, args.floatB, n_fold, j, args.earlystop, estimate=args.estimate)
-        boundaries_VBF.append(out[0])
-        boundaries_VBF_values.append(out[1])
-        boundaries.append(out[2])
-        boundaries_values.append(out[3])
-        smaxs.append(out[4])
-        smaxs_raw.append(out[5])
+        vb=(out[0]-1)/nscanvbf
+        boundaries_VBF.append(out[1])
+        boundaries_VBF_values.append(out[2])
+        boundaries.append(out[3])
+        boundaries_values.append(out[4])
+        smaxs.append(out[5])
+        smaxs_raw.append(out[6])
 
     smax = sum(smaxs)/n_fold
     print('Averaged significance: ', smax)
     smax_raw = sum(smaxs_raw)/n_fold
     print('Averaged raw significance: ', smax_raw)
 
-    s, u, yields = gettingsig(region, variable, boundaries_VBF_values, boundaries_values, args.transform, estimate=args.estimate)
+    s, u, yields = gettingsig(region, variable, vb, boundaries_VBF_values, boundaries_values, args.transform, estimate=args.estimate)
 
     outs={}
     outs['boundaries'] = boundaries

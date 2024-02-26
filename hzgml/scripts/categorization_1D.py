@@ -15,7 +15,8 @@ from ROOT import TFile, TH1F, TH1, gROOT
 from argparse import ArgumentParser
 import numpy as np
 import pandas as pd
-from root_pandas import *
+import uproot
+# from root_pandas import *
 import json
 from categorizer import *
 from pdb import set_trace
@@ -65,10 +66,21 @@ def gettingsig(region, variable, boundaries, transform, estimate):
 
     for category in ['sig', 'VBF', 'ggH', "data_sid", "bkgmc_sid", "bkgmc_cen", "sig_tot"]:
 
-        for data in tqdm(read_root(f'/eos/home-j/jiehan/root/2017/outputs/{region}/{"bkgmc" if "bkgmc" in category else "data" if "data" in category else "sig" if "sig" in category else category}.root', key='test', columns=[f"{variable}_score{'_t' if transform else ''}", 'H_mass', 'weight', 'event'], chunksize=500000), desc=f'Loading {category}', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
+        # for data in tqdm(read_root(f'/eos/home-j/jiehan/root/2017/outputs/{region}/{"bkgmc" if "bkgmc" in category else "data" if "data" in category else "sig" if "sig" in category else category}.root', key='test', columns=[f"{variable}_score{'_t' if transform else ''}", 'H_mass', 'weight', 'event'], chunksize=500000), desc=f'Loading {category}', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
+        # Define the file path
+        file_path = f'/eos/home-j/jiehan/root/2017/outputs/{region}/{"bkgmc" if "bkgmc" in category else "data" if "data" in category else "sig" if "sig" in category else category}.root'
+
+        # Open the file
+        file = uproot.open(file_path)
+
+        # Define the columns to read
+        columns = [f"{variable}_score{'_t' if transform else ''}", 'H_mass', 'weight', 'event']
+
+        # Iterate over the data in chunks
+        for data in tqdm(file['test'].iterate(columns, library='pd', step_size=500000), desc=f'Loading {category}', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
     
             if 'sid' in category:
-                data = data[(data.H_mass >= 100) & (data.H_mass <= 180) & ((data.H_mass < 120) | (data.H_mass > 130))]
+                data = data[(data.H_mass >= 100) & (data.H_mass <= 180) & ((data.H_mass < 122) | (data.H_mass > 128))]
                 data['w'] = data.weight
 
             elif 'tot' in category:
@@ -76,7 +88,7 @@ def gettingsig(region, variable, boundaries, transform, estimate):
                 data['w'] = data.weight
 
             else:
-                data = data[(data.H_mass >= 120) & (data.H_mass <= 130)]
+                data = data[(data.H_mass >= 122) & (data.H_mass <= 128)]
                 data['w'] = data.weight
            
             # print(data)
@@ -133,18 +145,18 @@ def categorizing(region, variable, sigs, bkgs, nscan, minN, transform, nbin, flo
     h_sig = TH1F('h_sig','h_sig',nscan,0,1)
     h_bkg = TH1F('h_bkg','h_bkg',nscan,0,1)
 
-    t_sig.Draw(f"{variable}_score{'_t' if transform else ''}>>h_sig", "weight*%f*((H_mass>=120&&H_mass<=130)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
+    t_sig.Draw(f"{variable}_score{'_t' if transform else ''}>>h_sig", "weight*%f*((H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
 
     # filling bkg histograms
     if estimate in ["fullSim", "fullSimrw"]:
         h_bkgmc_cen = TH1F('h_bkgmc_cen', 'h_bkgmc_cen', nscan, 0., 1.)
-        t_bkgmc.Draw(f"{variable}_score{'_t' if transform else ''}>>h_bkgmc_cen", "weight*%f*((H_mass>=120&&H_mass<=130)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
+        t_bkgmc.Draw(f"{variable}_score{'_t' if transform else ''}>>h_bkgmc_cen", "weight*%f*((H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
     if estimate in ["fullSimrw"]:
         h_bkgmc_sid = TH1F('h_bkgmc_sid', 'h_bkgmc_sid', nscan, 0., 1.)
-        t_bkgmc.Draw(f"{variable}_score{'_t' if transform else ''}>>h_bkgmc_sid", "weight*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=120&&H_mass<=130)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
+        t_bkgmc.Draw(f"{variable}_score{'_t' if transform else ''}>>h_bkgmc_sid", "weight*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
     if estimate in ["fullSimrw", "data_sid"]:
         h_data_sid = TH1F('h_data_sid', 'h_data_sid', nscan, 0., 1.)
-        t_data_sid.Draw(f"{variable}_score{'_t' if transform else ''}>>h_data_sid", "weight*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=120&&H_mass<=130)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
+        t_data_sid.Draw(f"{variable}_score{'_t' if transform else ''}>>h_data_sid", "weight*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
 
     if estimate == "data_sid":
         h_data_sid.Scale(0.20)

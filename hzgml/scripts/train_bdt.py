@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 import json
 import numpy as np
 import pandas as pd
-from root_pandas import *
+import uproot
 import pickle
 from sklearn.metrics import roc_curve, auc, confusion_matrix, roc_auc_score
 from sklearn.preprocessing import StandardScaler, QuantileTransformer
@@ -29,6 +29,7 @@ def getArgs():
     parser.add_argument('-r', '--region', action='store', choices=['two_jet', 'one_jet', 'zero_jet', 'zero_to_one_jet', 'VH_ttH', 'VBF', 'all_jet'], default='zero_jet', help='Region to process')
     parser.add_argument('-f', '--fold', action='store', type=int, nargs='+', choices=[0, 1, 2, 3], default=[0, 1, 2, 3], help='specify the fold for training')
     parser.add_argument('-p', '--params', action='store', type=dict, default=None, help='json string.') #type=json.loads
+    parser.add_argument('--hyperparams_path', action='store', default=None, help='path of hyperparameters json') 
     parser.add_argument('--save', action='store_true', help='Save model weights to HDF5 file')
     parser.add_argument('--corr', action='store_true', default=False, help='Plot corelation between each training variables')
     parser.add_argument('--importance', action='store_true', default=True, help='Plot importance of variables, parameter "gain" is recommanded')
@@ -164,7 +165,7 @@ class XGBoostHandler(object):
 
             self._mc_branches = list( set(self.train_variables) | set([p.split()[0].replace("(", "") for p in self.preselections]) | set([p.split()[0].replace("(", "") for p in self.mc_preselections]) | set([p.split()[0].replace("(", "") for p in self.signal_preselections]) | set([p.split()[0].replace("(", "") for p in self.background_preselections]) | set([self.randomIndex, self.weight]))
 
-            self._mc_branches = list( set(self.train_variables) | set([p.split()[0].replace("(", "") for p in self.preselections]) | set([p.split()[0].replace("(", "") for p in self.data_preselections]) | set([p.split()[0].replace("(", "") for p in self.signal_preselections]) | set([p.split()[0].replace("(", "") for p in self.background_preselections]) | set([self.randomIndex, self.weight]))
+            self._data_branches = list( set(self.train_variables) | set([p.split()[0].replace("(", "") for p in self.preselections]) | set([p.split()[0].replace("(", "") for p in self.data_preselections]) | set([p.split()[0].replace("(", "") for p in self.signal_preselections]) | set([p.split()[0].replace("(", "") for p in self.background_preselections]) | set([self.randomIndex, self.weight]))
 
             self._sig_branches = list( set(self.train_variables) | set([p.split()[0].replace("(", "") for p in self.preselections]) | set([p.split()[0].replace("(", "") for p in self.mc_preselections]) | set([p.split()[0].replace("(", "") for p in self.signal_preselections]) | set([self.randomIndex, self.weight]))
 
@@ -273,20 +274,23 @@ class XGBoostHandler(object):
         print('-------------------------------------------------')
         for sig in sig_list: print('XGB INFO: Adding signal sample: ', sig)
         #TODO put this to the config
-        for data in tqdm(read_root(sorted(sig_list), key=self.inputTree, columns=self._sig_branches, chunksize=self._chunksize), desc='XGB INFO: Loading training signals', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
-            data = self.preselect(data, 'signal')
-            self.m_data_sig = self.m_data_sig.append(data, ignore_index=True)
+        for filename in tqdm(sorted(sig_list), desc='XGB INFO: Loading training signals', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
+            file = uproot.open(filename)
+            for data in file[self.inputTree].iterate(self._sig_branches, library='pd', step_size=self._chunksize):
+                data = self.preselect(data, 'signal')
+                self.m_data_sig = self.m_data_sig.append(data, ignore_index=True)
 
         print('----------------------------------------------------------')
         if bkg_mc_list:
-            for bkg in bkg_mc_list:
-                print('XGB INFO: Adding mc background sample: ', bkg)
+            for bkg in bkg_mc_list: print('XGB INFO: Adding mc background sample: ', bkg)
+            for bkg in tqdm(sorted(bkg_mc_list), desc='XGB INFO: Loading training backgrounds', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
                 #TODO put this to the config
                 if "DY" in bkg:
                     branches = self._mc_branches + ["n_iso_photons"]
                 else: 
                     branches = self._mc_branches
-                for data in tqdm(read_root(bkg, key=self.inputTree, columns=branches, chunksize=self._chunksize), desc='XGB INFO: Loading training backgrounds', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
+                file = uproot.open(bkg)
+                for data in file[self.inputTree].iterate(branches, library='pd', step_size=self._chunksize):
                     if "DY" in bkg:
                         data = self.preselect(data, 'DYJetsToLL')
                     else:
@@ -297,17 +301,21 @@ class XGBoostHandler(object):
         if bkg_dd_list:
             for bkg in bkg_dd_list: print('XGB INFO: Adding Data-driven background sample: ', bkg)
             #TODO put this to the config
-            for data in tqdm(read_root(sorted(bkg_dd_list), key=self.inputTree, columns=self._branches, chunksize=self._chunksize), desc='XGB INFO: Loading training backgrounds', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
-                data = self.preselect(data, 'background')
-                self.m_data_bkg = self.m_data_bkg.append(data, ignore_index=True)
+            for filename in tqdm(sorted(bkg_dd_list), desc='XGB INFO: Loading training backgrounds', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
+                file = uproot.open(filename)
+                for data in file[self.inputTree].iterate(self._branches, library='pd', step_size=self._chunksize):
+                    data = self.preselect(data, 'background')
+                    self.m_data_bkg = self.m_data_bkg.append(data, ignore_index=True)
 
         print('----------------------------------------------------------')
         if bkg_data_list:
             for bkg in bkg_data_list: print('XGB INFO: Adding data side band background sample: ', bkg)
             #TODO put this to the config
-            for data in tqdm(read_root(sorted(bkg_data_list), key=self.inputTree, columns=self._branches, chunksize=self._chunksize), desc='XGB INFO: Loading training backgrounds', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
-                data = self.preselect(data, 'background')
-                self.m_data_bkg = self.m_data_bkg.append(data, ignore_index=True)
+            for filename in tqdm(sorted(bkg_data_list), desc='XGB INFO: Loading training backgrounds', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
+                file = uproot.open(filename)
+                for data in file[self.inputTree].iterate(self._data_branches, library='pd', step_size=self._chunksize):
+                    data = self.preselect(data, 'data')
+                    self.m_data_bkg = self.m_data_bkg.append(data, ignore_index=True)
 
     def plot_corr(self, data_type):
         if not os.path.isdir("plots/corr/"):
@@ -386,8 +394,11 @@ class XGBoostHandler(object):
         test_bkg_wt = test_bkg[[self.weight]]
 
         self.m_train_wt[fold] = pd.concat([train_sig_wt, train_bkg_wt]).to_numpy()
+        self.m_train_wt[fold][self.m_train_wt[fold] < 0] = 0
         self.m_val_wt[fold] = pd.concat([val_sig_wt, val_bkg_wt]).to_numpy()
+        self.m_val_wt[fold][self.m_val_wt[fold] < 0] = 0
         self.m_test_wt[fold] = pd.concat([test_sig_wt, test_bkg_wt]).to_numpy()
+        self.m_test_wt[fold][self.m_test_wt[fold] < 0] = 0
 
         # setup the truth labels
         print('XGB INFO: Signal labeled as one; background labeled as zero.')
@@ -447,10 +458,10 @@ class XGBoostHandler(object):
             plt.title('Score distribution test background')
             plt.show()
 
-    def plotFeaturesImportance(self, fold=0, save=True, show=False, type='gain'):
+    def plotFeaturesImportance(self, fold=0, save=True, show=True, type='gain'):
         """Plot feature importance. Type can be 'weight', 'gain' or 'cover'"""
 
-        xgb.plot_importance(booster=self.m_bst[fold], importance_type=type, show_values=show)
+        xgb.plot_importance(booster=self.m_bst[fold], importance_type=type, show_values=show, values_format='{v:.2f}')
         plt.tight_layout()
 
         if save:
@@ -561,15 +572,15 @@ class XGBoostHandler(object):
 
         print ('default param: ', self._region, fold, self.params[fold])
 
-        search_space = [Real(0.3, 0.7, name='alpha'),
+        search_space = [Real(0.0, 0.7, name='alpha'),
                 Real(0.4, 1, name='colsample_bytree'),
                 Real(0, 10, name='gamma'),
-                Real(5, 20, name='max_delta_step'),
-                Integer(4, 100, name='min_child_weight'),
-                Real(0.7, 1, name='subsample'),
-                Real(0.01, 0.4, name='eta'),
-                Integer(200, 400, name='max_bin'),
-                Integer(5, 20, name='max_depth')
+                Real(1, 20, name='max_delta_step'),
+                Real(0.0, 1, name='subsample'),
+                Real(0.1, 0.5, name='eta'),
+                Integer(5, 50, name='min_child_weight'),
+                Integer(0, 20, name='max_leaves'),
+                Integer(3, 20, name='max_depth')
         ]
 
         def objective(param):
@@ -584,10 +595,10 @@ class XGBoostHandler(object):
         search_names = [var.name for var in search_space]
 
         opt = Optimizer(search_space, # TODO: Add noise
-                    n_initial_points=10,
+                    n_initial_points=12,
                     acq_optimizer_kwargs={'n_jobs':4})
 
-        n_calls = 20
+        n_calls = 60
         exp_dir = 'models/skopt/'
 
         if not os.path.exists(exp_dir):
@@ -628,6 +639,8 @@ class XGBoostHandler(object):
 
         opt_result_x = [float(i) for i in opt_result.x]
         param = dict(zip(search_names, opt_result_x))
+        for name in search_names[-3:]:
+            param[name] = int(param[name])
         self.setParams(param, fold)
 
         with open(exp_dir + 'BDT_region_'+self._region+'_fold'+str(fold) + '.json', 'w') as fp:
@@ -699,17 +712,24 @@ def main():
     args=getArgs()
     
     configPath = args.config
-    xgb = XGBoostHandler(configPath, args.region)
+    xgb_model = XGBoostHandler(configPath, args.region)
 
-    if args.inputFolder: xgb.setInputFolder(args.inputFolder)
-    if args.outputFolder: xgb.setOutputFolder(args.outputFolder)
-    if args.params: xgb.setParams(args.params)
+    if args.inputFolder: xgb_model.setInputFolder(args.inputFolder)
+    if args.outputFolder: xgb_model.setOutputFolder(args.outputFolder)
+    if args.params: xgb_model.setParams(args.params)
 
-    xgb.readData()
+    if args.hyperparams_path:
+        for fold in range(4):
+            path = "{}/BDT_region_{}_fold{}.json".format(args.hyperparams_path, args.region, fold)
+            stream = open(path, 'r')
+            xgb_model.params[fold] = json.load(stream)
+        # xgb_model.setParams(hyperparameters)
+        
+    xgb_model.readData()
 
     if args.corr:
-        xgb.plot_corr("sig")
-        xgb.plot_corr("bkg")
+        xgb_model.plot_corr("sig")
+        xgb_model.plot_corr("bkg")
 
     # looping over the "4 folds"
     for i in args.fold:
@@ -718,36 +738,36 @@ def main():
         print(f' The #{i} fold of training')
         print('===================================================')
 
-        #xgb.setParams({'eval_metric': ['auc', 'logloss']}, i)
-        xgb.set_early_stopping_rounds(20)
+        #xgb_model.setParams({'eval_metric': ['auc', 'logloss']}, i)
+        xgb_model.set_early_stopping_rounds(20)
 
-        xgb.prepareData(i)
+        xgb_model.prepareData(i)
 
         if args.skopt: 
             try:
-                xgb.skoptHP(i)
+                xgb_model.skoptHP(i)
             except KeyboardInterrupt:
                 print('Finishing on SIGINT.')
             continue
 
-        xgb.trainModel(i)
+        xgb_model.trainModel(i)
 
-        xgb.testModel(i)
-        print("param: %s, Val AUC: %f" % xgb.getAUC(i))
+        xgb_model.testModel(i)
+        print("param: %s, Val AUC: %f" % xgb_model.getAUC(i))
 
-        #xgb.plotScore(i, 'test')
+        #xgb_model.plotScore(i, 'test')
         if args.importance:
-            xgb.plotFeaturesImportance(i)
+            xgb_model.plotFeaturesImportance(i)
         if args.roc:
-            xgb.plotROC(i)
+            xgb_model.plotROC(i)
 
-        xgb.transformScore(i)
+        xgb_model.transformScore(i)
 
-        if args.save: xgb.save(i)
+        if args.save: xgb_model.save(i)
     
     if args.skopt_plot: 
         for i in args.fold:
-            xgb.skoptPlot(i)
+            xgb_model.skoptPlot(i)
         return
 
     print('------------------------------------------------------------------------------')

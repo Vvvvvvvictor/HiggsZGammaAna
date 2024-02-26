@@ -11,8 +11,8 @@ This project requires to use python3 and either conda or virtual environment. If
 First checkout the code:
 
 ```
-git clone git@github.com:chenzhou36/hmumuml.git [-b your_branch]
-cd hmumuml
+[outdated] git clone git@github.com:chenzhou36/hmumuml.git [-b your_branch]
+cd hzgml
 ```
 
 Then,
@@ -46,7 +46,7 @@ python scripts/skim_ntuples.py [-i input_file_path] [-o output_file_path]
 
 ### Start XGBoost analysis!
 
-The whole ML task consists of training, applying the weights, optimizing the BDT boundaries for categorization, and calculating the number counting significances. The wrapper script `run_all.sh` will run everything. Please have a look!
+The whole ML task consists of training, applying the weights, optimizing the BDT boundaries for categorization, and calculating the number counting significances. The wrapper script `runbdt_all.sh` will run everything. Please have a look!
 
 #### Make some directories
 ```
@@ -54,6 +54,12 @@ mkdir -p models outputs plots
 ```
 
 #### Training a model
+
+If the hyperparameters are needed to be tuned, please run the following code.
+```
+source scripts/submit_hyperparameter_tuning_bdt_skopt.sh
+```
+This is an example for `two_jet` channel. You can change the `region` and `fold` in the script.
 
 The training script `train_bdt.py` will train the model in four-fold, and transform the output scores such that the unweighted signal distribution is flat. The detailed settings, including the preselections, training variables, hyperparameters, etc, are specified in the config file `data/training_config.json`.
 

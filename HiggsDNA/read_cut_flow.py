@@ -6,17 +6,17 @@ import re
 eos_path = '/eos/home-j/jiehan/parquet/nanov9/'
 log_path = '/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/HiggsDNA/eos_logs/'
 
-# dataset_type = 'bkgmc'
-# dataset_names = ["DYJetsToLL", "ZGToLLG"]
-# dataset_years = ["2016", "2017", "2018"]
+dataset_type = 'bkgmc'
+dataset_names = ["DYJetsToLL", "ZGToLLG"]
+dataset_years = ["2016", "2017", "2018"]
 
 # dataset_type = 'signal'
 # dataset_names = ["ggH_M125", "VBFH_M125", "ZH_M125", "ttH_M125"] # "WplusH_M125", "WminusH_M125",
 # dataset_years = ["2018"]#, "2017", "2018"]
 
-dataset_type = 'data'
-dataset_names = ["Data"]
-dataset_years = ["2016", "2017", "2018"]
+# dataset_type = 'data'
+# dataset_names = ["Data"]
+# dataset_years = ["2016", "2017", "2018"]
 
 cutflow_type = ['zgammas','zgammas_ele','zgammas_mu','zgammas_w','zgammas_ele_w','zgammas_mu_w']
 cut_type = ['all', 'N_lep_sel','trig_cut','lep_pt_cut','has_g_cand', 'os_cut', 'has_z_cand','sel_h_1','sel_h_2','sel_h_3']
@@ -27,15 +27,16 @@ temp = np.zeros(cut_num)
 cuti = 0
 for dataset in dataset_names:
     for year in dataset_years:
-        # try:
-        #     data = pd.read_parquet("{}{}/{}_{}/merged_nominal.parquet".format(eos_path, dataset_type, dataset, year))
-        # except:
-        #     continue
-        # weight = data['weight_central'][1]/data['weight_central_initial'][1]
-        weight = 1
+        try:
+            data = pd.read_parquet("{}{}/{}_{}/merged_nominal.parquet".format(eos_path, dataset_type, dataset, year))
+        except:
+            continue
+        weight = data['weight_central'][1]/data['weight_central_initial'][1]
         # print(data)
+        del data
+
+        # weight = 1
         print(weight)
-        # del data
         for log_dir in os.listdir("{}{}/{}_{}".format(log_path, dataset_type, dataset, year)):
             log_dir = "{}{}/{}_{}/{}".format(log_path, dataset_type, dataset, year, log_dir)
             if os.path.isdir(log_dir):

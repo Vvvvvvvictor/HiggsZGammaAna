@@ -16,7 +16,7 @@ sig_legend = ["sig", "ggH", "VBF"]
 path = "/eos/home-j/jiehan/root/2017/outputs/"
 channel = "two_jet"
 tree = "test"
-var = "bdt_score_t"
+var = "bdt_score_VBF_t"
 bins = 100
 x_range = (0, 1)
 blind_range = (120, 130)
@@ -83,7 +83,7 @@ print("============================")
 
 sb_ratio=1.
 
-selections+=["H_mass<130", "H_mass>120"]
+# selections+=["H_mass<130", "H_mass>120"]
 
 sig_yields, sig_hist_list = [], []
 for i, sig in enumerate(sig_file_list):
