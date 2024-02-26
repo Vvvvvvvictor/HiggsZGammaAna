@@ -7,7 +7,7 @@ from higgs_dna.utils import awkward_utils
 
 def select_x_to_yz(gen_part, x_pdgId, y_pdgId, z_pdgId):
     """
-    Return all x->yy decays, sorted by x_pt.
+    Return all x->yz decays, sorted by x_pt.
     Values of `None` for any of `x_pdgId`, `y_pdgId`, or `z_pdgId` will result in no requirement on pdgId.
     For example, 
         - `x_pdgId = None`, `y_pdgId = 5`, `z_pdgId = 5` will select all X->bb decays
