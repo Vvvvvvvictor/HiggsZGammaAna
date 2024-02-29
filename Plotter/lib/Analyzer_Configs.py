@@ -3,7 +3,7 @@ import sys
 from ROOT import *
 
 class Analyzer_Config:
-    def __init__(self, channel, year, region=''):
+    def __init__(self, channel, year, region='',treename=''):
         self.channel            = channel
         self.year               = year
         self.version            = 'UL'
@@ -14,6 +14,7 @@ class Analyzer_Config:
         self.root_output_name   = 'NONE'
         self.plot_output_path   = 'NONE'
         self.BDT_filename       = 'NONE'
+        self.treename           = treename
         self.mvaCut             = {}
         self.sig_names          = []
         self.bkg_names          = []
@@ -33,33 +34,33 @@ class Analyzer_Config:
                 self.out_region_name = self.version + '_full'
 
             if self.year == '2016':
-                self.sample_loc       = '/publicfs/cms/user/wangzebing/ALP/Analysis_out/UL/16'
+                self.sample_loc       = '/eos/user/z/zewang/HZGamma_data/run2UL/skimmed_ntuples'
                 self.out_dir          = 'plots_16UL'
-                self.root_output_name = "ALP_plot_data16_{0}.root".format(self.out_region_name)
+                self.root_output_name = "ALP_plot_data16_{0}_{1}.root".format(self.out_region_name,self.treename)
                 self.BDT_filename     = "/publicfs/cms/user/wangzebing/ALP/Analysis_code/MVA/weight/nodR/model_ALP_BDT_param_2016.pkl"
                 #mvaCut = 0.8675
             elif self.year == '-2016':
                 self.sample_loc       = '/publicfs/cms/user/wangzebing/ALP/Analysis_out/UL/16APV'
                 self.out_dir          = 'plots_16APVUL'
-                self.root_output_name = "ALP_plot_data16APV_{0}}.root".format(self.out_region_name)
+                self.root_output_name = "ALP_plot_data16APV_{0}_{1}.root".format(self.out_region_name,self.treename)
                 self.BDT_filename     = "/publicfs/cms/user/wangzebing/ALP/Analysis_code/MVA/weight/nodR/model_ALP_BDT_param_2016.pkl"
                 #mvaCut = 0.8365
             elif self.year == '2017':
-                self.sample_loc       = '/afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/Plotter/Data/2017'
+                self.sample_loc       = '/eos/user/z/zewang/HZGamma_data/run2UL/skimmed_ntuples'
                 self.out_dir          = 'plots_17UL'
-                self.root_output_name = "HZGamma_plot_data17_{0}.root".format(self.out_region_name)
+                self.root_output_name = "HZGamma_plot_data17_{0}_{1}.root".format(self.out_region_name,self.treename)
                 self.BDT_filename     = "/publicfs/cms/user/wangzebing/ALP/Analysis_code/MVA/weight/nodR/model_ALP_BDT_param_2017.pkl"
                 #mvaCut = 0.8365
             elif self.year == '2018':
-                self.sample_loc       = '/publicfs/cms/user/wangzebing/ALP/Analysis_out/UL/18'
+                self.sample_loc       = '/eos/user/z/zewang/HZGamma_data/run2UL/skimmed_ntuples'
                 self.out_dir          = 'plots_18UL'
-                self.root_output_name = "ALP_plot_data18_{0}.root".format(self.out_region_name)
+                self.root_output_name = "ALP_plot_data18_{0}_{1}.root".format(self.out_region_name,self.treename)
                 self.BDT_filename     = "/publicfs/cms/user/wangzebing/ALP/Analysis_code/MVA/weight/nodR/model_ALP_BDT_param_2018.pkl"
                 #mvaCut = 0.9766
             elif self.year == 'run2':
-                self.sample_loc       = '/publicfs/cms/user/wangzebing/ALP/Analysis_out/UL/run2'
+                self.sample_loc       = '/eos/user/z/zewang/HZGamma_data/run2UL/skimmed_ntuples'
                 self.out_dir          = 'plots_run2UL'
-                self.root_output_name = "ALP_plot_run2_{0}.root".format(self.out_region_name)
+                self.root_output_name = "ALP_plot_run2_{0}_{1}.root".format(self.out_region_name,self.treename)
                 self.BDT_filename     = "/publicfs/cms/user/wangzebing/ALP/Analysis_code/MVA/weight/UL/model_ALP_BDT_param.pkl"
                 self.mvaCut           = {'M1':0.955, 'M2':0.98, 'M3':0.985, 'M4':0.98, 'M5':0.985, 'M6':0.99, 'M7':0.985, 'M8':0.99, 'M9':0.99, 'M10':0.99, 'M15':0.99, 'M20':0.99, 'M25':0.985, 'M30':0.98}
             else:
@@ -71,10 +72,10 @@ class Analyzer_Config:
             else:
                 self.sig_names  = [self.channel]
 
-            self.bkg_names  = ['DYJetsToLL', 'ZGToLLG', 'TT', 'ZG2JToG2L2J', 'TGJets', 'TTGJets', 'WW', 'WZ', 'LLAJJ']
+            self.bkg_names  = ['WZ', 'WW', 'TTGJets', 'TGJets', 'ZG2JToG2L2J', 'TT', 'ZGToLLG', 'DYJetsToLL']
             self.samp_names = self.bkg_names + self.sig_names + ['data']
 
-            self.plot_output_path = "{0}/plot_{1}".format(self.out_dir, self.out_region_name)
+            self.plot_output_path = "{0}/plot_{1}_{2}".format(self.out_dir, self.out_region_name, self.treename)
             
             self.sys_names  = ['CMS_eff_g_up','CMS_eff_g_dn','CMS_pileup_up','CMS_pileup_dn','CMS_eff_lep_up','CMS_eff_lep_dn']
         else:

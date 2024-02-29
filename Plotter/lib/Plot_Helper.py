@@ -11,8 +11,15 @@ import math
 def LoadNtuples(ana_cfg):
     ntuples = {}
     for sample in ana_cfg.samp_names:
-        ntuples[sample] = TChain("passedEvents","chain_" + sample)
-        ntuples[sample]. Add(ana_cfg.sample_loc + '/%s.root' %sample)
+        ntuples[sample] = TChain(ana_cfg.treename,"chain_" + sample)
+        #ntuples[sample]. Add(ana_cfg.sample_loc + '/%s.root' %sample)
+        if ana_cfg.year == 'run2':
+            for year in ['2016', '2017', '2018']:
+                ntuples[sample]. Add( '{}/{}/{}.root'.format(ana_cfg.sample_loc, sample, year))
+        else:
+            ntuples[sample]. Add('{}/{}/{}.root'.format(ana_cfg.sample_loc, sample, ana_cfg.year))
+
+
     return ntuples
 
 
@@ -60,6 +67,7 @@ def MakeCMSDASLabel():
 def ScaleSignal(plt_cfg, stack_sig, hist_data, var_name):
     sig_hist = hist_data
     #### Add scale codes if needed
+    sig_hist.Scale(plt_cfg.sig_scale)
 
     return sig_hist
 
@@ -97,7 +105,8 @@ def MakeLegend(plt_cfg, histos, scaled_signal):
     legend.SetFillColor(kWhite)
     legend.AddEntry(histos["data"], "Data", "PE")
     for sample in plt_cfg.ana_cfg.sig_names:
-        legend.AddEntry(scaled_signal[sample], sample, "l")
+        #legend.AddEntry(scaled_signal[sample], sample, "l")
+        legend.AddEntry(scaled_signal[sample], r'{0} \times {1}'.format(sample, plt_cfg.sig_scale), "l")
 
     for sample in plt_cfg.ana_cfg.bkg_names:
         legend.AddEntry(histos[sample], sample )
@@ -311,21 +320,13 @@ def DrawOnCanv(canv, var_name, plt_cfg, ana_cfg, stacks, histos, scaled_sig, rat
     #upper_pad = TPad("upperpad_"+var_name, "upperpad_"+var_name, 0,0.2, 1,1)
     upper_pad = TPad("upperpad_"+var_name, "upperpad_"+var_name, 0,0.25, 1,1)
     upper_pad.SetBottomMargin(0.18)
-    upper_pad.SetLeftMargin(0.13)
-    upper_pad.SetRightMargin(0.1)
+    upper_pad.SetLeftMargin(0.18)
+    upper_pad.SetRightMargin(0.05)
     upper_pad.SetTopMargin(0.085)
     upper_pad.Draw()
     upper_pad.cd()
     canv.SetTickx()
     canv.SetTicky()
-
-    if logY:
-        upper_pad.SetLogy()
-        stacks['all'].SetMinimum(1e-2)
-        stacks['all'].SetMaximum(5e6)
-
-        histos['data'].SetMinimum(1e-2)
-        histos['data'].SetMaximum(5e6)
 
     if histos['data'].GetMaximum() > stacks['all'].GetMaximum():
         h_max = histos['data'].GetMaximum()
@@ -335,8 +336,11 @@ def DrawOnCanv(canv, var_name, plt_cfg, ana_cfg, stacks, histos, scaled_sig, rat
         h_max = stacks['sig'].GetMaximum()
 
     if logY:
-        histos['data'].SetMaximum(h_max*1.4)
-        stacks['all'].SetMaximum(h_max*1.4)
+        upper_pad.SetLogy()
+        histos['data'].SetMaximum(h_max*100)
+        stacks['all'].SetMaximum(h_max*100)
+        stacks['data'].SetMinimum(1e-2)
+        stacks['all'].SetMinimum(1e-2)
     else:
         histos['data'].SetMaximum(h_max*2)
         stacks['all'].SetMaximum(h_max*2)
@@ -352,7 +356,7 @@ def DrawOnCanv(canv, var_name, plt_cfg, ana_cfg, stacks, histos, scaled_sig, rat
         histos['data'].GetYaxis().SetTitle('Events')
     #histos['data'].GetYaxis().SetTitleSize(0.05)
     #histos['data'].GetYaxis().SetTitleFont(42)
-    #histos['data'].GetYaxis().SetTitleOffset(1.15)
+    histos['data'].GetYaxis().SetTitleOffset(1.5)
     stacks['all'].Draw('HISTSAME')
 
     for sample in ana_cfg.sig_names:
@@ -378,11 +382,13 @@ def DrawOnCanv(canv, var_name, plt_cfg, ana_cfg, stacks, histos, scaled_sig, rat
     # CMS style
     CMS_lumi.cmsText = "CMS"
     CMS_lumi.extraText = "Preliminary"
+    #CMS_lumi.extraText = "Working on progress"
     #CMS_lumi.extraText = "Supplementary"
     #CMS_lumi.cmsText = ""
     #CMS_lumi.extraText = ""
     CMS_lumi.cmsTextSize = 0.95
-    CMS_lumi.CMSText_posX = 0.0
+    CMS_lumi.lumiText_posX = 0.
+    CMS_lumi.CMSText_posX = -0.05
     CMS_lumi.outOfFrame = True
     CMS_lumi.CMS_lumi(canv,4,0,plt_cfg.year)
 
@@ -391,8 +397,8 @@ def DrawOnCanv(canv, var_name, plt_cfg, ana_cfg, stacks, histos, scaled_sig, rat
     lower_pad = TPad("lowerpad_"+var_name, "lowerpad_"+var_name, 0, 0, 1,0.35)
     lower_pad.SetTopMargin(0.00001)
     lower_pad.SetBottomMargin(0.25)
-    lower_pad.SetLeftMargin(0.13)
-    lower_pad.SetRightMargin(0.1)
+    lower_pad.SetLeftMargin(0.18)
+    lower_pad.SetRightMargin(0.05)
     lower_pad.SetGridy()
     lower_pad.Draw()
     lower_pad.cd()

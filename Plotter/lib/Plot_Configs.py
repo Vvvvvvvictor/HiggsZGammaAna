@@ -25,8 +25,7 @@ class Plot_Config:
         else:
             print('do not in 2016/2017/2018!')
             exit(0)
-        self.sig_scale  = 5
-        self.sig_weight = 0.4133
+        self.sig_scale  = 100
 
         self.LoadColors()
         self.LoadVariables()
@@ -68,14 +67,23 @@ class Plot_Config:
             'gamma_pt':             [r"p_{T,\gamma}",           50, 0., 50.],
             'gamma_eta':            [r"\eta_{\gamma}",          50, -2.5, 2.5],
             'gamma_phi':            [r"\phi_{\gamma}",          50, -4., 4.],
-            'Z_lead_lepton_pt':     [r"p_{T,\ell 1}",           50, 0., 50.],
+            'Z_lead_lepton_pt':     [r"p_{T,\ell 1}",           50, 0., 100.],
             'Z_lead_lepton_eta':    [r"\eta_{T,\ell 1}",        50, -2.5, 2.5],
             'Z_lead_lepton_phi':    [r"\phi_{T,\ell 1}",        50, -4., 4.],
             'Z_lead_lepton_mass':   [r"m_{\ell 1}",             50, 0., 1.],
-            'Z_sublead_lepton_pt':  [r"p_{T,\ell 2}",           50, 0., 50.],
+            'Z_sublead_lepton_pt':  [r"p_{T,\ell 2}",           50, 0., 100.],
             'Z_sublead_lepton_eta': [r"\eta_{T,\ell 2}",        50, -2.5, 2.5],
             'Z_sublead_lepton_phi': [r"\phi_{T,\ell 2}",        50, -4., 4.],
-            'Z_sublead_lepton_mass':[r"m_{\ell 2}",             50, 0., 1.]
+            'Z_sublead_lepton_mass':[r"m_{\ell 2}",             50, 0., 1.],
+            'H_relpt':              [r"p_{T_{\ell\ell\gamma}}/m_{\ell\ell\gamma}",             50, 0., 2.5],
+            'gamma_ptRelErr':       [r"\gamma_{E_{err}}/\gamma_{E}",             50, 0., 0.15],
+            'H_ptt':                [r"H_{ptt}",                50, 0., 100.],
+            'Z_cos_theta':          [r"cos(\Theta)",             50, -1., 1.],
+            'lep_cos_theta':        [r"cos(\theta)",             50, -1., 1.],
+            'lep_phi':              [r"\phi",                   50, 0., 4.],
+            'l1g_deltaR':           [r"max\Delta R(\ell,\gamma)",             50, 0., 5.],
+            'l2g_deltaR':           [r"min\Delta R(\ell,\gamma)",             50, 0., 5.],
+            'gamma_mvaID':          [r"\gamma_{mvaID}",             50, 0., 1.]
         }
 
     def InitializeHistos(self):
