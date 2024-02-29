@@ -474,22 +474,6 @@ class ZGammaTaggerRun2(Tagger):
             )
 
         all_cuts = has_z_cand & has_gamma_cand & sel_h_1 & sel_h_2 & sel_h_3
-        
-        # bing with control regions
-        var_CR1 = gamma_mvaID_WPL
-        var_CR2 = gamma_e_veto
-        SR = (var_CR1) & (var_CR2)
-        CR1 = (~var_CR1) & (var_CR2)
-        CR2 = (var_CR1) & (~var_CR2)
-        CR3 = (~var_CR1) & (~var_CR2)
-        SR = awkward.fill_none(SR, value = False)
-        CR1 = awkward.fill_none(CR1, value = False)
-        CR2 = awkward.fill_none(CR2, value = False)
-        CR3 = awkward.fill_none(CR3, value = False)
-        regions = awkward.where(SR, 0, awkward.where(CR1, 1, awkward.where(CR2, 2, awkward.where(CR3, 3, -999))))
-        #for i in range(5000):
-        #    print("SR1:", SR1[i], "SR:", SR[i], "CR1:", CR1[i], "CR2", CR2[i], "CR3", CR3[i], "regions:", regions[i])
-        awkward_utils.add_field(events, "regions",  regions)
 
 
         for cut_type in ["zgammas", "zgammas_ele", "zgammas_mu", "zgammas_w", "zgammas_ele_w", "zgammas_mu_w"]:
