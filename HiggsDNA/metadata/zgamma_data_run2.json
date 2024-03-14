@@ -28,7 +28,7 @@
             "Data"
         ],
         "years": [
-            "2018"
+            "2016preVFP", "2016postVFP"
         ]
     },
     "variables_of_interest": [
@@ -104,6 +104,10 @@
         "jet_4_phi",
         "jet_4_mass",
         "jet_4_btagDeepFlavB",
+        "jet_1_is_med_bjet",
+        "jet_2_is_med_bjet",
+        "jet_3_is_med_bjet",
+        "jet_4_is_med_bjet",
         "additional_lepton_1_pt",
         "additional_lepton_1_eta",
         "additional_lepton_1_phi",
@@ -141,6 +145,7 @@
         "GenHzgLeadGenChildChild2_mass",
         "GenHzgLeadGenChildChild2_pdgId",
         "n_jets",
+        "n_b_jets",
         "n_leptons",
         "n_electrons",
         "n_muons",

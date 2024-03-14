@@ -6,13 +6,13 @@ import re
 eos_path = '/eos/home-j/jiehan/parquet/nanov9/'
 log_path = '/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/HiggsDNA/eos_logs/'
 
-dataset_type = 'bkgmc'
-dataset_names = ["DYJetsToLL", "ZGToLLG"]
-dataset_years = ["2016", "2017", "2018"]
+# dataset_type = 'bkgmc'
+# dataset_names = ["DYJetsToLL"]
+# dataset_years = ["2016", "2017", "2018"]
 
-# dataset_type = 'signal'
-# dataset_names = ["ggH_M125", "VBFH_M125", "ZH_M125", "ttH_M125"] # "WplusH_M125", "WminusH_M125",
-# dataset_years = ["2018"]#, "2017", "2018"]
+dataset_type = 'signal'
+dataset_names = ["ggH_M125"] #, "VBFH_M125", "ZH_M125", "ttH_M125"] # "WplusH_M125", "WminusH_M125",
+dataset_years = ["2016preVFP", "2016postVFP"]#, "2017", "2018"]
 
 # dataset_type = 'data'
 # dataset_names = ["Data"]
@@ -31,12 +31,14 @@ for dataset in dataset_names:
             data = pd.read_parquet("{}{}/{}_{}/merged_nominal.parquet".format(eos_path, dataset_type, dataset, year))
         except:
             continue
-        weight = data['weight_central'][1]/data['weight_central_initial'][1]
+        if 'weight_central_initial' in data.keys():
+            weight = data['weight_central'][1]/data['weight_central_initial'][1]
+        else:
+            weight = 1
         # print(data)
         del data
-
-        # weight = 1
         print(weight)
+        
         for log_dir in os.listdir("{}{}/{}_{}".format(log_path, dataset_type, dataset, year)):
             log_dir = "{}{}/{}_{}/{}".format(log_path, dataset_type, dataset, year, log_dir)
             if os.path.isdir(log_dir):
@@ -45,7 +47,7 @@ for dataset in dataset_names:
                     if '.out' in log_file:
                         f = open("{}/{}".format(log_dir, log_file), 'r')
                         lines = f.read().split("DEBUG")
-                        if len(lines) < cut_num:
+                        if len(lines) < cut_num*6:
                             continue;
                         print("reading: {}/{}".format(log_dir, log_file))
                         for line in lines:

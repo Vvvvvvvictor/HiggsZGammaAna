@@ -38,9 +38,9 @@ class MCOverlapTagger(Tagger):
             return cut
 
         # Only use specific events in different MC NanoAOD
-        if "DYJetsToLL" in file:
+        if "DYJetsToLL" in file or "EWKZ2J" in file or "TTTo2L2Nu" in file:
             cut = self.get_n_iso_photon(data) == 0
-        elif "ZGToLLG" in file:
+        elif "ZGToLLG" in file or "ZG2JToG2L2J" in file or "TTGJets" in file:
             cut = self.get_n_iso_photon(data) > 0
         
         # cut = cut>0

@@ -25,10 +25,10 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "ZGToLLG", "DYJetsToLL"
+            "EWKZ2J", "ZG2JToG2L2J", "WGToLNuG", "TT", "TTGJets", "TGJets", "ttWJets", "ttZJets", "WW", "WZ", "ZZ"
         ],
         "years": [
-            "2016", "2017", "2018"
+            "2017", "2018"
         ]
     },
     "variables_of_interest": [
@@ -104,6 +104,10 @@
         "jet_4_phi",
         "jet_4_mass",
         "jet_4_btagDeepFlavB",
+        "jet_1_is_med_bjet",
+        "jet_2_is_med_bjet",
+        "jet_3_is_med_bjet",
+        "jet_4_is_med_bjet",
         "additional_lepton_1_pt",
         "additional_lepton_1_eta",
         "additional_lepton_1_phi",
@@ -141,6 +145,7 @@
         "GenHzgLeadGenChildChild2_mass",
         "GenHzgLeadGenChildChild2_pdgId",
         "n_jets",
+        "n_b_jets",
         "n_leptons",
         "n_electrons",
         "n_muons",

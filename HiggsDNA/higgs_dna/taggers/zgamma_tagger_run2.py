@@ -98,6 +98,16 @@ DEFAULT_OPTIONS = {
         "dr_electrons" : 0.4,
         "dr_muons" : 0.4,
     },
+    "btag_med": {
+        "2016preVFP": 0.2598,
+        "2016postVFP": 0.2489,
+        "2017": 0.3040,
+        "2018": 0.2783,
+        "2022": 0.3086,
+        "2022EE": 0.3196,
+        "2023": 0.2431,
+        "2023BPix": 0.2435
+    },
     "FSRphotons" : {
         "iso" : 1.8,
         "eta" : 2.4,
@@ -292,6 +302,9 @@ class ZGammaTaggerRun2(Tagger):
         )
         FSRphotons = awkward.with_field(FSRphotons, awkward.ones_like(FSRphotons.pt) * 0.0, "mass")
 
+        b_jet_cut = jets.btagDeepFlavB > self.options["btag_med"][self.year]
+        jets = awkward.with_field(jets, b_jet_cut, "is_med_bjet") 
+
         # Add object fields to events array
         for objects, name in zip([electrons, muons, jets], ["electron", "muon", "jet"]):
             awkward_utils.add_object_fields(
@@ -316,6 +329,9 @@ class ZGammaTaggerRun2(Tagger):
 
         n_jets = awkward.num(jets)
         awkward_utils.add_field(events, "n_jets", n_jets, overwrite=True)
+
+        n_b_jets = awkward.sum(b_jet_cut, axis=1)
+        awkward_utils.add_field(events, "n_b_jets", n_b_jets, overwrite=True)
 
         # PDG ID
         electrons = awkward.with_field(electrons, awkward.ones_like(electrons.pt) * 11, "id")
@@ -342,32 +358,34 @@ class ZGammaTaggerRun2(Tagger):
         
         # Make trigger cuts 
         if self.year is not None:
+            year = self.year[:4]
             single_ele_trigger_cut = awkward.num(events.Photon) < 0 # dummy cut, all False
             double_ele_trigger_cut = awkward.num(events.Photon) < 0
             single_mu_trigger_cut = awkward.num(events.Photon) < 0
             double_mu_trigger_cut = awkward.num(events.Photon) < 0 
-            for hlt in self.options["single_ele_trigger"][self.year]:
+            for hlt in self.options["single_ele_trigger"][year]:
                 if hasattr(events, hlt):
                     single_ele_trigger_cut = (single_ele_trigger_cut) | (events[hlt] == True)
-            for hlt in self.options["double_ele_trigger"][self.year]: # logical OR of all triggers
+            for hlt in self.options["double_ele_trigger"][year]: # logical OR of all triggers
                 if hasattr(events, hlt):
                     double_ele_trigger_cut = (double_ele_trigger_cut) | (events[hlt] == True)
-            for hlt in self.options["single_muon_trigger"][self.year]: # logical OR of all triggers
+            for hlt in self.options["single_muon_trigger"][year]: # logical OR of all triggers
                 if hasattr(events, hlt):
                     single_mu_trigger_cut = (single_mu_trigger_cut) | (events[hlt] == True)
-            for hlt in self.options["double_muon_trigger"][self.year]: # logical OR of all triggers
+            for hlt in self.options["double_muon_trigger"][year]: # logical OR of all triggers
                 if hasattr(events, hlt):
                     double_mu_trigger_cut = (double_mu_trigger_cut) | (events[hlt] == True)
         else:
-            single_ele_trigger_cut = awkward.num(events.Photon) > 0 # dummy cut, all True
-            double_ele_trigger_cut = awkward.num(events.Photon) > 0
-            single_mu_trigger_cut = awkward.num(events.Photon) > 0
-            double_mu_trigger_cut = awkward.num(events.Photon) > 0
+            single_ele_trigger_cut = awkward.num(events.Photon) >= 0 # dummy cut, all True
+            double_ele_trigger_cut = awkward.num(events.Photon) >= 0
+            single_mu_trigger_cut = awkward.num(events.Photon) >= 0
+            double_mu_trigger_cut = awkward.num(events.Photon) >= 0
 
         # Construct di-electron/di-muon pairs
         ee_pairs = awkward.combinations(electrons, 2, fields = ["LeadLepton", "SubleadLepton"])
         if self.year is not None:
-            e_cut = ee_pairs.LeadLepton.pt > self.options["lead_ele_pt"][self.year]
+            year = self.year[:4]
+            e_cut = ee_pairs.LeadLepton.pt > self.options["lead_ele_pt"][year]
         else:
             e_cut = ee_pairs.LeadLepton.pt > 25
         ee_cut = (ee_pairs.LeadLepton.pt > 25) & (ee_pairs.SubleadLepton.pt > 15)
@@ -376,7 +394,8 @@ class ZGammaTaggerRun2(Tagger):
 
         mm_pairs = awkward.combinations(muons, 2, fields = ["LeadLepton", "SubleadLepton"])
         if self.year is not None:
-            m_cut = mm_pairs.LeadLepton.pt > self.options["lead_mu_pt"][self.year]
+            year = self.year[:4]
+            m_cut = mm_pairs.LeadLepton.pt > self.options["lead_mu_pt"][year]
         else:
             m_cut = mm_pairs.LeadLepton.pt > 20
         mm_cut = (mm_pairs.LeadLepton.pt > 20) & (mm_pairs.SubleadLepton.pt > 10)
@@ -510,7 +529,12 @@ class ZGammaTaggerRun2(Tagger):
             else:
                 cut1 = N_mu_cut | N_e_cut
 
-            cut2 = cut1 & (single_mu_trigger_cut | single_mu_trigger_cut | double_ele_trigger_cut | double_mu_trigger_cut)
+            if "ele" in cut_type:
+                cut2 = cut1 & (single_ele_trigger_cut | double_ele_trigger_cut)
+            elif "mu" in cut_type:
+                cut2 = cut1 & (single_mu_trigger_cut | double_mu_trigger_cut)
+            else:
+                cut2 = cut1 & (single_ele_trigger_cut | single_mu_trigger_cut | double_ele_trigger_cut | double_mu_trigger_cut)
 
             if "ele" in cut_type:
                 cut3 = cut2 & ele_cut

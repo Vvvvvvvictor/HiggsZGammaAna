@@ -6,9 +6,9 @@ NOMINAL_TAG = "nominal" # name of the nominal events (relevant when we have mult
 #post-VFP runs: 278801-284044 lumi: 16755.0362868 /pb
 
 LUMI = {
-    "2016" : 35.9,
-    "2016UL_preVFP" : 19.51, 
-    "2016UL_postVFP" : 16.80, 
+    "2016" : 36.31,
+    "2016preVFP" : 19.5, 
+    "2016postVFP" : 16.8, 
     "2017" : 41.48,
     "2018" : 59.83,
     "2022" : 35.18,
@@ -17,8 +17,8 @@ LUMI = {
 
 GOLDEN_JSON = {
     "2016" : "metadata/golden_json/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt",
-    "2016UL_preVFP" : "metadata/golden_json/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt",
-    "2016UL_postVFP" : "metadata/golden_json/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt",
+    "2016preVFP" : "metadata/golden_json/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt",
+    "2016postVFP" : "metadata/golden_json/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt",
     "2017" : "metadata/golden_json/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt",
     "2018" : "metadata/golden_json/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt",
     "2022" : "metadata/golden_json/Cert_Collisions2022_355100_362760_Golden.json",
@@ -31,10 +31,10 @@ BRANCHES = {
         "2016" : [
             "HLT_Diphoton30_18_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass90"
         ],
-        "2016UL_postVFP" : [
+        "2016postVFP" : [
             "HLT_Diphoton30_18_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass90"
         ],
-        "2016UL_preVFP" : [
+        "2016preVFP" : [
             "HLT_Diphoton30_18_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass90"
         ],
         "2017" : [
@@ -54,8 +54,8 @@ BRANCHES = {
     "mc" : {
         "2016APV" : [],
         "2016" : [],
-        "2016UL_preVFP" : [],
-        "2016UL_postVFP" : [],
+        "2016preVFP" : [],
+        "2016postVFP" : [],
         "2017" : [],
         "2018" : [],
         "2022" : [],

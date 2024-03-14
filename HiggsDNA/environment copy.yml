@@ -6,22 +6,22 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - awkward
-  - conda-pack
-  - dill
-  - enlighten
-  - matplotlib
-  - numba
-  - pandas
-  - pip
-  - pyaml
-  - pyarrow
-  - python
-  - rich
-  - tqdm
-  - uproot
-  - vector
-  - xrootd
+  - awkward>=1.8
+  - conda-pack>=0.7
+  - dill>=0.3
+  - enlighten>=1.10
+  - matplotlib>=3.5
+  - numba>=0.55
+  - pandas>=1.4
+  - pip>=22.2
+  - pyaml>=21.10
+  - pyarrow>=9.0
+  - python==3.8
+  - rich>=12.5
+  - tqdm>=4.64
+  - uproot>=4.3
+  - vector>=0.8.5
+  - xrootd>=5.1
   - pip:
     - correctionlib
     - pydantic

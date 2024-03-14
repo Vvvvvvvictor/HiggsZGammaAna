@@ -235,7 +235,7 @@ class SampleManager():
             f = j["file"][0]
             files.append(
                     File(
-                        name = "root://cmsxrootd.fnal.gov/" + f["name"],
+                        name = "root://xrootd-cms.infn.it/" + f["name"], # better to use xrootd-cms.infn.it instead of cmsxrootd.fnal.gov in Europe and Asia, the other is better in US. Noted in https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookXrootdService#OpenwithRoot
                         is_data = is_data,
                         n_events = f["nevents"],
                         size_gb = round(f["size"]*1e-9,2) 
