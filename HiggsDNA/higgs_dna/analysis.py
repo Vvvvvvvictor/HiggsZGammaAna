@@ -518,7 +518,7 @@ class AnalysisManager():
 
         for file in files:
             try:
-                f = uproot.open(file, **get_file_handler(file), timeout = 300)
+                f = uproot.open(file, file, timeout = 300)
             except Exception:
                 if (os.system(f"xrdcp '{file}' '/tmp/{os.getpid()}/{os.path.basename(file)}'")):
                     raise RuntimeError("xrdcp failed")

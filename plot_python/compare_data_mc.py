@@ -1,25 +1,31 @@
 import pandas as pd
+import uproot
 import mplhep as hep
 import matplotlib.pyplot as plt
 import numpy as np
 from pdb import set_trace
 
 
-VAR = "gamma_pt"
-XLABLE = r"photon pt"
+VAR = "H_mass"
+XLABLE = r"$M_{ll\gamma}$"
 BINS = 40
-RMIN = 15
-RMAX = 55
-WEIGHT = "weight_central"
+RMIN = 100
+RMAX = 180
+WEIGHT = "weight"
+PATH = "/eos/user/j/jiehan/root/skimmed_ntuples_two_jet/"
 
-
-
-data_list = [
-    "/eos/user/j/jiehan/parquet/nanov9/data/Data_2016/merged_nominal.parquet"
+bkg_mc_file_list = [
+    ["ZGToLLG"],
+    ["DYJetsToLL"],
+    ["EWKZ2J"],
+    ["ZG2JToG2L2J"],
+    ["TT"],
+    ["TTGJets"],
+    ["ttWJets", "ttZJets"],
+    ["WW", "WZ", "ZZ"]
 ]
-bkg_mc_list = [
-    "/eos/user/j/jiehan/parquet/nanov9/bkgmc/DYJetsToLL_2016/merged_nominal.parquet",
-    "/eos/user/j/jiehan/parquet/nanov9/bkgmc/ZGToLLG_2016/merged_nominal.parquet"
+data_file_list = [
+    ["data"]
 ]
 
 bkg_mc_hist_list, data_hist_list = [], []
@@ -27,23 +33,43 @@ bkg_mc_hist_list, data_hist_list = [], []
 def convert_parquet_to_hist(file_list, hist_list):
     for data in file_list:
         samples = pd.read_parquet(data)
-        if "weight_central_no_lumi" in samples.keys():
-            print(data, ":", samples["weight_central"][1]/samples["weight_central_no_lumi"][1], sep="\n")
-        # if "DY" in data:
+        # samples = samples[samples["n_jets"]>1]
+        # if "weight_central_no_lumi" in samples.keys():
+        #     print(data, ":", samples["weight_central"][0]/samples["weight_central_no_lumi"][0], sep="\n")
+        if "DY" in data:
             # print(sum(samples[samples["n_iso_photons"]>0][WEIGHT]))
             # print(sum(samples[samples["n_iso_photons"]==0][WEIGHT]))
-            # samples = samples[samples["n_iso_photons"]==0]
+            samples = samples[samples["n_iso_photons"]==0]
             # samples[WEIGHT]*=3
-        # if "ZG" in data:
+        if "ZG" in data:
             # print(sum(samples[samples["n_iso_photons"]>0][WEIGHT]))
             # print(sum(samples[samples["n_iso_photons"]==0][WEIGHT]))
-            # samples = samples[samples["n_iso_photons"]>0]
+            samples = samples[samples["n_iso_photons"]>0]
             # samples[WEIGHT]*=3
+        if "H_mass" in VAR and "data" in data:
+            samples = samples[(samples["H_mass"]<122) | (samples["H_mass"]>128)]
         hist, bins = np.histogram(samples[VAR], bins=BINS, range=[RMIN, RMAX], weights=samples[WEIGHT])
         hist_list.append(hist)
 
-convert_parquet_to_hist(data_list, data_hist_list)
-convert_parquet_to_hist(bkg_mc_list, bkg_mc_hist_list)
+def convert_root_to_hist(file_list, hist_list):
+    for type in file_list:
+        type_hist = np.zeros(BINS)
+        for data in type:
+            # set_trace()
+            print("Reading", PATH+data+"/two_jet_run2.root:two_jet", "...")
+            samples = uproot.open(PATH+data+"/two_jet_run2.root:two_jet").arrays(library="pd")
+            if ("H_mass" in VAR and "data" in data) or "H_mass" not in VAR:
+                samples = samples[(samples["H_mass"]<122) | (samples["H_mass"]>128)]
+            print(samples["weight"].sum())
+            hist, bins = np.histogram(samples[VAR], bins=BINS, range=[RMIN, RMAX], weights=samples[WEIGHT])
+            type_hist = type_hist + hist
+        hist_list.append(type_hist)
+
+# convert_parquet_to_hist(data_list, data_hist_list)
+# convert_parquet_to_hist(bkg_mc_list, bkg_mc_hist_list)
+
+convert_root_to_hist(data_file_list, data_hist_list)
+convert_root_to_hist(bkg_mc_file_list, bkg_mc_hist_list)
 
 hep.style.use("CMS")
 fig, ax = plt.subplots(figsize=(10, 10), dpi=400)
@@ -64,7 +90,8 @@ hep.histplot(
     histtype='fill', 
     color=['b','g'],
     ax=ax,
-    label=['DYJets','SM ZG']
+    label=["SM ZG", "DYJets", "EWK Z+Jets", "EWK ZG", "TT", "TTG+Jets", "TTVJets", "Diboson"],
+    stack=True
 )
 
 ax.set_xlabel("{} (GeV)".format(XLABLE), fontsize=25)
@@ -72,4 +99,4 @@ ax.set_ylabel("Events / {:.0f} GeV".format((RMAX-RMIN)/BINS), fontsize=25)
 ax.set_xlim(RMIN, RMAX)
 ax.legend()
 
-plt.savefig("pic/a.png")
+plt.savefig("pic/data_vs_mc_2jet_{}.png".format(VAR))

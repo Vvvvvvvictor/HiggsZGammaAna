@@ -21,7 +21,7 @@ git cms-init
 
 Install the GBRLikelihood package which contains the RooDoubleCBFast implementation
 ```
-git clone git@github.com:jonathon-langford/HiggsAnalysis.git
+git clone https://github.com/jonathon-langford/HiggsAnalysis.git
 ```
 Install Combine as per the documentation here: cms-analysis.github.io/HiggsAnalysis-CombinedLimit/
 ```

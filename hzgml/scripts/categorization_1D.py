@@ -27,6 +27,7 @@ def getArgs():
     """Get arguments from command line."""
     parser = ArgumentParser()
     parser.add_argument('-r', '--region', action = 'store', choices = ['all_jet', 'two_jet', 'one_jet', 'zero_jet', 'zero_to_one_jet', 'VH_ttH'], default = 'zero_jet', help = 'Region to process')
+    parser.add_argument('-i', '--input', action = 'store', default = '/eos/home-j/jiehan/root/outputs', help = 'Path of root file for categorization')
     parser.add_argument('-n', '--nscan', type = int, default = 100, help='number of scan.')
     parser.add_argument('-b', '--nbin', type = int, default = 10, choices = [1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16], help = 'number of BDT bins.')
     parser.add_argument('--skip', action = 'store_true', default = False, help = 'skip the hadd part')
@@ -45,7 +46,7 @@ def getArgs():
 
     return  parser.parse_args()
 
-def gettingsig(region, variable, boundaries, transform, estimate):
+def gettingsig(input_path, region, variable, boundaries, transform, estimate):
 
     nbin = len(boundaries[0])
 
@@ -66,9 +67,9 @@ def gettingsig(region, variable, boundaries, transform, estimate):
 
     for category in ['sig', 'VBF', 'ggH', "data_sid", "bkgmc_sid", "bkgmc_cen", "sig_tot"]:
 
-        # for data in tqdm(read_root(f'/eos/home-j/jiehan/root/2017/outputs/{region}/{"bkgmc" if "bkgmc" in category else "data" if "data" in category else "sig" if "sig" in category else category}.root', key='test', columns=[f"{variable}_score{'_t' if transform else ''}", 'H_mass', 'weight', 'event'], chunksize=500000), desc=f'Loading {category}', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
+        # for data in tqdm(read_root(f'{input_path}/{region}/{"bkgmc" if "bkgmc" in category else "data" if "data" in category else "sig" if "sig" in category else category}.root', key='test', columns=[f"{variable}_score{'_t' if transform else ''}", 'H_mass', 'weight', 'event'], chunksize=500000), desc=f'Loading {category}', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
         # Define the file path
-        file_path = f'/eos/home-j/jiehan/root/2017/outputs/{region}/{"bkgmc" if "bkgmc" in category else "data" if "data" in category else "sig" if "sig" in category else category}.root'
+        file_path = f'{input_path}/{region}/{"bkgmc" if "bkgmc" in category else "data" if "data" in category else "sig" if "sig" in category else category}.root'
 
         # Open the file
         file = uproot.open(file_path)
@@ -84,7 +85,7 @@ def gettingsig(region, variable, boundaries, transform, estimate):
                 data['w'] = data.weight
 
             elif 'tot' in category:
-                data = data[(data.H_mass >= 105) & (data.H_mass <= 170)]
+                data = data[(data.H_mass >= 100) & (data.H_mass <= 180)]
                 data['w'] = data.weight
 
             else:
@@ -130,16 +131,16 @@ def gettingsig(region, variable, boundaries, transform, estimate):
 
     return z, abs(u), yields
 
-def categorizing(region, variable, sigs, bkgs, nscan, minN, transform, nbin, floatB, n_fold, fold, earlystop, estimate):
+def categorizing(input_path, region, variable, sigs, bkgs, nscan, minN, transform, nbin, floatB, n_fold, fold, earlystop, estimate):
 
-    f_sig = TFile('/eos/home-j/jiehan/root/2017/outputs/%s/sig.root' % (region))
+    f_sig = TFile('%s/%s/sig.root' % (input_path, region))
     t_sig = f_sig.Get('test')
  
     if estimate in ["fullSim", "fullSimrw"]:
-        f_bkgmc = TFile('/eos/home-j/jiehan/root/2017/outputs/%s/bkgmc.root' % (region))
+        f_bkgmc = TFile('%s/%s/bkgmc.root' % (input_path, region))
         t_bkgmc = f_bkgmc.Get('test')
     if estimate in ["fullSimrw", "data_sid"]:
-        f_data_sid = TFile('/eos/home-j/jiehan/root/2017/outputs/%s/data.root' % (region))
+        f_data_sid = TFile('%s/%s/data.root' % (input_path, region))
         t_data_sid = f_data_sid.Get('test')
 
     h_sig = TH1F('h_sig','h_sig',nscan,0,1)
@@ -189,10 +190,12 @@ def main():
     shield = args.shield
     add = args.add
 
+    input_path = args.input
+
     sigs = ['ggH','VBF','WminusH','WplusH','ZH','ttH']
 
     # bkgs = ['data_fake', 'mc_med', 'mc_true']
-    bkgs = ["ZGToLLG", "DYJetsToLL", "LLAJJ", "TT", "WW", "WZ", "ZZ"]
+    bkgs = ["ZGToLLG", "DYJetsToLL", "EWKZ2J", "ZG2JToG2L2J", "WGToLNuG", "TT", "TTGJets", "TGJets", "WW", "WZ", "ZZ", "ttZJets", "ttWJets"]
     if args.floatB and args.nbin == 16:
         print('ERROR: With floatB option, the maximun nbin is 15!!')
         quit()
@@ -207,14 +210,14 @@ def main():
     if not args.skip:
         siglist=''
         for sig in sigs:
-            if os.path.isfile('/eos/home-j/jiehan/root/2017/outputs/%s/%s.root'% (region,sig)): siglist+=' /eos/home-j/jiehan/root/2017/outputs/%s/%s.root'% (region,sig)
-        os.system("hadd -f /eos/home-j/jiehan/root/2017/outputs/%s/sig.root"%(region)+siglist)
+            if os.path.isfile('%s/%s/%s.root'% (input_path, region,sig)): siglist+=' %s/%s/%s.root'% (input_path, region,sig)
+        os.system("hadd -f %s/%s/sig.root"%(input_path, region)+siglist)
 
     if not args.skip:
         bkglist=''
         for bkg in bkgs:
-            if os.path.isfile('/eos/home-j/jiehan/root/2017/outputs/%s/%s.root'% (region,bkg)): bkglist+=' /eos/home-j/jiehan/root/2017/outputs/%s/%s.root'% (region,bkg)
-        os.system("hadd -f /eos/home-j/jiehan/root/2017/outputs/%s/bkgmc.root"%(region)+bkglist)
+            if os.path.isfile('%s/%s/%s.root'% (input_path, region,bkg)): bkglist+=' %s/%s/%s.root'% (input_path,region,bkg)
+        os.system("hadd -f %s/%s/bkgmc.root"%(input_path, region)+bkglist)
 
 
     n_fold = args.nfold
@@ -222,7 +225,7 @@ def main():
     boundaries_values=[]
     smaxs = []
     for j in range(n_fold):
-        bound, bound_value, smax = categorizing(region, variable, sigs, bkgs, nscan, args.minN, args.transform, args.nbin if not args.floatB else args.nbin + 1, args.floatB, n_fold, j, args.earlystop, estimate=args.estimate)
+        bound, bound_value, smax = categorizing(input_path, region, variable, sigs, bkgs, nscan, args.minN, args.transform, args.nbin if not args.floatB else args.nbin + 1, args.floatB, n_fold, j, args.earlystop, estimate=args.estimate)
         boundaries.append(bound)
         boundaries_values.append(bound_value)
         smaxs.append(smax)
@@ -232,7 +235,7 @@ def main():
     smax = sum(smaxs)/n_fold
     print('Averaged significance: ', smax)
 
-    s, u, yields = gettingsig(region, variable, boundaries_values, args.transform, estimate=args.estimate)
+    s, u, yields = gettingsig(input_path, region, variable, boundaries_values, args.transform, estimate=args.estimate)
 
     outs={}
     outs['boundaries'] = boundaries
@@ -251,21 +254,21 @@ def main():
 
     print(outs, '\n================================================\n')
 
-    '''
-    if not os.path.isdir('significances/%s'%region):
-        print(f'INFO: Creating output folder: "significances/{region}"')
-        os.makedirs("significances/%s"%region)
-    '''
-    with open('/eos/home-j/jiehan/root/2017/outputs/significances/bin_binaries_%s.txt'%region, 'w') as json_file:
-        json_file.write('{:d} '.format(args.nbin))
+    if not os.path.isdir('%s/significances/%s'%(input_path,region)):
+        print(f'INFO: Creating output folder: "{input_path}/significances/{region}"')
+        os.makedirs("%s/significances/%s"%(input_path,region))
+
+    with open('%s/significances/bin_binaries_1D_%s.txt'%(input_path,region), 'w') as json_file:
+        json_file.write('1\n1\n')
         for i in boundaries_values:
+            json_file.write('{:d} '.format(len(i)))
             for j in i:
                 json_file.write('{:.2f} '.format(j))
-        json_file.write('1.00 ')
+        json_file.write('1.00\n')
         for i in list(yields['z']):
             json_file.write('{:.4f} '.format(i))
         json_file.write('%.4f %.4f' % (s, u))
-    with open('/eos/home-j/jiehan/root/2017/outputs/significances/%d_%d_%s_1D_%d.json' % (shield+1, add+1, region, args.nbin), 'w') as json_file:
+    with open('%s/significances/%d_%d_%s_1D_%d.json' % (input_path, shield+1, add+1, region, args.nbin), 'w') as json_file:
         json.dump(outs, json_file)
         for i in list(yields['z']):
             json_file.write('{:.4f}\n'.format(i))

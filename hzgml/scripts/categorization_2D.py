@@ -67,10 +67,10 @@ def gettingsig(region, variable, boundaries_VBF, boundaries, transform, estimate
 
     for category in ['sig', 'VBF', 'ggH', "data_sid", "bkgmc_sid", "bkgmc_cen"]:
 
-        # for data in tqdm(read_root(f'/eos/home-j/jiehan/root/2017/outputs/{region}/{"bkgmc" if "bkgmc" in category else "data" if "data" in category else category}.root', key='test', columns=[f"{variable}_score{'_t' if transform else ''}", f"{variable}_score_VBF{'_t' if transform else ''}", 'H_mass', 'weight', 'event'], chunksize=500000), desc=f'Loading {category}', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
+        # for data in tqdm(read_root(f'/eos/home-j/jiehan/root/outputs/{region}/{"bkgmc" if "bkgmc" in category else "data" if "data" in category else category}.root', key='test', columns=[f"{variable}_score{'_t' if transform else ''}", f"{variable}_score_VBF{'_t' if transform else ''}", 'H_mass', 'weight', 'event'], chunksize=500000), desc=f'Loading {category}', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
 
         # Construct the file path
-        file_path = f'/eos/home-j/jiehan/root/2017/outputs/{region}/{"bkgmc" if "bkgmc" in category else "data" if "data" in category else category}.root'
+        file_path = f'/eos/home-j/jiehan/root/outputs/{region}/{"bkgmc" if "bkgmc" in category else "Data" if "data" in category else category}.root'
 
         # Open the ROOT file
         with uproot.open(file_path) as f:
@@ -163,14 +163,14 @@ def projectionY(hist, x1, x2, histname, ybin=100, y1=0, y2=1):
 def categorizing(region, variable, sigs, bkgs, nscan, nscanvbf, minN, transform, nbin, nvbf, floatB, n_fold, fold, earlystop, estimate):
 
     # get inputs
-    f_sig = TFile('/eos/home-j/jiehan/root/2017/outputs/%s/sig.root' % (region))
+    f_sig = TFile('/eos/home-j/jiehan/root/outputs/%s/sig.root' % (region))
     t_sig = f_sig.Get('test')
 
     if estimate in ["fullSim", "fullSimrw"]:
-        f_bkgmc = TFile('/eos/home-j/jiehan/root/2017/outputs/%s/bkgmc.root' % (region))
+        f_bkgmc = TFile('/eos/home-j/jiehan/root/outputs/%s/bkgmc.root' % (region))
         t_bkgmc = f_bkgmc.Get('test')
     if estimate in ["fullSimrw", "data_sid"]:
-        f_data_sid = TFile('/eos/home-j/jiehan/root/2017/outputs/%s/data.root' % (region))
+        f_data_sid = TFile('/eos/home-j/jiehan/root/outputs/%s/Data.root' % (region))
         t_data_sid = f_data_sid.Get('test')
 
     # filling signal histograms
@@ -316,7 +316,7 @@ def main():
 
     sigs = ['ggH','VBF','WminusH','WplusH','ZH','ttH']
 
-    bkgs = ['DYJetsToLL', 'ZGToLLG']
+    bkgs = ["ZGToLLG", "DYJetsToLL", "WGToLNuG", "EWKZ2J", "ZG2JToG2L2J", "TT", "TTGJets", "TGJets", "ttWJets", "ttZJets", "WW", "WZ", "ZZ"]
 
     region = args.region
 
@@ -325,14 +325,14 @@ def main():
     if not args.skip:
         siglist=''
         for sig in sigs:
-            if os.path.isfile('/eos/home-j/jiehan/root/2017/outputs/%s/%s.root'% (region,sig)): siglist+=' /eos/home-j/jiehan/root/2017/outputs/%s/%s.root'% (region,sig)
-        os.system("hadd -f /eos/home-j/jiehan/root/2017/outputs/%s/sig.root"%(region)+siglist)
+            if os.path.isfile('/eos/home-j/jiehan/root/outputs/%s/%s.root'% (region,sig)): siglist+=' /eos/home-j/jiehan/root/outputs/%s/%s.root'% (region,sig)
+        os.system("hadd -f /eos/home-j/jiehan/root/outputs/%s/sig.root"%(region)+siglist)
 
     if not args.skip:
         bkglist=''
         for bkg in bkgs:
-            if os.path.isfile('/eos/home-j/jiehan/root/2017/outputs/%s/%s.root'% (region,bkg)): bkglist+=' /eos/home-j/jiehan/root/2017/outputs/%s/%s.root'% (region,bkg)
-        os.system("hadd -f /eos/home-j/jiehan/root/2017/outputs/%s/bkgmc.root"%(region)+bkglist)
+            if os.path.isfile('/eos/home-j/jiehan/root/outputs/%s/%s.root'% (region,bkg)): bkglist+=' /eos/home-j/jiehan/root/outputs/%s/%s.root'% (region,bkg)
+        os.system("hadd -f /eos/home-j/jiehan/root/outputs/%s/bkgmc.root"%(region)+bkglist)
 
     nscan=args.nscan
     nscanvbf = args.nscanvbf
@@ -387,7 +387,7 @@ def main():
         os.makedirs("significances/%s"%region)
     '''
 
-    with open('/eos/home-j/jiehan/root/2017/outputs/significances/%d_%s_2D_%d_%d.json' % (shield+1, region, args.vbf, args.nbin), 'w') as json_file:
+    with open('/eos/home-j/jiehan/root/outputs/significances/%d_%s_2D_%d_%d.json' % (shield+1, region, args.vbf, args.nbin), 'w') as json_file:
         # json.dump(outs, json_file) 
         for i in list(yields['z']):
             json_file.write('\n{:.4f}'.format(i))

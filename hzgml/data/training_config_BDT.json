@@ -1,14 +1,14 @@
 {"common":   {"train_signal": ["ggH", "VBF"],
               "train_dd_background": [],
-              "train_mc_background": ["ZGToLLG", "DYJetsToLL", "LLAJJ", "TT", "WW", "WZ", "ZZ"],
+              "train_mc_background": ["ZGToLLG", "DYJetsToLL", "EWKZ2J", "ZG2JToG2L2J", "WGToLNuG", "TT", "TTGJets", "TGJets", "WW", "WZ", "ZZ", "ttZJets", "ttWJets"],
               "train_data_background": [],
               "train_variables": ["Z_cos_theta", "lep_phi","lep_cos_theta",
-                              "Z_lead_lepton_eta", "Z_sublead_lepton_eta",
-                              "gamma_eta", "l1g_deltaR", "l2g_deltaR", "H_relpt",
-                              "H_ptt", "gamma_mvaID", "gamma_ptRelErr"
+                              "Z_lead_lepton_eta", "Z_sublead_lepton_eta", "H_relpt",
+                              "gamma_eta", "l1g_deltaR", "l2g_deltaR", "Z_pt",
+                              "H_ptt", "gamma_mvaID", "gamma_ptRelErr", "HZ_deltaRap"
                         ],
-              "preselections": ["H_mass >= 100", "H_mass <= 180", "gamma_mvaID_WP80 == 1"],
-              "signal_preselections": ["is_center == 1"],
+              "preselections": ["H_mass >= 120", "H_mass <= 130"],
+              "signal_preselections": [],
               "background_preselections": [],
               "data_preselections": ["is_center == 0"],
               "mc_preselections": [],
@@ -62,12 +62,14 @@
                          {"silent": 1, "eval_metric": ["logloss", "auc"], "grow_policy": "lossguide", "nthread": 4, "objective": "binary:logistic", "tree_method": "hist", "booster": "gbtree"}
                          ]
               },
- "two_jet":  {"#+preselections": ["n_jets >= 2"],
+ "two_jet":  {"+train_signal": [],
+              "#+preselections": ["n_jets >= 2"],
               "inputTree": "two_jet",
               "+train_variables": [
                                 "delta_eta_jj", "delta_phi_zgjj", "pt_balance",
-                                "delta_phi_jj", "photon_zeppenfeld", 
-                                "jet_1_pt", "jet_2_pt", "jet1G_deltaR", "jet2G_deltaR"
+                                "delta_phi_jj", "photon_zeppenfeld", "mass_jj",
+                                "jet_1_pt", "jet_2_pt", "jet1G_deltaR", "jet2G_deltaR",
+                                "jet_1_btagDeepFlavB", "jet_2_btagDeepFlavB"
                                    ],
               "params": [{"silent": 1, "eval_metric": ["logloss", "auc"], "grow_policy": "lossguide", "nthread": 4, "objective": "binary:logistic", "tree_method": "hist", "booster": "gbtree"},
                          {"silent": 1, "eval_metric": ["logloss", "auc"], "grow_policy": "lossguide", "nthread": 4, "objective": "binary:logistic", "tree_method": "hist", "booster": "gbtree"},
@@ -77,15 +79,15 @@
               },
  "VBF":      {"train_signal": ["VBF"],
               "train_dd_background": [],
-              "train_mc_background": ["ggH"],
+              "train_mc_background": ["ggH", "WminusH", "WplusH", "ZH", "ttH"],
               "train_data_background": [],
-              "+preselections": ["n_jets >= 2", "is_center == 1"],
+              "+preselections": ["n_jets >= 2"],
               "signal_preselections": [],
               "inputTree": "two_jet",
-              "train_variables": ["delta_eta_jj", "pt_balance", 
-                                    "delta_phi_jj", "photon_zeppenfeld", "mass_jj",
-                                    "delta_phi_zgjj", 
-                                    "jet_1_pt", "jet_2_pt", "jet1G_deltaR", "jet2G_deltaR"
+              "train_variables": ["delta_eta_jj", "delta_phi_jj", "delta_phi_zgjj",
+                                  "pt_balance", "photon_zeppenfeld", "mass_jj",
+                                  "jet_1_pt", "jet1G_deltaR", "jet_1_btagDeepFlavB",
+                                  "jet_2_pt", "jet2G_deltaR", "jet_2_btagDeepFlavB"
                                    ],
               "params": [{"silent": 1, "eval_metric": ["logloss", "auc"], "grow_policy": "lossguide", "nthread": 4, "objective": "binary:logistic",   "tree_method": "hist", "booster": "gbtree"},
                          {"silent": 1, "eval_metric": ["logloss", "auc"], "grow_policy": "lossguide", "nthread": 4, "objective": "binary:logistic", "tree_method": "hist", "booster": "gbtree"},

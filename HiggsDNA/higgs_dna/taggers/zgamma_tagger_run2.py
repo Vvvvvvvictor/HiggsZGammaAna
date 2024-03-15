@@ -254,8 +254,6 @@ class ZGammaTaggerRun2(Tagger):
 
         photons = events.Photon[photon_selection]
         
-        print(awkward.num(photons))
-        
         # lepton-photon overlap removal 
         clean_photon_mask = object_selections.delta_R(photons, muons, 0.4) & object_selections.delta_R(photons, electrons, 0.4)
         photons = photons[clean_photon_mask]

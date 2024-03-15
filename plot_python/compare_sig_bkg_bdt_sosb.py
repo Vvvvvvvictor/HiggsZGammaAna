@@ -10,20 +10,20 @@ print("=====================================================================")
 
 # Basic set of picture's content
 ratio = 1
-mc_legend = ["SM ZG", "DYJets", "EWK ZG", "TT", "Diboson"]
+mc_legend = ["SM ZG", "DYJets", "EWK Z+Jets", "EWK ZG", "TT", "TTG+Jets", "TTVJets", "Diboson"]
 sig_legend = ["sig", "ggH", "VBF"]
 # path = "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/final_fit/CMSSW_10_2_13/src/flashggFinalFit/InputData/outputs/"
-path = "/eos/home-j/jiehan/root/2017/outputs/"
+path = "/eos/home-j/jiehan/root/outputs/"
 channel = "two_jet"
 tree = "test"
-var = "bdt_score_VBF_t"
-bins = 100
-x_range = (0, 1)
+var = "bdt_score_t"
+bins = 50
+x_range = (0.5, 1)
 blind_range = (120, 130)
-x_title = "BDT score"
+x_title = "Dijet BDT score"
 y_title = "Events/{:.2f}".format((x_range[1]-x_range[0])/bins)
-sub_y_title = "S/#sqrt{B^{MC}_{scale}}"
-selections = []
+sub_y_title = "S/#sqrt{B}"
+selections = ["bdt_score_VBF>0.4"]
 
 # Dataset list
 sig_file_list = [
@@ -34,8 +34,11 @@ sig_file_list = [
 mc_file_list = [
     "ZGToLLG.root",
     "DYJetsToLL.root",
-    "LLAJJ.root",
+    "EWKZ2J.root",
+    "ZG2JToG2L2J.root",
     "TT.root",
+    "TTGJets.root",
+    ["ttWJets.root", "ttZJets.root"],
     ["WW.root", "WZ.root", "ZZ.root"]
 ]
 data_file_list = [
@@ -128,7 +131,10 @@ print("==============================")
 print("Finish reading skimmed ntuples")
 print("==============================")
 
-rp = pic.get_S_over_sqrtB(sig_hist_list[0], mc_hist, ratio, (0.,0.26))
+rp = pic.get_S_over_sqrtB(sig_hist_list[0], mc_hist, ratio, (0.,0.2005))
+
+line = ROOT.TLine()
+plot.Set(line, LineStyle=2, LineWidth=2, LineColor=ROOT.kRed)
 
 c1.Update()
 pads[0].cd()
@@ -141,12 +147,17 @@ for sig_hist in sig_hist_list:
     sig_hist.Draw("hist same")
 plot.Set(sig_hist, MarkerStyle=1, MarkerSize=3)
 
-pads[0].Update()
-plot.Set(h_stack, Maximum=0.1)
-# plot.Set(h_stack, Maximum=1.3*pads[0].GetFrame().GetY2())
+plot.Set(h_stack, Maximum=1.3*pads[0].GetFrame().GetY2())
+# plot.Set(h_stack, Maximum=0.045)
 
-legend = plot.PositionedLegend(0.75, 0.30, 3, 0.015)
-plot.Set(legend, NColumns=2, TextSize=0.045, TextFont=62)
+x1, x2 = 0.61, 0.8
+line.DrawLine(x1, 0, x1, 0.5*pads[0].GetFrame().GetY2())
+line.DrawLine(x2, 0, x2, 0.5*pads[0].GetFrame().GetY2())
+
+pads[0].Update()
+
+legend = plot.PositionedLegend(0.65, 0.3, 3, 0.015)
+plot.Set(legend, NColumns=2, TextSize=0.033, TextFont=62, FillStyle=0)
 for i in range(len(sig_hist_list)):
     legend.AddEntry("sig_{}".format(i), sig_legend[i]+"({:4.2f})".format(sig_yields[i]), "l")
 for i in range(len(mc_file_list)):
@@ -160,11 +171,9 @@ print("========================")
 pads[1].cd()
 rp.Draw("E")
 # plot.Set(pads[1], Logy=1)
-line = ROOT.TLine()
-plot.Set(line, LineStyle=2, LineWidth=2, LineColor=ROOT.kRed)
-line.DrawLine(0.29, 0, 0.29, 0.26)
-line.DrawLine(0.57, 0, 0.57, 0.26)
-line.DrawLine(0.73, 0, 0.73, 0.26)
+# line.DrawLine(0.29, 0, 0.29, 0.26)
+line.DrawLine(x1, 0, x1, 0.2)
+line.DrawLine(x2, 0, x2, 0.2)
 # plot.DrawHorizontalLine(pads[1], line, 1)
 # plot.Set(rp, MarkerStyle=7, MarkerSize=2)
 rp.GetXaxis().SetTitle(x_title)

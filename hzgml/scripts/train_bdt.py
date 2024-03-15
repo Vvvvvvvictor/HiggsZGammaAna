@@ -69,7 +69,7 @@ class XGBoostHandler(object):
 
         self._region = region
 
-        self._inputFolder = '/eos/home-j/jiehan/root/2017/skimmed_ntuples'
+        self._inputFolder = '/eos/home-j/jiehan/root/skimmed_ntuples_two_jet'
         self._outputFolder = 'models'
         self._chunksize = 500000
         self._branches = []
@@ -114,7 +114,7 @@ class XGBoostHandler(object):
         self.params = [{'eval_metric': ['auc', 'logloss']}]
         self.early_stopping_rounds = 10
         self.numRound = 10000
-        self.SF = 1.       
+        self.SF = -1       
         self.readConfig(configPath)
         self.checkConfig()
 
@@ -144,6 +144,10 @@ class XGBoostHandler(object):
                 for member in config.keys():
                     if member in member_variables:
                         setattr(self, member, config[member])
+                if '+train_mc_background' in config.keys():
+                    self.train_mc_background += config['+train_mc_background']
+                if '+train_signal' in config.keys():
+                    self.train_signal += config['+train_signal']
                 if '+train_variables' in config.keys():
                     self.train_variables += config['+train_variables']
                 if '+preselections' in config.keys():
@@ -384,7 +388,7 @@ class XGBoostHandler(object):
         # setup the weights
         print('XGB INFO: Setting the event weights...')
 
-        if self.SF == -1: self.SF = 1.*len(train_sig_wt)/len(train_bkg_wt)
+        if self.SF == -1: self.SF = 1.*train_sig.shape[0]/train_bkg.shape[0]
 
         train_sig_wt = train_sig[[self.weight]] * ( train_sig.shape[0] + train_bkg.shape[0] ) * self.SF / ( train_sig[self.weight].mean() * (1.+self.SF) * train_sig.shape[0] )
         train_bkg_wt = train_bkg[[self.weight]] * ( train_sig.shape[0] + train_bkg.shape[0] ) * self.SF / ( train_bkg[self.weight].mean() * (1.+self.SF) * train_bkg.shape[0] )

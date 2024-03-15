@@ -22,9 +22,9 @@ def getArgs():
     """Get arguments from command line."""
     parser = ArgumentParser()
     parser.add_argument('-c', '--config', action='store', nargs=2, default=['data/training_config_BDT.json', 'data/apply_config_BDT.json'], help='Region to process')
-    parser.add_argument('-i', '--inputFolder', action='store', default='/eos/home-j/jiehan/root/2017/skimmed_ntuples', help='directory of training inputs')
+    parser.add_argument('-i', '--inputFolder', action='store', default='/eos/home-j/jiehan/root/skimmed_ntuples_two_jet', help='directory of training inputs')
     parser.add_argument('-m', '--modelFolder', action='store', default='models', help='directory of BDT models')
-    parser.add_argument('-o', '--outputFolder', action='store', default='/eos/home-j/jiehan/root/2017/outputs', help='directory for outputs')
+    parser.add_argument('-o', '--outputFolder', action='store', default='/eos/home-j/jiehan/root/outputs', help='directory for outputs')
     parser.add_argument('-r', '--region', action='store', choices=['two_jet', 'one_jet', 'zero_jet', 'zero_to_one_jet', 'VH_ttH', 'all_jet'], default='zero_jet', help='Region to process')
     parser.add_argument('-cat', '--category', action='store', nargs='+', help='apply only for specific categories')
 
@@ -200,10 +200,10 @@ class ApplyXGBHandler(object):
     def applyBDT(self, category, scale=1):
         outputbraches = copy.deepcopy(self._outbranches)
         branches = copy.deepcopy(self._branches)
-        branches += ["Z_sublead_lepton_pt", "gamma_mvaID_WP80", "gamma_mvaID_WPL"]
+        # branches += ["Z_sublead_lepton_pt", "gamma_mvaID_WP80", "gamma_mvaID_WPL"]
         outputbraches += []
-        if category == "DYJetsToLL":
-            branches.append('n_iso_photons')
+        # if category == "DYJetsToLL":
+        #     branches.append('n_iso_photons')
         # if category != "data_fake" and category != "mc_true" and category != "mc_med":
         #     branches.append('gamma_mvaID_WP80')
         # if category == "data_fake" or category == "mc_true" or category == "mc_med":
@@ -231,44 +231,44 @@ class ApplyXGBHandler(object):
 
         #TODO put this to the config
         # for data in tqdm(read_root(sorted(f_list), key=self._inputTree, columns=branches, chunksize=self._chunksize), bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}', desc='XGB INFO: Applying BDTs to %s samples' % category):
-        for filename in tqdm(sorted(f_list), desc='XGB INFO: Applying BDTs to %s samples' % category, bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
-            file = uproot.open(filename)
-            for data in file[self._inputTree].iterate(branches, library='pd', step_size=self._chunksize):
-                data = self.preselect(data)
-                data = data[data.Z_sublead_lepton_pt >= 15]
-                if category == "DYJetsToLL":
-                    data = data[data.n_iso_photons == 0]
-                if category != "data_fake" and category != "mc_true" and category != "mc_med":
-                    pass
-                    # data = data[data.gamma_mvaID_WP80 > 0] #TODO: check this one
-                    data = data[data.gamma_mvaID_WPL > 0] #TODO: check this one
-                out_data = pd.DataFrame()
+        with uproot.recreate(output_path) as output_file:
+            out_data = pd.DataFrame()
+            for filename in tqdm(sorted(f_list), desc='XGB INFO: Applying BDTs to %s samples' % category, bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
+                file = uproot.open(filename)
+                for data in file[self._inputTree].iterate(branches, library='pd', step_size=self._chunksize):
+                    data = self.preselect(data)
+                    # data = data[data.Z_sublead_lepton_pt >= 15]
+                    # if category == "DYJetsToLL":
+                    #     data = data[data.n_iso_photons == 0]
+                    # if category != "data_fake" and category != "mc_true" and category != "mc_med":
+                    #     pass
+                    #     # data = data[data.gamma_mvaID_WP80 > 0] #TODO: check this one
+                    #     data = data[data.gamma_mvaID_WPL > 0] #TODO: check this one
 
-                for i in range(4):
+                    for i in range(4):
 
-                    data_s = data[data[self.randomIndex]%4 == i]
-                    data_o = data_s[outputbraches]
+                        data_s = data[data[self.randomIndex]%4 == i]
+                        data_o = data_s[outputbraches]
 
-                    for model in self.train_variables.keys():
-                        x_Events = data_s[self.train_variables[model]]
-                        dEvents = xgb.DMatrix(x_Events)
-                        scores = self.m_models[model][i].predict(dEvents)
-                        if len(scores) > 0:
-                            scores_t = self.m_tsfs[model][i].transform(scores.reshape(-1,1)).reshape(-1)
-                        else:
-                            scores_t = scores
-                    
-                        xgb_basename = self.models[model]
-                        data_o[xgb_basename] = scores
-                        data_o[xgb_basename+'_t'] = scores_t
+                        for model in self.train_variables.keys():
+                            x_Events = data_s[self.train_variables[model]]
+                            dEvents = xgb.DMatrix(x_Events)
+                            scores = self.m_models[model][i].predict(dEvents)
+                            if len(scores) > 0:
+                                scores_t = self.m_tsfs[model][i].transform(scores.reshape(-1,1)).reshape(-1)
+                            else:
+                                scores_t = scores
+                        
+                            xgb_basename = self.models[model]
+                            data_o[xgb_basename] = scores
+                            data_o[xgb_basename+'_t'] = scores_t
 
-                    out_data = pd.concat([out_data, data_o], ignore_index=True, sort=False)
+                        out_data = pd.concat([out_data, data_o], ignore_index=True, sort=False)
 
                 # out_data.to_root(output_path, key='test', mode='a', index=False)
-                with uproot.recreate(output_path) as file:
-                    file['test'] = out_data
-
-                del out_data, data_s, data_o
+                
+            output_file['test'] = out_data
+            del out_data, data_s, data_o
 
 
 def main():

@@ -57,14 +57,15 @@ def get_hist_sb(arrays, variable, ratio, name, bins, range, blind_range, hist=No
     print(yield_sing)
     return hist, yield_sing, yield_inte
 
-def get_ratio_hist(numerator_h, denominator_h, range=(0.35, 1.65)):
+def get_ratio_hist(numerator_h, denominator_h, range=None):
     ratio_h = numerator_h.Clone("ratio_h")
     ratio_h.SetLineColor(ROOT.kBlack)
     ratio_h.SetMarkerStyle(0)
     ratio_h.SetMarkerSize(1)
     ratio_h.SetTitle("")
-    ratio_h.SetMinimum(range[0])
-    ratio_h.SetMaximum(range[1])
+    if range:
+        ratio_h.SetMinimum(range[0])
+        ratio_h.SetMaximum(range[1])
     
     # Set up plot for markers and errors
     # ratio_h.Sumw2()
@@ -92,25 +93,37 @@ def get_ratio_hist(numerator_h, denominator_h, range=(0.35, 1.65)):
 
     return ratio_h
 
-def get_S_over_sqrtB(hist_s, hist_b, ratio, yrange=(0., 0.5)):
+def get_S_over_sqrtB(hist_s, hist_b, ratio, yrange=None):
     hist_sosb = hist_s.Clone("hist_sosb")
     hist_sosb.Reset()
     hist_sosb.SetLineColor(ROOT.kBlack)
     hist_sosb.SetMarkerStyle(0)
     hist_sosb.SetMarkerSize(1)
     hist_sosb.SetTitle("")
-    hist_sosb.SetMinimum(yrange[0])
-    hist_sosb.SetMaximum(yrange[1])
+    if yrange:
+        hist_sosb.SetMinimum(yrange[0])
+        hist_sosb.SetMaximum(yrange[1])
 
     for i in range(hist_s.GetNbinsX()):
         s_bin_content = hist_s.GetBinContent(i) / ratio
         b_bin_content = hist_b.GetBinContent(i)
+        s_bin_content_err = hist_s.GetBinError(i)
+        b_bin_content_err = hist_b.GetBinError(i)
+        # s_bin_content_err = s_bin_content ** 0.5
+        # b_bin_content_err = b_bin_content ** 0.5
         # print(s_bin_content, b_bin_content, sep=", ")
         
+        maximum = 0
         # Avoid division by zero
-        if b_bin_content > 0:
-            ssqrtoverb = s_bin_content / (b_bin_content**0.5)
+        if b_bin_content > 0 and b_bin_content_err / b_bin_content < 5:
+            ssqrtoverb = s_bin_content / (b_bin_content ** 0.5)
+            if ssqrtoverb > maximum:
+                maximum = ssqrtoverb
+            ssqrtoverb_err = ((s_bin_content_err / b_bin_content ** 0.5) ** 2 + (s_bin_content * b_bin_content_err / b_bin_content ** 1.5 / 2) ** 2) ** 0.5
             hist_sosb.SetBinContent(i, ssqrtoverb)
+            hist_sosb.SetBinError(i, ssqrtoverb_err)
+    
+    # hist_sosb.SetMaximum(1.1*maximum)
 
     # Adjust y-axis settings
     y = hist_sosb.GetYaxis()

@@ -19,5 +19,3 @@ process         0       1
 rate            3.539      1.0 
 
 lumi_13TeV_Uncorrelated_17       lnN   1.020 -
-
-pdfindex_0_13TeV 			 discrete
