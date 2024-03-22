@@ -518,7 +518,7 @@ class AnalysisManager():
 
         for file in files:
             try:
-                f = uproot.open(file, file, timeout = 300)
+                f = uproot.open(file, timeout = 300)
             except Exception:
                 if (os.system(f"xrdcp '{file}' '/tmp/{os.getpid()}/{os.path.basename(file)}'")):
                     raise RuntimeError("xrdcp failed")
@@ -526,10 +526,30 @@ class AnalysisManager():
 
             runs = f["Runs"]
             if "genEventCount" in runs.keys() and "genEventSumw" in runs.keys():
-                sum_weights += numpy.sum(runs["genEventSumw"].array())
+                # sum_weights += numpy.sum(runs["genEventSumw"].array())
+                sum_genWeight = numpy.sum(runs["genEventSumw"].array())
+                logger.debug("[AnalysisManager : genEventSumw] genEventSumw: %.6f", sum_genWeight)
             elif "genEventCount_" in runs.keys() and "genEventSumw_" in runs.keys():
-                sum_weights += numpy.sum(runs["genEventSumw_"].array())
+                # sum_weights += numpy.sum(runs["genEventSumw_"].array())
+                sum_genWeight = numpy.sum(runs["genEventSumw_"].array())
+                logger.debug("[AnalysisManager : genEventSumw_] genEventSumw_: %.6f", sum_genWeight)
             tree = f["Events"]
+
+
+            if "Generator_weight" in tree.keys():
+                sum_genWeight = numpy.sum(tree["Generator_weight"])
+                logger.debug("[AnalysisManager : GeneratorWeightSum] Sum of Generator_weight: %.6f", sum_genWeight)
+                unique_values = numpy.unique(tree["Generator_weight"])
+                for value in unique_values:
+                    logger.debug("[AnalysisManager : GeneratorWeight] Unique values of Generator_weight: %.6f", value)
+
+            if "genWeight" in tree.keys():
+                sum_genWeight = numpy.sum(tree["genWeight"])
+                sum_weights += sum_genWeight
+                logger.debug("[AnalysisManager : GenWeightSum] Sum of genWeight: %.6f", sum_genWeight)
+                unique_values = numpy.unique(tree["genWeight"])
+                for value in unique_values:
+                    logger.debug("[AnalysisManager : GenWeight] Unique values of genWeight: %.6f", value)
 
             # Get events that is not duplicated
             if is_data:
@@ -551,13 +571,14 @@ class AnalysisManager():
 
             f.close()
 
-            logger.debug("Load samples: sample type: %s" % events_file.type)
+            logger.debug("[AnalysisManager : Load samples] Sample type: %s" % events_file.type)
 
             events.append(events_file)
 
             logger.debug("[AnalysisManager : load_events] Loaded %d events from file '%s'." % (len(events_file), file))
 
         events = awkward.concatenate(events)
+
         return events, sum_weights
 
 

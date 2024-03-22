@@ -25,10 +25,10 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "EWKZ2J", "ZG2JToG2L2J", "WGToLNuG", "TT", "TTGJets", "TGJets", "ttWJets", "ttZJets", "WW", "WZ", "ZZ"
+            "DYJetsToLL"
         ],
         "years": [
-            "2017", "2018"
+            "2016preVFP", "2016postVFP", "2017","2018"
         ]
     },
     "variables_of_interest": [

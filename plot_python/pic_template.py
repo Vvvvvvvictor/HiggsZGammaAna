@@ -11,7 +11,7 @@ def read_file(file, var = None, tree = "inclusive", selections = []):
     selections: a list of selection(<str>). If there is '&' or '|' in one item, MUST use "()" to enclose each subitem.(exp. '(H_eta>1.5) & (H_pt>10)')
     '''
     print("Reading {}:{}...".format(file, tree))
-    variabels = ["weight", "H_mass", "event"]
+    variabels = ["weight", "H_mass"]
     variabels.append(var)
     decro_sel = []
     for i in selections:

@@ -31,10 +31,11 @@ def getArgs():
     parser.add_argument('-p', '--params', action='store', type=dict, default=None, help='json string.') #type=json.loads
     parser.add_argument('--hyperparams_path', action='store', default=None, help='path of hyperparameters json') 
     parser.add_argument('--save', action='store_true', help='Save model weights to HDF5 file')
-    parser.add_argument('--corr', action='store_true', default=False, help='Plot corelation between each training variables')
+    parser.add_argument('--corr', action='store_true', default=True, help='Plot corelation between each training variables')
     parser.add_argument('--importance', action='store_true', default=True, help='Plot importance of variables, parameter "gain" is recommanded')
     parser.add_argument('--roc', action='store_true', default=True, help='Plot ROC')
     parser.add_argument('--skopt', action='store_true', default=False, help='Run hyperparameter tuning using skopt')
+    parser.add_argument('--n-calls', action='store', type=int, default=36, help='Steps of hyperparameter tuning using skopt')
     parser.add_argument('--skopt-plot', action='store_true', default=False, help='Plot skopt results')
 
     parser.add_argument('-s', '--shield', action='store', type=int, default=-1, help='Which variables needs to be shielded')
@@ -64,6 +65,7 @@ class XGBoostHandler(object):
               """)
 
         args=getArgs()
+        self.n_calls = args.n_calls
         self._shield = args.shield
         self._add = args.add
 
@@ -462,7 +464,7 @@ class XGBoostHandler(object):
             plt.title('Score distribution test background')
             plt.show()
 
-    def plotFeaturesImportance(self, fold=0, save=True, show=True, type='gain'):
+    def plotFeaturesImportance(self, fold=0, save=True, show=True, type='weight'):
         """Plot feature importance. Type can be 'weight', 'gain' or 'cover'"""
 
         xgb.plot_importance(booster=self.m_bst[fold], importance_type=type, show_values=show, values_format='{v:.2f}')
@@ -576,15 +578,15 @@ class XGBoostHandler(object):
 
         print ('default param: ', self._region, fold, self.params[fold])
 
-        search_space = [Real(0.0, 0.7, name='alpha'),
-                Real(0.4, 1, name='colsample_bytree'),
-                Real(0, 10, name='gamma'),
+        search_space = [Real(0.0, 1.0, name='alpha'),
+                Real(0.01, 1, name='colsample_bytree'),
+                Real(0.01, 10, name='gamma'),
                 Real(1, 20, name='max_delta_step'),
-                Real(0.0, 1, name='subsample'),
-                Real(0.1, 0.5, name='eta'),
-                Integer(5, 50, name='min_child_weight'),
-                Integer(0, 20, name='max_leaves'),
-                Integer(3, 20, name='max_depth')
+                Real(0.0, 1.0, name='subsample'),
+                Real(0.01, 0.1, name='eta'),
+                Integer(1, 50, name='min_child_weight'),
+                Integer(1, 20, name='max_leaves'),
+                Integer(3, 25, name='max_depth')
         ]
 
         def objective(param):
@@ -600,9 +602,9 @@ class XGBoostHandler(object):
 
         opt = Optimizer(search_space, # TODO: Add noise
                     n_initial_points=12,
-                    acq_optimizer_kwargs={'n_jobs':4})
+                    acq_optimizer_kwargs={'n_jobs':8})
 
-        n_calls = 60
+        n_calls = self.n_calls
         exp_dir = 'models/skopt/'
 
         if not os.path.exists(exp_dir):
@@ -681,7 +683,7 @@ class XGBoostHandler(object):
         plt.rcdefaults()
 
         # Load results
-        res_loaded = load(exp_dir + 'BDT_region_'+self._region+'_fold'+str(fold) + '.pkl')
+        res_loaded = load(exp_dir + 'results_region_'+self._region+'_fold'+str(fold) + '.pkl')
         print(res_loaded)
 
         # Plot evaluations
@@ -727,6 +729,7 @@ def main():
             path = "{}/BDT_region_{}_fold{}.json".format(args.hyperparams_path, args.region, fold)
             stream = open(path, 'r')
             xgb_model.params[fold] = json.load(stream)
+            xgb_model.setParams(xgb_model.params[fold], fold)
         # xgb_model.setParams(hyperparameters)
         
     xgb_model.readData()

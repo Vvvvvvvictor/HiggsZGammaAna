@@ -1,6 +1,6 @@
 from ROOT import *
 
-file_data = TFile("../InputData/two_jet_data/HZGamma_ZG_bkg_Hm125_workspace.root")
+file_data = TFile("./InputData/two_jet_data/HZGamma_data_bkg_workspace_cat0.root")
 
 nbins = 65
 ws_name = 'CMS_hzg_workspace'

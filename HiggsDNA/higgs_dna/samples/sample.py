@@ -1,8 +1,13 @@
 import awkward
+import numpy
 
 from higgs_dna.samples.file import File
 from higgs_dna.utils import awkward_utils
 from higgs_dna.constants import CENTRAL_WEIGHT, LUMI
+
+import logging
+from higgs_dna.utils.logger_utils import simple_logger
+logger = simple_logger(__name__)
 
 # FIXME need to add option for specifying campaign (e.g. Prompt, UL, etc)
 
@@ -45,6 +50,7 @@ class Sample():
         awkward_utils.add_field(events, CENTRAL_WEIGHT, awkward.ones_like(events.run))
 
         if not self.is_data:
+
             awkward_utils.add_field(
                     events = events,
                     name = CENTRAL_WEIGHT,

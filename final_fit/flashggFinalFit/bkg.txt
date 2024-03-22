@@ -1,4 +1,0 @@
-IntLumi =  41.480 C L(-INF - +INF) 
-CMS_hzg_mass =  125.00 L(105 - 170) B(65) // [GeV]
-MH =  125.00 L(110 - 140) B(10) // [GeV]
-CMS_hgg_nuisance_deltafracright =  0.0000 C L(-1 - 1) 

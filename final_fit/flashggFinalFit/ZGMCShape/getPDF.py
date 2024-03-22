@@ -1,7 +1,7 @@
 from ROOT import *
 
-file_data = TFile("../InputData/two_jet_data/HZGamma_data_bkg_workspace.root")
-file_bkg = TFile("../InputData/two_jet_data/HZGamma_ZG_bkg_workspace.root")
+file_data = TFile("./InputData/two_jet_data/HZGamma_data_bkg_workspace_cat0.root")
+file_bkg = TFile("./InputData/HZGamma_data_bkg_workspace_ZG.root")
 
 ws_name = 'CMS_hzg_workspace'
 inWS_data = file_data.Get(ws_name)
@@ -51,19 +51,18 @@ mass_.setRange(100.0, 180.0)
 hist_bkg_toy = histpdf_bkg.generate(ArgSet,1000000000)
 hist_bkg_toy.Print()
 
-kest1 = RooKeysPdf("ZGMCShape", "ZGMCShape", mass_, hist_bkg_toy, RooKeysPdf.MirrorBoth,2)
+kest1 = RooKeysPdf("ZGMCShape", "ZGMCShape", mass_, hist_bkg_toy, RooKeysPdf.MirrorBoth,1)
 
 canv = TCanvas("c1","c1",800,1000)
-mass_.setRange(100.0, 180.0)
+mass_.setRange(105.0, 170.0)
 frame = mass_.frame(100)
 
 datasets_bkg.plotOn(frame)
 kest1.plotOn(frame)
 
 frame.Draw()
-canv.SaveAs('bkg_smooth.png')
+#canv.SaveAs('bkg_smooth.png')
 
-mass_.setRange(105.0, 170.0)
 w = RooWorkspace("w", "workspace")
 getattr(w,'import')(kest1)
 w.Print()

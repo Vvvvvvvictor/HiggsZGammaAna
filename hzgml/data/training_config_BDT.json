@@ -4,7 +4,7 @@
               "train_data_background": [],
               "train_variables": ["Z_cos_theta", "lep_phi","lep_cos_theta",
                               "Z_lead_lepton_eta", "Z_sublead_lepton_eta", "H_relpt",
-                              "gamma_eta", "l1g_deltaR", "l2g_deltaR", "Z_pt",
+                              "gamma_eta", "l1g_deltaR", "l2g_deltaR",
                               "H_ptt", "gamma_mvaID", "gamma_ptRelErr", "HZ_deltaRap"
                         ],
               "preselections": ["H_mass >= 120", "H_mass <= 130"],
