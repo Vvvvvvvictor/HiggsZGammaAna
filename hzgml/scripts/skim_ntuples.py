@@ -19,6 +19,9 @@ import pandas as pd
 import uproot
 # from root_pandas import *
 from tqdm import tqdm
+import warnings
+
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 def getArgs():
     parser = ArgumentParser(description="Skim the input ntuples for Hmumu XGBoost analysis.")
@@ -247,6 +250,31 @@ def compute_H_bt(x):
 
     return r * abs(Z.Px() * gamma.Py() - gamma.Px() * Z.Py()) / dev * 2.0
 
+def compute_jet_ptt(x):
+
+    if x.n_jets < 2:
+        return -9999
+    else:
+        Jets_1 = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.jet_1_pt, x.jet_1_eta, x.jet_1_phi, x.jet_1_mass)
+        Jets_2 = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.jet_2_pt, x.jet_2_eta, x.jet_2_phi, x.jet_2_mass)
+
+        return abs(Jets_1.Px() * Jets_2.Py() - Jets_2.Px() * Jets_1.Py()) / (Jets_1 - Jets_2).Pt() * 2.0
+
+def compute_max_two_jet_btag(x):
+
+    n_jets = x.n_jets
+    jet_btag_array = []
+
+    for i in range(1, min(n_jets+1, 5)):
+        jet_name = f"jet_{i}"
+        jet_btag_array.append(getattr(x, f"{jet_name}_btagDeepFlavB"))
+
+    jet_btag_array = np.array(jet_btag_array)
+    jet_btag_array_sorted = np.sort(jet_btag_array)[::-1]
+
+    return np.sum(jet_btag_array_sorted[:2])
+
+
 def compute_mass_jj(x):
 
     if x.n_jets < 2:
@@ -280,6 +308,18 @@ def compute_delta_phi_zg_jj(x):
         Jets_2 = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.jet_2_pt, x.jet_2_eta, x.jet_2_phi, x.jet_2_mass)
         j1j2 = Jets_1+Jets_2
         return true_delta_phi(abs(zg.Phi()-j1j2.Phi()))
+    return -9999
+
+def compute_delta_eta_zg_jj(x):
+
+    if x.n_jets >= 2:
+        Z = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.Z_pt, x.Z_eta, x.Z_phi, x.Z_mass)
+        gamma = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.gamma_pt, x.gamma_eta, x.gamma_phi, x.gamma_mass)
+        zg = Z+gamma
+        Jets_1 = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.jet_1_pt, x.jet_1_eta, x.jet_1_phi, x.jet_1_mass)
+        Jets_2 = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.jet_2_pt, x.jet_2_eta, x.jet_2_phi, x.jet_2_mass)
+        j1j2 = Jets_1+Jets_2
+        return abs(zg.Eta()-j1j2.Eta())
     return -9999
 
 def compute_photon_zeppenfeld(x):
@@ -336,7 +376,7 @@ def compute_Delta_Phi(x, var = "gamma_phi", min_jet=0):
 
 def compute_Delta_R(x, min_jet=0):
 
-    if x.n_jets <= min_jet: return -9999
+    if x.n_jets < min_jet: return -9999
     else: 
         jet = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(getattr(x, "jet_%d_pt" % min_jet), getattr(x, "jet_%d_eta" % min_jet), getattr(x, "jet_%d_phi" % min_jet), getattr(x, "jet_%d_mass" % min_jet))
         gamma = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.gamma_pt, x.gamma_eta, x.gamma_phi, x.gamma_mass)
@@ -405,6 +445,8 @@ def decorate(data):
     data['MET_deltaphi'] = data.apply(lambda x: compute_Delta_Phi(x, 'MET_phi'), axis=1)
     data['weight'] = data.weight_central
     data['mass_jj'] = data.apply(lambda x: compute_mass_jj(x), axis=1)
+    data['max_two_jet_btag'] = data.apply(lambda x: compute_max_two_jet_btag(x), axis=1)
+    data['jet_ptt'] = data.apply(lambda x: compute_jet_ptt(x), axis=1)
     data['H_ptt'] = data.apply(lambda x: compute_H_ptt(x), axis=1)
     data['H_al'] = data.apply(lambda x: compute_H_al(x), axis=1)
     data['H_bt'] = data.apply(lambda x: compute_H_bt(x), axis=1)
@@ -416,6 +458,7 @@ def decorate(data):
     data['delta_eta_jj'] = data.apply(lambda x: compute_delta_eta_jj(x), axis=1)
     data['delta_phi_jj'] = data.apply(lambda x: compute_delta_phi_jj(x), axis=1)
     data['delta_phi_zgjj'] = data.apply(lambda x: compute_delta_phi_zg_jj(x), axis=1)
+    data['delta_eta_zgjj'] = data.apply(lambda x: compute_delta_eta_zg_jj(x), axis=1)
     data['photon_zeppenfeld'] = data.apply(lambda x: compute_photon_zeppenfeld(x), axis=1)
     data['H_zeppenfeld'] = data.apply(lambda x: compute_H_zeppenfeld(x), axis=1)
     data['pt_balance'] = data.apply(lambda x: compute_pt_balance(x), axis=1)

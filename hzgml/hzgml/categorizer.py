@@ -132,6 +132,22 @@ class pyTH1(object):
             hist.SetBinError(i+1, err)
 
         return hist
+    
+    def Smooth(self, iterations):
+        # Create a temporary TH1F histogram to perform smoothing
+        temp_hist = ROOT.TH1F("temp_hist", "Temporary Histogram", len(self.BinContent), self.BinLowEdge[0], self.BinLowEdge[-1] + self.BinWidth[-1])
+        
+        # Fill the temporary histogram with the bin contents
+        for i in range(len(self.BinContent)):
+            temp_hist.SetBinContent(i+1, self.BinContent[i])
+
+        # Smooth the temporary histogram
+        temp_hist.Smooth(iterations)
+
+        # Update the bin contents after smoothing
+        for i in range(len(self.BinContent)):
+            self.BinContent[i] = temp_hist.GetBinContent(i+1)
+            self.BinError[i] = temp_hist.GetBinError(i+1)
 
 
 class categorizer(object):
@@ -159,6 +175,45 @@ class categorizer(object):
             self.h_bkg_rw_num = pyTH1(h_bkg_rw_num)
             self.h_bkg_rw_den = pyTH1(h_bkg_rw_den)
 
+    def smooth_sim(self, iterations, SorB='B'):
+
+        if SorB == 'S': py_hist = self.h_sig
+        elif SorB == 'B': py_hist = self.h_bkg
+
+        hist = py_hist.to_TH1F("hist")
+
+        py_hist.Smooth(iterations)
+
+        if SorB == 'S': self.h_sig = py_hist
+        elif SorB == 'B': self.h_bkg = py_hist
+
+        # Create canvas to draw histograms
+        canvas = ROOT.TCanvas("canvas", "Smoothed Histogram", 800, 600)
+
+        # Draw original histogram
+        hist.SetLineColor(ROOT.kBlue)
+        hist.Draw()
+
+        # Draw smoothed histogram
+        hist_smoothed = ROOT.TH1F("hist_smoothed", "Smoothed Histogram", len(py_hist.BinContent), py_hist.BinLowEdge[0], py_hist.BinLowEdge[-1] + py_hist.BinWidth[-1])
+        for i in range(len(py_hist.BinContent)):
+            hist_smoothed.SetBinContent(i+1, py_hist.BinContent[i])
+        hist_smoothed.SetLineColor(ROOT.kRed)
+        hist_smoothed.Draw("same")
+
+        # Create legend
+        legend = ROOT.TLegend(0.7, 0.7, 0.9, 0.9)
+        legend.AddEntry(hist, "Original", "l")
+        legend.AddEntry(hist_smoothed, "Smoothed", "l")
+        legend.Draw()
+
+        # Update canvas
+        canvas.Modified()
+        canvas.Update()
+
+        # Save canvas as PNG file
+        canvas.SaveAs("smoothed_histogram.png")
+
     def smooth(self, bl, br, SorB='B', function='Epoly2'):
 
         if SorB == 'S': hist = self.h_sig
@@ -170,7 +225,11 @@ class categorizer(object):
 
         h_merge_list = ROOT.TList()
 
-        if bl != 1:
+        if bl == 0:
+            print("!!! Left edge can not be 0 !!!")
+            return
+
+        if bl > 1:
             h_left = hist.to_TH1F('h_left', 1, bl-1)
             h_merge_list.Add(h_left)
 

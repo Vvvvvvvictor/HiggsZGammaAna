@@ -4,7 +4,7 @@
               "train_data_background": [],
               "train_variables": ["Z_cos_theta", "lep_phi","lep_cos_theta",
                               "Z_lead_lepton_eta",
-                              "l2g_deltaR", "ll_deltaR",
+                              "l2g_deltaR",
                               "gamma_mvaID", "gamma_ptRelErr"
                         ],
               "preselections": ["H_mass >= 100", "H_mass <= 180", "gamma_pt > 0"],
@@ -20,7 +20,7 @@
               "+train_variables": [
                                 "delta_eta_jj", "pt_balance", "delta_phi_zgjj",
                                 "delta_phi_jj", "photon_zeppenfeld",
-                                "jet_1_pt", "jet1G_deltaR", "jet_ptt"
+                                "jet_1_pt", "jet1G_deltaR"
                                    ],
               "params": [{"silent": 1, "eval_metric": ["logloss", "auc"], "grow_policy": "lossguide", "nthread": 4, "objective": "binary:logistic", "tree_method": "hist", "booster": "gbtree"},
                          {"silent": 1, "eval_metric": ["logloss", "auc"], "grow_policy": "lossguide", "nthread": 4, "objective": "binary:logistic", "tree_method": "hist", "booster": "gbtree"},

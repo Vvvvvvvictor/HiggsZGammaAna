@@ -32,6 +32,8 @@ def select_jets(jets, options, clean, name = "none", tagger = None):
         id_cut = jets.pt > 0
 
     all_cuts = standard_cuts & id_cut
+    standard_cuts = awkward.sum(standard_cuts, axis=1) > 0
+    id_cut = awkward.sum(standard_cuts & id_cut, axis=1) > 0
 
     if tagger is not None:
         tagger.register_cuts(

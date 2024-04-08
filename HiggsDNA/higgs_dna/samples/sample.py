@@ -54,7 +54,7 @@ class Sample():
             awkward_utils.add_field(
                     events = events,
                     name = CENTRAL_WEIGHT,
-                    data = events[CENTRAL_WEIGHT] * events.genWeight,
+                    data = events[CENTRAL_WEIGHT] * events.Generator_weight,
                     overwrite = True
             )
             awkward_utils.add_field(

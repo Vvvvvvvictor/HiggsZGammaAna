@@ -138,8 +138,12 @@ class TagSequence():
             self.summary[tagger.name] = { "priority" : idx }
 
             for name in self.selections[tagger.name].keys():
+                try:
+                    n_events_pre_overlap_removal = int(awkward.sum(self.selections[tagger.name][name]))
+                except:
+                    n_events_pre_overlap_removal = 0
                 self.summary[tagger.name][name] = { 
-                            "n_events_pre_overlap_removal" : int(awkward.sum(self.selections[tagger.name][name]))
+                            "n_events_pre_overlap_removal" : n_events_pre_overlap_removal
                             # add int() because json does not recgonize numpy int64 dtype
                 }
 

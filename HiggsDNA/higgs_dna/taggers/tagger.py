@@ -2,6 +2,7 @@ import awkward
 import vector
 import json
 import logging
+import numpy
 from higgs_dna.utils.logger_utils import simple_logger
 # logger = logging.getLogger(__name__)
 logger = simple_logger(__name__)
@@ -171,17 +172,21 @@ class Tagger():
                 yields = 0
                 individual_eff = 0
                 if weighted:
-                    if float(awkward.count(events[result].genWeight)) > 0.:
-                        individual_eff = float(awkward.sum(events[result].genWeight)) / float(awkward.count(events[result].genWeight))
+                    unique_values = numpy.unique(events[result].Generator_weight)
+                    for value in unique_values:
+                        unique_counts = numpy.sum(events[result].Generator_weight == value)
+                        logger.debug("[Tagger] : Generator_weight that equals to {} is {}".format(value, unique_counts))
+                    yields = numpy.sum(events[result].Generator_weight.to_numpy().astype('float64'))
+                    if float(awkward.count(result)) > 0.:
+                        individual_eff = yields / awkward.count(result)
                     else:
                         individual_eff = 0.
-                    yields = float(awkward.sum(events[result].genWeight))
                     if yields > 0:
-                        individual_eff = float(awkward.sum(events[result].genWeight)) / float(awkward.count(events[result].genWeight))
+                        individual_eff = yields / awkward.count(result)
                 else:
-                    yields = float(awkward.sum(result))
-                    if yields > 0:
-                        individual_eff = float(awkward.sum(result)) / float(awkward.count(result))
+                    yields = numpy.sum(result)
+                    if float(awkward.count(result)) > 0:
+                        individual_eff = awkward.sum(result) / awkward.count(result)
             self.cut_summary[cut_type][name] = {
                     "individual_eff" : float(individual_eff) 
                     #TODO: add eff as N-1 cut

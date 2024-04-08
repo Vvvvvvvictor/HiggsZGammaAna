@@ -6,6 +6,8 @@ vector.register_awkward()
 import numpy
 import numba
 
+from functools import reduce
+
 from higgs_dna.utils import awkward_utils
 
 import logging
@@ -38,11 +40,11 @@ def select_objects(objects, cuts = {}, clean = {}, name = "none", tagger = None)
             cut_ = objects.pt > value
             cut_names.append("pt > %.4f" % value)
         if cut in ["eta", "dxy", "dz"]:
-            cut_ = abs(objects[cut]) < value
-            cut_names.append("|%s| < %.4f" % (cut, value))
+            cut_ = abs(objects[cut]) <= value
+            cut_names.append("|%s| <= %.4f" % (cut, value))
         if cut in ["etasc"]:
-            cut_ = abs(objects.eta + objects.deltaEtaSC) < value
-            cut_names.append("|%s| < %.4f" % (cut, value))
+            cut_ = abs(objects.eta + objects.deltaEtaSC) <= value
+            cut_names.append("|%s| <= %.4f" % (cut, value))
         if cut in ["pfRelIso03_all", "pfRelIso03_chg", "sip3d"]:
             cut_ = objects[cut] < value
             cut_names.append("%s < %.4f" % (cut, value))
@@ -56,8 +58,12 @@ def select_objects(objects, cuts = {}, clean = {}, name = "none", tagger = None)
         cut_results.append(cut_)
 
     all_cuts = objects.pt > 0
-    for cut in cut_results:
+    for i, cut in enumerate(cut_results):
         all_cuts = (all_cuts) & cut
+        if i == 0:
+            cut_results[i] = (awkward.sum(cut, axis=1) > 0)
+        else:
+             cut_results[i] = (awkward.sum(cut, axis=1) > 0) & cut_results[i-1]
 
     if tagger is not None:
         tagger.register_cuts(

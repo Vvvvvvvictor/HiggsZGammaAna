@@ -106,7 +106,7 @@ class XGBoostHandler(object):
         self.train_mc_background = []
         self.train_dd_background = []
         self.train_variables = []
-        self.preselections = []
+        self.preselections = ['gamma_pt > 0']
         self.mc_preselections = []
         self.data_preselections = []
         self.signal_preselections = []
@@ -284,7 +284,7 @@ class XGBoostHandler(object):
             file = uproot.open(filename)
             for data in file[self.inputTree].iterate(self._sig_branches, library='pd', step_size=self._chunksize):
                 data = self.preselect(data, 'signal')
-                self.m_data_sig = self.m_data_sig.append(data, ignore_index=True)
+                self.m_data_sig = pd.concat([self.m_data_sig, data], ignore_index=True)
 
         print('----------------------------------------------------------')
         if bkg_mc_list:
@@ -301,7 +301,7 @@ class XGBoostHandler(object):
                         data = self.preselect(data, 'DYJetsToLL')
                     else:
                         data = self.preselect(data, 'mc_background')
-                    self.m_data_bkg = self.m_data_bkg.append(data, ignore_index=True)
+                    self.m_data_bkg = pd.concat([self.m_data_bkg, data], ignore_index=True)
         
         print('----------------------------------------------------------')
         if bkg_dd_list:
@@ -311,7 +311,7 @@ class XGBoostHandler(object):
                 file = uproot.open(filename)
                 for data in file[self.inputTree].iterate(self._branches, library='pd', step_size=self._chunksize):
                     data = self.preselect(data, 'background')
-                    self.m_data_bkg = self.m_data_bkg.append(data, ignore_index=True)
+                    self.m_data_bkg = pd.concat([self.m_data_bkg, data], ignore_index=True)
 
         print('----------------------------------------------------------')
         if bkg_data_list:
@@ -321,7 +321,7 @@ class XGBoostHandler(object):
                 file = uproot.open(filename)
                 for data in file[self.inputTree].iterate(self._data_branches, library='pd', step_size=self._chunksize):
                     data = self.preselect(data, 'data')
-                    self.m_data_bkg = self.m_data_bkg.append(data, ignore_index=True)
+                    self.m_data_bkg = pd.concat([self.m_data_bkg, data], ignore_index=True)
 
     def plot_corr(self, data_type):
         if not os.path.isdir("plots/corr/"):
@@ -331,7 +331,7 @@ class XGBoostHandler(object):
         else:
             data = self.m_data_bkg
         columns = list(data.columns)
-        for rem in ("is_center", "weight", "event", "gamma_mvaID_WP80", "gamma_mvaID_WPL", "n_iso_photons"):
+        for rem in ("is_center", "weight", "event", "gamma_mvaID_WP80", "gamma_mvaID_WPL", "n_iso_photons", "n_b_jets", "n_jets"):
             if rem in columns:
                 columns.remove(rem)
                 data = data.drop(rem, axis=1)
@@ -339,7 +339,17 @@ class XGBoostHandler(object):
 
         data = data.corr() * 100
 
-        print(data)
+        # 将相关性矩阵转换为按相关性值排序的数据框
+        sorted_corr = data.unstack().sort_values(ascending=False)
+
+        # 选择相关性大于0.4的变量对
+        strong_corr = sorted_corr[(sorted_corr.abs() > 40) & (sorted_corr < 100)]
+        strong_corr = strong_corr[strong_corr.index.map(lambda x: x[0] < x[1])]
+        max_var_length = max([len(var) for var in columns])
+        # 输出结果
+        for (var1, var2), corr in strong_corr.items():
+            print(f"Correlation between {var1:<{max_var_length}} and {var2:<{max_var_length}} is {corr:.2f}")
+        # print(data)
 
         plt.figure(figsize=(12, 9), dpi=300)
         plt.imshow(data)
@@ -475,7 +485,7 @@ class XGBoostHandler(object):
             if not os.path.isdir('plots/feature_importance'):
                 os.makedirs('plots/feature_importance')
             # save figure
-            plt.savefig('plots/feature_importance/%d_BDT_%s_%d.png' % (self._shield+1, self._region, fold))
+            plt.savefig('plots/feature_importance/%d_BDT_%s_%d_%s.png' % (self._shield+1, self._region, fold, type))
 
         if show: plt.show()
 
@@ -764,7 +774,8 @@ def main():
 
         #xgb_model.plotScore(i, 'test')
         if args.importance:
-            xgb_model.plotFeaturesImportance(i)
+            xgb_model.plotFeaturesImportance(i, type='weight')
+            xgb_model.plotFeaturesImportance(i, type='gain')
         if args.roc:
             xgb_model.plotROC(i)
 

@@ -25,10 +25,10 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "Data"
+            "Data_SingleMuon", "Data_DoubleMuon", "Data_SingleElectron", "Data_DoubleEG"
         ],
         "years": [
-            "2018"
+            "2017"
         ]
     },
     "variables_of_interest": [
@@ -163,6 +163,7 @@
         "btagWeight_DeepCSVB",
         "btagWeight_CSVV2",
         "genWeight",
+        "Generator_weight",
         "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL",
         "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ",
         "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL",

@@ -52,6 +52,9 @@ def select_electrons(electrons, options, clean, name = "none", tagger = None):
         transition_cut = electrons.pt > 0.
 
     all_cuts = standard_cuts & id_cut & transition_cut
+    standard_cuts = awkward.sum(standard_cuts, axis=1) > 0
+    id_cut = awkward.sum(standard_cuts & id_cut, axis=1) > 0
+    transition_cut = awkward.sum(id_cut & transition_cut, axis=1) > 0
 
     if tagger is not None:
         tagger.register_cuts(
@@ -91,7 +94,7 @@ def select_muons(muons, options, clean, name = "none", tagger = None):
     if options["id"] == "medium":
         id_cut = muons.mediumId == True
     elif options["id"] == "loose":
-        id_cut = (muons.looseId == True) | ((muons.pt >= 200.)  & (muons.highPtId > 0)) 
+        id_cut = (muons.looseId == True) | ((muons.pt > 200.)  & (muons.highPtId > 0)) 
     elif not options["id"] or options["id"].lower() == "none":
         id_cut = muons.pt > 0.
     else:
@@ -104,6 +107,9 @@ def select_muons(muons, options, clean, name = "none", tagger = None):
         global_cut = muons.pt > 0
 
     all_cuts = standard_cuts & id_cut & global_cut
+    standard_cuts = awkward.sum(standard_cuts, axis=1) > 0
+    id_cut = awkward.sum(standard_cuts & id_cut, axis=1) > 0
+    global_cut = awkward.sum(id_cut & global_cut, axis=1) > 0
 
     if tagger is not None:
         tagger.register_cuts(

@@ -103,8 +103,8 @@ def gettingsig(input_path, region, variable, boundaries, transform, estimate):
                     data_ss = data_s[data_s[f"{variable}_score{'_t' if transform else ''}"] >= boundaries[i][j]]
                     if j != len(boundaries[i]) - 1: data_ss = data_ss[data_ss[f"{variable}_score{'_t' if transform else ''}"] < boundaries[i][j+1]]
     
-                    yields[category][j] += data_ss.w.sum()
-                    yields[category+'_err'][j] = np.sqrt(yields[category+'_err'][j]**2 + (data_ss.w**2).sum())
+                    yields.loc[j, category] += data_ss.w.sum()
+                    yields.loc[j, category+'_err'] = np.sqrt(yields[category+'_err'][j]**2 + (data_ss.w**2).sum())
 
     if estimate == "data_sid":
         yields['bkg'] = yields['data_sid']*0.20
@@ -120,9 +120,6 @@ def gettingsig(input_path, region, variable, boundaries, transform, estimate):
     yields['z'] = zs[0]
     yields['u'] = zs[1]
     yields['VBF purity [%]'] = yields['VBF']/yields['sig']*100
-
-    for i in yields:
-        print(yields[i])
 
     z = np.sqrt((yields['z']**2).sum())
     u = np.sqrt((yields['z']**2 * yields['u']**2).sum())/z
@@ -166,7 +163,15 @@ def categorizing(input_path, region, variable, sigs, bkgs, nscan, minN, transfor
         cgz = categorizer(h_sig, h_bkgmc_cen, h_bkg_rw_num=h_data_sid, h_bkg_rw_den=h_bkgmc_sid)
     elif estimate == "fullSim":
         cgz = categorizer(h_sig, h_bkgmc_cen)
-    #cgz.smooth(60, nscan)  #uncomment this line to fit a function to the BDT distribution. Usage: categorizer.smooth(left_bin_to_fit, right_bin_to_fit, SorB='S' (for signal) or 'B' (for bkg), function='Epoly2', printMessage=False (switch to "True" to print message))
+    
+    # cgz.smooth(1, nscan, SorB='B', function='Epoly2')
+    '''
+    uncomment upper line to fit a function to the BDT distribution. Usage: categorizer.smooth(left_bin_to_fit, right_bin_to_fit, SorB='S' (for signal) or 'B' (for bkg), function='Epoly2', printMessage=False (switch to "True" to print message))
+    TODO: first parameter must >= 1, 0 is banned.
+    '''
+
+    cgz.smooth_sim(1, SorB='B')
+        
     bmax, zmax = cgz.fit(1, nscan, nbin, minN=minN, floatB=floatB, earlystop=earlystop, pbar=True)
     print(bmax)
     boundaries = bmax
@@ -251,6 +256,7 @@ def main():
     outs['fine_tuned'] = False
     outs['variable'] = variable
     outs['estimate'] = args.estimate
+    outs.update(yields.to_dict())
 
     print(outs, '\n================================================\n')
 
@@ -269,10 +275,10 @@ def main():
             json_file.write('{:.4f} '.format(i))
         json_file.write('%.4f %.4f' % (s, u))
     with open('%s/significances/%d_%d_%s_1D_%d.json' % (input_path, shield+1, add+1, region, args.nbin), 'w') as json_file:
-        json.dump(outs, json_file)
-        for i in list(yields['z']):
-            json_file.write('{:.4f}\n'.format(i))
-        json_file.write('{:.4f}'.format(s))
+        json.dump(outs, json_file, indent=4)
+        # for i in list(yields['z']):
+        #     json_file.write('{:.4f}\n'.format(i))
+        json_file.write('\n{:.4f}'.format(s))
 
     return
 

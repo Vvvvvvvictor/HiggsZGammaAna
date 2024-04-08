@@ -1,37 +1,56 @@
 import ROOT
 from tqdm import trange
-import uproot, uproot3
-import awkward
+import uproot
 import os
+import pandas as pd
+import numpy as np
 import re
+from pdb import set_trace
 
-def read_file(file, var = None, tree = "inclusive", selections = []):
+def read_file(file, var=None, tree="inclusive", selections=[]):
     '''
     read file and apply selections
     selections: a list of selection(<str>). If there is '&' or '|' in one item, MUST use "()" to enclose each subitem.(exp. '(H_eta>1.5) & (H_pt>10)')
     '''
     print("Reading {}:{}...".format(file, tree))
-    variabels = ["weight", "H_mass"]
-    variabels.append(var)
-    decro_sel = []
+    variables = ["weight", "H_mass"]
+    if isinstance(var, str):
+        variables.append(var)
+    else:
+        for i in var:
+            variables.append(i)
+    decro_sel, var_not_exist = [], []
     for i in selections:
         var_can = list(set([j for j in re.split('\W+', i) if not j.isdigit()]))
         # print(var_can)
-        variabels += var_can
+        variables += var_can
         for j in var_can:
             i = i.replace(j, "arrays."+j)
         decro_sel.append(i)
-    arrays = uproot.open(file+':'+tree).arrays(variabels,library='ak')
+    data= uproot.open(file+':'+tree)
+    variables = list(set(variables))
+    for var in variables:
+        if var not in data:
+            var_not_exist.append(var)
+    variables = [x for x in variables if x not in var_not_exist]
+    arrays = data.arrays(variables,library='pd')
     for i in decro_sel:
         print(i)
         arrays = arrays[eval(i)]
-    return arrays
+    return arrays, var_not_exist
 
-def get_hist(arrays, variable, ratio, name, bins, range, hist=None):
+def get_hist(arrays, variable, ratio, name, bins, range, hist=None, selections=[]):
     if hist is None:
         hist = ROOT.TH1D(name,name,bins,range[0],range[1])
         hist.Sumw2()
     yields = hist.Integral()
+    for i in selections:
+        var_can = list(set([j for j in re.split('\W+', i) if not j.isdigit()]))
+        for j in var_can:
+            i = i.replace(j, "arrays."+j)
+        print(i)
+        arrays = arrays[eval(i)]
+    arrays = arrays.reset_index(drop=True)
     for i in trange(0, len(arrays[variable])):
         hist.Fill(float(arrays[variable][i]), float(arrays['weight'][i])*ratio)
     hist.SetLineWidth(3)

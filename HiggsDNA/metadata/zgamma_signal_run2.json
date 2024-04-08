@@ -163,7 +163,7 @@
         "btagWeight_DeepCSVB",
         "btagWeight_CSVV2",
         "genWeight",
-	"Generator_weight",
+	    "Generator_weight",
         "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL",
         "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ",
         "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL",

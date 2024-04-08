@@ -57,7 +57,7 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     // TFile* fbkg = TFile::Open(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/bkg_template_v3_cut2/bkg/bkg_0sig_cat%d.root", cat));
     // hbkg = (TH1F*)fbkg->Get(Form("mass_cat%d", cat));
     double dataevents = hbkg->Integral();
-    double mcsbevents = hbkg->Integral(0,17)+hbkg->Integral(23,65);
+    double mcsbevents = hbkg->Integral(0,22)+hbkg->Integral(28,80);
 	
     //signal MC
     TFile* fsig = TFile::Open(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/bkg_sig_template.root"));
@@ -65,6 +65,13 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     // TFile* fsig = TFile::Open(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/bkg_template_v3_cut2/sig/FullSig_cat%d.root", cat));
     // TH1F* hsig = (TH1F*)fsig->Get(Form("mass_cat%d_FullSig", cat));
 	double sigevents = hsig->Integral();
+
+    //data full range
+    TFile* ffr = TFile::Open(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/bkg_sig_template.root"));
+    TH1F* hfr = (TH1F*)( ffr->Get(Form("data_full_%s_cat%d", channel.Data(), cat)) );
+    // TFile* ffr = TFile::Open(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/bkg_template_v3_cut2/data_sid/data_0sig_cat%d.root", cat));
+    // TH1F* hfr = (TH1F*)ffr->Get(Form("mass_cat%d_data", cat));
+	double frevents = hfr->Integral();
 
     //data side band
     TFile* fsb = TFile::Open(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/bkg_sig_template.root"));
@@ -78,15 +85,16 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     cout << "\n\tFinish preparing data!!!\n" << endl;
 
     //initializing
-    double mgg_low=105, mgg_high=170;
+    double mgg_low=100, mgg_high=180;
     RooRealVar mH("mH", "mH", 125.38, mgg_low, mgg_high);
     mH.setMin( mgg_low );
     mH.setMax( mgg_high );
     // mH.setMax( hbkg->GetBinCenter(hbkg->GetNbinsX()) + hbkg->GetBinWidth(hbkg->GetNbinsX()) );
 
     //background function fit
-    RooDataHist* dbkg = new RooDataHist("data_bin","dataset with x", mH, hbkg);
-    RooDataHist* dsb = new RooDataHist("data_bin","dataset with x", mH, hsb);
+    RooDataHist* dbkg = new RooDataHist("bkg_mc","dataset with x", mH, hbkg);
+    RooDataHist* dsb = new RooDataHist("data_sb","dataset with x", mH, hsb);
+    RooDataHist* dfr = new RooDataHist("data_fr","dataset with x", mH, hfr);
     // cout<<"bkg hist integral "<<hbkg->Integral()<<" "<<dbkg->sumEntries()<<endl;
 
     RooRealVar nsig("nsig","nsig",sigevents,-100*sigevents,100*sigevents);
@@ -101,43 +109,43 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     RooRealVar sigma_b4(Form("sigma_b4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("sigma_b4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),3.,1.,15.);
     RooRealVar sigma_b5(Form("sigma_b5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("sigma_b5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),3.,1.,15.);
     
-    RooRealVar step_b1(Form("step_b1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("step_b1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),105.,100,115.);
-    RooRealVar step_b2(Form("step_b2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("step_b2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),105.,100.,115.);
-    RooRealVar step_b3(Form("step_b3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("step_b3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),101.,100,115.);
-    RooRealVar step_b4(Form("step_b4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("step_b4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),101.,100,115.);
-    RooRealVar step_b5(Form("step_b5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("step_b5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),101.,100,115.);
+    RooRealVar step_b1(Form("step_b1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("step_b1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),105.,95,115.);
+    RooRealVar step_b2(Form("step_b2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("step_b2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),105.,95.,115.);
+    RooRealVar step_b3(Form("step_b3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("step_b3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),101.,95,115.);
+    RooRealVar step_b4(Form("step_b4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("step_b4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),101.,95,115.);
+    RooRealVar step_b5(Form("step_b5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("step_b5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),101.,95,115.);
 
     RooRealVar p0(Form("p0_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("p0_env_pdf_ele_mu_cat%d_2020_13TeV",cat),15);
-    RooRealVar b1p1(Form("b1p1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b1p1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1.2,-15.,15.);
-    RooRealVar b2p1(Form("b2p1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b2p1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1.2,-15.,15.);
-    RooRealVar b2p2(Form("b2p2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b2p2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1.2, -15.,15.);
-    RooRealVar b3p1(Form("b3p1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b3p1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1.2,-15.,15.);
-    RooRealVar b3p2(Form("b3p2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b3p2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1.2,-15.,15.);
-    RooRealVar b3p3(Form("b3p3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b3p3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1.2,-15.,15.);
-    RooRealVar b4p1(Form("b4p1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b4p1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1.2,-15.,15.);
-    RooRealVar b4p2(Form("b4p2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b4p2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1.2,-15.,15.);
-    RooRealVar b4p3(Form("b4p3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b4p3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1.2,-15.,15.);//untag
-    RooRealVar b4p4(Form("b4p4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b4p4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1.2,-15.,15.);//VBF&lepton
-    RooRealVar b5p1(Form("b5p1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b5p1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),2.5663,-15.,15.);//untag
-    RooRealVar b5p2(Form("b5p2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b5p2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),2.536,-15.,15.);
-    RooRealVar b5p3(Form("b5p3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b5p3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),7.3253e-01,-15.,15.);
-    RooRealVar b5p4(Form("b5p4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b5p4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),2.3505e-01,-15.,15.);
-    RooRealVar b5p5(Form("b5p5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b5p5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),8.9944e-01,-15.,15.);
+    RooRealVar b1p1(Form("b1p1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b1p1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1,-15.,15.);
+    RooRealVar b2p1(Form("b2p1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b2p1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1,-15.,15.);
+    RooRealVar b2p2(Form("b2p2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b2p2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1, -15.,15.);
+    RooRealVar b3p1(Form("b3p1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b3p1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1,-15.,15.);
+    RooRealVar b3p2(Form("b3p2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b3p2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1,-15.,15.);
+    RooRealVar b3p3(Form("b3p3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b3p3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1,-15.,15.);
+    RooRealVar b4p1(Form("b4p1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b4p1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1,-15.,15.);
+    RooRealVar b4p2(Form("b4p2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b4p2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1,-15.,15.);
+    RooRealVar b4p3(Form("b4p3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b4p3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1,-15.,15.);//untag
+    RooRealVar b4p4(Form("b4p4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b4p4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1,-15.,15.);//VBF&lepton
+    RooRealVar b5p1(Form("b5p1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b5p1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1,-15.,15.);//untag
+    RooRealVar b5p2(Form("b5p2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b5p2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1,-15.,15.);
+    RooRealVar b5p3(Form("b5p3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b5p3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1,-15.,15.);
+    RooRealVar b5p4(Form("b5p4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b5p4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1,-15.,15.);
+    RooRealVar b5p5(Form("b5p5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b5p5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1,-15.,15.);
 
-    RooRealVar sigma_pow1(Form("sigma_pow1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("sigma_pow1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),4.,3.,8.);
-    RooRealVar turnon_pow1(Form("turnon_pow1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("turnon_pow1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),107.,102,108);
+    RooRealVar sigma_pow1(Form("sigma_pow1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("sigma_pow1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),4.,1.,8.);
+    RooRealVar turnon_pow1(Form("turnon_pow1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("turnon_pow1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),107.,95,115);
     RooRealVar p1_pow1(Form("p1_pow1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("p1_pow1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),-6.3453,-7,-2.);
     RooRealVar cp1_pow1(Form("cp1_pow1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cp1_pow1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),4.7131e-05 ,0.0,1.);
     
-    RooRealVar sigma_pow3(Form("sigma_pow3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("sigma_pow3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),3.5,3.,8.);
-    RooRealVar turnon_pow3(Form("turnon_pow3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("turnon_pow3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),107,102,108);
+    RooRealVar sigma_pow3(Form("sigma_pow3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("sigma_pow3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),3.5,1.,8.);
+    RooRealVar turnon_pow3(Form("turnon_pow3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("turnon_pow3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),107,95,115);
     RooRealVar p1_pow3(Form("p1_pow3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("p1_pow3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),-6.3671,-10,-2.);
     RooRealVar cp1_pow3(Form("cp1_pow3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cp1_pow3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),9.6543e-01,0.,1.);
     RooRealVar p3_pow3(Form("p3_pow3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("p3_pow3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),-4.267,-8.,-2.);
     RooRealVar cp3_pow3(Form("cp3_pow3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cp3_pow3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1.1001e-06,0,1.);
 
-    RooRealVar sigma_pow5(Form("sigma_pow5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("sigma_pow5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),4.0999,3.,8.);
-    RooRealVar turnon_pow5(Form("turnon_pow5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("turnon_pow5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),107.21,102,108);
+    RooRealVar sigma_pow5(Form("sigma_pow5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("sigma_pow5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),4.0999,1.,8.);
+    RooRealVar turnon_pow5(Form("turnon_pow5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("turnon_pow5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),107.21,95,115);
     RooRealVar p1_pow5(Form("p1_pow5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("p1_pow5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),-9.8,-8,-2);
     RooRealVar cp1_pow5(Form("cp1_pow5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cp1_pow5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1.9425e-06,0.,1.);
     RooRealVar p3_pow5(Form("p3_pow5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("p3_pow5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),-6.4921,-8.,-2.);
@@ -145,55 +153,55 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     RooRealVar p5_pow5(Form("p5_pow5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("p5_pow5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),-6.3125,-8.,-2.);
     RooRealVar cp5_pow5(Form("cp5_pow5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cp5_pow5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1.8914e-03,0.0,1.);
 
-    RooRealVar sigma_lau1(Form("sigma_lau1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("sigma_lau1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),2.6496,2.,8.);
-    RooRealVar turnon_lau1(Form("turnon_lau1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("turnon_lau1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),106.05,103,109);
+    RooRealVar sigma_lau1(Form("sigma_lau1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("sigma_lau1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),2.6496,1.,8.);
+    RooRealVar turnon_lau1(Form("turnon_lau1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("turnon_lau1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),106.05,95,115);
     RooRealVar cl1_lau1(Form("cl1_lau1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cl1_lau1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1.e-12,0.0,1.);//untag
     RooRealVar cl2_lau1(Form("cl2_lau1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cl2_lau1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),0.7 ,0.6,1.);
 
-    RooRealVar sigma_lau2(Form("sigma_lau2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("sigma_lau2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),3.1145,2.,8.);
-    RooRealVar turnon_lau2(Form("turnon_lau2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("turnon_lau2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),105.89,103,109);
+    RooRealVar sigma_lau2(Form("sigma_lau2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("sigma_lau2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),3.1145,1.,8.);
+    RooRealVar turnon_lau2(Form("turnon_lau2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("turnon_lau2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),105.89,95,115);
     RooRealVar cl1_lau2(Form("cl1_lau2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cl1_lau2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1.2209e-05,0.,1.);
     RooRealVar cl2_lau2(Form("cl2_lau2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cl2_lau2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),9.2780e-01,0.5,1.0);
     RooRealVar cl3_lau2(Form("cl3_lau2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cl3_lau2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1.2371e-07,0,1.);
 
-    RooRealVar sigma_lau3(Form("sigma_lau3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("sigma_lau3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),3.53,2.,8.);
-    RooRealVar turnon_lau3(Form("turnon_lau3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("turnon_lau3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),107.2,103,109);
+    RooRealVar sigma_lau3(Form("sigma_lau3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("sigma_lau3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),3.53,1.,8.);
+    RooRealVar turnon_lau3(Form("turnon_lau3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("turnon_lau3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),104.2,95,115);
     RooRealVar cl1_lau3(Form("cl1_lau3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cl1_lau3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),9.3514e-10,0.,1.);
     RooRealVar cl2_lau3(Form("cl2_lau3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cl2_lau3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),9.5466e-08,0.,1.);
     RooRealVar cl3_lau3(Form("cl3_lau3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cl3_lau3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),8.7939e-11,0,1.);
     RooRealVar cl4_lau3(Form("cl4_lau3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cl4_lau3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),9.0697e-01,0.9,1.);
 
-    RooRealVar sigma_lau4(Form("sigma_lau4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("sigma_lau4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),3.53,2.,8.);
-    RooRealVar turnon_lau4(Form("turnon_lau4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("turnon_lau4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),107.2,103,109);
-    RooRealVar cl1_lau4(Form("cl1_lau4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cl1_lau4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),9.3514e-05,0.,1.);
-    RooRealVar cl2_lau4(Form("cl2_lau4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cl2_lau4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),9.5466e-02,0.,1.);
-    RooRealVar cl3_lau4(Form("cl3_lau4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cl3_lau4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),8.7939e-17,0,1.);
+    RooRealVar sigma_lau4(Form("sigma_lau4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("sigma_lau4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),3.53,1.,8.);
+    RooRealVar turnon_lau4(Form("turnon_lau4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("turnon_lau4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),102.2,95,115);
+    RooRealVar cl1_lau4(Form("cl1_lau4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cl1_lau4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),9.3514e-1,0.,1.);
+    RooRealVar cl2_lau4(Form("cl2_lau4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cl2_lau4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),9.5466e-1,0.,1.);
+    RooRealVar cl3_lau4(Form("cl3_lau4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cl3_lau4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),8.7939e-1,0,1.);
     RooRealVar cl4_lau4(Form("cl4_lau4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cl4_lau4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),0.99,0.9,1.);
-    RooRealVar cl5_lau4(Form("cl5_lau4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cl5_lau4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),0.,0,1.);
+    RooRealVar cl5_lau4(Form("cl5_lau4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cl5_lau4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),0.1,0,1.);
 
-    RooRealVar sigma_lau5(Form("sigma_lau5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("sigma_lau5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),3.3253,2.,8.);
-    RooRealVar turnon_lau5(Form("turnon_lau5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("turnon_lau5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),105.41,103,110);
+    RooRealVar sigma_lau5(Form("sigma_lau5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("sigma_lau5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),3.3253,1.,8.);
+    RooRealVar turnon_lau5(Form("turnon_lau5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("turnon_lau5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),105.41,95,115);
     RooRealVar cl1_lau5(Form("cl1_lau5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cl1_lau5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),3.8677e-05,0.,.1);
     RooRealVar cl2_lau5(Form("cl2_lau5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cl2_lau5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),4.9106e-01,0.,.9);
     RooRealVar cl3_lau5(Form("cl3_lau5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cl3_lau5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),2.7235e-09,0,.0001);
     RooRealVar cl4_lau5(Form("cl4_lau5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cl4_lau5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),6.1470e-01 ,0.1,1.);
     RooRealVar cl5_lau5(Form("cl5_lau5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cl5_lau5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1.5457e-09,0,1e-4);
-    RooRealVar cl6_lau5(Form("cl6_lau5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cl6_lau5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),2.5973e-02,0.0,0.5);
+    RooRealVar cl6_lau5(Form("cl6_lau5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cl6_lau5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),2.7473e-02,0.0,0.5);
 
-    RooRealVar sigma_exp1(Form("sigma_exp1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("sigma_exp1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),3.56,2.,7.);
-    RooRealVar turnon_exp1(Form("turnon_exp1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("turnon_exp1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),106.97,103.,110);
+    RooRealVar sigma_exp1(Form("sigma_exp1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("sigma_exp1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),3.56,1.,7.);
+    RooRealVar turnon_exp1(Form("turnon_exp1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("turnon_exp1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),106.97,95,115);
     RooRealVar p1_exp1(Form("p1_exp1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("p1_exp1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),-4e-02,-0.1,0.);
     RooRealVar cp1_exp1(Form("cp1_exp1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cp1_exp1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),0.01,0,1.);
 
-    RooRealVar sigma_exp3(Form("sigma_exp3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("sigma_exp3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),4.,2.,7.);
-    RooRealVar turnon_exp3(Form("turnon_exp3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("turnon_exp3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),107.5,103.,110);
+    RooRealVar sigma_exp3(Form("sigma_exp3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("sigma_exp3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),4.,1.,7.);
+    RooRealVar turnon_exp3(Form("turnon_exp3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("turnon_exp3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),107.5,95.,115);
     RooRealVar p1_exp3(Form("p1_exp3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("p1_exp3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),-3.4437e-02,-0.1,0.);
     RooRealVar cp1_exp3(Form("cp1_exp3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cp1_exp3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1.2335e-02,0.,1.);
     RooRealVar p3_exp3(Form("p3_exp3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("p3_exp3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),-6.5070e-02,-0.5,0.);
     RooRealVar cp3_exp3(Form("cp3_exp3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cp3_exp3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),5.9216e-01,0,1.);
 
-    RooRealVar sigma_exp5(Form("sigma_exp5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("sigma_exp5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),4.12,2.,8);
-    RooRealVar turnon_exp5(Form("turnon_exp5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("turnon_exp5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),107.21,103.,110);
+    RooRealVar sigma_exp5(Form("sigma_exp5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("sigma_exp5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),4.12,1.,8);
+    RooRealVar turnon_exp5(Form("turnon_exp5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("turnon_exp5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),107.21,95.,115);
     RooRealVar p1_exp5(Form("p1_exp5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("p1_exp5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),-5.1816e-02,-0.1,0.);
     RooRealVar cp1_exp5(Form("cp1_exp5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("cp1_exp5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),0.5,0.0,1.);
     RooRealVar p3_exp5(Form("p3_exp5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("p3_exp5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),-4.3062e-02,-0.5,0.);
@@ -258,23 +266,6 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     gauxexp1.setBufferFraction(0.25);
     gauxexp3.setBufferFraction(0.25);
     gauxexp5.setBufferFraction(0.25);
-        
-    // RooArgSet *params_pow1 = gauxpow1.getParameters((const RooArgSet*)(0));
-    // RooArgSet *params_pow3 = gauxpow3.getParameters((const RooArgSet*)(0));
-    // RooArgSet *params_pow5 = gauxpow5.getParameters((const RooArgSet*)(0));
-    // RooArgSet *params_exp1 = gauxexp1.getParameters((const RooArgSet*)(0));
-    // RooArgSet *params_exp3 = gauxexp3.getParameters((const RooArgSet*)(0));
-    // RooArgSet *params_exp5 = gauxexp5.getParameters((const RooArgSet*)(0));
-    // RooArgSet *params_lau1 = gauxlau1.getParameters((const RooArgSet*)(0));
-    // RooArgSet *params_lau2 = gauxlau2.getParameters((const RooArgSet*)(0));
-    // RooArgSet *params_lau3 = gauxlau3.getParameters((const RooArgSet*)(0));
-    // RooArgSet *params_lau4 = gauxlau4.getParameters((const RooArgSet*)(0));
-    // RooArgSet *params_lau5 = gauxlau5.getParameters((const RooArgSet*)(0));
-    // RooArgSet *params_bern1 = bern1.getParameters((const RooArgSet*)(0));
-    // RooArgSet *params_bern2 = bern2.getParameters((const RooArgSet*)(0));
-    // RooArgSet *params_bern3 = bern3.getParameters((const RooArgSet*)(0));
-    // RooArgSet *params_bern4 = bern4.getParameters((const RooArgSet*)(0));
-    // RooArgSet *params_bern5 = bern5.getParameters((const RooArgSet*)(0));
 
     cout << "\n\tFinish initializing fitting variables\n" << endl;
 
@@ -301,37 +292,36 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     TFile *f = new TFile(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/outputs/%s_%d_%dxsig.root", channel.Data(), cat, sig),"UPDATE"); 
     hbkg->Write(hbkg->GetName(), TObject::kOverwrite);
     hsb->Write(hsb->GetName(), TObject::kOverwrite);
+    hfr->Write(hfr->GetName(), TObject::kOverwrite);
     hsig->Write(hsig->GetName(), TObject::kOverwrite);
 
 
     int flag; TString status;
     flag = 1; status = "Pass";
-    double dmc, dss, ss, tot_err, ss_cor, delta, chi2, prob, nll;
+    double dmc, dss, ss, tot_err, ss_cor, delta, chi2=0., prob, nll;
 
     int bkg_npars, bkg_ndof;
     RooPlot *frame_bkg;
 
-    mH.setRange("R1",mgg_low,122);
-    mH.setRange("R3",122,128);
-    mH.setRange("R2",128,mgg_high);
+    mH.setRange("range_low",mgg_low,122);
+    mH.setRange("signal",122,128);
+    mH.setRange("range_high",128,mgg_high);
 
     //background function fit
-    bkg_model_fit = bkg_model->fitTo(*dsb,Range("R1,R2"),RooFit::Save(1),RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE)); 
+    bkg_model_fit = bkg_model->fitTo(*dfr,Range("range"),SplitRange(true),Save(1),Minimizer("Minuit2","minimize"),SumW2Error(kTRUE),EvalErrorWall(false)); 
     bkg_npars = bkg_model_fit->floatParsFinal().getSize();
-    bkg_ndof = 118-bkg_npars;
     frame_bkg = mH.frame(Title(Form("Data side band with %s pdf", bkg_fun.Data())));
-    dsb->plotOn(frame_bkg);
-    bkg_model->plotOn(frame_bkg,Range("R1"));
-    bkg_model->plotOn(frame_bkg,Range("R2"));
+    bkg_ndof = 74-bkg_npars;
+    dfr->plotOn(frame_bkg, Cut("mH>128 || mH<122"));
+    bkg_model->plotOn(frame_bkg,NormRange("range_low,signal,range_high"));
+    chi2 = frame_bkg->chiSquare(bkg_npars);
     bkg_model->SetName(bkg_fun);
     bkg_model->Write(bkg_model->GetName(), TObject::kOverwrite);
     nll = bkg_model_fit->minNll();
-    chi2 = frame_bkg->chiSquare(bkg_npars);
     prob = TMath::Prob(chi2*bkg_ndof, bkg_ndof);
-    // if(prob<0.05) status = "Fail";
+    if(prob<0.01) status = "Fail";
     output << "\t" << bkg_fun.Data() << "\tsb:\tnpars = " << bkg_npars << " \tchi^2 = " << chi2 << "\tprob = " << prob << "\tnll: " << nll << endl;
-    bkg_model->plotOn(frame_bkg,Range("R3"));
-    bkg_model->paramOn(frame_bkg, RooFit::Layout(0.34,0.96,0.89),RooFit::Format("NEA",AutoPrecision(1)));
+    bkg_model->paramOn(frame_bkg, Layout(0.34,0.96,0.89),Format("NEA",AutoPrecision(1)));
     frame_bkg->getAttText()->SetTextSize(0.03);
     frame_bkg->Draw();
     gPad->Print(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/test/data_sb_shape_%s_cat%d_%s.pdf",channel.Data(),cat,bkg_fun.Data()));
@@ -340,13 +330,13 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     cout << "\n\t Finish data side band fit\n" << endl;
 
     //background function fit
-    bkg_model_fit = bkg_model->fitTo(*dbkg,RooFit::Save(1),RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE));
+    bkg_model_fit = bkg_model->fitTo(*dbkg,Save(1),Minimizer("Minuit2","minimize"),SumW2Error(kTRUE),EvalErrorWall(false));
     bkg_npars = bkg_model_fit->floatParsFinal().getSize();
-    bkg_ndof = 65-bkg_npars;
+    bkg_ndof = 80-bkg_npars;
     frame_bkg = mH.frame(Title(Form("Background with %s pdf", bkg_fun.Data())));
     dbkg->plotOn(frame_bkg);
     bkg_model->plotOn(frame_bkg);
-    bkg_model->paramOn(frame_bkg, RooFit::Layout(0.34,0.96,0.89),RooFit::Format("NEA",AutoPrecision(1)));
+    bkg_model->paramOn(frame_bkg, Layout(0.34,0.96,0.89),Format("NEA",AutoPrecision(1)));
     frame_bkg->getAttText()->SetTextSize(0.03);
     bkg_model->SetName(bkg_fun);
     bkg_model->Write(bkg_model->GetName(), TObject::kOverwrite);
@@ -365,37 +355,39 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     //     p->setConstant(kTRUE);
     // }
 
-    // mean.setConstant(kTRUE); sigma_b1.setConstant(kTRUE); sigma_b2.setConstant(kTRUE); sigma_b3.setConstant(kTRUE); sigma_b4.setConstant(kTRUE); sigma_b5.setConstant(kTRUE); step_b1.setConstant(kTRUE); step_b2.setConstant(kTRUE); step_b3.setConstant(kTRUE); step_b4.setConstant(kTRUE); step_b5.setConstant(kTRUE); p0.setConstant(kTRUE); b1p1.setConstant(kTRUE); b2p2.setConstant(kTRUE); b3p1.setConstant(kTRUE); b3p2.setConstant(kTRUE); b3p3.setConstant(kTRUE); b4p1.setConstant(kTRUE); b4p2.setConstant(kTRUE); b4p3.setConstant(kTRUE); b4p4.setConstant(kTRUE); b5p1.setConstant(kTRUE); b5p2.setConstant(kTRUE); b5p3.setConstant(kTRUE); b5p4.setConstant(kTRUE); b5p5.setConstant(kTRUE); sigma_pow1.setConstant(kTRUE); turnon_pow1.setConstant(kTRUE); p1_pow1.setConstant(kTRUE); cp1_pow1.setConstant(kTRUE); sigma_pow3.setConstant(kTRUE); turnon_pow3.setConstant(kTRUE); p1_pow3.setConstant(kTRUE); cp1_pow3.setConstant(kTRUE); p3_pow3.setConstant(kTRUE); cp3_pow3.setConstant(kTRUE); sigma_pow5.setConstant(kTRUE); turnon_pow5.setConstant(kTRUE); p1_pow5.setConstant(kTRUE); cp1_pow5.setConstant(kTRUE); p3_pow5.setConstant(kTRUE); cp3_pow5.setConstant(kTRUE); p5_pow5.setConstant(kTRUE); cp5_pow5.setConstant(kTRUE); sigma_lau1.setConstant(kTRUE); turnon_lau1.setConstant(kTRUE); cl1_lau1.setConstant(kTRUE); cl2_lau1.setConstant(kTRUE); sigma_lau2.setConstant(kTRUE); turnon_lau2.setConstant(kTRUE); cl1_lau2.setConstant(kTRUE); cl2_lau2.setConstant(kTRUE); cl3_lau2.setConstant(kTRUE); sigma_lau3.setConstant(kTRUE); turnon_lau3.setConstant(kTRUE); cl1_lau3.setConstant(kTRUE); cl2_lau3.setConstant(kTRUE); cl3_lau3.setConstant(kTRUE); cl4_lau3.setConstant(kTRUE); sigma_lau4.setConstant(kTRUE); turnon_lau4.setConstant(kTRUE); cl1_lau4.setConstant(kTRUE); cl2_lau4.setConstant(kTRUE); cl3_lau4.setConstant(kTRUE); cl4_lau4.setConstant(kTRUE); cl5_lau4.setConstant(kTRUE); sigma_lau5.setConstant(kTRUE); turnon_lau5.setConstant(kTRUE); cl1_lau5.setConstant(kTRUE); cl2_lau5.setConstant(kTRUE); cl3_lau5.setConstant(kTRUE); cl4_lau5.setConstant(kTRUE); cl5_lau5.setConstant(kTRUE); cl6_lau5.setConstant(kTRUE); sigma_exp1.setConstant(kTRUE); turnon_exp1.setConstant(kTRUE); p1_exp1.setConstant(kTRUE); cp1_exp1.setConstant(kTRUE); sigma_exp3.setConstant(kTRUE); turnon_exp3.setConstant(kTRUE); p1_exp3.setConstant(kTRUE); cp1_exp3.setConstant(kTRUE); p3_exp3.setConstant(kTRUE); cp3_exp3.setConstant(kTRUE); sigma_exp5.setConstant(kTRUE); turnon_exp5.setConstant(kTRUE); p1_exp5.setConstant(kTRUE); cp1_exp5.setConstant(kTRUE); p3_exp5.setConstant(kTRUE); cp3_exp5.setConstant(kTRUE); p5_exp5.setConstant(kTRUE); cp5_exp5.setConstant(kTRUE); 
 
     cout << "\t=================================\n";
     cout << "\n\tFinish background function fit\n" << endl;
 
     //signal function fit
-    RooRealVar sigma("sigma","sigma",2.,0.,5.); 
+    RooRealVar sigma("sigma","sigma",3.,0.1,5.); 
     RooRealVar MH("MH","MH",125., 124., 126.); 
     RooGaussian sig_gau("sig_gau","sig_gau",mH,MH,sigma);
     
-    RooRealVar sigma_CB("sigma_CB","sigma_CB",1.0, 0.01, 1.); 
+    RooRealVar sigma_CB("sigma_CB","sigma_CB",0.5, 0.1, 1.); 
     RooRealVar alpha("alpha","alpha",0.5, 0., 1.0); 
-    RooRealVar n_CB("n_CB","n_CB",7.,1.,15.); 
-    RooRealVar fracG1("fracG1","fracG1",0.3,0.,0.5); 
+    RooRealVar n_CB("n_CB","n_CB",12.,1.,20.); 
+    RooRealVar fracG1("fracG1","fracG1",0.1,0.,1.0); 
     RooCBShape CBshape("CBShape", "CBShape", mH, MH, sigma_CB, alpha, n_CB);
     RooAddPdf* signal = new RooAddPdf("signal","signal",RooArgList(sig_gau, CBshape),fracG1);
     sigma.setConstant(false);MH.setConstant(false);sigma_CB.setConstant(false);alpha.setConstant(false);n_CB.setConstant(false);fracG1.setConstant(false);
 
     RooDataHist* dsig = new RooDataHist("data_bin","dataset with x", mH, hsig);
     RooFitResult *signal_fit;
-    signal_fit = signal->fitTo(*dsig,RooFit::Save(1),RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE)); //FIXME kTRUE or kFALSE
-    sigma.setConstant(true);MH.setConstant(true);sigma_CB.setConstant(true);alpha.setConstant(true);n_CB.setConstant(true);fracG1.setConstant(true);
+    signal_fit = signal->fitTo(*dsig,Save(1),Minimizer("Minuit2","minimize"),SumW2Error(kTRUE),EvalErrorWall(false)); //FIXME kTRUE or kFALSE
     int sig_npars = signal_fit->floatParsFinal().getSize();
-    int sig_ndof = 65-sig_npars;
+    int sig_ndof = 160-sig_npars;
     RooPlot *frame_sig = mH.frame(Title("Signal with distorted Gaussian pdf"));
     dsig->plotOn(frame_sig, DataError(RooAbsData::SumW2));
     signal->plotOn(frame_sig);
+    signal->paramOn(frame_sig, Layout(0.4,0.96,0.89),Format("NEA",AutoPrecision(1)));
     signal->Write(signal->GetName(), TObject::kOverwrite);
     output << "\t" << bkg_fun.Data() << "\tsig:\tnpars = " << sig_npars << "\tchi^2 = " << frame_sig->chiSquare(sig_npars) << "\tprob = " << TMath::Prob(frame_sig->chiSquare(sig_npars)*sig_ndof, sig_ndof) << endl;
     frame_sig->Draw();
     gPad->Print(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/test/signal_shape_%s_cat%d_%s.pdf",channel.Data(),cat,bkg_fun.Data()));
+
+
+    sigma.setConstant(true);MH.setConstant(true);sigma_CB.setConstant(true);alpha.setConstant(true);n_CB.setConstant(true);fracG1.setConstant(true);
 
     cout << "\t=================================" << endl;
     cout << "\n\t Finish signal function fit\n" << endl;
@@ -410,7 +402,7 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     // asimov dataset fit
     RooAddPdf* model = new RooAddPdf("model","model",RooArgList(*signal, *bkg_model),RooArgList(nsig,nbkg));
     RooFitResult *model_fit;
-    int data_npars, data_ndof;
+    int data_npars, data_ndof, fit_status;
 
     TCanvas *canv = new TCanvas();
     RooPlot *frame_data = mH.frame();
@@ -423,32 +415,30 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     pad2->Draw();
     pad1->cd();
 
-    model_fit = model->fitTo(*ddata,RooFit::Save(1),RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE)); //FIXME kTRUE or kFALSE
+    model_fit = model->fitTo(*ddata,Save(1),Minimizer("Minuit2","minimize"),SumW2Error(kTRUE)); //FIXME kTRUE or kFALSE
+    fit_status = model_fit->status();
     dmc = nsig.getError();
     data_npars = model_fit->floatParsFinal().getSize();
-    data_ndof = 65-data_npars;
+    data_ndof = 80-data_npars;
     ddata->plotOn(frame_data, Name("data"), DataError(RooAbsData::SumW2));
     RooHist *plotdata = (RooHist*)frame_data->getObject(frame_data->numItems()-1);
     model->plotOn(frame_data, Name("fitmcweight"));
     chi2 = frame_data->chiSquare(data_npars);
     prob = TMath::Prob(chi2*data_ndof, data_ndof);
     frame_data->remove("fitmcweight");
-    output << "\t" << bkg_fun.Data() << "\tdata(MC):\tnpars = " << data_npars << "\tchi^2 = " << chi2 << "\tprob = " << prob << endl;
+    output << "\t" << bkg_fun.Data() << "\tdata(MC):\tnpars = " << data_npars << "\tchi^2 = " << chi2 << "\tprob = " << prob << "\tstatus = " << fit_status << endl;
 
-    model_fit = model->fitTo(*ddata,RooFit::Save(1),RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kFALSE)); //FIXME kTRUE or kFALSE
+    model_fit = model->fitTo(*ddata,Save(1),Minimizer("Minuit2","minimize"),AsymptoticError(kFALSE)); //FIXME kTRUE or kFALSE
+    fit_status = model_fit->status();
     ss = nsig.getVal();
     dss = nsig.getError();
-    tot_err = sqrt(dss*dss+ss*ss);
-    delta = abs(ss)-2*dmc;
-    if (delta<0) ss_cor = 0;
-    else{
-        if (ss>0) ss_cor = delta;
-        else ss_cor = -1. * delta;
-    }
+    tot_err = sqrt(dss * dss + ss * ss);
+    delta = fabs(ss) - 2 * dmc;
+    ss_cor = (delta < 0) ? 0 : ((ss > 0) ? delta : -delta);
     if (delta > 0.2 * dss) status = "Fail";
 
     data_npars = model_fit->floatParsFinal().getSize();
-    data_ndof = 65-data_npars;
+    data_ndof = 80-data_npars;
 
     // if(ss < 0) frame_data->SetMinimum(ss);
     // ddata->plotOn(frame_data, Name("data"), DataError(RooAbsData::SumW2));
@@ -461,7 +451,7 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     // model->plotOn(frame_data, Name("signal"), Components(sigPdf->GetName()), LineStyle(ELineStyle::kDashed), LineColor(kGreen));
     model->plotOn(frame_data, Name("background"), Components(bkg_model->GetName()), LineStyle(ELineStyle::kDashed), LineColor(kRed));
 
-    if(prob<0.05) status="Fail";
+    if(prob<0.01) status="Fail";
     model->SetName(Form("%s_model", bkg_fun.Data()));
     frame_data->SetTitle(Form("Pesudo data with with x%d signal, prob: %.3f", sig, prob));
     frame_data->SetXTitle("");
@@ -469,7 +459,7 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     frame_data->SetTitleSize(0.056, "Y");
     frame_data->SetTitleOffset(0.75, "Y");
     // model->Write(model->GetName(), TObject::kOverwrite);
-    output << "\t" << bkg_fun.Data() << "\tdata(Psu):\tnpars = " << data_npars << "\tchi^2 = " << chi2 << "\tprob = " << prob << endl;
+    output << "\t" << bkg_fun.Data() << "\tdata(Psu):\tnpars = " << data_npars << "\tchi^2 = " << chi2 << "\tprob = " << prob << "\tstatus = " << fit_status << endl;
     output << "\t" << bkg_fun.Data() << "\tSS:\tnsig = " << ss << "\tdmc = " << dmc << "\tss_cor = " << ss_cor << "\tdss = " << dss << "\ttot_err = " << tot_err << "\tstatus = " << status.Data() << "\n" << endl;
     // output << "\tnbkg = " << nbkg.getVal() << "\tnbkg_err = " << nbkg.getError() << "\n" << endl;
 

@@ -275,7 +275,7 @@ class Task():
                         job_info = json.load(f_in)
                         copied = True
                 except:
-                    os.system("sleep 1s")
+                    os.system("sleep 0.1s")
 
             self.phys_summary["n_events_initial"] += job_info["n_events"]
             if not self.config["sample"]["is_data"]:

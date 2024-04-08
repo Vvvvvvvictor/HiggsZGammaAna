@@ -19,15 +19,24 @@ log_path = '/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/HiggsDNA/eos_logs/
 # dataset_years = ["2017"]#, "2017", "2018"]
 
 dataset_type = 'data'
-dataset_names = ["Data"]
-dataset_years = ["2016preVFP", "2016postVFP", "2017", "2018"]
+dataset_names = ["Data_SingleMuon", "Data_DoubleMuon", "Data_SingleElectron", "Data_DoubleEG"] # "Data_SingleMuon", "Data_DoubleMuon", "Data_SingleElectron", "Data_DoubleEG"
+dataset_years = ["2017"] #2016preVFP", "2016postVFP", "2017", "2018"]
 
 cutflow_type = ['zgammas','zgammas_ele','zgammas_mu','zgammas_w','zgammas_ele_w','zgammas_mu_w']
 type_num = len(cutflow_type)
 cut_type = ['all', 'N_lep_sel','trig_cut','lep_pt_cut','has_g_cand', 'os_cut', 'has_z_cand','sel_h_1','sel_h_2','sel_h_3']
+cut_name = {
+    'zgammas':['No selction', r'$N_{l}\geq2$', r'e, ee trigger || $\mu$, $\mu\mu$ trigger', r'lepton trigger $p_{T}$ cut', r'$N_{\gamma}\geq1$', 'Opposite charge', r'80GeV<m_{ll}<100GeV', r'p_{T}^{\gamma}>15./110.', r'm_{ll}+m_{ll\gamma}<185GeV', r'100GeV<m_{ll\gamma}<180GeV'], 
+    'zgammas_ele':['No selction', r'$N_{e}\geq2$', 'e, ee trigger', r'e trigger $p_{T}$ cut', r'$N_{\gamma}\geq1$', 'Opposite charge', r'80GeV<$m_{ee}$<100GeV', r'$p_{T}^{\gamma}$>15./110.', r'$m_{ee}+m_{ee\gamma}$<185GeV', r'100GeV<$m_{ee\gamma}$<180GeV'],
+    'zgammas_mu':['No selction', r'$N_{\mu}\geq2$', r'$\mu$, $\mu\mu$ trigger', r'$\mu$ trigger $p_{T}$ cut', r'$N_{\gamma}\geq1$', 'Opposite charge', r'80GeV<$m_{\mu\mu}$<100GeV', r'$p_{T}^{\gamma}$>15./110.', r'$m_{\mu\mu}+m_{\mu\mu\gamma}$<185GeV', r'100GeV<$m_{\mu\mu\gamma}$<180GeV'], 
+    'zgammas_w':['No selction', r'$N_{l}\geq2$', r'e, ee trigger || $\mu$, $\mu\mu$ trigger', r'lepton trigger $p_{T}$ cut', r'$N_{\gamma}\geq1$', 'Opposite charge', r'80GeV<m_{ll}<100GeV', r'p_{T}^{\gamma}>15./110.', r'm_{ll}+m_{ll\gamma}<185GeV', r'100GeV<m_{ll\gamma}<180GeV'],  
+    'zgammas_ele_w':['No selction', r'$N_{e}\geq2$', 'e, ee trigger', r'e trigger $p_{T}$ cut', r'$N_{\gamma}\geq1$', 'Opposite charge', r'80GeV<$m_{ee}$<100GeV', r'$p_{T}^{\gamma}$>15./110.', r'$m_{ee}+m_{ee\gamma}$<185GeV', r'100GeV<$m_{ee\gamma}$<180GeV'],
+    'zgammas_mu_w':['No selction', r'$N_{\mu}\geq2$', r'$\mu$, $\mu\mu$ trigger', r'$\mu$ trigger $p_{T}$ cut', r'$N_{\gamma}\geq1$', 'Opposite charge', r'80GeV<$m_{\mu\mu}$<100GeV', r'$p_{T}^{\gamma}$>15./110.', r'$m_{\mu\mu}+m_{\mu\mu\gamma}$<185GeV', r'100GeV<$m_{\mu\mu\gamma}$<180GeV']
+}
 cut_num = len(cut_type)
 cutflow = {'zgammas':np.array(np.zeros(cut_num)), 'zgammas_ele':np.array(np.zeros(cut_num)), 'zgammas_mu':np.array(np.zeros(cut_num)), 'zgammas_w':np.array(np.zeros(cut_num)), 'zgammas_ele_w':np.array(np.zeros(cut_num)), 'zgammas_mu_w':np.array(np.zeros(cut_num))}
 
+electron_yields_dict, muon_yields_dict = {}, {}
 for dataset in dataset_names:
     for year in dataset_years:
         try:
@@ -53,13 +62,29 @@ for dataset in dataset_names:
                     continue
                 f = open("{}/{}".format(log_dir, log_file), 'r')
                 lines = f.read().split("DEBUG")
-                if len(lines) < (cut_num*6+20):
+                if len(lines) < (cut_num*3+20):
                     continue;
                 print("reading: {}/{}".format(log_dir, log_file))
                 for line in lines:
                     line = line.replace("\n", " ")
-                    if "zgammas" not in line:
-                        continue
+                    # print(line)
+                    match = re.match(r".*?cut type : SelectedElectron,.*? cut.\s*:\s*.*?(.+),.*? yields\s*:\s*.*?(\d+)", line)
+                    if match:
+                        cut = match.group(1)
+                        yields = int(match.group(2))
+                        if cut in electron_yields_dict:
+                            electron_yields_dict[cut] += yields
+                        else:
+                            electron_yields_dict[cut] = yields
+                    # set_trace()
+                    match = re.match(r".*?cut type : SelectedMuon,.*? cut.\s*:\s*.*?(.+),.*? yields\s*:\s*.*?(\d+)", line)
+                    if match:
+                        cut = match.group(1)
+                        yields = int(match.group(2))
+                        if cut not in muon_yields_dict:
+                            muon_yields_dict[cut] = yields
+                        else:
+                            muon_yields_dict[cut] += yields
                     if cuti == cut_num:
                         cutflow[cutflow_type[typei]] += temp
                         temp = np.zeros(cut_num)
@@ -71,6 +96,8 @@ for dataset in dataset_names:
                     match = re.search(r'{}.*?{}.*?yields\s*:\s*.*?(\d+\.\d+)'.format(cutflow_type[typei], cut_type[cuti]), line)
                     if match:
                         yields = float(match.group(1))
+                    else:
+                        continue
                     if 'w' in cutflow_type[typei]:
                         temp[cuti] += yields*weight
                     else:
@@ -79,13 +106,24 @@ for dataset in dataset_names:
                 f.close()
                 break
             # break
-for i in cutflow:
-    print(i)
-    for j in cutflow[i]:
-        if 'w' in i:
-            print('%.3f'%j)
+    lepton_flag = 0
+
+for name in cutflow:
+    print(name)
+    cuts = cut_name[name]
+    for i, yields in enumerate(cutflow[name]):
+        cut = cuts[i]
+        # if i == 1 and 'w' not in name:
+        #     if 'mu' in name:
+        #         # print(muon_yields_dict)
+        #         print('\n'.join([f'{cut:>40} {yields:.0f}' for cut, yields in muon_yields_dict.items()]))
+        #     if "ele" in name:
+        #         # print(electron_yields_dict)
+        #         print('\n'.join([f'{cut:>40} {yields:.0f}' for cut, yields in electron_yields_dict.items()]))
+        if 'w' in name:
+            print(f'{cut:>40} {yields:.3f}')
         else:
-            print(int(j))
+            print(f'{cut:>40} {yields:.0f}')
     print(' ')
 end_time = time.time()
 run_time = end_time - start_time

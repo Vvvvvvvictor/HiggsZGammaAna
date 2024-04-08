@@ -352,7 +352,17 @@ class ZGammaTaggerRun2(Tagger):
         FSRphotons = awkward.Array(FSRphotons, with_name = "Momentum4D")
 
         #awkward_utils.add_field(events, "gamma_fsr_pt",  awkward.fill_none(FSRphotons.pt, DUMMY_VALUE))
-        
+
+        ee_pairs = awkward.combinations(electrons, 2, fields = ["LeadLepton", "SubleadLepton"])
+        mm_pairs = awkward.combinations(muons, 2, fields = ["LeadLepton", "SubleadLepton"])
+        z_cands = awkward.concatenate([ee_pairs, mm_pairs], axis = 1)
+        z_cands["ZCand"] = z_cands.LeadLepton + z_cands.SubleadLepton
+        os_cut = (z_cands.LeadLepton.charge * z_cands.SubleadLepton.charge) == -1
+        z_cands = z_cands[os_cut]
+        z_cands = z_cands[awkward.argsort(abs(z_cands.ZCand.mass - 91.1876), axis = 1)]
+        z_ee_cut = awkward.fill_none(awkward.firsts(z_cands).LeadLepton.id == 11, False)
+        z_mumu_cut = awkward.fill_none(awkward.firsts(z_cands).LeadLepton.id == 13, False)
+
         # Make trigger cuts 
         if self.year is not None:
             year = self.year[:4]
@@ -378,50 +388,74 @@ class ZGammaTaggerRun2(Tagger):
             single_mu_trigger_cut = awkward.num(events.Photon) >= 0
             double_mu_trigger_cut = awkward.num(events.Photon) >= 0
 
-        ee_pairs = awkward.combinations(electrons, 2, fields = ["LeadLepton", "SubleadLepton"])
-        mm_pairs = awkward.combinations(muons, 2, fields = ["LeadLepton", "SubleadLepton"])
-        z_cands = awkward.concatenate([ee_pairs, mm_pairs], axis = 1)
-        z_cands["ZCand"] = z_cands.LeadLepton + z_cands.SubleadLepton
-        os_cut = z_cands.LeadLepton.charge * z_cands.SubleadLepton.charge == -1
+        z_ee_pairs = z_cands[awkward.fill_none(z_cands.LeadLepton.id == 11, False)]
+        z_mm_pairs = z_cands[awkward.fill_none(z_cands.LeadLepton.id == 13, False)]
+
+        if self.year is not None:
+            year = self.year[:4]
+            e_cut = z_ee_pairs.LeadLepton.pt > self.options["lead_ele_pt"][year]
+            m_cut = z_mm_pairs.LeadLepton.pt > self.options["lead_mu_pt"][year]
+        else:
+            e_cut = z_ee_pairs.LeadLepton.pt > 25
+            m_cut = z_mm_pairs.LeadLepton.pt > 20
+        ee_cut = (z_ee_pairs.LeadLepton.pt > 25) & (z_ee_pairs.SubleadLepton.pt > 15)
+        mm_cut = (z_mm_pairs.LeadLepton.pt > 20) & (z_mm_pairs.SubleadLepton.pt > 10)
+        z_ee_cands = awkward.concatenate([z_ee_pairs[double_ele_trigger_cut & ee_cut], z_ee_pairs[single_ele_trigger_cut & e_cut]], axis = 1)
+        z_mm_cands = awkward.concatenate([z_mm_pairs[double_mu_trigger_cut & mm_cut], z_mm_pairs[single_mu_trigger_cut & m_cut]], axis = 1)
+        ele_cut = awkward.num(z_ee_cands) >= 1
+        muon_cut = awkward.num(z_mm_cands) >= 1
+
+        # if self.year is not None:
+        #     year = self.year[:4]
+        #     m_cut = z_mm_pairs.LeadLepton.pt > self.options["lead_mu_pt"][year]
+        # else:
+        #     m_cut = z_mm_pairs.LeadLepton.pt > 20
+        # mm_cut = (z_mm_pairs.LeadLepton.pt > 20) & (z_mm_pairs.SubleadLepton.pt > 10)
+        # z_mm_cands = awkward.concatenate([z_mm_pairs[double_mu_trigger_cut & mm_cut], z_mm_pairs[single_mu_trigger_cut & m_cut]], axis = 1)
+        # muon_cut = awkward.num(z_mm_cands) >= 1
+
+        z_cands = awkward.concatenate([z_ee_cands, z_mm_cands], axis = 1)
+        os_cut = (z_cands.LeadLepton.charge * z_cands.SubleadLepton.charge) == -1
         z_cands = z_cands[os_cut]
-        z_cands = z_cands[awkward.argsort(abs(z_cands.ZCand.mass - 91.1876), axis = 1)]
-        z_ee_cut = awkward.fill_none(awkward.firsts(z_cands).LeadLepton.id == 11, False)
-        z_mumu_cut = awkward.fill_none(awkward.firsts(z_cands).LeadLepton.id == 13, False)
-
-        # Construct di-electron/di-muon pairs
-        ee_pairs = awkward.combinations(electrons, 2, fields = ["LeadLepton", "SubleadLepton"])
-        if self.year is not None:
-            year = self.year[:4]
-            e_cut = ee_pairs.LeadLepton.pt > self.options["lead_ele_pt"][year]
-        else:
-            e_cut = ee_pairs.LeadLepton.pt > 25
-        ee_cut = (ee_pairs.LeadLepton.pt > 25) & (ee_pairs.SubleadLepton.pt > 15)
-        ee_pairs = ee_pairs[(double_ele_trigger_cut & ee_cut) | (single_ele_trigger_cut & e_cut)]
-        ele_cut = awkward.num(ee_pairs) >= 1
-
-        mm_pairs = awkward.combinations(muons, 2, fields = ["LeadLepton", "SubleadLepton"])
-        if self.year is not None:
-            year = self.year[:4]
-            m_cut = mm_pairs.LeadLepton.pt > self.options["lead_mu_pt"][year]
-        else:
-            m_cut = mm_pairs.LeadLepton.pt > 20
-        mm_cut = (mm_pairs.LeadLepton.pt > 20) & (mm_pairs.SubleadLepton.pt > 10)
-        mm_pairs = mm_pairs[(double_mu_trigger_cut & mm_cut) | (single_mu_trigger_cut & m_cut)]
-        muon_cut = awkward.num(mm_pairs) >= 1
-
-        # Concatenate these together
-        z_cands = awkward.concatenate([ee_pairs, mm_pairs], axis = 1)
         z_cands["ZCand"] = z_cands.LeadLepton + z_cands.SubleadLepton # these add as 4-vectors since we registered them as "Momentum4D" objects
-        z_cands = z_cands[awkward.argsort(abs(z_cands.ZCand.mass - 91.1876), axis = 1)] # take the one with mass closest to mZ
-
-        # Make Z candidate-level cuts
-        os_cut = z_cands.LeadLepton.charge * z_cands.SubleadLepton.charge == -1
-        z_cands = z_cands[os_cut]
-
         mass_cut = (z_cands.ZCand.mass > 80.) & (z_cands.ZCand.mass < 100.)
-        # mass_cut = (z_cands.ZCand.mass > 50.)
         z_cands = z_cands[mass_cut] # OSSF lepton pairs with m_ll > 50.
-        
+
+        # # Construct di-electron/di-muon pairs
+        # ee_pairs = awkward.combinations(electrons, 2, fields = ["LeadLepton", "SubleadLepton"])
+        # if self.year is not None:
+        #     year = self.year[:4]
+        #     e_cut = ee_pairs.LeadLepton.pt > self.options["lead_ele_pt"][year]
+        # else:
+        #     e_cut = ee_pairs.LeadLepton.pt > 25
+        # ee_cut = (ee_pairs.LeadLepton.pt > 25) & (ee_pairs.SubleadLepton.pt > 15)
+        # ee_pairs = awkward.concatenate([ee_pairs[double_ele_trigger_cut & ee_cut], ee_pairs[single_ele_trigger_cut & e_cut]], axis = 1)
+        # ele_cut = awkward.num(ee_pairs) >= 1
+
+        # mm_pairs = awkward.combinations(muons, 2, fields = ["LeadLepton", "SubleadLepton"])
+        # if self.year is not None:
+        #     year = self.year[:4]
+        #     m_cut = mm_pairs.LeadLepton.pt > self.options["lead_mu_pt"][year]
+        # else:
+        #     m_cut = mm_pairs.LeadLepton.pt > 20
+        # mm_cut = (mm_pairs.LeadLepton.pt > 20) & (mm_pairs.SubleadLepton.pt > 10)
+        # mm_pairs = awkward.concatenate([mm_pairs[double_mu_trigger_cut & mm_cut], mm_pairs[single_mu_trigger_cut & m_cut]], axis = 1)
+        # muon_cut = awkward.num(mm_pairs) >= 1
+
+        # # Concatenate these together
+        # z_cands = awkward.concatenate([ee_pairs, mm_pairs], axis = 1)
+
+        # # Make Z candidate-level cuts
+        # os_cut = (z_cands.LeadLepton.charge * z_cands.SubleadLepton.charge) == -1
+        # z_cands = z_cands[os_cut]
+
+        # z_cands["ZCand"] = z_cands.LeadLepton + z_cands.SubleadLepton # these add as 4-vectors since we registered them as "Momentum4D" objects
+        # mass_cut = (z_cands.ZCand.mass > 80.) & (z_cands.ZCand.mass < 100.)
+        # # mass_cut = (z_cands.ZCand.mass > 50.)
+        # z_cands = z_cands[mass_cut] # OSSF lepton pairs with m_ll > 50.
+
+        # z_cands = z_cands[awkward.argsort(abs(z_cands.ZCand.mass - 91.1876), axis = 1)] # take the one with mass closest to mZ
+
         has_z_cand = awkward.num(z_cands) >= 1
         z_cand = awkward.firsts(z_cands)
 
@@ -524,7 +558,7 @@ class ZGammaTaggerRun2(Tagger):
 
         for cut_type in ["zgammas", "zgammas_ele", "zgammas_mu", "zgammas_w", "zgammas_ele_w", "zgammas_mu_w"]:
             if "_w" in cut_type:
-                if hasattr(events, 'genWeight'):
+                if hasattr(events, 'Generator_weight'):
                     weighted = True
                 else:
                     continue
@@ -538,7 +572,7 @@ class ZGammaTaggerRun2(Tagger):
             elif "mu" in cut_type:
                 cut1 = N_mu_cut & z_mumu_cut #& inv_z_ee_cut
             else:
-                cut1 = (N_mu_cut | N_e_cut) &  (z_ee_cut | z_mumu_cut)
+                cut1 = (N_mu_cut & z_mumu_cut) | (N_e_cut & z_ee_cut)
 
             if "ele" in cut_type:
                 cut2 = cut1 & (single_ele_trigger_cut | double_ele_trigger_cut)

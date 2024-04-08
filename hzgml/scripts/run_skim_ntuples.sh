@@ -4,69 +4,96 @@ echo "==============STARTED=============="
 input="/eos/home-j/jiehan/parquet/nanov9/"
 target="/eos/home-j/jiehan/root/skimmed_ntuples/"
 
-################
-# Signal samples
-################
-# type="signal"
-# for samples in ggH VBF WplusH WminusH ZH ttH;
-# do
-# mkdir -p ${target}${samples}
-# for year in 2016 2017 2018;
-# do
-# echo python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i ${input}${type}/${samples}_M125_${year}/merged_nominal.parquet -o ${target}${samples}/${year}.root
-# python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i ${input}${type}/${samples}_M125_${year}/merged_nominal.parquet -o ${target}${samples}/${year}.root
-# done
-# done
+years=(2016preVFP 2016postVFP 2017 2018)
 
-# mkdir -p /eos/home-j/jiehan/root/2017/skimmed_ntuples/ggH/ /eos/home-j/jiehan/root/2017/skimmed_ntuples/VBF/ /eos/home-j/jiehan/root/2017/skimmed_ntuples/WminusH/ /eos/home-j/jiehan/root/2017/skimmed_ntuples/WplusH/ /eos/home-j/jiehan/root/2017/skimmed_ntuples/ZH/ /eos/home-j/jiehan/root/2017/skimmed_ntuples/ttH/
-python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/2017/mva_based/signal/ggH_M125_2017/merged_nominal.parquet -o /eos/home-j/jiehan/root/2017/skimmed_ntuples/ggH/2017.root
-# python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/2017/mva_based/signal/VBFH_M125_2017/merged_nominal.parquet -o /eos/home-j/jiehan/root/2017/skimmed_ntuples/VBF/2017.root
-# python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/2017/mva_based/signal/WminusH_M125_2017/merged_nominal.parquet -o /eos/home-j/jiehan/root/2017/skimmed_ntuples/WminusH/2017.root
-# python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/2017/mva_based/signal/WplusH_M125_2017/merged_nominal.parquet -o /eos/home-j/jiehan/root/2017/skimmed_ntuples/WplusH/2017.root
-# python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/2017/mva_based/signal/ZH_M125_2017/merged_nominal.parquet -o /eos/home-j/jiehan/root/2017/skimmed_ntuples/ZH/2017.root
-# python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/2017/mva_based/signal/ttH_M125_2017/merged_nominal.parquet -o /eos/home-j/jiehan/root/2017/skimmed_ntuples/ttH/2017.root
+# 函数定义：执行命令并处理错误
+execute_command() {
+    local cmd="$1"
+    local max_retries=10  # 最大重试次数
+    local attempt=1
 
-##############
-# Data samples
-##############
+    while [ $attempt -le $max_retries ]; do
+        echo "Attempt $attempt: $cmd"
+        $cmd && break  # 如果命令成功执行，则跳出循环
+        echo "Command $cmd failed. Retrying..."
+        ((attempt++))
+    done
 
-# type="data"
-# for samples in Data;
-# do
-# mkdir -p ${target}${samples}
-# for year in 2016 2017 2018;
-# do
-# echo python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i ${input}${type}/${samples}_${year}/merged_nominal.parquet -o ${target}${samples}/${year}.root
-# python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i ${input}${type}/${samples}_${year}/merged_nominal.parquet -o ${target}${samples}/${year}.root
-# done
-# done
+    if [ $attempt -gt $max_retries ]; then
+        echo "Error: Maximum retries reached. Command failed: $cmd"
+    fi
+}
 
-# mkdir -p /eos/home-j/jiehan/root/2017/skimmed_ntuples/data/
-# python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/2017/mva_based/data/Data_2017/merged_nominal.parquet -o /eos/home-j/jiehan/root/2017/skimmed_ntuples/data/2017.root
+# 函数定义：处理样本数据
+process_sample() {
+    local sample="$1"
+    local type="$2"
 
-###################
-# Prompt MC samples
-###################
+    for year in "${years[@]}"; do
+        command="python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py "
+        if [ "$type" = "signal" ]; then
+            command+="-i ${input}${type}/${sample}_M125_${year}/merged_nominal.parquet "
+        else
+            command+="-i ${input}${type}/${sample}_${year}/merged_nominal.parquet "
+        fi
+        if [ "$type" = "Data" ]; then
+            command+="-o ${target}data/${year}.root"
+        else
+            command+="-o ${target}${sample}/${year}.root"
+        fi
+        
+        # 使用函数执行命令
+        execute_command "$command" &
+        pid_list+=($!)
+    done
 
-# type="bkgmc"
-# for samples in ZGToLLG DYJetsToLL WGToLNuG ZG2JToG2L2J EWKZ2J TT TTGJets TGJets ttWJets ttZJets WW WZ ZZ;
-# do
-# mkdir -p ${target}${samples}
-# for year in 2016 2017 2018;
-# do
-# echo python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i ${input}${type}/${samples}_${year}/merged_nominal.parquet -o ${target}${samples}/${year}.root
-# python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i ${input}${type}/${samples}_${year}/merged_nominal.parquet -o ${target}${samples}/${year}.root
-# done
-# done
+    # 等待所有后台任务完成
+    for pid in "${pid_list[@]}"; do
+        wait $pid
+    done
 
-# mkdir -p /eos/home-j/jiehan/root/2017/skimmed_ntuples/ZGToLLG/ /eos/home-j/jiehan/root/2017/skimmed_ntuples/ZG2JToG2L2J/ /eos/home-j/jiehan/root/2017/skimmed_ntuples/TGJets/ /eos/home-j/jiehan/root/2017/skimmed_ntuples/TTGJets/
-# python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/2017/mva_based/background/ZGToLLG_2017/merged_nominal.parquet -o /eos/home-j/jiehan/root/2017/skimmed_ntuples/ZGToLLG/2017.root
-# python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/2017/mva_based/background/ZG2JToG2L2J_2017/merged_nominal.parquet -o /eos/home-j/jiehan/root/2017/skimmed_ntuples/ZG2JToG2L2J/2017.root
-# python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/2017/mva_based/background/TTGJets_2017/merged_nominal.parquet -o /eos/home-j/jiehan/root/2017/skimmed_ntuples/TTGJets/2017.root
-# python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/2017/mva_based/background/TGJets_2017/merged_nominal.parquet -o /eos/home-j/jiehan/root/2017/skimmed_ntuples/TGJets/2017.root
+    echo "Sample $sample completed successfully."
+}
 
-# mkdir -p /eos/home-j/jiehan/root/2017/skimmed_ntuples/DYJetsToLL/
-# python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/2017/mva_based/dy/DYJetsToLL_2017/merged_nominal.parquet -o /eos/home-j/jiehan/root/2017/skimmed_ntuples/DYJetsToLL/2017.root
+# 处理 signal 样本
+
+samples=(ggH VBF WplusH WminusH ZH ttH)
+type="signal"
+for sample in "${samples[@]}"; do
+    mkdir -p "$target$sample"
+    # 存储后台任务的进程ID列表
+    pid_list=()
+
+    # 调用函数处理样本数据
+    process_sample "$sample" "$type"
+done
+
+# 处理 data 样本
+
+samples=(Data)
+type="data"
+for sample in "${samples[@]}"; do
+    mkdir -p "$target$sample"
+    # 存储后台任务的进程ID列表
+    pid_list=()
+
+    # 调用函数处理样本数据
+    process_sample "$sample" "$type"
+done
+
+# 处理 bkgmc 样本
+
+samples=(ZGToLLG DYJetsToLL WGToLNuG ZG2JToG2L2J EWKZ2J TT TTGJets TGJets ttWJets ttZJets WW WZ ZZ)
+# samples=(ZGToLLG)
+type="bkgmc"
+for sample in "${samples[@]}"; do
+    mkdir -p "$target$sample"
+    # 存储后台任务的进程ID列表
+    pid_list=()
+
+    # 调用函数处理样本数据
+    process_sample "$sample" "$type"
+done
 
 # Use fake photon background estimation with data-driven
 
@@ -74,14 +101,7 @@ python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntup
 # python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/apply_weight.py
 
 # ######################
-# Non prompt MC samples
+# Non prompt MC sample
 # ######################
-
-# mkdir -p /eos/home-j/jiehan/root/2017/skimmed_ntuples/LLAJJ/ /eos/home-j/jiehan/root/2017/skimmed_ntuples/TT/ /eos/home-j/jiehan/root/2017/skimmed_ntuples/WW/ /eos/home-j/jiehan/root/2017/skimmed_ntuples/WZ/ /eos/home-j/jiehan/root/2017/skimmed_ntuples/ZZ/
-# python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/2017/mva_based/background/LLAJJ_2017/merged_nominal.parquet -o /eos/home-j/jiehan/root/2017/skimmed_ntuples/LLAJJ/2017.root
-# python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/2017/mva_based/background/TT_2017/merged_nominal.parquet -o /eos/home-j/jiehan/root/2017/skimmed_ntuples/TT/2017.root
-# python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/2017/mva_based/background/WW_2017/merged_nominal.parquet -o /eos/home-j/jiehan/root/2017/skimmed_ntuples/WW/2017.root
-# python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/2017/mva_based/background/WZ_2017/merged_nominal.parquet -o /eos/home-j/jiehan/root/2017/skimmed_ntuples/WZ/2017.root
-# python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/2017/mva_based/background/ZZ_2017/merged_nominal.parquet -o /eos/home-j/jiehan/root/2017/skimmed_ntuples/ZZ/2017.root
 
 echo "==============FINISHED==========="

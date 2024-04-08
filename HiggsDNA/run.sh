@@ -1,4 +1,4 @@
-rm -rf /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/HiggsDNA/eos_logs/signal/ggH_M125_201*
-rm -rf /eos/user/j/jiehan/parquet/nanov9/signal/ggH_M125_201*
-rm -rf /eos/user/j/jiehan/parquet/nanov9/signal/analysis_manager.pkl 
-source scripts/run_analysis_signal_run2.sh
+rm -rf eos_logs/data/Data_Double* eos_logs/data/Data_Single*
+rm -rf /eos/user/j/jiehan/parquet/nanov9/data/Data_Double* /eos/user/j/jiehan/parquet/nanov9/data/Data_Single*
+rm -rf /eos/user/j/jiehan/parquet/nanov9/data/analysis_manager.pkl 
+bash scripts/run_analysis_data_run2.sh
