@@ -68,6 +68,8 @@ for dataset in dataset_names:
                 for line in lines:
                     line = line.replace("\n", " ")
                     # print(line)
+                    if "!!!!charge of lead lepton" in line and "[]" not in line:
+                        print(line)
                     match = re.match(r".*?cut type : SelectedElectron,.*? cut.\s*:\s*.*?(.+),.*? yields\s*:\s*.*?(\d+)", line)
                     if match:
                         cut = match.group(1)
