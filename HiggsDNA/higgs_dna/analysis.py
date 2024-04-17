@@ -525,32 +525,33 @@ class AnalysisManager():
                 f = uproot.open(f'/tmp/{os.getpid()}/{os.path.basename(file)}')
 
             runs = f["Runs"]
-            if "genEventCount" in runs.keys() and "genEventSumw" in runs.keys():
-                # sum_weights += numpy.sum(runs["genEventSumw"].array()) #FIXME: use genWeight or Generator_weight
-                sum_genWeight = numpy.sum(runs["genEventSumw"].array())
-                logger.debug("[AnalysisManager : genEventSumw] genEventSumw: {}".format(sum_genWeight))
-            elif "genEventCount_" in runs.keys() and "genEventSumw_" in runs.keys():
-                # sum_weights += numpy.sum(runs["genEventSumw_"].array()) #FIXME: use genWeight or Generator_weight
-                sum_genWeight = numpy.sum(runs["genEventSumw_"].array())
-                logger.debug("[AnalysisManager : genEventSumw_] genEventSumw_: {}".format(sum_genWeight))
+            # if "genEventCount" in runs.keys() and "genEventSumw" in runs.keys():
+            #     # sum_weights += numpy.sum(runs["genEventSumw"].array()) #FIXME: use genWeight or Generator_weight
+            #     sum_genWeight = numpy.sum(runs["genEventSumw"].array())
+            #     logger.debug("[AnalysisManager : genEventSumw] genEventSumw: {}".format(sum_genWeight))
+            # elif "genEventCount_" in runs.keys() and "genEventSumw_" in runs.keys():
+            #     # sum_weights += numpy.sum(runs["genEventSumw_"].array()) #FIXME: use genWeight or Generator_weight
+            #     sum_genWeight = numpy.sum(runs["genEventSumw_"].array())
+            #     logger.debug("[AnalysisManager : genEventSumw_] genEventSumw_: {}".format(sum_genWeight))
             tree = f["Events"]
 
 
             if "Generator_weight" in tree.keys():
                 sum_genWeight = numpy.sum(tree["Generator_weight"])
+                sum_weights += sum_genWeight #FIXME: use genWeight or Generator_weight
                 logger.debug("[AnalysisManager : GeneratorWeightSum] Sum of Generator_weight: {}".format(sum_genWeight))
                 unique_values = numpy.unique(tree["Generator_weight"])
                 for i, value in enumerate(unique_values):
                     unique_counts = numpy.sum(tree["Generator_weight"] == value)
                     logger.debug("[AnalysisManager : GeneratorWeight] Unique values of Generator_weight: {}, numbers: {}".format(value, unique_counts))
 
-            if "genWeight" in tree.keys():
-                sum_genWeight = numpy.sum(tree["genWeight"])
-                # sum_weights += sum_genWeight #FIXME: use genWeight or Generator_weight
-                logger.debug("[AnalysisManager : GenWeightSum] Sum of genWeight: {}".format(sum_genWeight))
-                unique_values = numpy.unique(tree["genWeight"])
-                for value in unique_values:
-                    logger.debug("[AnalysisManager : GenWeight] Unique values of genWeight: ".format(value))
+            # if "genWeight" in tree.keys():
+            #     sum_genWeight = numpy.sum(tree["genWeight"])
+            #     # sum_weights += sum_genWeight #FIXME: use genWeight or Generator_weight
+            #     logger.debug("[AnalysisManager : GenWeightSum] Sum of genWeight: {}".format(sum_genWeight))
+            #     unique_values = numpy.unique(tree["genWeight"])
+            #     for value in unique_values:
+            #         logger.debug("[AnalysisManager : GenWeight] Unique values of genWeight: ".format(value))
                     
             # Get events that is not duplicated
             if is_data:

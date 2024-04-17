@@ -8,6 +8,7 @@ import time
 start_time = time.time()
 
 eos_path = '/eos/home-j/jiehan/parquet/nanov9/'
+# log_path = '/eos/user/j/jiehan/eos_logs/'
 log_path = '/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/HiggsDNA/eos_logs/'
 
 # dataset_type = 'bkgmc'
@@ -19,7 +20,7 @@ log_path = '/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/HiggsDNA/eos_logs/
 # dataset_years = ["2017"]#, "2017", "2018"]
 
 dataset_type = 'data'
-dataset_names = ["Data_SingleMuon", "Data_DoubleMuon", "Data_SingleElectron", "Data_DoubleEG"] # "Data_SingleMuon", "Data_DoubleMuon", "Data_SingleElectron", "Data_DoubleEG"
+dataset_names = ["Data_DoubleMuon"] # "Data_SingleMuon", "Data_DoubleMuon", "Data_SingleElectron", "Data_DoubleEG"
 dataset_years = ["2017"] #2016preVFP", "2016postVFP", "2017", "2018"]
 
 cutflow_type = ['zgammas','zgammas_ele','zgammas_mu','zgammas_w','zgammas_ele_w','zgammas_mu_w']
@@ -39,18 +40,22 @@ cutflow = {'zgammas':np.array(np.zeros(cut_num)), 'zgammas_ele':np.array(np.zero
 electron_yields_dict, muon_yields_dict = {}, {}
 for dataset in dataset_names:
     for year in dataset_years:
-        try:
-            data = pd.read_parquet("{}{}/{}_{}/merged_nominal.parquet".format(eos_path, dataset_type, dataset, year))
-            if 'weight_central_initial' in data.keys():
-                weight = data['weight_central'][1]/data['weight_central_initial'][1]
-            else:
-                weight = 1
-            del data
-        except:
-            weight = 1
+        weight = 1
+        # try:
+        #     data = pd.read_parquet("{}{}/{}_{}/merged_nominal.parquet".format(eos_path, dataset_type, dataset, year))
+        #     print("{}{}/{}_{}/merged_nominal.parquet".format(eos_path, dataset_type, dataset, year))
+        #     if 'weight_central_initial' in data.keys():
+        #         weight = data['weight_central'][1]/data['weight_central_initial'][1]
+        #     else:
+        #         weight = 1
+        #         print("No weight exists, set it as 1.")
+        #     del data
+        # except:
+        #     print("No weight exists, set it as 1.")
         print(weight)
         
         for log_dir in os.listdir("{}{}/{}_{}".format(log_path, dataset_type, dataset, year)):
+            flag = 1
             log_dir = "{}{}/{}_{}/{}".format(log_path, dataset_type, dataset, year, log_dir)
             temp = np.zeros(cut_num)
             typei, cuti = 0, 0
@@ -97,6 +102,7 @@ for dataset in dataset_names:
                     yields = 0
                     match = re.search(r'{}.*?{}.*?yields\s*:\s*.*?(\d+\.\d+)'.format(cutflow_type[typei], cut_type[cuti]), line)
                     if match:
+                        flag = 0
                         yields = float(match.group(1))
                     else:
                         continue
@@ -107,6 +113,11 @@ for dataset in dataset_names:
                     cuti += 1
                 f.close()
                 break
+            if flag:
+                print(log_dir)
+            # for i in range(cut_num):
+            #     if cutflow['zgammas_mu'][i] + cutflow['zgammas_ele'][i] != cutflow['zgammas'][i]:
+            #         print(log_dir)
             # break
     lepton_flag = 0
 

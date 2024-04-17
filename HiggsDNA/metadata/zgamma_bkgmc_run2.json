@@ -25,7 +25,7 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "ZGToLLG"
+            "DYJetsToLL"
         ],
         "years": [
             "2016preVFP", "2016postVFP", "2017","2018"

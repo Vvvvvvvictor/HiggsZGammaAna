@@ -172,10 +172,10 @@ class Tagger():
                 yields = 0
                 individual_eff = 0
                 if weighted:
-                    unique_values = numpy.unique(events[result].Generator_weight)
-                    for value in unique_values:
-                        unique_counts = numpy.sum(events[result].Generator_weight == value)
-                        logger.debug("[Tagger] : Generator_weight that equals to {} is {}".format(value, unique_counts))
+                    # unique_values = numpy.unique(events[result].Generator_weight)
+                    # for value in unique_values:
+                    #     unique_counts = numpy.sum(events[result].Generator_weight == value)
+                    #     logger.debug("[Tagger] : Generator_weight that equals to {} is {}".format(value, unique_counts))
                     yields = numpy.sum(events[result].Generator_weight.to_numpy().astype('float64'))
                     if float(awkward.count(result)) > 0.:
                         individual_eff = yields / awkward.count(result)
