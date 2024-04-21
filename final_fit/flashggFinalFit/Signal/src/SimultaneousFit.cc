@@ -344,13 +344,20 @@ void SimultaneousFit::buildSumOfGaussians(string name, int nGaussians, bool recu
 
   // start looping through the desired number of Gaussians
   for (int g=0; g<nGaussians; g++){
-    float dmRange =3.;
-    if (g>3) dmRange=6.;
+    float dmRange =0.5;
+    float dsRange =1.0;
+    if (g>3) {
+      dmRange=3.;
+      dsRange =2;
+      }
 
     //start defining parameters
-    //RooFormulaVar *dMH = new RooFormulaVar(Form("dMH"),Form("dMH",g),"@0-125.0",RooArgList(*MH));
-    RooFormulaVar *dMH = new RooFormulaVar(Form("dMH"),Form("dMH",g),"@0-@1",RooArgList(*MH,*mass));//bing
-    RooRealVar *dm_p0 = new RooRealVar(Form("dm_g%d_p0",g),Form("dm_g%d_p0",g),0.1,-2.,2.);// bing cat0,1,3
+    RooFormulaVar *dMH = new RooFormulaVar(Form("dMH"),Form("dMH",g),"@0-125.0",RooArgList(*MH));
+    //RooFormulaVar *dMH = new RooFormulaVar(Form("dMH"),Form("dMH",g),"@0-@1",RooArgList(*MH,*mass));//bing
+    //RooRealVar *dm_p0 = new RooRealVar(Form("dm_g%d_p0",g),Form("dm_g%d_p0",g),0.1,-1.,1.);// bing cat0,1,3
+    //RooRealVar *dm_p0 = new RooRealVar(Form("dm_g%d_p0",g),Form("dm_g%d_p0",g),(g+1)*(g+1)*0.1,(g+1)*(g+1)*(-1.),(g+1)*(g+1)*(1.));//dijet
+    //RooRealVar *dm_p0 = new RooRealVar(Form("dm_g%d_p0",g),Form("dm_g%d_p0",g),(g+1)*(g+1)*0.1,(g+1)*(g+1)*(-1.),1.);
+    RooRealVar *dm_p0 = new RooRealVar(Form("dm_g%d_p0",g),Form("dm_g%d_p0",g),(g+1)*0.1,(g+1)*(-1.*dmRange),(g+1)*(dmRange));
     //RooRealVar *dm_p0 = new RooRealVar(Form("dm_g%d_p0",g),Form("dm_g%d_p0",g),0.1,-4.0,4.0);//bing
     RooRealVar *dm_p1 = new RooRealVar(Form("dm_g%d_p1",g),Form("dm_g%d_p1",g),0.01,-0.01,0.01);
     RooRealVar *dm_p2 = new RooRealVar(Form("dm_g%d_p2",g),Form("dm_g%d_p2",g),0.01,-0.01,0.01);
@@ -362,8 +369,9 @@ void SimultaneousFit::buildSumOfGaussians(string name, int nGaussians, bool recu
     RooFormulaVar *mean_order2 = new RooFormulaVar(Form("mean_g%d_order2",g),Form("mean_g%d_order2",g),"((@0+@1))",RooArgList(*MH,*dm_order2));
     //RooRealVar *sigma_p0 = new RooRealVar(Form("sigma_g%d_p0",g),Form("sigma_g%d_p0",g),(g+1)*1.5,1.5,4.0); //bing cat0
     //RooRealVar *sigma_p0 = new RooRealVar(Form("sigma_g%d_p0",g),Form("sigma_g%d_p0",g),(g+1),1.0,4.0); //bing cat1
-    RooRealVar *sigma_p0 = new RooRealVar(Form("sigma_g%d_p0",g),Form("sigma_g%d_p0",g),(g+1)*1.,1.,15.); //bing cat2
-    //RooRealVar *sigma_p0 = new RooRealVar(Form("sigma_g%d_p0",g),Form("sigma_g%d_p0",g),(g+1)*0.42,0.1,15.); //bing jet01
+    //RooRealVar *sigma_p0 = new RooRealVar(Form("sigma_g%d_p0",g),Form("sigma_g%d_p0",g),(g+1)*(g+1)*0.4,(g+1)*(g+1)*0.3,(g+1)*(g+1)); //bing cat2
+    //RooRealVar *sigma_p0 = new RooRealVar(Form("sigma_g%d_p0",g),Form("sigma_g%d_p0",g),(g+1)*(g+1)*dsRange,0.3,25.); //bing dijet
+    RooRealVar *sigma_p0 = new RooRealVar(Form("sigma_g%d_p0",g),Form("sigma_g%d_p0",g),(g+1)*dsRange,0.3,20.); //bing 01jet
     //RooRealVar *sigma_p0 = new RooRealVar(Form("sigma_g%d_p0",g),Form("sigma_g%d_p0",g),(g+1)*0.5,1.0,4.0); //bing cat3
     //RooRealVar *sigma_p0 = new RooRealVar(Form("sigma_g%d_p0",g),Form("sigma_g%d_p0",g),(g+1)*3,1.0,6.0);//bing
     //RooRealVar *sigma_p0 = new RooRealVar(Form("sigma_g%d_p0",g),Form("sigma_g%d_p0",g),(g+1)*0.1,0.1,10);//bing

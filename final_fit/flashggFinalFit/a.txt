@@ -1,194 +1,334 @@
-./HZGamma_BkgModel_UL_xingchen already exist
-[INFO] got intL and sqrts 0x410ec10, 0x7388640
-[INFO] Got mass from ws 0x75df230
-[INFO] opened data entries: sumEntries: 180296
-RooGaussStepBernstein::ftest_pdf_0_13TeV_bern2[ x=CMS_hzg_mass mean=ftest_pdf_0_13TeV_bern2_mean sigma=ftest_pdf_0_13TeV_bern2_sigma_b2 stepVal=step_b2 coefficients=(ftest_pdf_0_13TeV_bern2_b0,ftest_pdf_0_13TeV_bern2_b1) ] = 2.25597
-[INFO]	 Bernstein 1 0 721287 -1.44257e+06 0
-RooGaussStepBernstein::ftest_pdf_0_13TeV_bern3[ x=CMS_hzg_mass mean=ftest_pdf_0_13TeV_bern3_mean sigma=ftest_pdf_0_13TeV_bern3_sigma_b3 stepVal=step_b3 coefficients=(ftest_pdf_0_13TeV_bern3_b0,ftest_pdf_0_13TeV_bern3_b1,ftest_pdf_0_13TeV_bern3_b2) ] = 2.25597
+./HZGamma_BkgModel_UL_xingchen_chi2 already exist
+[INFO] got intL and sqrts 0x3394c00, 0x66fdc30
+[INFO] Got mass from ws 0x6954830
+[INFO] opened data entries: sumEntries: 19599.5
+RooGaussStepBernstein::ftest_pdf_0_13TeV_bern2[ x=CMS_hzg_mass mean=ftest_pdf_0_13TeV_bern2_mean sigma=ftest_pdf_0_13TeV_bern2_sigma_b2 stepVal=step_b2 coefficients=(ftest_pdf_0_13TeV_bern2_b0,ftest_pdf_0_13TeV_bern2_b1) ] = 3.75982
+run chi2 fit
+
+  RooFitResult: minimized FCN value: 1776.75, estimated distance to minimum: 300.264
+                covariance matrix quality: Full matrix, but forced positive-definite
+                Status : MINIMIZE=0 HESSE=0 
+
+    Constant Parameter    Value     
+  --------------------  ------------
+  ftest_pdf_0_13TeV_bern2_mean    0.0000e+00
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+  ftest_pdf_0_13TeV_bern2_b0    3.0000e-01    2.0449e-01 +/-  7.41e-02  <none>
+  ftest_pdf_0_13TeV_bern2_b1    3.0000e-01   -5.3496e-02 +/-  1.67e-02  <none>
+  ftest_pdf_0_13TeV_bern2_sigma_b2    5.0000e+00    2.0000e+00 +/-  6.30e-03  <none>
+               step_b2    1.0500e+02    1.0460e+02 +/-  1.17e-01  <none>
+
+[INFO]	 Bernstein 1 0 1776.75 -3553.51 0
+RooGaussStepBernstein::ftest_pdf_0_13TeV_bern3[ x=CMS_hzg_mass mean=ftest_pdf_0_13TeV_bern3_mean sigma=ftest_pdf_0_13TeV_bern3_sigma_b3 stepVal=step_b3 coefficients=(ftest_pdf_0_13TeV_bern3_b0,ftest_pdf_0_13TeV_bern3_b1,ftest_pdf_0_13TeV_bern3_b2) ] = 3.75982
+run chi2 fit
+
+  RooFitResult: minimized FCN value: 272.473, estimated distance to minimum: 0.000202772
+                covariance matrix quality: Full, accurate covariance matrix
+                Status : MINIMIZE=0 HESSE=0 
+
+    Constant Parameter    Value     
+  --------------------  ------------
+  ftest_pdf_0_13TeV_bern3_mean    0.0000e+00
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+  ftest_pdf_0_13TeV_bern3_b0    3.0000e-01    4.0427e-01 +/-  2.53e-01  <none>
+  ftest_pdf_0_13TeV_bern3_b1    3.0000e-01   -1.2042e-01 +/-  7.54e-02  <none>
+  ftest_pdf_0_13TeV_bern3_b2    3.0000e-01    8.4269e-02 +/-  5.28e-02  <none>
+  ftest_pdf_0_13TeV_bern3_sigma_b3    5.0000e+00    3.1832e+00 +/-  4.53e-01  <none>
+               step_b3    1.0500e+02    1.0375e+02 +/-  4.24e-01  <none>
+
 [INFO]  F-test Prob(chi2>chi2(data)) == 0
-[INFO]	 Bernstein 2 721287 717967 6639.86 0
-RooGaussStepBernstein::ftest_pdf_0_13TeV_bern4[ x=CMS_hzg_mass mean=ftest_pdf_0_13TeV_bern4_mean sigma=ftest_pdf_0_13TeV_bern4_sigma_b4 stepVal=step_b4 coefficients=(ftest_pdf_0_13TeV_bern4_b0,ftest_pdf_0_13TeV_bern4_b1,ftest_pdf_0_13TeV_bern4_b2,ftest_pdf_0_13TeV_bern4_b3) ] = 2.25597
-[INFO]  F-test Prob(chi2>chi2(data)) == 3.98926e-32
-[INFO]	 Bernstein 3 717967 717897 139.197 3.98926e-32
-RooGaussStepBernstein::ftest_pdf_0_13TeV_bern5[ x=CMS_hzg_mass mean=ftest_pdf_0_13TeV_bern5_mean sigma=ftest_pdf_0_13TeV_bern5_sigma_b5 stepVal=step_b5 coefficients=(ftest_pdf_0_13TeV_bern5_b0,ftest_pdf_0_13TeV_bern5_b1,ftest_pdf_0_13TeV_bern5_b2,ftest_pdf_0_13TeV_bern5_b3,ftest_pdf_0_13TeV_bern5_b4) ] = 2.25597
-[INFO]  F-test Prob(chi2>chi2(data)) == 0.00037249
-[INFO]	 Bernstein 4 717897 717891 12.6654 0.00037249
+[INFO]	 Bernstein 2 1776.75 272.473 3008.56 0
+RooGaussStepBernstein::ftest_pdf_0_13TeV_bern4[ x=CMS_hzg_mass mean=ftest_pdf_0_13TeV_bern4_mean sigma=ftest_pdf_0_13TeV_bern4_sigma_b4 stepVal=step_b4 coefficients=(ftest_pdf_0_13TeV_bern4_b0,ftest_pdf_0_13TeV_bern4_b1,ftest_pdf_0_13TeV_bern4_b2,ftest_pdf_0_13TeV_bern4_b3) ] = 3.75982
+run chi2 fit
+
+  RooFitResult: minimized FCN value: 227.469, estimated distance to minimum: 0.00103643
+                covariance matrix quality: Full matrix, but forced positive-definite
+                Status : MINIMIZE=0 HESSE=0 
+
+    Constant Parameter    Value     
+  --------------------  ------------
+  ftest_pdf_0_13TeV_bern4_mean    0.0000e+00
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+  ftest_pdf_0_13TeV_bern4_b0    3.0000e-01    6.9908e+00 +/-  3.00e+00  <none>
+  ftest_pdf_0_13TeV_bern4_b1    3.0000e-01   -1.1071e+00 +/-  4.19e-01  <none>
+  ftest_pdf_0_13TeV_bern4_b2    3.0000e-01    1.1521e+00 +/-  4.27e-01  <none>
+  ftest_pdf_0_13TeV_bern4_b3    3.0000e-01   -1.2104e-01 +/-  1.80e-01  <none>
+  ftest_pdf_0_13TeV_bern4_sigma_b4    5.0000e+00    4.7388e+00 +/-  5.76e-01  <none>
+               step_b4    1.0500e+02    1.0355e+02 +/-  4.61e-01  <none>
+
+[INFO]  F-test Prob(chi2>chi2(data)) == 2.3739e-21
+[INFO]	 Bernstein 3 272.473 227.469 90.0064 2.3739e-21
+RooGaussStepBernstein::ftest_pdf_0_13TeV_bern5[ x=CMS_hzg_mass mean=ftest_pdf_0_13TeV_bern5_mean sigma=ftest_pdf_0_13TeV_bern5_sigma_b5 stepVal=step_b5 coefficients=(ftest_pdf_0_13TeV_bern5_b0,ftest_pdf_0_13TeV_bern5_b1,ftest_pdf_0_13TeV_bern5_b2,ftest_pdf_0_13TeV_bern5_b3,ftest_pdf_0_13TeV_bern5_b4) ] = 3.75982
+run chi2 fit
+
+  RooFitResult: minimized FCN value: 226.882, estimated distance to minimum: 0.00050052
+                covariance matrix quality: Full, accurate covariance matrix
+                Status : MINIMIZE=0 HESSE=0 
+
+    Constant Parameter    Value     
+  --------------------  ------------
+  ftest_pdf_0_13TeV_bern5_mean    0.0000e+00
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+  ftest_pdf_0_13TeV_bern5_b0    3.0000e-01    8.0271e-01 +/-  1.56e+00  <none>
+  ftest_pdf_0_13TeV_bern5_b1    3.0000e-01    2.4473e-02 +/-  1.17e-01  <none>
+  ftest_pdf_0_13TeV_bern5_b2    3.0000e-01    9.1454e-02 +/-  1.86e-01  <none>
+  ftest_pdf_0_13TeV_bern5_b3    3.0000e-01    1.5160e-02 +/-  1.02e-01  <none>
+  ftest_pdf_0_13TeV_bern5_b4    3.0000e-01    3.4248e-02 +/-  8.07e-02  <none>
+  ftest_pdf_0_13TeV_bern5_sigma_b5    5.0000e+00    5.0933e+00 +/-  7.31e-01  <none>
+               step_b5    1.0500e+02    1.0356e+02 +/-  4.72e-01  <none>
+
+[INFO]  F-test Prob(chi2>chi2(data)) == 0.278339
+[INFO]	 Bernstein 4 227.469 226.882 1.17518 0.278339
 [INFO] Determining Envelope Functions for Family Bernstein, cat 0
-[INFO] Upper end Threshold for highest order function 0.1
-[INFO] 	 Bernstein 1 0 721287 -1.44257e+06 0
+[INFO] Upper end Threshold for highest order function 0.05
+run chi2 fit
+
+  RooFitResult: minimized FCN value: 1776.75, estimated distance to minimum: 300.264
+                covariance matrix quality: Full matrix, but forced positive-definite
+                Status : MINIMIZE=0 HESSE=0 
+
+    Constant Parameter    Value     
+  --------------------  ------------
+  env_pdf_0_13TeV_bern2_mean    0.0000e+00
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+  env_pdf_0_13TeV_bern2_b0    3.0000e-01    2.0449e-01 +/-  7.41e-02  <none>
+  env_pdf_0_13TeV_bern2_b1    3.0000e-01   -5.3496e-02 +/-  1.67e-02  <none>
+  env_pdf_0_13TeV_bern2_sigma_b2    5.0000e+00    2.0000e+00 +/-  6.30e-03  <none>
+               step_b2    1.0500e+02    1.0460e+02 +/-  1.17e-01  <none>
+
+[INFO] 	 Bernstein 1 0 1776.75 -3553.51 0
 [INFO] Calculating GOF for pdf ext, using 6 fitted parameters
-[INFO] Chi2 in Observed =  3412.75
+[INFO] Chi2 in Observed =  2870.45
 [INFO] p-value  =  0
-[INFO] 	 Bernstein 2 721287 717967 6639.86 0
+run chi2 fit
+
+  RooFitResult: minimized FCN value: 272.473, estimated distance to minimum: 0.000202772
+                covariance matrix quality: Full, accurate covariance matrix
+                Status : MINIMIZE=0 HESSE=0 
+
+    Constant Parameter    Value     
+  --------------------  ------------
+  env_pdf_0_13TeV_bern3_mean    0.0000e+00
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+  env_pdf_0_13TeV_bern3_b0    3.0000e-01    4.0427e-01 +/-  2.53e-01  <none>
+  env_pdf_0_13TeV_bern3_b1    3.0000e-01   -1.2042e-01 +/-  7.54e-02  <none>
+  env_pdf_0_13TeV_bern3_b2    3.0000e-01    8.4269e-02 +/-  5.28e-02  <none>
+  env_pdf_0_13TeV_bern3_sigma_b3    5.0000e+00    3.1832e+00 +/-  4.53e-01  <none>
+               step_b3    1.0500e+02    1.0375e+02 +/-  4.24e-01  <none>
+
+[INFO] 	 Bernstein 2 1776.75 272.473 3008.56 0
 [INFO] Calculating GOF for pdf ext, using 7 fitted parameters
-[INFO] Chi2 in Observed =  344.256
-[INFO] p-value  =  0.000116495
-[INFO] 	 Bernstein 3 717967 717897 139.197 3.98926e-32
+[INFO] Chi2 in Observed =  358.337
+[INFO] p-value  =  1.42806e-05
+run chi2 fit
+
+  RooFitResult: minimized FCN value: 227.469, estimated distance to minimum: 0.00103643
+                covariance matrix quality: Full matrix, but forced positive-definite
+                Status : MINIMIZE=0 HESSE=0 
+
+    Constant Parameter    Value     
+  --------------------  ------------
+  env_pdf_0_13TeV_bern4_mean    0.0000e+00
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+  env_pdf_0_13TeV_bern4_b0    3.0000e-01    6.9908e+00 +/-  3.00e+00  <none>
+  env_pdf_0_13TeV_bern4_b1    3.0000e-01   -1.1071e+00 +/-  4.19e-01  <none>
+  env_pdf_0_13TeV_bern4_b2    3.0000e-01    1.1521e+00 +/-  4.27e-01  <none>
+  env_pdf_0_13TeV_bern4_b3    3.0000e-01   -1.2104e-01 +/-  1.80e-01  <none>
+  env_pdf_0_13TeV_bern4_sigma_b4    5.0000e+00    4.7388e+00 +/-  5.76e-01  <none>
+               step_b4    1.0500e+02    1.0355e+02 +/-  4.61e-01  <none>
+
+[INFO] 	 Bernstein 3 272.473 227.469 90.0064 2.3739e-21
 [INFO] Calculating GOF for pdf ext, using 8 fitted parameters
-[INFO] Chi2 in Observed =  271.94
-[INFO] p-value  =  0.185317
-[INFO] Adding to Envelope env_pdf_0_13TeV_bern4 0.185317 2xNLL + c is 1.4358e+06
-[INFO] 	 Bernstein 4 717897 717891 12.6654 0.00037249
+[INFO] Chi2 in Observed =  268.227
+[INFO] p-value  =  0.230446
+[INFO] Adding to Envelope env_pdf_0_13TeV_bern4 0.230446 2xNLL + c is 462.939
+run chi2 fit
+
+  RooFitResult: minimized FCN value: 226.882, estimated distance to minimum: 0.00050052
+                covariance matrix quality: Full, accurate covariance matrix
+                Status : MINIMIZE=0 HESSE=0 
+
+    Constant Parameter    Value     
+  --------------------  ------------
+  env_pdf_0_13TeV_bern5_mean    0.0000e+00
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+  env_pdf_0_13TeV_bern5_b0    3.0000e-01    8.0271e-01 +/-  1.56e+00  <none>
+  env_pdf_0_13TeV_bern5_b1    3.0000e-01    2.4473e-02 +/-  1.17e-01  <none>
+  env_pdf_0_13TeV_bern5_b2    3.0000e-01    9.1454e-02 +/-  1.86e-01  <none>
+  env_pdf_0_13TeV_bern5_b3    3.0000e-01    1.5160e-02 +/-  1.02e-01  <none>
+  env_pdf_0_13TeV_bern5_b4    3.0000e-01    3.4248e-02 +/-  8.07e-02  <none>
+  env_pdf_0_13TeV_bern5_sigma_b5    5.0000e+00    5.0933e+00 +/-  7.31e-01  <none>
+               step_b5    1.0500e+02    1.0356e+02 +/-  4.72e-01  <none>
+
+[INFO] 	 Bernstein 4 227.469 226.882 1.17518 0.278339
 [INFO] Calculating GOF for pdf ext, using 9 fitted parameters
-[INFO] Chi2 in Observed =  267.415
-[INFO] p-value  =  0.227577
-[INFO] Adding to Envelope env_pdf_0_13TeV_bern5 0.227577 2xNLL + c is 1.43579e+06
- [WARNING] could not add ] 
-RooFFTConvPdf::ftest_pdf_0_13TeV_exp1_gauxexp1[ ftest_pdf_0_13TeV_exp1_step_exp1(CMS_hzg_mass) (*) ftest_pdf_0_13TeV_exp1_gau_exp1(CMS_hzg_mass) ] = 0.00295833
-[INFO]	 Exponential 1 0 725444 -1.45089e+06 0
-RooFFTConvPdf::ftest_pdf_0_13TeV_exp3_gauxexp3[ ftest_pdf_0_13TeV_exp3_step_exp3(CMS_hzg_mass) (*) ftest_pdf_0_13TeV_exp3_gau_exp3(CMS_hzg_mass) ] = 0.0215605
-[WARNING] Warning -- Fit status for ftest_pdf_0_13TeV_exp3_gauxexp3 at 3
-[INFO]  F-test Prob(chi2>chi2(data)) == 0
-[INFO]	 Exponential 3 725444 717927 15035 0
-RooFFTConvPdf::ftest_pdf_0_13TeV_exp5_gauxexp5[ ftest_pdf_0_13TeV_exp5_step_exp5(CMS_hzg_mass) (*) ftest_pdf_0_13TeV_exp5_gau_exp5(CMS_hzg_mass) ] = 0.0197415
-[#0] ERROR:Tracing -- RooGaussModel::analyticalIntegral(ftest_pdf_0_13TeV_exp5_gau_exp5_fft) got nan during case 1 
-[WARNING] Warning -- Fit status for ftest_pdf_0_13TeV_exp5_gauxexp5 at 3
-[INFO]  F-test Prob(chi2>chi2(data)) == 1
-[INFO]	 Exponential 5 717927 717929 0 1
-[INFO] Determining Envelope Functions for Family Exponential, cat 0
-[INFO] Upper end Threshold for highest order function 0.1
-[#0] ERROR:Fitting -- RooAbsPdf::fitTo(env_pdf_0_13TeV_exp1_gauxexp1) ERROR: Cannot apply sum-of-weights correction to covariance matrix: correction matrix calculated with weight-squared is singular
-[WARNING] Warning -- Fit status for env_pdf_0_13TeV_exp1_gauxexp1 at 603
-[INFO] 	 Exponential 1 0 717994 -1.43599e+06 0
-[INFO] Calculating GOF for pdf ext, using 6 fitted parameters
-[INFO] Chi2 in Observed =  51905
-[INFO] p-value  =  0
-[WARNING] Warning -- Fit status for env_pdf_0_13TeV_exp3_gauxexp3 at 603
-[INFO] 	 Exponential 3 717994 719363 0 1
-[INFO] Calculating GOF for pdf ext, using 8 fitted parameters
-[INFO] Chi2 in Observed =  51905
-[INFO] p-value  =  0
+[INFO] Chi2 in Observed =  268.608
+[INFO] p-value  =  0.212494
 13 TeV
+run chi2 fit
+
+  RooFitResult: minimized FCN value: 227.469, estimated distance to minimum: 0.000330256
+                covariance matrix quality: Full, accurate covariance matrix
+                Status : MINIMIZE=0 HESSE=0 
+
+    Constant Parameter    Value     
+  --------------------  ------------
+  env_pdf_0_13TeV_bern4_mean    0.0000e+00
+
+    Floating Parameter  InitialValue    FinalValue +/-  Error     GblCorr.
+  --------------------  ------------  --------------------------  --------
+  env_pdf_0_13TeV_bern4_b0    6.9908e+00    6.9890e+00 +/-  7.27e+00  <none>
+  env_pdf_0_13TeV_bern4_b1   -1.1071e+00   -1.1068e+00 +/-  1.22e+00  <none>
+  env_pdf_0_13TeV_bern4_b2    1.1521e+00    1.1523e+00 +/-  1.26e+00  <none>
+  env_pdf_0_13TeV_bern4_b3   -1.2104e-01   -1.2081e-01 +/-  2.35e-01  <none>
+  env_pdf_0_13TeV_bern4_sigma_b4    4.7388e+00    4.7401e+00 +/-  5.97e-01  <none>
+               step_b4    1.0355e+02    1.0356e+02 +/-  4.72e-01  <none>
+
 // ------------------------------------------------------------------------- //
-[INFO] Created MultiPdf CMS_hgg_cat0_13TeV_bkgshape, in Category 0 with a total of 2 pdfs
-RooArgList::store = (env_pdf_0_13TeV_bern4,env_pdf_0_13TeV_bern5)
-[INFO] Best Fit Pdf = 1, env_pdf_0_13TeV_bern5
+[INFO] Created MultiPdf CMS_hgg_cat0_13TeV_bkgshape, in Category 0 with a total of 1 pdfs
+RooArgList::store = (env_pdf_0_13TeV_bern4)
+[INFO] Best Fit Pdf = 0, env_pdf_0_13TeV_bern4
 // ------------------------------------------------------------------------- //
-[INFO] Simple check of index 1
+[INFO] Simple check of index 0
 [#0] ERROR:ObjectHandling -- RooWorkSpace::import(multipdf) ERROR importing object named pdfindex_0_13TeV: another instance with same name already in the workspace and no conflict resolution protocol specified
 [#0] ERROR:ObjectHandling -- RooWorkspace::import(multipdf) ERROR dataset with name roohist_data_mass_cat0 already exists in workspace, import aborted
 13 TeV
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 0 : xtmp 105.5  ytmp 2838.82 bkgval  2747.66 ytmp-bkgval 91.1588
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 1 : xtmp 106.5  ytmp 3420.22 bkgval  3510.58 ytmp-bkgval -90.3637
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 2 : xtmp 107.5  ytmp 4132.39 bkgval  4252.49 ytmp-bkgval -120.101
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 3 : xtmp 108.5  ytmp 4928.53 bkgval  4907.99 ytmp-bkgval 20.5452
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 4 : xtmp 109.5  ytmp 5651.09 bkgval  5427.6 ytmp-bkgval 223.491
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 5 : xtmp 110.5  ytmp 5733.12 bkgval  5787.01 ytmp-bkgval -53.8912
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 6 : xtmp 111.5  ytmp 5975.92 bkgval  5988.05 ytmp-bkgval -12.1308
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 7 : xtmp 112.5  ytmp 5933.15 bkgval  6052.49 ytmp-bkgval -119.344
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 8 : xtmp 113.5  ytmp 6063.27 bkgval  6012.32 ytmp-bkgval 50.9566
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 9 : xtmp 114.5  ytmp 5559.19 bkgval  5900.46 ytmp-bkgval -341.276
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 10 : xtmp 115.5  ytmp 5741.06 bkgval  5744.72 ytmp-bkgval -3.665
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 11 : xtmp 116.5  ytmp 5698.61 bkgval  5565.35 ytmp-bkgval 133.266
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 12 : xtmp 117.5  ytmp 5518.69 bkgval  5375.36 ytmp-bkgval 143.331
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 13 : xtmp 118.5  ytmp 5075.91 bkgval  5182.3 ytmp-bkgval -106.394
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 14 : xtmp 119.5  ytmp 5054.05 bkgval  4990.16 ytmp-bkgval 63.8879
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 15 : xtmp 120.5  ytmp 4895.75 bkgval  4800.86 ytmp-bkgval 94.8875
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 16 : xtmp 121.5  ytmp 4731.05 bkgval  4615.33 ytmp-bkgval 115.724
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 17 : xtmp 128.5  ytmp 3447.9 bkgval  3443.46 ytmp-bkgval 4.44197
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 18 : xtmp 129.5  ytmp 3320.9 bkgval  3295.51 ytmp-bkgval 25.3811
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 19 : xtmp 130.5  ytmp 3233.84 bkgval  3152.64 ytmp-bkgval 81.2022
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 20 : xtmp 131.5  ytmp 3020.87 bkgval  3014.86 ytmp-bkgval 6.00739
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 21 : xtmp 132.5  ytmp 2864.01 bkgval  2882.22 ytmp-bkgval -18.2046
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 22 : xtmp 133.5  ytmp 2774.58 bkgval  2754.71 ytmp-bkgval 19.8709
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 23 : xtmp 134.5  ytmp 2515.43 bkgval  2632.35 ytmp-bkgval -116.921
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 24 : xtmp 135.5  ytmp 2557.64 bkgval  2515.12 ytmp-bkgval 42.5221
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 25 : xtmp 136.5  ytmp 2354.12 bkgval  2402.99 ytmp-bkgval -48.872
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 26 : xtmp 137.5  ytmp 2311.1 bkgval  2295.94 ytmp-bkgval 15.1546
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 27 : xtmp 138.5  ytmp 2080.83 bkgval  2193.92 ytmp-bkgval -113.091
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 28 : xtmp 139.5  ytmp 2109.97 bkgval  2096.87 ytmp-bkgval 13.101
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 29 : xtmp 140.5  ytmp 1953.18 bkgval  2004.72 ytmp-bkgval -51.5359
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 30 : xtmp 141.5  ytmp 1946.07 bkgval  1917.38 ytmp-bkgval 28.6856
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 31 : xtmp 142.5  ytmp 1762.37 bkgval  1834.77 ytmp-bkgval -72.3942
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 32 : xtmp 143.5  ytmp 1712.76 bkgval  1756.77 ytmp-bkgval -44.0091
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 33 : xtmp 144.5  ytmp 1589.13 bkgval  1683.28 ytmp-bkgval -94.1413
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 34 : xtmp 145.5  ytmp 1746.96 bkgval  1614.15 ytmp-bkgval 132.813
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 35 : xtmp 146.5  ytmp 1623.82 bkgval  1549.25 ytmp-bkgval 74.5606
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 36 : xtmp 147.5  ytmp 1602.67 bkgval  1488.43 ytmp-bkgval 114.233
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 37 : xtmp 148.5  ytmp 1414.77 bkgval  1431.53 ytmp-bkgval -16.7616
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 38 : xtmp 149.5  ytmp 1444.94 bkgval  1378.35 ytmp-bkgval 66.583
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 39 : xtmp 150.5  ytmp 1305.89 bkgval  1328.73 ytmp-bkgval -22.8359
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 40 : xtmp 151.5  ytmp 1278.24 bkgval  1282.44 ytmp-bkgval -4.2048
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 41 : xtmp 152.5  ytmp 1199.13 bkgval  1239.3 ytmp-bkgval -40.1646
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 42 : xtmp 153.5  ytmp 1228.88 bkgval  1199.06 ytmp-bkgval 29.827
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 43 : xtmp 154.5  ytmp 1137.47 bkgval  1161.49 ytmp-bkgval -24.0196
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 44 : xtmp 155.5  ytmp 1068.4 bkgval  1126.35 ytmp-bkgval -57.9516
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 45 : xtmp 156.5  ytmp 1197.77 bkgval  1093.37 ytmp-bkgval 104.396
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 46 : xtmp 157.5  ytmp 1022.42 bkgval  1062.29 ytmp-bkgval -39.8776
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 47 : xtmp 158.5  ytmp 1109.43 bkgval  1032.82 ytmp-bkgval 76.6085
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 48 : xtmp 159.5  ytmp 1038.46 bkgval  1004.67 ytmp-bkgval 33.7914
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 49 : xtmp 160.5  ytmp 870.831 bkgval  977.522 ytmp-bkgval -106.691
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 50 : xtmp 161.5  ytmp 913.116 bkgval  951.066 ytmp-bkgval -37.9495
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 51 : xtmp 162.5  ytmp 974.968 bkgval  924.969 ytmp-bkgval 49.999
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 52 : xtmp 163.5  ytmp 863.619 bkgval  898.888 ytmp-bkgval -35.2689
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 53 : xtmp 164.5  ytmp 801.288 bkgval  872.468 ytmp-bkgval -71.1799
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 54 : xtmp 165.5  ytmp 833.616 bkgval  845.345 ytmp-bkgval -11.7289
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 55 : xtmp 166.5  ytmp 868.18 bkgval  817.139 ytmp-bkgval 51.0411
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 56 : xtmp 167.5  ytmp 780.991 bkgval  787.46 ytmp-bkgval -6.46892
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 57 : xtmp 168.5  ytmp 762.204 bkgval  755.908 ytmp-bkgval 6.29604
-[INFO] plotdata->Integral() 63834.6 ( bins 65) hbkgplots[i]->Integral() 63845.8 (bins 65
-[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen/fit_results_run2_cat0/HZGmassInde_fTest/multipdf_cat0 setting point 58 : xtmp 169.5  ytmp 744.593 bkgval  722.067 ytmp-bkgval 22.5263
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 0 : xtmp 105.5  ytmp 619.118 bkgval  598.249 ytmp-bkgval 20.8692
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 1 : xtmp 106.5  ytmp 645.573 bkgval  651.553 ytmp-bkgval -5.97969
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 2 : xtmp 107.5  ytmp 726.02 bkgval  692.77 ytmp-bkgval 33.2508
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 3 : xtmp 108.5  ytmp 650.592 bkgval  720.931 ytmp-bkgval -70.3386
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 4 : xtmp 109.5  ytmp 785.604 bkgval  736.234 ytmp-bkgval 49.3697
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 5 : xtmp 110.5  ytmp 703.376 bkgval  739.837 ytmp-bkgval -36.4609
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 6 : xtmp 111.5  ytmp 740.276 bkgval  733.538 ytmp-bkgval 6.73801
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 7 : xtmp 112.5  ytmp 741.043 bkgval  719.438 ytmp-bkgval 21.6056
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 8 : xtmp 113.5  ytmp 687.371 bkgval  699.632 ytmp-bkgval -12.2601
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 9 : xtmp 114.5  ytmp 702.438 bkgval  675.997 ytmp-bkgval 26.4416
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 10 : xtmp 115.5  ytmp 599.529 bkgval  650.073 ytmp-bkgval -50.5448
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 11 : xtmp 116.5  ytmp 606.155 bkgval  623.031 ytmp-bkgval -16.8761
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 12 : xtmp 117.5  ytmp 618.744 bkgval  595.699 ytmp-bkgval 23.0454
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 13 : xtmp 118.5  ytmp 628.006 bkgval  568.625 ytmp-bkgval 59.3815
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 14 : xtmp 119.5  ytmp 564.575 bkgval  542.147 ytmp-bkgval 22.4272
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 15 : xtmp 120.5  ytmp 519.713 bkgval  516.461 ytmp-bkgval 3.25204
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 16 : xtmp 121.5  ytmp 499.851 bkgval  491.664 ytmp-bkgval 8.18739
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 17 : xtmp 128.5  ytmp 364.602 bkgval  343.997 ytmp-bkgval 20.6051
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 18 : xtmp 129.5  ytmp 328.567 bkgval  326.422 ytmp-bkgval 2.14458
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 19 : xtmp 130.5  ytmp 314.386 bkgval  309.664 ytmp-bkgval 4.72233
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 20 : xtmp 131.5  ytmp 291.376 bkgval  293.698 ytmp-bkgval -2.3221
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 21 : xtmp 132.5  ytmp 272.713 bkgval  278.504 ytmp-bkgval -5.79086
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 22 : xtmp 133.5  ytmp 266.089 bkgval  264.058 ytmp-bkgval 2.03127
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 23 : xtmp 134.5  ytmp 259.303 bkgval  250.338 ytmp-bkgval 8.96564
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 24 : xtmp 135.5  ytmp 256.4 bkgval  237.321 ytmp-bkgval 19.0788
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 25 : xtmp 136.5  ytmp 209.669 bkgval  224.985 ytmp-bkgval -15.3155
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 26 : xtmp 137.5  ytmp 204.903 bkgval  213.307 ytmp-bkgval -8.40431
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 27 : xtmp 138.5  ytmp 191.939 bkgval  202.266 ytmp-bkgval -10.3268
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 28 : xtmp 139.5  ytmp 197.662 bkgval  191.838 ytmp-bkgval 5.82462
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 29 : xtmp 140.5  ytmp 186.505 bkgval  182.001 ytmp-bkgval 4.50436
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 30 : xtmp 141.5  ytmp 163.438 bkgval  172.732 ytmp-bkgval -9.29419
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 31 : xtmp 142.5  ytmp 174.77 bkgval  164.009 ytmp-bkgval 10.7605
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 32 : xtmp 143.5  ytmp 157.098 bkgval  155.81 ytmp-bkgval 1.28763
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 33 : xtmp 144.5  ytmp 151.789 bkgval  148.112 ytmp-bkgval 3.67675
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 34 : xtmp 145.5  ytmp 150.253 bkgval  140.892 ytmp-bkgval 9.36078
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 35 : xtmp 146.5  ytmp 134.594 bkgval  134.129 ytmp-bkgval 0.465504
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 36 : xtmp 147.5  ytmp 126.725 bkgval  127.799 ytmp-bkgval -1.07343
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 37 : xtmp 148.5  ytmp 127.647 bkgval  121.879 ytmp-bkgval 5.76745
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 38 : xtmp 149.5  ytmp 118.939 bkgval  116.349 ytmp-bkgval 2.59023
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 39 : xtmp 150.5  ytmp 112.207 bkgval  111.184 ytmp-bkgval 1.0223
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 40 : xtmp 151.5  ytmp 100.004 bkgval  106.364 ytmp-bkgval -6.35929
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 41 : xtmp 152.5  ytmp 94.3537 bkgval  101.864 ytmp-bkgval -7.51009
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 42 : xtmp 153.5  ytmp 91.6273 bkgval  97.6626 ytmp-bkgval -6.03523
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 43 : xtmp 154.5  ytmp 88.5775 bkgval  93.7374 ytmp-bkgval -5.15999
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 44 : xtmp 155.5  ytmp 98.7163 bkgval  90.0659 ytmp-bkgval 8.65037
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 45 : xtmp 156.5  ytmp 70.8754 bkgval  86.6256 ytmp-bkgval -15.7501
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 46 : xtmp 157.5  ytmp 85.5665 bkgval  83.3938 ytmp-bkgval 2.17264
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 47 : xtmp 158.5  ytmp 89.953 bkgval  80.3483 ytmp-bkgval 9.60471
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 48 : xtmp 159.5  ytmp 82.6054 bkgval  77.4663 ytmp-bkgval 5.13904
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 49 : xtmp 160.5  ytmp 64.5842 bkgval  74.7256 ytmp-bkgval -10.1414
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 50 : xtmp 161.5  ytmp 77.3692 bkgval  72.1035 ytmp-bkgval 5.26567
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 51 : xtmp 162.5  ytmp 70.4399 bkgval  69.5776 ytmp-bkgval 0.862308
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 52 : xtmp 163.5  ytmp 64.778 bkgval  67.1255 ytmp-bkgval -2.3475
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 53 : xtmp 164.5  ytmp 64.0608 bkgval  64.7245 ytmp-bkgval -0.66372
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 54 : xtmp 165.5  ytmp 53.9074 bkgval  62.3523 ytmp-bkgval -8.44493
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 55 : xtmp 166.5  ytmp 64.8904 bkgval  59.9864 ytmp-bkgval 4.90393
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 56 : xtmp 167.5  ytmp 60.7605 bkgval  57.6045 ytmp-bkgval 3.15603
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 57 : xtmp 168.5  ytmp 65.5042 bkgval  55.1842 ytmp-bkgval 10.32
+[INFO] plotdata->Integral() 1981.39 ( bins 65) hbkgplots[i]->Integral() 1981.67 (bins 65
+[INFO] Channel  ./HZGamma_BkgModel_UL_xingchen_chi2/fit_results_run2_cat3/HZGmassInde_fTest/multipdf_cat0 setting point 58 : xtmp 169.5  ytmp 44.9104 bkgval  52.7038 ytmp-bkgval -7.79334
 [RESULT] Recommended options
 Cat 0
 	Bernstein - 3
-	Exponential - 3
 /afs/cern.ch/work/z/zewang/private/HZGamma/flashggfinalfit/CMSSW_10_2_13/src/flashggFinalFit/Signal
-./HZGamma_SigModel_UL_xingchen already exist
+./HZGamma_SigModel_UL_xingchen_chi2 already exist

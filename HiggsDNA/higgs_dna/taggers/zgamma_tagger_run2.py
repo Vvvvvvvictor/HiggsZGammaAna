@@ -405,6 +405,14 @@ class ZGammaTaggerRun2(Tagger):
         ele_trigger_cut = single_ele_trigger_cut | double_ele_trigger_cut
         mu_trigger_cut = single_mu_trigger_cut  | double_mu_trigger_cut
 
+        #### !!!!!! remove os cut through this part
+        ee_pairs = awkward.combinations(electrons, 2, fields = ["LeadLepton", "SubleadLepton"])
+        mm_pairs = awkward.combinations(muons, 2, fields = ["LeadLepton", "SubleadLepton"])
+        z_cands = awkward.concatenate([ee_pairs, mm_pairs], axis = 1)
+        z_cands["ZCand"] = z_cands.LeadLepton + z_cands.SubleadLepton
+        z_cands = z_cands[awkward.argsort(abs(z_cands.ZCand.mass - 91.1876), axis = 1)]
+        ####
+
         z_ee_pairs = z_cands[z_cands.LeadLepton.id == 11]
         z_mm_pairs = z_cands[z_cands.LeadLepton.id == 13]
 
@@ -417,17 +425,17 @@ class ZGammaTaggerRun2(Tagger):
             m_cut = z_mm_pairs.LeadLepton.pt > 20
         ee_cut = (z_ee_pairs.LeadLepton.pt > 25) & (z_ee_pairs.SubleadLepton.pt > 15)
         mm_cut = (z_mm_pairs.LeadLepton.pt > 20) & (z_mm_pairs.SubleadLepton.pt > 10)
-        z_ee_cands = z_ee_pairs[ele_trigger_cut & ((double_ele_trigger_cut & ee_cut) | (single_ele_trigger_cut & e_cut))]
+        z_ee_cands = z_ee_pairs[(double_ele_trigger_cut & ee_cut) | (single_ele_trigger_cut & e_cut)]
         ee_trigger_pt_cut = awkward.fill_none(awkward.num(z_ee_cands) >= 1, False)
-        z_mm_cands = z_mm_pairs[mu_trigger_cut & ((double_mu_trigger_cut & mm_cut) | (single_mu_trigger_cut & m_cut))]
+        z_mm_cands = z_mm_pairs[(double_mu_trigger_cut & mm_cut) | (single_mu_trigger_cut & m_cut)]
         mm_trigger_pt_cut = awkward.fill_none(awkward.num(z_mm_cands) >= 1, False)
 
         z_cands = awkward.concatenate([z_ee_cands, z_mm_cands], axis = 1)
         pair_cut = awkward.num(z_cands) >= 1
 
         os_cut = (z_cands.LeadLepton.charge * z_cands.SubleadLepton.charge) == -1
-        temp_z_cands = z_cands[os_cut]
-        os_cut = awkward.num(temp_z_cands) >= 1
+        z_cands = z_cands[os_cut]
+        os_cut = awkward.num(z_cands) >= 1
 
         z_cands["ZCand"] = z_cands.LeadLepton + z_cands.SubleadLepton # these add as 4-vectors since we registered them as "Momentum4D" objects
         mass_cut = (z_cands.ZCand.mass > 80.) & (z_cands.ZCand.mass < 100.)
@@ -610,26 +618,26 @@ class ZGammaTaggerRun2(Tagger):
                 weighted = weighted
             )
 
-        checked_cut = (z_ee_cut | z_mumu_cut) & pair_cut
-        checked_events = events[checked_cut]
-        print("!!!start check events tag(inclusive)!!!")
-        for event in checked_events:
-            print(event.run, event.luminosityBlock, event.event, sep=" ")
-        print("!!!end check events tag(inclusive)!!!")
+        # checked_cut = (z_ee_cut | z_mumu_cut) & pair_cut
+        # checked_events = events[checked_cut]
+        # print("!!!start check events tag(inclusive)!!!")
+        # for event in checked_events:
+        #     print(event.run, event.luminosityBlock, event.event, sep=" ")
+        # print("!!!end check events tag(inclusive)!!!")
 
-        checked_cut = z_ee_cut & ee_trigger_pt_cut
-        checked_events = events[checked_cut]
-        print("!!!start check events tag(electron)!!!")
-        for event in checked_events:
-            print(event.run, event.luminosityBlock, event.event, sep=" ")
-        print("!!!end check events tag(electron)!!!")
+        # checked_cut = z_ee_cut & ee_trigger_pt_cut
+        # checked_events = events[checked_cut]
+        # print("!!!start check events tag(electron)!!!")
+        # for event in checked_events:
+        #     print(event.run, event.luminosityBlock, event.event, sep=" ")
+        # print("!!!end check events tag(electron)!!!")
 
-        checked_cut = z_mumu_cut & mm_trigger_pt_cut
-        checked_events = events[checked_cut]
-        print("!!!start check events tag(muon)!!!")
-        for event in checked_events:
-            print(event.run, event.luminosityBlock, event.event, sep=" ")
-        print("!!!end check events tag(muon)!!!")
+        # checked_cut = z_mumu_cut & mm_trigger_pt_cut
+        # checked_events = events[checked_cut]
+        # print("!!!start check events tag(muon)!!!")
+        # for event in checked_events:
+        #     print(event.run, event.luminosityBlock, event.event, sep=" ")
+        # print("!!!end check events tag(muon)!!!")
 
         # self.register_cuts(
         #     names = ["has_z_cand", "has_gamma_cand", "sel_h_1", "sel_h_2", "sel_h_3", "all cuts"],

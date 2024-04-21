@@ -10,7 +10,6 @@ parser.add_argument("-j", "--json", dest="json", type=str, default="./significan
 parser.add_argument("-o", "--out", dest="out", type=str, default="./output_file", help="path to the output dir")
 parser.add_argument("-t", "--tree", dest="tree", type=str, default="test", help="name of the tree")
 parser.add_argument("-dm", "--shift", dest="shift", type=float, default=5, help="shift ALP mass")
-parser.add_argument("-mb", "--multibdt", dest="multibdt", type=bool, default=False, help="whether use two BDT for categorization")
 args = parser.parse_args()
 
 shift = int(args.shift)
@@ -25,17 +24,11 @@ if not os.path.exists(args.out):
 # Get the number of categories and the corresponding boundaries
 ############################
 file_json = open(args.json, "r")
-json = file_json.readlines()
-num_bdt = int(json[0])
-if num_bdt == 2:
-    bdt_div = float(json[1])
-nCat, boundaries = [], []
-for i in range(num_bdt):
-    sub_json = json[i+2].split(" ")
-    nCat.append(int(sub_json[0]))
-    boundaries.append(list(map(float, sub_json[1:nCat[0]+2])))
+json = file_json.readline().split(' ')
+nCat = int(json[0])
+boundaries = list(map(float, json[1:6]))
 
-print nCat, "\n", boundaries
+
 
 # Read the input dataset
 ############################
@@ -50,14 +43,14 @@ mychain = myfile.Get(args.tree)
 entries = mychain.GetEntriesFast()
 print "Entries: ",entries
 
-for c in range(nCat[0]):
+for c in range(nCat):
     for mass_H in [125]:
         print "[[ INFO ]] prepare Higgs mass: {0}".format(mass_H)
         w = RooWorkspace("CMS_hzg_workspace")
 
         Sqrts = RooRealVar("Sqrts","Sqrts",13)
         IntLumi = RooRealVar("IntLumi","IntLumi", lumi['17'])
-        CMS_hzg_mass = RooRealVar("CMS_hzg_mass","CMS_hzg_mass",mass_H,100.,180.)
+        CMS_hzg_mass = RooRealVar("CMS_hzg_mass","CMS_hzg_mass",mass_H,105.,170.)
         CMS_hzg_weight = RooRealVar("CMS_hzg_weight","CMS_hzg_weight",-100000,1000000)
 
 
@@ -77,14 +70,13 @@ for c in range(nCat[0]):
 
         for jentry in range(entries):
             nb = mychain.GetEntry(jentry)
-            if mychain.H_mass>180. or mychain.H_mass<100.: continue
-            if args.multibdt: 
-                if mychain.bdt_score_VBF > bdt_div: continue
+            if mychain.H_mass>170. or mychain.H_mass<105.: continue
+
 
             CMS_hzg_mass.setVal(mychain.H_mass + mass_H - 125.0)
             CMS_hzg_weight.setVal(mychain.weight)
 
-            if mychain.bdt_score_t > boundaries[0][c] and mychain.bdt_score_t < boundaries[0][c+1]:
+            if mychain.bdt_score_t > boundaries[c] and mychain.bdt_score_t < boundaries[c+1]:
                 data_mass_cats.add(ArgSet,mychain.weight)
 
         data_mass_cats.Print("v")
@@ -103,55 +95,3 @@ for c in range(nCat[0]):
         w.writeToFile(args.out+"/HZGamma_data_bkg_Hm{0}_workspace_cat{1}.root".format(mass_H,c))
         del w
 
-if args.multibdt:
-    for c in range(nCat[1]):
-        for mass_H in [125]:
-            print "[[ INFO ]] prepare Higgs mass: {0}".format(mass_H)
-            w = RooWorkspace("CMS_hzg_workspace")
-
-            Sqrts = RooRealVar("Sqrts","Sqrts",13)
-            IntLumi = RooRealVar("IntLumi","IntLumi", lumi['17'])
-            CMS_hzg_mass = RooRealVar("CMS_hzg_mass","CMS_hzg_mass",mass_H,100.,180.)
-            CMS_hzg_weight = RooRealVar("CMS_hzg_weight","CMS_hzg_weight",-100000,1000000)
-
-
-            getattr(w,'import')(Sqrts)
-            getattr(w,'import')(IntLumi)
-            getattr(w,'import')(CMS_hzg_mass)
-            getattr(w,'import')(CMS_hzg_weight)
-
-            ArgSet = RooArgSet("args")
-            ArgSet.add(CMS_hzg_mass)
-            ArgSet.add(CMS_hzg_weight)
-            print "#"*51
-            ArgSet.Print("v")
-            print "#"*51
-
-            data_mass_cats = RooDataSet("ggh_{0}_13TeV_cat0".format(mass_H),"ggh_{0}_13TeV_cat0".format(mass_H), ArgSet, "CMS_hzg_weight")
-
-            for jentry in range(entries):
-                nb = mychain.GetEntry(jentry)
-                if mychain.H_mass>180. or mychain.H_mass<100.: continue
-                if mychain.bdt_score_VBF < bdt_div: continue
-
-                CMS_hzg_mass.setVal(mychain.H_mass + mass_H - 125.0)
-                CMS_hzg_weight.setVal(mychain.weight)
-
-                if mychain.bdt_score_t > boundaries[1][c] and mychain.bdt_score_t < boundaries[1][c+1]:
-                    data_mass_cats.add(ArgSet,mychain.weight)
-
-            data_mass_cats.Print("v")
-            #dataset_WithoutWeight.Print("v")
-            print type(ArgSet)
-            print "#"*51
-
-            
-            c1 = TCanvas("c1","With Weight")
-            massDist = CMS_hzg_mass.frame(RooFit.Title("CMS_hzg_mss"))
-            data_mass_cats.plotOn(massDist)
-            massDist.Draw()
-
-            getattr(w,'import')(data_mass_cats)
-
-            w.writeToFile(args.out+"/HZGamma_data_bkg_Hm{0}_workspace_cat{1}.root".format(mass_H,c+nCat[0]))
-            del w

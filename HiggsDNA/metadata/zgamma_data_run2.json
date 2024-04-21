@@ -25,10 +25,10 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "Data_DoubleMuon"
+            "Data"
         ],
         "years": [
-            "2017"
+            "2018"
         ]
     },
     "variables_of_interest": [
