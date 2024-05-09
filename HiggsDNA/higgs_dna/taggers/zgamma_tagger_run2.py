@@ -255,6 +255,27 @@ class ZGammaTaggerRun2(Tagger):
         )
 
         photons = events.Photon[photon_selection]
+
+        # bing with control regions
+        var_CR1 = ((photons.isScEtaEB & (photons.mvaID > self.options["photons"]["mvaID_barrel"])) | (photons.isScEtaEE & (photons.mvaID > self.options["photons"]["mvaID_endcap"])))
+        var_CR2 = photons.mvaID_WP80
+        var_CR3 = photons.electronVeto
+        SR = (var_CR1) & (var_CR3)
+        CR1 = (~var_CR2) & (var_CR3)
+        CR2 = (~var_CR1) & (var_CR2) & (var_CR3)
+        CR3 = (~var_CR2) & (~var_CR3)
+        CR4 = (~var_CR1) & (var_CR2) & (~var_CR3)
+        CR5 = (var_CR1) & (~var_CR3)
+        SR = awkward.fill_none(awkward.sum(SR,axis=1)>0, value = False)
+        CR1 = awkward.fill_none(awkward.sum(CR1, axis=1) > 0, value=False)
+        CR2 = awkward.fill_none(awkward.sum(CR2, axis=1) > 0, value=False)
+        CR3 = awkward.fill_none(awkward.sum(CR3, axis=1) > 0, value=False)
+        CR4 = awkward.fill_none(awkward.sum(CR4, axis=1) > 0, value=False)
+        CR5 = awkward.fill_none(awkward.sum(CR5, axis=1) > 0, value=False)
+        regions = awkward.where(SR, 0, awkward.where(CR1, 1, awkward.where(CR2, 2, awkward.where(CR3, 3, awkward.where(CR4, 4, awkward.where(CR5, 5, -1))))))
+        for i in range(5000):
+           print("SR:", SR[i], "CR1:", CR1[i], "CR2", CR2[i], "CR3", CR3[i], "CR4", CR4[i], "CR5", CR5[i], "regions:", regions[i])
+        awkward_utils.add_field(events, "regions",  regions)
         
         # lepton-photon overlap removal 
         clean_photon_mask = object_selections.delta_R(photons, muons, 0.4) & object_selections.delta_R(photons, electrons, 0.4)
@@ -301,7 +322,10 @@ class ZGammaTaggerRun2(Tagger):
         )
         FSRphotons = awkward.with_field(FSRphotons, awkward.ones_like(FSRphotons.pt) * 0.0, "mass")
 
-        b_jet_cut = jets.btagDeepFlavB > self.options["btag_med"][self.year]
+        if "2016" not in self.year:
+            year = self.year[:4]
+
+        b_jet_cut = jets.btagDeepFlavB > self.options["btag_med"][year]
         jets = awkward.with_field(jets, b_jet_cut, "is_med_bjet") 
 
         # Add object fields to events array
@@ -557,23 +581,6 @@ class ZGammaTaggerRun2(Tagger):
             )
 
         all_cuts = has_z_cand & has_gamma_cand & sel_h_1 & sel_h_2 & sel_h_3
-        
-        # bing with control regions
-        var_CR1 = gamma_mvaID_WPL
-        var_CR2 = gamma_e_veto
-        SR = (var_CR1) & (var_CR2)
-        CR1 = (~var_CR1) & (var_CR2)
-        CR2 = (var_CR1) & (~var_CR2)
-        CR3 = (~var_CR1) & (~var_CR2)
-        SR = awkward.fill_none(SR, value = False)
-        CR1 = awkward.fill_none(CR1, value = False)
-        CR2 = awkward.fill_none(CR2, value = False)
-        CR3 = awkward.fill_none(CR3, value = False)
-        regions = awkward.where(SR, 0, awkward.where(CR1, 1, awkward.where(CR2, 2, awkward.where(CR3, 3, -999))))
-        #for i in range(5000):
-        #    print("SR1:", SR1[i], "SR:", SR[i], "CR1:", CR1[i], "CR2", CR2[i], "CR3", CR3[i], "regions:", regions[i])
-        awkward_utils.add_field(events, "regions",  regions)
-
 
         for cut_type in ["zgammas", "zgammas_ele", "zgammas_mu", "zgammas_w", "zgammas_ele_w", "zgammas_mu_w"]:
             if "_w" in cut_type:
@@ -801,8 +808,8 @@ class ZGammaTaggerRun2(Tagger):
         # use_central_nano = options["use_central_nano"] # indicates whether we are using central nanoAOD (with some branches that are necessary for full diphoton preselection missing) or custom nanoAOD (with these branches added)
 
 
-        all_cuts = pt_cut & eta_cut & id_cut & e_veto_cut
-        # all_cuts = pt_cut # bing for CR selection
+        # all_cuts = pt_cut & eta_cut & id_cut & e_veto_cut
+        all_cuts = pt_cut & eta_cut # bing for CR selection
 
         self.register_cuts(
                 names = ["pt", "eta", "id", "e_veto", "all"],
