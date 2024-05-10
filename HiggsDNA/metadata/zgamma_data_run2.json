@@ -76,6 +76,7 @@
         "gamma_alliso",
         "gamma_genPartFlav",
         "gamma_mvaID_WP80",
+        "gamma_mvaID_WP90",
         "gamma_mvaID_WPL",
         "gamma_e_veto",
         "gamma_fsr_pt",

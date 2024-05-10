@@ -255,27 +255,6 @@ class ZGammaTaggerRun2(Tagger):
         )
 
         photons = events.Photon[photon_selection]
-
-        # bing with control regions
-        var_CR1 = ((photons.isScEtaEB & (photons.mvaID > self.options["photons"]["mvaID_barrel"])) | (photons.isScEtaEE & (photons.mvaID > self.options["photons"]["mvaID_endcap"])))
-        var_CR2 = photons.mvaID_WP80
-        var_CR3 = photons.electronVeto
-        SR = (var_CR1) & (var_CR3)
-        CR1 = (~var_CR2) & (var_CR3)
-        CR2 = (~var_CR1) & (var_CR2) & (var_CR3)
-        CR3 = (~var_CR2) & (~var_CR3)
-        CR4 = (~var_CR1) & (var_CR2) & (~var_CR3)
-        CR5 = (var_CR1) & (~var_CR3)
-        SR = awkward.fill_none(awkward.sum(SR,axis=1)>0, value = False)
-        CR1 = awkward.fill_none(awkward.sum(CR1, axis=1) > 0, value=False)
-        CR2 = awkward.fill_none(awkward.sum(CR2, axis=1) > 0, value=False)
-        CR3 = awkward.fill_none(awkward.sum(CR3, axis=1) > 0, value=False)
-        CR4 = awkward.fill_none(awkward.sum(CR4, axis=1) > 0, value=False)
-        CR5 = awkward.fill_none(awkward.sum(CR5, axis=1) > 0, value=False)
-        regions = awkward.where(SR, 0, awkward.where(CR1, 1, awkward.where(CR2, 2, awkward.where(CR3, 3, awkward.where(CR4, 4, awkward.where(CR5, 5, -1))))))
-        for i in range(5000):
-           print("SR:", SR[i], "CR1:", CR1[i], "CR2", CR2[i], "CR3", CR3[i], "CR4", CR4[i], "CR5", CR5[i], "regions:", regions[i])
-        awkward_utils.add_field(events, "regions",  regions)
         
         # lepton-photon overlap removal 
         clean_photon_mask = object_selections.delta_R(photons, muons, 0.4) & object_selections.delta_R(photons, electrons, 0.4)
@@ -462,7 +441,8 @@ class ZGammaTaggerRun2(Tagger):
         os_cut = awkward.num(z_cands) >= 1
 
         z_cands["ZCand"] = z_cands.LeadLepton + z_cands.SubleadLepton # these add as 4-vectors since we registered them as "Momentum4D" objects
-        mass_cut = (z_cands.ZCand.mass > 80.) & (z_cands.ZCand.mass < 100.)
+        #mass_cut = (z_cands.ZCand.mass > 80.) & (z_cands.ZCand.mass < 100.)
+        mass_cut = z_cands.ZCand.mass > 50.
         z_cands = z_cands[mass_cut] # OSSF lepton pairs with m_ll > 50.
 
         # # Construct di-electron/di-muon pairs
@@ -543,6 +523,8 @@ class ZGammaTaggerRun2(Tagger):
         awkward_utils.add_field(events, "gamma_chiso",  gamma_cand.pfRelIso03_chg) #run2
         awkward_utils.add_field(events, "gamma_alliso",  gamma_cand.pfRelIso03_all) #run2
         awkward_utils.add_field(events, "gamma_e_veto",  gamma_e_veto)
+        awkward_utils.add_field(events, "gamma_mvaID_WP80",  gamma_cand.mvaID_WP80)
+        awkward_utils.add_field(events, "gamma_mvaID_WP90",  gamma_cand.mvaID_WP90)
         # awkward_utils.add_field(events, "gamma_chiso",  gamma_cand.pfRelIso03_chg_quadratic) #run3
         # awkward_utils.add_field(events, "gamma_alliso",  gamma_cand.pfRelIso03_all_quadratic) #run3
         #awkward_utils.add_field(events, "gamma_mvaID_17",  gamma_cand.mvaID_Fall17V2) #run3
@@ -662,6 +644,31 @@ class ZGammaTaggerRun2(Tagger):
                 name = "gamma_fsr_%s" % field,
                 data = awkward.fill_none(FSRphotons[field][:,0], DUMMY_VALUE)
             )
+
+
+        # bing with control regions
+        #var_CR1 = ((photons.isScEtaEB & (photons.mvaID > self.options["photons"]["mvaID_barrel"])) | (photons.isScEtaEE & (photons.mvaID > self.options["photons"]["mvaID_endcap"])))
+        var_CR1 = gamma_cand.mvaID_WP80
+        var_CR2 = gamma_cand.mvaID_WP90
+        var_CR3 = gamma_e_veto
+        SR = (var_CR1) & (var_CR3)
+        CR1 = (~var_CR1) & (var_CR2) & (var_CR3)
+        CR2 = (~var_CR2) & (var_CR3)
+        CR3 = (var_CR1) & (~var_CR3)
+        CR4 = (~var_CR1) & (var_CR2) & (~var_CR3)
+        CR5 = (~var_CR2) & (~var_CR3)
+        
+        SR = awkward.fill_none(SR, value = False)
+        CR1 = awkward.fill_none(CR1, value=False)
+        CR2 = awkward.fill_none(CR2, value=False)
+        CR3 = awkward.fill_none(CR3, value=False)
+        CR4 = awkward.fill_none(CR4, value=False)
+        CR5 = awkward.fill_none(CR5, value=False)
+        regions = awkward.where(SR, 0, awkward.where(CR1, 1, awkward.where(CR2, 2, awkward.where(CR3, 3, awkward.where(CR4, 4, awkward.where(CR5, 5, -1))))))
+        for i in range(5000):
+           print("SR:", SR[i], "CR1:", CR1[i], "CR2", CR2[i], "CR3", CR3[i], "CR4", CR4[i], "CR5", CR5[i], "var_CR1", var_CR1[i], "var_CR2", var_CR2[i], "var_CR3", var_CR3[i], "regions:", regions[i])
+        awkward_utils.add_field(events, "regions",  regions)
+
 
         elapsed_time = time.time() - start
         logger.debug("[ZGammaTagger] %s, syst variation : %s, total time to execute select_zgammas: %.6f s" % (self.name, self.current_syst, elapsed_time))
