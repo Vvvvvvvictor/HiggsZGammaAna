@@ -13,9 +13,10 @@ def LoadNtuples(ana_cfg):
     for sample in ana_cfg.samp_names:
         ntuples[sample] = TChain(ana_cfg.treename,"chain_" + sample)
         #ntuples[sample]. Add(ana_cfg.sample_loc + '/%s.root' %sample)
-        if ana_cfg.year == 'run2':
-            for year in ['2016', '2017', '2018']:
-                ntuples[sample]. Add( '{}/{}/{}.root'.format(ana_cfg.sample_loc, sample, year))
+        if 'run2' in ana_cfg.year:
+            #for year in ['2016', '2017', '2018']:
+            #    ntuples[sample]. Add( '{}/{}/{}.root'.format(ana_cfg.sample_loc, sample, year))
+            ntuples[sample]. Add( '{}/{}/{}_{}.root'.format(ana_cfg.sample_loc, sample, ana_cfg.treename, ana_cfg.year))
         else:
             ntuples[sample]. Add('{}/{}/{}.root'.format(ana_cfg.sample_loc, sample, ana_cfg.year))
 
@@ -101,7 +102,7 @@ def MakeLegend(plt_cfg, histos, scaled_signal):
     legend.SetNColumns(3)
     legend.SetBorderSize(0)
     legend.SetTextFont(42)
-    legend.SetTextSize(0.045)
+    legend.SetTextSize(0.035)
     legend.SetFillColor(kWhite)
     legend.AddEntry(histos["data"], "Data", "PE")
     for sample in plt_cfg.ana_cfg.sig_names:

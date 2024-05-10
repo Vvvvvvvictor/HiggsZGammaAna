@@ -22,6 +22,9 @@ unset __conda_setup
 cd /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/Plotter
 conda activate hzgml
 
-python scripts/HZGamma_ZReFit.py --doReFit --splitJobs --nJobs 10 --iJob $1
+#python scripts/HZGamma_ZReFit.py --doReFit --splitJobs --nJobs 10 --iJob $1
+
+python scripts/HZGamma_ZReFit.py --doReFit -y run2 --truelineshape ./Data/UL/run2_01jet/ZReFit -o ./Data/UL/run2_01jet/ZReFit --tree zero_to_one_jet --splitJobs --nJobs 20 --iJob $1 --sampleName sig #--verbose
+#python scripts/HZGamma_ZReFit.py --plotReFit -y run2_refit --tree zero_to_one_jet --sampleName sig -o ./Data/UL/run2_01jet/ZReFit --verbose -c ele
 
 echo "running done"

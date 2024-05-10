@@ -48,10 +48,10 @@ def CMS_lumi(pad,  iPeriod,  iPosX, year ):
         lumi_sqrtS = "41.48 fb^{-1}"
     elif year == '2018':
         lumi_sqrtS = "59.83 fb^{-1}"
-    elif year == 'run2':
+    elif 'run2' in year:
         lumi_sqrtS = "138 fb^{-1}"
     else:
-        print("do not include at 2016/2017/2018")
+        print("[[CMS Lumi]] do not include at 2016/2017/2018")
         exit(0)
     global outOfFrame, relPosX
     if(iPosX/10==0 ): outOfFrame = True

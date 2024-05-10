@@ -372,6 +372,7 @@ def decorate(data):
 
     if data.shape[0] == 0: return data
 
+    
     data['HZ_relM'] = data.H_mass / data.Z_mass
     data['H_relpt'] = data.H_pt / data.H_mass
     data['Z_relpt'] = data.Z_pt / data.H_mass
@@ -422,6 +423,7 @@ def decorate(data):
     data['pt_balance_0j'] = data.apply(lambda x: compute_pt_balance_0j(x), axis=1)
     data['pt_balance_1j'] = data.apply(lambda x: compute_pt_balance_1j(x), axis=1)
     data['is_center'] = data.apply(lambda x: compute_is_center(x), axis=1)
+    
     #data[['Jets_QGscore_Lead', 'Jets_QGflag_Lead', 'Jets_QGscore_Sub', 'Jets_QGflag_Sub']] = data.apply(lambda x: compute_QG(x), axis=1, result_type='expand')
 
     #data.rename(columns={'Muons_Minv_MuMu_Paper': 'm_mumu', 'Muons_Minv_MuMu_VH': 'm_mumu_VH', 'EventInfo_EventNumber': 'eventNumber', 'Jets_jetMultip': 'n_j'}, inplace=True)

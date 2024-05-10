@@ -8,7 +8,7 @@ import numpy as np
 sys.path.insert(0, '%s/lib' % os.getcwd())
 from ROOT import *
 from Plot_Helper import LoadNtuples, MakeStack, CreateCanvas, DrawOnCanv, SaveCanvPic, ScaleSignal, MakeRatioPlot, MakeLegend, Total_Unc
-from Analyzer_Helper import getMassSigma
+from Analyzer_Helper import reweighting
 import Analyzer_Configs as AC
 import Plot_Configs     as PC
 
@@ -20,8 +20,10 @@ parser.add_argument("-y", "--Year", dest="year", default="2017", help="which yea
 parser.add_argument("--region", dest="region", default="full", help="CR for sideband region, SR for signal region, full for full region")
 parser.add_argument('-b', '--blind', dest='blind', action='store_true', default=False, help='Blind signal region')
 parser.add_argument('-ln', '--ln', dest='ln', action='store_true', default=False, help='log plot?')
+parser.add_argument('-m', '--mva', dest='mva', action='store_true', default=False, help='use mva or not')
 parser.add_argument('--ele', dest='ele', action='store_true', default=False, help='electron channel?')
 parser.add_argument('--mu', dest='mu', action='store_true', default=False, help='muon channel?')
+parser.add_argument('--reweighting', dest='reweighting', action='store_true', default=False, help='Apply reweighting?')
 args = parser.parse_args()
 
 
@@ -32,7 +34,22 @@ tdrstyle.setTDRStyle()
 def main():
 
     # Setup the plot configuration
-    analyzer_cfg = AC.Analyzer_Config('inclusive', args.year, args.region, 'inclusive')
+    cat = 'zero_to_one_jet'
+    #cat = 'two_jet'
+    analyzer_cfg = AC.Analyzer_Config('inclusive', args.year, args.region, cat)
+    
+    if args.reweighting:
+        analyzer_cfg.out_dir = analyzer_cfg.out_dir+"_reweighting"
+        analyzer_cfg.plot_output_path = "{0}/plot_{1}_{2}".format(analyzer_cfg.out_dir, analyzer_cfg.out_region_name, analyzer_cfg.treename)
+        reweighting_json = analyzer_cfg.load_reweighting('/afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/Plotter/Data/reweight_run2UL_{}.json'.format(cat))
+
+    if args.ele:
+        analyzer_cfg.out_dir = analyzer_cfg.out_dir+"_ele"
+        analyzer_cfg.plot_output_path = "{0}/plot_{1}_{2}".format(analyzer_cfg.out_dir, analyzer_cfg.out_region_name, analyzer_cfg.treename)
+    if args.mu:
+        analyzer_cfg.out_dir = analyzer_cfg.out_dir+"_mu"
+        analyzer_cfg.plot_output_path = "{0}/plot_{1}_{2}".format(analyzer_cfg.out_dir, analyzer_cfg.out_region_name, analyzer_cfg.treename)
+
     analyzer_cfg.Print_Config()
     plot_cfg = PC.Plot_Config(analyzer_cfg, args.year)
     # creat output files
@@ -55,7 +72,7 @@ def main():
 
             if (iEvt % 100000 == 1):
                 print("looking at event %d" %iEvt)
-            #if (iEvt == 100): break
+            #if (iEvt == 500): break
 
             
             if args.ele:
@@ -66,13 +83,9 @@ def main():
                     continue
             
             weight = ntup.weight_central
-            #weight = ntup.weight
 
-
-            if  args.region == "SR" and (ntup.H_m>135. or ntup.H_m<115.): continue
-            if  args.region == "CR" and (ntup.H_m<135. and ntup.H_m>115.): continue
-
-            #print(getattr(ntup,'Z_pt'))
+            if  args.region == "SR" and (ntup.H_mass>130. or ntup.H_mass<120.): continue
+            if  args.region == "CR" and (ntup.H_mass<130. and ntup.H_mass>120.): continue
 
             # remove DY duplicate
             if ("DY" in sample) and (ntup.n_iso_photons > 0):
@@ -81,11 +94,27 @@ def main():
             if ("ZGToLLG" in sample) and (ntup.n_iso_photons < 1):
                 continue
 
-            #if not (ntup.n_jets >=2 and ntup.n_leptons < 3):
-            #    continue
+            if args.reweighting:
+                reweight = getattr(ntup, 'reweight')
+                '''
+                if sample in analyzer_cfg.bkg_names+analyzer_cfg.sig_names:
+                    value_reweight = []
+                    for val in analyzer_cfg.reweight_variables:
+                        value_reweight.append(getattr(ntup,val))
+                    #print(analyzer_cfg.norm_SFs)
+                    reweight = reweighting(analyzer_cfg, reweighting_json, value_reweight)
+                '''
+            else:
+                reweight = 1.0
+                
 
             for var_name in var_names:
-                histos[var_name][sample].Fill( getattr(ntup,var_name), weight )
+
+                if  args.blind and (sample == 'data') and ('H_mass' in var_name):
+                    if getattr(ntup,var_name) > 130 or getattr(ntup,var_name) < 120 :
+                        histos[var_name][sample].Fill( getattr(ntup,var_name), weight * reweight )
+                else:
+                    histos[var_name][sample].Fill( getattr(ntup,var_name), weight * reweight )
 
         # End of for iEvt in range( ntup.GetEntries() )
     # End of for sample in analyzer_cfg.samp_names
@@ -94,6 +123,10 @@ def main():
     raw_dir = out_file.mkdir('raw_plots')
     raw_dir.cd()
     for var_name in var_names:
+        stacks = MakeStack(histos[var_name], analyzer_cfg, var_name)
+        hist_bkg = stacks['bkg'].GetStack().Last()
+        hist_bkg.SetName(var_name+"_bkg")
+        hist_bkg.Write()
         for sample in analyzer_cfg.samp_names:
             plot_cfg.SetHistStyles(histos[var_name][sample], sample)
             histos[var_name][sample].Write()

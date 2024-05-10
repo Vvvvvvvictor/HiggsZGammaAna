@@ -37,7 +37,6 @@ if not args.verbose:
     os.close(1)
     os.open(os.devnull, os.O_WRONLY)
 
-
 def Model_GenZ_lineshape(mZ):
     global meanCB, sigmaCB, alphaCB, nCB
     global meanGauss1, sigmaGauss1, f1
@@ -48,18 +47,18 @@ def Model_GenZ_lineshape(mZ):
     global parameters
     parameters = ["meanCB","sigmaCB","alphaCB","nCB","meanGauss1","meanGauss2","meanGauss3","sigmaGauss1","sigmaGauss2","sigmaGauss3","f1","f2","f3"]
 
-    meanCB = RooRealVar("meanCB","meanCB",90., 50., 130.)
+    meanCB = RooRealVar("meanCB","meanCB",90., 60., 120.)
     sigmaCB = RooRealVar("sigmaCB","sigmaCB",4., 0.1, 10.)
     alphaCB = RooRealVar("alphaCB","alphaCB",0.8, 0.01, 5.)
     nCB = RooRealVar("nCB","nCB",9., 0.1, 20.)
-    meanGauss1 = RooRealVar("meanGauss1","meanGauss1",91., 50., 130.)
-    sigmaGauss1 = RooRealVar("sigmaGauss1","sigmaGauss1",0.7, 0.1, 20.0)
+    meanGauss1 = RooRealVar("meanGauss1","meanGauss1",91., 60., 120.)
+    sigmaGauss1 = RooRealVar("sigmaGauss1","sigmaGauss1",6, 0.5, 20.0)
     f1 = RooRealVar("f1","f1",0.6, 0., 1.)
-    meanGauss2 = RooRealVar("meanGauss2","meanGauss2",91., 50., 130.)
+    meanGauss2 = RooRealVar("meanGauss2","meanGauss2",91., 60., 120.)
     sigmaGauss2 = RooRealVar("sigmaGauss2","sigmaGauss2",2., 0.5, 20.)
     f2 = RooRealVar("f2","f2",0.6, 0., 1.)
-    meanGauss3 = RooRealVar("meanGauss3","meanGauss3",91., 50., 130.)
-    sigmaGauss3 = RooRealVar("sigmaGauss3","sigmaGauss3",12., 0.5, 20.)
+    meanGauss3 = RooRealVar("meanGauss3","meanGauss3",91., 60., 120.)
+    sigmaGauss3 = RooRealVar("sigmaGauss3","sigmaGauss3",1., 0.5, 20.)
     f3 = RooRealVar("f3","f3",0.8, 0., 1.)
 
     singleCB = RooCBShape("singleCB", "singleCB", mZ, meanCB, sigmaCB, alphaCB, nCB)
@@ -77,7 +76,7 @@ def get_GenZ_lineshape(filename, treeName, outpath):
     file = TFile(filename)
     tree = file.Get(treeName)
 
-    massZ = RooRealVar("GenHzgLeadGenChild_mass", "GenHzgLeadGenChild_mass", 91., 50., 130.)
+    massZ = RooRealVar("GenHzgLeadGenChild_mass", "GenHzgLeadGenChild_mass", 91., 60., 120.)
     lep_id = RooRealVar("GenHzgLeadGenChildChild1_pdgId", "GenHzgLeadGenChildChild1_pdgId", 11, -1000, 1000)
     massZ.SetTitle("m_{ll}")
     massZ.setUnit("GeV")
@@ -153,10 +152,14 @@ def get_GenZ_lineshape(filename, treeName, outpath):
 
 
 def ZConstrainReFit(treeName, outpath, splitJobs):
-    analyzer_cfg = AC.Analyzer_Config('inclusive', args.year)
+    #cat = 'zero_to_one_jet'
+    #cat = 'two_jet'
+    cat = args.tree
+    analyzer_cfg = AC.Analyzer_Config(channel='inclusive', year=args.year, treename=cat)
     analyzer_cfg.Print_Config()
-    analyzer_cfg.out_dir = "{}/data_Zrefit".format(outpath)
+
     analyzer_cfg.plot_output_path = "{}/ZRefit_plots".format(outpath)
+
     ntuples = LoadNtuples(analyzer_cfg)
 
     truelineshape_ele = Zrefit.getParameters("{}/GenZ_truelineshapeele.txt".format(args.truelineshape))
@@ -168,14 +171,13 @@ def ZConstrainReFit(treeName, outpath, splitJobs):
 
         ntup = ntuples[sample] # just a short name
         nEvts = ntup.GetEntries()
-        print('\n\nOn sample: %s' %sample)
-        print('total events: %d' %nEvts)
 
         # Split jobs
+        analyzer_cfg.out_dir = '{}/{}'.format(analyzer_cfg.sample_loc, sample)
         if splitJobs:
             nJobs = args.nJobs
             iJob = args.iJob
-            analyzer_cfg.root_output_name = "{}_job{}.root".format(sample, iJob)
+            analyzer_cfg.root_output_name = "{}_run2_refit_job{}.root".format(cat, iJob)
 
             if iJob < 1:
                 print("[[ERROR]]: The job number can only start from 1")
@@ -188,7 +190,7 @@ def ZConstrainReFit(treeName, outpath, splitJobs):
             if iJob == 1:
                 splits[0] = -1
         else:
-            analyzer_cfg.root_output_name = "{}.root".format(sample)
+            analyzer_cfg.root_output_name = "{}_run2_refit.root".format(cat)
             splits = [0, nEvts]
         
         # copy the output file name
@@ -196,16 +198,24 @@ def ZConstrainReFit(treeName, outpath, splitJobs):
         passedEvents = TTree(treeName,treeName)
         branch_names, branch = Zrefit.branch_setup(passedEvents)
         branch_names_new, branch_new = Zrefit.add_branch(passedEvents)
+        if sample == 'data':
+            branch_names = [b for b in branch_names if 'Gen' not in b]
+            branch_names = [b for b in branch_names if 'n_iso_photons' not in b]
 
         #print("DEBUG: ", splits)
-
+        print('\n\nOn sample: %s' %sample)
+        print('total events: %d' %ntup.GetEntries())
 
         # loop through all the events
         for iEvt in range( nEvts ):
             ntup.GetEvent(iEvt)
 
-            #if iEvt > 5: break
-            #if iEvt > 10000: continue
+            #if iEvt > 1: break
+            #if iEvt > 5000: continue
+            if (iEvt % 100000 == 1):
+                print("looking at event %d" %iEvt)
+            #if (iEvt == 5): break
+
             if (iEvt <= splits[0] or iEvt > splits[1]):
                 continue
 
@@ -302,10 +312,10 @@ def ZConstrainReFit(treeName, outpath, splitJobs):
 
 
 def ZConstrainReFit_plot(outpath):
-    analyzer_cfg = AC.Analyzer_Config('ggH', args.year)
-    analyzer_cfg.sample_loc = "{}/data_Zrefit".format(outpath)
+    cat = args.tree
+    analyzer_cfg = AC.Analyzer_Config(channel='inclusive', year=args.year, treename=cat)
+
     analyzer_cfg.Print_Config()
-    analyzer_cfg.out_dir = "{}/data_Zrefit".format(outpath)
     analyzer_cfg.plot_output_path = "{}/ZRefit_plots".format(outpath)
     ntuples = LoadNtuples(analyzer_cfg)
 

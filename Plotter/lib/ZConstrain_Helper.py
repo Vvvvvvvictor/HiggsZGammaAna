@@ -133,7 +133,64 @@ def branch_setup(tree):
     "weight_central",
     "run",
     "event",
-    "luminosityBlock"
+    "luminosityBlock",
+    'HZ_relM',
+    'H_relpt',
+    'Z_relpt',
+    'Z_lead_lepton_relpt',
+    'Z_sublead_lepton_relpt',
+    'gamma_relpt',
+    'jet_1_relpt',
+    'jet_2_relpt',
+    'MET_relpt',
+    'gamma_ptRelErr',
+    'G_ECM',
+    'Z_ECM',
+    'Z_rapCM',
+    'l_rapCM',
+    'HZ_deltaRap',
+    'l_cosProdAngle',
+    'Z_cosProdAngle',
+    'll_deltaR',
+    'leadLG_deltaR',
+    'ZG_deltaR',
+    'subleadLG_deltaR',
+    'H_deltaphi',
+    'Z_deltaphi',
+    'Z_lead_lepton_deltaphi',
+    'Z_sublead_lepton_deltaphi',
+    'additional_lepton_1_deltaphi',
+    'additional_lepton_2_deltaphi',
+    'MET_deltaphi',
+    'weight',
+    'mass_jj',
+    'H_ptt',
+    'H_al',
+    'H_bt',
+    'Z_cos_theta',
+    'lep_cos_theta',
+    'lep_phi',
+    'l1g_deltaR',
+    'l2g_deltaR',
+    'delta_eta_jj',
+    'delta_phi_jj',
+    'delta_phi_zgjj',
+    'photon_zeppenfeld',
+    'H_zeppenfeld',
+    'pt_balance',
+    'pt_balance_0j',
+    'pt_balance_1j',
+    'is_center',
+    'jet_1_deltaphi',
+    'jet_2_deltaphi',
+    'jet_3_deltaphi',
+    'jet_4_deltaphi',
+    'jet1G_deltaR',
+    'jet2G_deltaR',
+    'jet3G_deltaR',
+    'jet4G_deltaR',
+    'reweight',
+    'BDT_score'
     ]
     
     # setup the branchs
@@ -192,8 +249,8 @@ def MakeZReFitModel(PTRECO1_lep, PTErr1_lep, Theta1_lep, Phi1_lep, M1, PTRECO2_l
     pTRECO2_lep = RooRealVar("pTRECO2_lep", "pTRECO2_lep", PTRECO2_lep, 5., 500.)
     pTMean1_lep = RooRealVar("pTMean1_lep", "pTMean1_lep", PTRECO1_lep, max(5.0, PTRECO1_lep-2*PTErr1_lep), PTRECO1_lep+2*PTErr1_lep)
     pTMean2_lep = RooRealVar("pTMean2_lep", "pTMean2_lep", PTRECO2_lep, max(5.0, PTRECO2_lep-2*PTErr2_lep), PTRECO2_lep+2*PTErr2_lep)
-    pTSigma1_lep = RooRealVar("pTSigma1_lep", "pTSigma1_lep", PTErr1_lep, 0.001, 1000.)
-    pTSigma2_lep = RooRealVar("pTSigma2_lep", "pTSigma2_lep", PTErr2_lep, 0.001, 1000.)
+    pTSigma1_lep = RooRealVar("pTSigma1_lep", "pTSigma1_lep", PTErr1_lep)
+    pTSigma2_lep = RooRealVar("pTSigma2_lep", "pTSigma2_lep", PTErr2_lep)
     theta1_lep = RooRealVar("theta1_lep", "theta1_lep", Theta1_lep)
     theta2_lep = RooRealVar("theta2_lep", "theta2_lep", Theta2_lep)
     phi1_lep = RooRealVar("phi1_lep", "phi1_lep", Phi1_lep)
@@ -205,21 +262,21 @@ def MakeZReFitModel(PTRECO1_lep, PTErr1_lep, Theta1_lep, Phi1_lep, M1, PTRECO2_l
     # gamma
     pTRECO1_gamma = RooRealVar("pTRECO1_gamma", "pTRECO1_gamma", PTRECO1_gamma, 5., 500.)
     pTMean1_gamma = RooRealVar("pTMean1_gamma", "pTMean1_gamma", PTRECO1_gamma, max(0.5, PTRECO1_gamma-2*PTErr1_gamma), PTRECO1_gamma+2*PTErr1_gamma)
-    pTSigma1_gamma = RooRealVar("pTSigma1_gamma", "pTSigma1_gamma", PTErr1_gamma, 0.001, 1000.)
+    pTSigma1_gamma = RooRealVar("pTSigma1_gamma", "pTSigma1_gamma", PTErr1_gamma)
     theta1_gamma = RooRealVar("theta1_gamma", "theta1_gamma", Theta1_gamma)
     phi1_gamma = RooRealVar("phi1_gamma", "phi1_gamma", Phi1_gamma)
     
-    pTSigma1_lep.setConstant(kTRUE)
-    pTSigma2_lep.setConstant(kTRUE)
-    theta1_lep.setConstant(kTRUE)
-    theta2_lep.setConstant(kTRUE)
-    phi1_lep.setConstant(kTRUE)
-    phi2_lep.setConstant(kTRUE)
-    m1.setConstant(kTRUE)
-    m2.setConstant(kTRUE)
-    theta1_gamma.setConstant(kTRUE)
-    phi1_gamma.setConstant(kTRUE)
-    pTSigma1_gamma.setConstant(kTRUE)
+    #pTSigma1_lep.setConstant(kTRUE)
+    #pTSigma2_lep.setConstant(kTRUE)
+    #theta1_lep.setConstant(kTRUE)
+    #theta2_lep.setConstant(kTRUE)
+    #phi1_lep.setConstant(kTRUE)
+    #phi2_lep.setConstant(kTRUE)
+    #m1.setConstant(kTRUE)
+    #m2.setConstant(kTRUE)
+    #theta1_gamma.setConstant(kTRUE)
+    #phi1_gamma.setConstant(kTRUE)
+    #pTSigma1_gamma.setConstant(kTRUE)
 
     # gauss
     gauss1_lep = RooGaussian("gauss1_lep", "gauss1_lep", pTRECO1_lep, pTMean1_lep, pTSigma1_lep)
@@ -307,9 +364,9 @@ def MakeZReFitModel(PTRECO1_lep, PTErr1_lep, Theta1_lep, Phi1_lep, M1, PTRECO2_l
 
     #r = model.fitTo(pTs, RooFit.Save(),RooFit.Constrain(mZ),RooFit.PrintLevel(-1), RooFit.PrintEvalErrors(-1))
     if n_fsr == 1:
-        r = model.fitTo(pTs, RooFit.Save(),RooFit.Constrain(RooArgSet(pTMean1_lep, pTMean2_lep, pTMean1_gamma)),RooFit.PrintLevel(-1), RooFit.PrintEvalErrors(-1))
+        r = model.fitTo(pTs, RooFit.Save(),RooFit.Constrain(RooArgSet(pTMean1_lep, pTMean2_lep, pTMean1_gamma)),RooFit.PrintLevel(-1),RooFit.PrintEvalErrors(-1))
     else:
-        r = model.fitTo(pTs, RooFit.Save(),RooFit.Constrain(RooArgSet(pTMean1_lep, pTMean2_lep)),RooFit.PrintLevel(-1), RooFit.PrintEvalErrors(-1))
+        r = model.fitTo(pTs, RooFit.Save(),RooFit.Constrain(RooArgSet(pTMean1_lep, pTMean2_lep)),RooFit.PrintLevel(-1),RooFit.PrintEvalErrors(-1))
 
     #print("DEBUG: MakeZReFitModel: model float parameters: ", sigmaGauss1, pTRECO1_lep, pTMean1_lep, pTSigma1_lep, pTMean2_lep, pTSigma2_lep, mZ)
 

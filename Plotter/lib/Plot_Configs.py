@@ -20,10 +20,10 @@ class Plot_Config:
             self.lumi    = '59.83'
         elif year == 'run2Rereco':
             self.lumi    = '137.24'
-        elif year == 'run2':
+        elif 'run2' in year:
             self.lumi    = '138'
         else:
-            print('do not in 2016/2017/2018!')
+            print('[[Plot Configs]] do not in 2016/2017/2018!')
             exit(0)
         self.sig_scale  = 100
 
@@ -45,21 +45,25 @@ class Plot_Config:
 
         self.colors["DYJetsToLL"]  =  kAzure + 7
         self.colors["ZGToLLG"]  =  kOrange
+        self.colors["ZG2JToG2L2J"]  =  kYellow
         self.colors["TT"]  =  kGreen
-        self.colors["ZG2JToG2L2J"]  =  kViolet
         self.colors["TGJets"]  =  kSpring
-        self.colors["TTGJets"]  =  kYellow
+        self.colors["TTGJets"]  =  kTeal
+        self.colors["EWKZ2J"]  =  kMagenta
+        self.colors["ttWJets"]  =  kGray
+        self.colors["ttZJets"]  =  kCyan
         self.colors["WW"]  =  kPink
-        self.colors["WZ"]  =  kRed -7
-        self.colors["ZZ"]  =  kYellow -7
-        self.colors["LLAJJ"]  =  kGreen -7
+        self.colors["WZ"]  =  kGreen -7
+        self.colors["ZZ"]  =  kSpring -7
+        self.colors["WGToLNuG"]  =  kViolet
+
 
     def LoadVariables(self):
         self.variables_map = {
             'Z_pt':                 [r"p_{T, Z}",               50, 0., 50.],
             'Z_eta':                [r"\eta_{Z}",               50, -2.5, 2.5],
             'Z_phi':                [r"\phi_{Z}",               50, -4., 4.],
-            'Z_mass':               [r"m_{Z}",                  50, 50., 120.],
+            'Z_mass':               [r"m_{Z}",                  60, 60., 120.],
             'H_pt':                 [r"p_{T, \ell\ell\gamma}",  50, 0., 80.],
             'H_eta':                [r"\eta_{\ell\ell\gamma}",  50, -2.5, 2.5],
             'H_phi':                [r"\phi_{\ell\ell\gamma}",  50, -4., 4.],
@@ -71,19 +75,23 @@ class Plot_Config:
             'Z_lead_lepton_eta':    [r"\eta_{T,\ell 1}",        50, -2.5, 2.5],
             'Z_lead_lepton_phi':    [r"\phi_{T,\ell 1}",        50, -4., 4.],
             'Z_lead_lepton_mass':   [r"m_{\ell 1}",             50, 0., 1.],
-            'Z_sublead_lepton_pt':  [r"p_{T,\ell 2}",           50, 0., 100.],
+            'Z_sublead_lepton_pt':  [r"p_{T,\ell 2}",           50, 0., 60.],
             'Z_sublead_lepton_eta': [r"\eta_{T,\ell 2}",        50, -2.5, 2.5],
             'Z_sublead_lepton_phi': [r"\phi_{T,\ell 2}",        50, -4., 4.],
             'Z_sublead_lepton_mass':[r"m_{\ell 2}",             50, 0., 1.],
-            'H_relpt':              [r"p_{T_{\ell\ell\gamma}}/m_{\ell\ell\gamma}",             50, 0., 2.5],
-            'gamma_ptRelErr':       [r"\gamma_{E_{err}}/\gamma_{E}",             50, 0., 0.15],
-            'H_ptt':                [r"H_{ptt}",                50, 0., 100.],
-            'Z_cos_theta':          [r"cos(\Theta)",             50, -1., 1.],
+            'H_ptt':                [r"H_{ptt}",                50, 0., 50.],
             'lep_cos_theta':        [r"cos(\theta)",             50, -1., 1.],
-            'lep_phi':              [r"\phi",                   50, 0., 4.],
-            'l1g_deltaR':           [r"max\Delta R(\ell,\gamma)",             50, 0., 5.],
-            'l2g_deltaR':           [r"min\Delta R(\ell,\gamma)",             50, 0., 5.],
-            'gamma_mvaID':          [r"\gamma_{mvaID}",             50, 0., 1.]
+            'lep_phi':              [r"\phi",                   50, -3.5, 3.5],
+            'l1g_deltaR':           [r"max\Delta R(\ell,\gamma)",             50, 0.5, 4.],
+            'l2g_deltaR':           [r"min\Delta R(\ell,\gamma)",             50, 0.45, 3.],
+            'gamma_relpt':          [r"pT_{\gamma}/m_{\ell\ell\gamma}",             50, 0.13, 0.5],
+            'gamma_mvaID':          [r"\gamma_{mvaID}",             50, 0.4, 1.],
+            'Z_cos_theta':          [r"cos(\Theta)",             50, -1., 1.],
+            'H_relpt':              [r"p_{T_{\ell\ell\gamma}}/m_{\ell\ell\gamma}",             50, 0., 1.],
+            'gamma_ptRelErr':       [r"\gamma_{E_{err}}/\gamma_{E}",             50, 0.01, 0.08],
+            'Z_mass_refit':               [r"m_{ZRefit}",                  60, 60., 120.],
+            'H_mass_refit':               [r"m_{\ell\ell\gamma Refit}",     65, 105., 170.],
+            #'BDT_score':            ["BDT Output",             50, 0., 1.]
         }
 
     def InitializeHistos(self):

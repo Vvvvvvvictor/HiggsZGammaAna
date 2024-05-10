@@ -54,52 +54,93 @@ echo "==============STARTED=============="
 #python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/2017/mva_based/background/WZ_2017/merged_nominal.parquet -o /eos/home-j/jiehan/root/2017/skimmed_ntuples/WZ/2017.root
 #python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/2017/mva_based/background/ZZ_2017/merged_nominal.parquet -o /eos/home-j/jiehan/root/2017/skimmed_ntuples/ZZ/2017.root
 
-mkdir -p /eos/user/z/zewang/HZGamma_data/data_CR
+# ######################
+# CR Sample
+# ######################
 
-base_path=/afs/cern.ch/work/z/zewang/private/HZGamma
-outpath=/eos/user/z/zewang/HZGamma_data/data_CR
-datasets16=( data_run2_APV_Run2016_CR data_run2_DoubleEG_Run2016_CR data_run2_DoubleMuon_Run2016_CR data_run2_SingleElectron_Run2016_CR data_run2_SingleMuon_Run2016_CR )
-datasets16_ZG=( bkgmc_run2_2016_postVFP_ZG_CR bkgmc_run2_2016_preVFP_ZG_CR )
-datasets18=( data_run2_DoubleMuon_Run2018A_CR data_run2_DoubleMuon_Run2018B_CR data_run2_DoubleMuon_Run2018C_CR data_run2_DoubleMuon_Run2018D_CR data_run2_EGamma_Run2018A_CR data_run2_EGamma_Run2018B_CR data_run2_EGamma_Run2018C_CR data_run2_EGamma_Run2018D_CR data_run2_SingleMuon_Run2018A_CR data_run2_SingleMuon_Run2018B_CR data_run2_SingleMuon_Run2018C_CR data_run2_SingleMuon_Run2018D_CR )
-datasets18_ZG=( bkgmc_run2_2018_ZG_CR )
-lable16=Data_2016
-lable18=Data_2018
-nDatasets16=${#datasets16[@]}
-nDatasets18=${#datasets18[@]}
+#mkdir -p /eos/user/z/zewang/HZGamma_data/data_CR
 
-for ((iData=0; iData<$nDatasets16; iData++))
-    do
+#base_path=/afs/cern.ch/work/z/zewang/private/HZGamma
+#outpath=/eos/user/z/zewang/HZGamma_data/data_CR
+#datasets16=( data_run2_APV_Run2016_CR data_run2_DoubleEG_Run2016_CR data_run2_DoubleMuon_Run2016_CR data_run2_SingleElectron_Run2016_CR data_run2_SingleMuon_Run2016_CR )
+#datasets16_ZG=( bkgmc_run2_2016_postVFP_ZG_CR bkgmc_run2_2016_preVFP_ZG_CR )
+#datasets18=( data_run2_DoubleMuon_Run2018A_CR data_run2_DoubleMuon_Run2018B_CR data_run2_DoubleMuon_Run2018C_CR data_run2_DoubleMuon_Run2018D_CR data_run2_EGamma_Run2018A_CR data_run2_EGamma_Run2018B_CR data_run2_EGamma_Run2018C_CR data_run2_EGamma_Run2018D_CR data_run2_SingleMuon_Run2018A_CR data_run2_SingleMuon_Run2018B_CR data_run2_SingleMuon_Run2018C_CR data_run2_SingleMuon_Run2018D_CR )
+#datasets18_ZG=( bkgmc_run2_2018_ZG_CR )
+#lable16=Data_2016
+#lable18=Data_2018
+#nDatasets16=${#datasets16[@]}
+#nDatasets18=${#datasets18[@]}
+
+#:<<BLOCK
+#for ((iData=0; iData<$nDatasets16; iData++))
+#    do
     
-    input=$base_path/${datasets16[$iData]}/$lable16/merged_nominal.parquet
-    output=$outpath/${datasets16[$iData]}.root
+#    input=$base_path/${datasets16[$iData]}/$lable16/merged_nominal.parquet
+#    output=$outpath/${datasets16[$iData]}.root
 
-    echo "python /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i $input -o $output"
-    python /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i $input -o $output
+#    echo "python /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i $input -o $output"
+    #python /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i $input -o $output
 
-done
+#done
 
 #hadd -f $outpath/data_2016.root $outpath/data_run2_*Run2016*.root
 
-for ((iData=0; iData<$nDatasets18; iData++))
-    do
+#for ((iData=0; iData<$nDatasets18; iData++))
+#    do
     
-    input=$base_path/${datasets18[$iData]}/$lable18/merged_nominal.parquet
-    output=$outpath/${datasets18[$iData]}.root
+#    input=$base_path/${datasets18[$iData]}/$lable18/merged_nominal.parquet
+#    output=$outpath/${datasets18[$iData]}.root
 
-    echo "python /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i $input -o $output"
-    python /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i $input -o $output
+#    echo "python /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i $input -o $output"
+    #python /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i $input -o $output
 
-done
+#done
 
 #hadd -f $outpath/data_2018.root $outpath/data_run2_*Run2018*.root
 
-echo "python /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i $base_path/bkgmc_run2_2016_postVFP_ZG_CR/ZGToLLG_2016/merged_nominal.parquet -o $outpath/bkgmc_run2_2016_postVFP_ZG_CR.root"
-python /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i $base_path/bkgmc_run2_2016_postVFP_ZG_CR/ZGToLLG_2016/merged_nominal.parquet -o $outpath/bkgmc_run2_2016_postVFP_ZG_CR.root
+#echo "python /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i $base_path/bkgmc_run2_2016_postVFP_ZG_CR/ZGToLLG_2016/merged_nominal.parquet -o $outpath/bkgmc_run2_2016_postVFP_ZG_CR.root"
+#python /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i $base_path/bkgmc_run2_2016_postVFP_ZG_CR/ZGToLLG_2016/merged_nominal.parquet -o $outpath/bkgmc_run2_2016_postVFP_ZG_CR.root
 
-echo "python /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i $base_path/bkgmc_run2_2016_preVFP_ZG_CR/ZGToLLG_2016/merged_nominal.parquet -o $outpath/bkgmc_run2_2016_preVFP_ZG_CR.root"
-python /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i $base_path/bkgmc_run2_2016_preVFP_ZG_CR/ZGToLLG_2016/merged_nominal.parquet -o $outpath/bkgmc_run2_2016_preVFP_ZG_CR.root
+#echo "python /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i $base_path/bkgmc_run2_2016_preVFP_ZG_CR/ZGToLLG_2016/merged_nominal.parquet -o $outpath/bkgmc_run2_2016_preVFP_ZG_CR.root"
+#python /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i $base_path/bkgmc_run2_2016_preVFP_ZG_CR/ZGToLLG_2016/merged_nominal.parquet -o $outpath/bkgmc_run2_2016_preVFP_ZG_CR.root
 
-echo "python /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i $base_path/bkgmc_run2_2018_ZG_CR/ZGToLLG_2018/merged_nominal.parquet -o $outpath/bkgmc_run2_2018_ZG_CR.root"
-python /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i $base_path/bkgmc_run2_2018_ZG_CR/ZGToLLG_2018/merged_nominal.parquet -o $outpath/bkgmc_run2_2018_ZG_CR.root
+#echo "python /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i $base_path/bkgmc_run2_2018_ZG_CR/ZGToLLG_2018/merged_nominal.parquet -o $outpath/bkgmc_run2_2018_ZG_CR.root"
+#python /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i $base_path/bkgmc_run2_2018_ZG_CR/ZGToLLG_2018/merged_nominal.parquet -o $outpath/bkgmc_run2_2018_ZG_CR.root
+
+#BLOCK
+
+#for ((iData=1; iData<417; iData++))
+#    do
+#    
+#    input=$base_path/data_run2_2017_nanov2_CR/Data_2017/job_${iData}/output_job_${iData}_nominal.parquet
+#    output=$outpath/job_${iData}.root
+
+#    echo "python /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i $input -o $output"
+#    python /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i $input -o $output
+
+#done
+
+################
+# Signal samples
+################
+#type="signal"
+# for samples in ggH VBF WminusH 
+
+mkdir -p /eos/user/z/zewang/HZGamma_data/run2UL/sig_noCut/skimmed_ntuples/ggH/ /eos/user/z/zewang/HZGamma_data/run2UL/sig_noCut/skimmed_ntuples/VBF/ /eos/user/z/zewang/HZGamma_data/run2UL/sig_noCut/skimmed_ntuples/WminusH/ /eos/user/z/zewang/HZGamma_data/run2UL/sig_noCut/skimmed_ntuples/WplusH/ /eos/user/z/zewang/HZGamma_data/run2UL/sig_noCut/skimmed_ntuples/ZH/ /eos/user/z/zewang/HZGamma_data/run2UL/sig_noCut/skimmed_ntuples/ttH/
+
+year=( 2016 2017 2018 )
+nyear=${#year[@]}
+
+for ((iYear=0; iYear<$nyear; iYear++))
+    do
+    #python /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /afs/cern.ch/work/z/zewang/private/HZGamma/run2_gen_noCut/ggH_M125_${year[$iYear]}/merged_nominal.parquet -o /eos/user/z/zewang/HZGamma_data/run2UL/sig_noCut/skimmed_ntuples/ggH/${year[$iYear]}.root
+    #python /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /afs/cern.ch/work/z/zewang/private/HZGamma/run2_gen_noCut/VBFH_M125_${year[$iYear]}/merged_nominal.parquet -o /eos/user/z/zewang/HZGamma_data/run2UL/sig_noCut/skimmed_ntuples/VBF/${year[$iYear]}.root
+    python /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /afs/cern.ch/work/z/zewang/private/HZGamma/run2_gen_noCut/WminusH_M125_${year[$iYear]}/merged_nominal.parquet -o /eos/user/z/zewang/HZGamma_data/run2UL/sig_noCut/skimmed_ntuples/WminusH/${year[$iYear]}.root
+    #python /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /afs/cern.ch/work/z/zewang/private/HZGamma/run2_gen_noCut/WplusH_M125_${year[$iYear]}/merged_nominal.parquet -o /eos/user/z/zewang/HZGamma_data/run2UL/sig_noCut/skimmed_ntuples/WplusH/${year[$iYear]}.root
+    #python /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /afs/cern.ch/work/z/zewang/private/HZGamma/run2_gen_noCut/ZH_M125_${year[$iYear]}/merged_nominal.parquet -o /eos/user/z/zewang/HZGamma_data/run2UL/sig_noCut/skimmed_ntuples/ZH/${year[$iYear]}.root
+    #python /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /afs/cern.ch/work/z/zewang/private/HZGamma/run2_gen_noCut/ttH_M125_${year[$iYear]}/merged_nominal.parquet -o /eos/user/z/zewang/HZGamma_data/run2UL/sig_noCut/skimmed_ntuples/ttH/${year[$iYear]}.root
+
+done
+
 
 echo "==============FINISHED==========="
