@@ -556,7 +556,7 @@ class AnalysisManager():
             # Get events that is not duplicated
             if is_data:
                 duplicated_sample_remover = DuplicatedSamplesTagger(is_data=is_data)
-                duplicated_remove_cut = duplicated_sample_remover.calculate_selection(file, tree, config["sample"]["year"])
+                duplicated_remove_cut = duplicated_sample_remover.calculate_selection(file, tree)
 
                 trimmed_branches = [x for x in branches if x in tree.keys()]
                 events_file = tree.arrays(trimmed_branches, library = "ak", how = "zip") #TODO: There is a bug here.
