@@ -303,8 +303,9 @@ class ZGammaTaggerRun2(Tagger):
 
         if "2016" not in self.year:
             year = self.year[:4]
-
-        b_jet_cut = jets.btagDeepFlavB > self.options["btag_med"][year]
+            b_jet_cut = jets.btagDeepFlavB > self.options["btag_med"][year]
+        else:
+            b_jet_cut = jets.btagDeepFlavB > self.options["btag_med"][self.year]
         jets = awkward.with_field(jets, b_jet_cut, "is_med_bjet") 
 
         # Add object fields to events array
