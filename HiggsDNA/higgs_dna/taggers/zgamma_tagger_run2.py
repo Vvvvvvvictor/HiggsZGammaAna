@@ -562,7 +562,7 @@ class ZGammaTaggerRun2(Tagger):
                 dummy_value = DUMMY_VALUE
             )
 
-        all_cuts = has_z_cand & has_gamma_cand & sel_h_1 & sel_h_2 & sel_h_3
+        all_cuts = has_z_cand & has_gamma_cand & sel_h_1 #& sel_h_2 & sel_h_3
 
         for cut_type in ["zgammas", "zgammas_ele", "zgammas_mu", "zgammas_w", "zgammas_ele_w", "zgammas_mu_w"]:
             if "_w" in cut_type:
