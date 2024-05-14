@@ -1,4 +1,4 @@
-for cat in 2 3
+for cat in 0 1 2 3
 do
 # cat=0
 # for sig in 0 1 2 5 10 20

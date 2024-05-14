@@ -71,7 +71,7 @@ class XGBoostHandler(object):
 
         self._region = region
 
-        self._inputFolder = '/eos/home-j/jiehan/root/skimmed_ntuples_two_jet'
+        self._inputFolder = '/eos/home-j/jiehan/root/skimmed_ntuples_two_jet_reindex'
         self._outputFolder = 'models'
         self._chunksize = 500000
         self._branches = []
@@ -116,7 +116,7 @@ class XGBoostHandler(object):
         self.params = [{'eval_metric': ['auc', 'logloss']}]
         self.early_stopping_rounds = 10
         self.numRound = 10000
-        self.SF = -1       
+        self.SF = -1
         self.readConfig(configPath)
         self.checkConfig()
 
@@ -364,6 +364,22 @@ class XGBoostHandler(object):
         plt.tight_layout()
         plt.savefig("plots/corr/corr_%s_%s.pdf" % (self._region, data_type))
 
+    def reweightSignal(self):
+        min_mass, max_mass = 120, 130
+        if (self.m_data_bkg["H_mass"] > min_mass).all() and (self.m_data_bkg["H_mass"] < max_mass).all():
+            n_bins = 100
+            bin_edges = np.linspace(min_mass, max_mass, n_bins + 1)
+            
+            sig_hist, _ = np.histogram(self.m_data_sig['H_mass'], bins=bin_edges, weights=self.m_data_sig['weight'], density=True)
+            bkg_hist, _ = np.histogram(self.m_data_bkg['H_mass'], bins=bin_edges, weights=self.m_data_bkg['weight'], density=True)
+
+            # calculate ratio of signal to background
+            ratio_hist = np.divide(bkg_hist, sig_hist, out=np.zeros_like(bkg_hist), where=sig_hist != 0)
+
+            # refreche the weights
+            bin_indices = np.digitize(self.m_data_sig['H_mass'], bins=bin_edges) - 1
+            self.m_data_sig['weight'] = self.m_data_sig['weight'] * np.where((bin_indices >= 0) & (bin_indices < n_bins), ratio_hist[bin_indices], 1)
+
 
     def prepareData(self, fold=0):
         # training, validation, test split
@@ -401,7 +417,6 @@ class XGBoostHandler(object):
         print('XGB INFO: Setting the event weights...')
 
         if self.SF == -1: self.SF = 1.*train_sig.shape[0]/train_bkg.shape[0]
-
         train_sig_wt = train_sig[[self.weight]] * ( train_sig.shape[0] + train_bkg.shape[0] ) * self.SF / ( train_sig[self.weight].mean() * (1.+self.SF) * train_sig.shape[0] )
         train_bkg_wt = train_bkg[[self.weight]] * ( train_sig.shape[0] + train_bkg.shape[0] ) * self.SF / ( train_bkg[self.weight].mean() * (1.+self.SF) * train_bkg.shape[0] )
         val_sig_wt = val_sig[[self.weight]] * ( train_sig.shape[0] + train_bkg.shape[0] ) * self.SF / ( train_sig[self.weight].mean() * (1.+self.SF) * train_sig.shape[0] )
@@ -747,6 +762,8 @@ def main():
     if args.corr:
         xgb_model.plot_corr("sig")
         xgb_model.plot_corr("bkg")
+
+    xgb_model.reweightSignal()
 
     # looping over the "4 folds"
     for i in args.fold:
