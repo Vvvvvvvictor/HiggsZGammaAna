@@ -248,7 +248,7 @@ class ZGammaTaggerRun2(Tagger):
         )
 
         # Photons
-        photon_selection = self.select_photons(
+        photon_selection, sr_cut = self.select_photons(
                 photons = events.Photon,
                 rho = rho,
                 options = self.options["photons"]
@@ -260,13 +260,14 @@ class ZGammaTaggerRun2(Tagger):
         clean_photon_mask = object_selections.delta_R(photons, muons, 0.4) & object_selections.delta_R(photons, electrons, 0.4)
         photons = photons[clean_photon_mask]
 
+
         # Jets
         jet_cut = jet_selections.select_jets(
             jets = events.Jet,
             options = self.options["jets"],
             clean = {
                 "photons" : {
-                    "objects" : photons,
+                    "objects" : photons[(photons.electronVeto > self.options["photons"]["e_veto"]) & (photons.mvaID_WP80 == 1)],
                     "min_dr" : self.options["jets"]["dr_photons"]
                 },
                 "electrons" : {
@@ -358,31 +359,42 @@ class ZGammaTaggerRun2(Tagger):
         muons = awkward.Array(muons, with_name = "Momentum4D")
         FSRphotons = awkward.Array(FSRphotons, with_name = "Momentum4D")
 
+        #awkward_utils.add_field(events, "gamma_fsr_pt",  awkward.fill_none(FSRphotons.pt, DUMMY_VALUE))
 
         # bing with control regions
         #var_CR1 = ((photons.isScEtaEB & (photons.mvaID > self.options["photons"]["mvaID_barrel"])) | (photons.isScEtaEE & (photons.mvaID > self.options["photons"]["mvaID_endcap"])))
         var_CR1 = awkward.fill_none(photons.mvaID_WP80, False)
         var_CR2 = awkward.fill_none(photons.mvaID_WP90, False)
         var_CR3 = awkward.fill_none(photons.electronVeto, False)
-        SR = awkward.sum(((var_CR1) & (var_CR3)), axis=1) > 0
-        CR1 = awkward.sum(((~var_CR1) & (var_CR2) & (var_CR3)), axis=1) > 0
-        CR2 = awkward.sum(((~var_CR2) & (var_CR3)), axis=1) > 0
-        CR3 = awkward.sum(((var_CR1) & (~var_CR3)), axis=1) > 0
-        CR4 = awkward.sum(((~var_CR1) & (var_CR2) & (~var_CR3)), axis=1) > 0
-        CR5 = awkward.sum(((~var_CR2) & (~var_CR3)), axis=1) > 0
+        SR_cut = (var_CR1) & (var_CR3)
+        CR1_cut = (~var_CR1) & (var_CR2) & (var_CR3)
+        CR2_cut = (~var_CR2) & (var_CR3)
+        CR3_cut = (var_CR1) & (~var_CR3)
+        CR4_cut = (~var_CR1) & (var_CR2) & (~var_CR3)
+        CR5_cut = (~var_CR2) & (~var_CR3)
         
-        SR = awkward.fill_none(SR, value = False)
-        CR1 = awkward.fill_none(CR1, value=False)
-        CR2 = awkward.fill_none(CR2, value=False)
-        CR3 = awkward.fill_none(CR3, value=False)
-        CR4 = awkward.fill_none(CR4, value=False)
-        CR5 = awkward.fill_none(CR5, value=False)
+        SR = awkward.fill_none(awkward.sum(SR_cut, axis=1) > 0, value = False)
+        CR1 = awkward.fill_none(awkward.sum(CR1_cut, axis=1) > 0, value=False)
+        CR2 = awkward.fill_none(awkward.sum(CR2_cut, axis=1) > 0, value=False)
+        CR3 = awkward.fill_none(awkward.sum(CR3_cut, axis=1) > 0, value=False)
+        CR4 = awkward.fill_none(awkward.sum(CR4_cut, axis=1) > 0, value=False)
+        CR5 = awkward.fill_none(awkward.sum(CR5_cut, axis=1) > 0, value=False)
         regions = awkward.where(SR, 0, awkward.where(CR1, 1, awkward.where(CR2, 2, awkward.where(CR3, 3, awkward.where(CR4, 4, awkward.where(CR5, 5, -1))))))
+
+        masks, photon_masks, non_overlap_masks, non_overlap_photon_masks = [SR, CR1, CR2, CR3, CR4, CR5], [SR_cut, CR1_cut, CR2_cut, CR3_cut, CR4_cut, CR5_cut], [], []
+        recent_mask = awkward.zeros_like(SR)
+        for mask, photon_mask in zip(masks, photon_masks):
+            non_overlap_mask = mask & ~recent_mask
+            non_overlap_masks.append(non_overlap_mask)
+            non_overlap_photon_mask = non_overlap_mask & photon_mask
+            non_overlap_photon_masks.append(non_overlap_photon_mask)
+            recent_mask = mask | recent_mask
+        photons = awkward.concatenate([photons[non_overlap_photon_mask] for non_overlap_photon_mask in non_overlap_photon_masks], axis = 1)
+        
+            
         # for i in range(5000):
         #    print("SR:", SR[i], "CR1:", CR1[i], "CR2", CR2[i], "CR3", CR3[i], "CR4", CR4[i], "CR5", CR5[i], "var_CR1", var_CR1[i], "var_CR2", var_CR2[i], "var_CR3", var_CR3[i], "regions:", regions[i])
         awkward_utils.add_field(events, "regions",  regions)
-
-        #awkward_utils.add_field(events, "gamma_fsr_pt",  awkward.fill_none(FSRphotons.pt, DUMMY_VALUE))
 
         ee_pairs = awkward.combinations(electrons, 2, fields = ["LeadLepton", "SubleadLepton"])
         os_cut = (ee_pairs.LeadLepton.charge * ee_pairs.SubleadLepton.charge) == -1
@@ -849,7 +861,7 @@ class ZGammaTaggerRun2(Tagger):
                 cut_type = "photon"
         )
 
-        return all_cuts
+        return all_cuts, id_cut & e_veto_cut
 
     def select_FSRphotons(self, FSRphotons, electrons, photons, options):
         FSR_pt_cut = FSRphotons.pt > options["pt"]
