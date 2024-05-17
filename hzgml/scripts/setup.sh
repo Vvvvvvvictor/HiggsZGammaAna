@@ -1,7 +1,7 @@
 #!/bin/bash
 # import ROOT
-source /cvmfs/sft.cern.ch/lcg/views/LCG_104/x86_64-centos8-gcc11-opt/setup.sh
-source /cvmfs/sft.cern.ch/lcg/releases/LCG_104/ROOT/6.28.04/x86_64-centos8-gcc11-opt/bin/thisroot.sh
+source /cvmfs/sft.cern.ch/lcg/views/LCG_102/x86_64-centos9-gcc11-opt/setup.sh
+source /cvmfs/sft.cern.ch/lcg/releases/LCG_102/ROOT/6.26.04/x86_64-centos9-gcc11-opt/bin/thisroot.sh
 source /eos/user/${USER::1}/$USER/hzgmlenv/bin/activate
 
 export PATH="`pwd`:${PATH}"

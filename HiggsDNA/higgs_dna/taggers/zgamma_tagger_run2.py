@@ -358,6 +358,30 @@ class ZGammaTaggerRun2(Tagger):
         muons = awkward.Array(muons, with_name = "Momentum4D")
         FSRphotons = awkward.Array(FSRphotons, with_name = "Momentum4D")
 
+
+        # bing with control regions
+        #var_CR1 = ((photons.isScEtaEB & (photons.mvaID > self.options["photons"]["mvaID_barrel"])) | (photons.isScEtaEE & (photons.mvaID > self.options["photons"]["mvaID_endcap"])))
+        var_CR1 = awkward.fill_none(photons.mvaID_WP80, False)
+        var_CR2 = awkward.fill_none(photons.mvaID_WP90, False)
+        var_CR3 = awkward.fill_none(photons.electronVeto, False)
+        SR = awkward.sum(((var_CR1) & (var_CR3)), axis=1) > 0
+        CR1 = awkward.sum(((~var_CR1) & (var_CR2) & (var_CR3)), axis=1) > 0
+        CR2 = awkward.sum(((~var_CR2) & (var_CR3)), axis=1) > 0
+        CR3 = awkward.sum(((var_CR1) & (~var_CR3)), axis=1) > 0
+        CR4 = awkward.sum(((~var_CR1) & (var_CR2) & (~var_CR3)), axis=1) > 0
+        CR5 = awkward.sum(((~var_CR2) & (~var_CR3)), axis=1) > 0
+        
+        SR = awkward.fill_none(SR, value = False)
+        CR1 = awkward.fill_none(CR1, value=False)
+        CR2 = awkward.fill_none(CR2, value=False)
+        CR3 = awkward.fill_none(CR3, value=False)
+        CR4 = awkward.fill_none(CR4, value=False)
+        CR5 = awkward.fill_none(CR5, value=False)
+        regions = awkward.where(SR, 0, awkward.where(CR1, 1, awkward.where(CR2, 2, awkward.where(CR3, 3, awkward.where(CR4, 4, awkward.where(CR5, 5, -1))))))
+        # for i in range(5000):
+        #    print("SR:", SR[i], "CR1:", CR1[i], "CR2", CR2[i], "CR3", CR3[i], "CR4", CR4[i], "CR5", CR5[i], "var_CR1", var_CR1[i], "var_CR2", var_CR2[i], "var_CR3", var_CR3[i], "regions:", regions[i])
+        awkward_utils.add_field(events, "regions",  regions)
+
         #awkward_utils.add_field(events, "gamma_fsr_pt",  awkward.fill_none(FSRphotons.pt, DUMMY_VALUE))
 
         ee_pairs = awkward.combinations(electrons, 2, fields = ["LeadLepton", "SubleadLepton"])
@@ -647,28 +671,28 @@ class ZGammaTaggerRun2(Tagger):
             )
 
 
-        # bing with control regions
-        #var_CR1 = ((photons.isScEtaEB & (photons.mvaID > self.options["photons"]["mvaID_barrel"])) | (photons.isScEtaEE & (photons.mvaID > self.options["photons"]["mvaID_endcap"])))
-        var_CR1 = gamma_cand.mvaID_WP80
-        var_CR2 = gamma_cand.mvaID_WP90
-        var_CR3 = gamma_e_veto
-        SR = (var_CR1) & (var_CR3)
-        CR1 = (~var_CR1) & (var_CR2) & (var_CR3)
-        CR2 = (~var_CR2) & (var_CR3)
-        CR3 = (var_CR1) & (~var_CR3)
-        CR4 = (~var_CR1) & (var_CR2) & (~var_CR3)
-        CR5 = (~var_CR2) & (~var_CR3)
+        # # bing with control regions
+        # #var_CR1 = ((photons.isScEtaEB & (photons.mvaID > self.options["photons"]["mvaID_barrel"])) | (photons.isScEtaEE & (photons.mvaID > self.options["photons"]["mvaID_endcap"])))
+        # var_CR1 = gamma_cand.mvaID_WP80
+        # var_CR2 = gamma_cand.mvaID_WP90
+        # var_CR3 = gamma_e_veto
+        # SR = (var_CR1) & (var_CR3)
+        # CR1 = (~var_CR1) & (var_CR2) & (var_CR3)
+        # CR2 = (~var_CR2) & (var_CR3)
+        # CR3 = (var_CR1) & (~var_CR3)
+        # CR4 = (~var_CR1) & (var_CR2) & (~var_CR3)
+        # CR5 = (~var_CR2) & (~var_CR3)
         
-        SR = awkward.fill_none(SR, value = False)
-        CR1 = awkward.fill_none(CR1, value=False)
-        CR2 = awkward.fill_none(CR2, value=False)
-        CR3 = awkward.fill_none(CR3, value=False)
-        CR4 = awkward.fill_none(CR4, value=False)
-        CR5 = awkward.fill_none(CR5, value=False)
-        regions = awkward.where(SR, 0, awkward.where(CR1, 1, awkward.where(CR2, 2, awkward.where(CR3, 3, awkward.where(CR4, 4, awkward.where(CR5, 5, -1))))))
-        # for i in range(5000):
-        #    print("SR:", SR[i], "CR1:", CR1[i], "CR2", CR2[i], "CR3", CR3[i], "CR4", CR4[i], "CR5", CR5[i], "var_CR1", var_CR1[i], "var_CR2", var_CR2[i], "var_CR3", var_CR3[i], "regions:", regions[i])
-        awkward_utils.add_field(events, "regions",  regions)
+        # SR = awkward.fill_none(SR, value = False)
+        # CR1 = awkward.fill_none(CR1, value=False)
+        # CR2 = awkward.fill_none(CR2, value=False)
+        # CR3 = awkward.fill_none(CR3, value=False)
+        # CR4 = awkward.fill_none(CR4, value=False)
+        # CR5 = awkward.fill_none(CR5, value=False)
+        # regions = awkward.where(SR, 0, awkward.where(CR1, 1, awkward.where(CR2, 2, awkward.where(CR3, 3, awkward.where(CR4, 4, awkward.where(CR5, 5, -1))))))
+        # # for i in range(5000):
+        # #    print("SR:", SR[i], "CR1:", CR1[i], "CR2", CR2[i], "CR3", CR3[i], "CR4", CR4[i], "CR5", CR5[i], "var_CR1", var_CR1[i], "var_CR2", var_CR2[i], "var_CR3", var_CR3[i], "regions:", regions[i])
+        # awkward_utils.add_field(events, "regions",  regions)
 
 
         elapsed_time = time.time() - start

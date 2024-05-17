@@ -21,10 +21,10 @@ pd.options.mode.chained_assignment = None
 def getArgs():
     """Get arguments from command line."""
     parser = ArgumentParser()
-    parser.add_argument('-c', '--config', action='store', nargs=2, default=['data/training_config_BDT.json', 'data/apply_config_BDT.json'], help='Region to process')
-    parser.add_argument('-i', '--inputFolder', action='store', default='/eos/home-j/jiehan/root/skimmed_ntuples_two_jet', help='directory of training inputs')
-    parser.add_argument('-m', '--modelFolder', action='store', default='models', help='directory of BDT models')
-    parser.add_argument('-o', '--outputFolder', action='store', default='/eos/home-j/jiehan/root/outputs', help='directory for outputs')
+    parser.add_argument('-c', '--config', action='store', nargs=2, default=['/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/data/training_config_BDT.json', '/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/data/apply_config_BDT.json'], help='Region to process')
+    parser.add_argument('-i', '--inputFolder', action='store', default='/eos/home-j/jiehan/data_for_norm_float', help='directory of training inputs')
+    parser.add_argument('-m', '--modelFolder', action='store', default='/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/models', help='directory of BDT models')
+    parser.add_argument('-o', '--outputFolder', action='store', default='/eos/home-j/jiehan/data_for_norm_float/output', help='directory for outputs')
     parser.add_argument('-r', '--region', action='store', choices=['two_jet', 'one_jet', 'zero_jet', 'zero_to_one_jet', 'VH_ttH', 'all_jet'], default='zero_jet', help='Region to process')
     parser.add_argument('-cat', '--category', action='store', nargs='+', help='apply only for specific categories')
 
@@ -234,9 +234,13 @@ class ApplyXGBHandler(object):
         with uproot.recreate(output_path) as output_file:
             out_data = pd.DataFrame()
             for filename in tqdm(sorted(f_list), desc='XGB INFO: Applying BDTs to %s samples' % category, bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
+                print(filename)
                 file = uproot.open(filename)
-                for data in file[self._inputTree].iterate(branches, library='pd', step_size=self._chunksize):
-                    data = self.preselect(data)
+                print(self._inputTree)
+                data = file[self._inputTree].arrays(library='pd')
+                print(data)
+                # for data in file[self._inputTree].iterate(branches, library='pd', step_size=self._chunksize):
+                #     data = self.preselect(data)
                     # data = data[data.Z_sublead_lepton_pt >= 15]
                     # if category == "DYJetsToLL":
                     #     data = data[data.n_iso_photons == 0]
@@ -245,30 +249,45 @@ class ApplyXGBHandler(object):
                     #     # data = data[data.gamma_mvaID_WP80 > 0] #TODO: check this one
                     #     data = data[data.gamma_mvaID_WPL > 0] #TODO: check this one
 
-                    for i in range(4):
+                for i in range(4):
 
-                        data_s = data[data[self.randomIndex]%4 == i]
-                        data_o = data_s[outputbraches]
+                    data_s = data[data[self.randomIndex]%4 == i]
+                    data_o = data_s
+                    # data_o = data_s[outputbraches]
 
-                        for model in self.train_variables.keys():
-                            x_Events = data_s[self.train_variables[model]]
-                            dEvents = xgb.DMatrix(x_Events)
-                            scores = self.m_models[model][i].predict(dEvents)
-                            if len(scores) > 0:
-                                scores_t = self.m_tsfs[model][i].transform(scores.reshape(-1,1)).reshape(-1)
-                            else:
-                                scores_t = scores
-                        
-                            xgb_basename = self.models[model]
-                            data_o[xgb_basename] = scores
-                            data_o[xgb_basename+'_t'] = scores_t
+                    for model in self.train_variables.keys():
+                        x_Events = data_s[self.train_variables[model]]
+                        dEvents = xgb.DMatrix(x_Events)
+                        scores = self.m_models[model][i].predict(dEvents)
+                        if len(scores) > 0:
+                            scores_t = self.m_tsfs[model][i].transform(scores.reshape(-1,1)).reshape(-1)
+                        else:
+                            scores_t = scores
+                    
+                        xgb_basename = self.models[model]
+                        data_o[xgb_basename] = scores
+                        data_o[xgb_basename+'_t'] = scores_t
 
-                        out_data = pd.concat([out_data, data_o], ignore_index=True, sort=False)
+                    out_data = pd.concat([out_data, data_o], ignore_index=True, sort=False)
 
                 # out_data.to_root(output_path, key='test', mode='a', index=False)
-                
-            output_file['test'] = out_data
-            del out_data, data_s, data_o
+            print(out_data)
+            output_file[self._inputTree] = out_data
+
+            for tree in "inclusive", "zero_jet", "one_jet", "two_jet", "zero_to_one_jet", "VH_ttH":
+                print(tree)
+                out_data = pd.DataFrame()
+                if tree == self._inputTree: continue
+                for filename in tqdm(sorted(f_list), desc='XGB INFO: Applying BDTs to %s samples' % category, bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
+                    print(filename)
+                    file = uproot.open(filename)
+                    data = file[tree].arrays(library='pd')
+                    out_data = pd.concat([out_data, data], ignore_index=True, sort=False)
+                    print(data)
+                output_file[tree] = out_data
+                print(out_data)
+
+            del out_data, data_s, data_o, data
 
 
 def main():
@@ -285,7 +304,7 @@ def main():
     xgb.loadModels()
     xgb.loadTransformer()
 
-    with open('data/inputs_config.json') as f:
+    with open('/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/data/inputs_config.json') as f:
         config = json.load(f)
     sample_list = config['sample_list']
 

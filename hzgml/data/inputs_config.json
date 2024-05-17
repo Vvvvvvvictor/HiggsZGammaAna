@@ -1,20 +1,10 @@
-{"sample_list": {"DYJetsToLL":  ["two_jet_run2"],
-                 "ZGToLLG":     ["two_jet_run2"],
-                 "ZG2JToG2L2J": ["two_jet_run2"],
-                 "TT":          ["two_jet_run2"],
-                 "EWKZ2J":      ["two_jet_run2"],
-                 "TGJets":      ["two_jet_run2"],
-                 "WGToLNuG":    ["two_jet_run2"],
-                 "ttWJets":     ["two_jet_run2"],
-                 "ttZJets":     ["two_jet_run2"],
-                 "TTGJets":     ["two_jet_run2"],
-                 "ZZ":          ["two_jet_run2"],
-                 "WW":          ["two_jet_run2"],
-                 "WZ":          ["two_jet_run2"],
-                 "data":        ["two_jet_run2"],
-                 "ttH":         ["two_jet_run2"],
-                 "ZH":          ["two_jet_run2"],
-                 "WminusH":     ["two_jet_run2"],
-                 "WplusH":      ["two_jet_run2"],
-                 "VBF":         ["two_jet_run2"],
-                 "ggH":         ["two_jet_run2"]}}
+{
+    "sample_list": {
+        "Data": [
+            "two_jet"
+        ],
+        "ZGToLLG": [
+            "two_jet"
+        ]
+    }
+}

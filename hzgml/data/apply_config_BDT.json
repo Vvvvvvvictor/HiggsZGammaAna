@@ -3,5 +3,5 @@
  "zero_to_one_jet": {"#+preselections": ["n_jets <= 1"], "models": {"zero_to_one_jet": "bdt_score"}},
  "zero_jet": {"#+preselections": ["n_jets == 0"], "models": {"zero_jet": "bdt_score"}},
  "one_jet":  {"#+preselections": ["n_jets == 1"], "models": {"one_jet": "bdt_score"}},
- "two_jet":  {"#+preselections": ["n_jets >= 2"], "models": {"two_jet": "bdt_score", "VBF": "bdt_score_VBF"}}
+ "two_jet":  {"#+preselections": ["n_jets >= 2"], "models": {"two_jet": "dijet_bdt_score"}}
 }
