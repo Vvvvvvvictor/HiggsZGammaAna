@@ -22,9 +22,9 @@ def getArgs():
     """Get arguments from command line."""
     parser = ArgumentParser()
     parser.add_argument('-c', '--config', action='store', nargs=2, default=['/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/data/training_config_BDT.json', '/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/data/apply_config_BDT.json'], help='Region to process')
-    parser.add_argument('-i', '--inputFolder', action='store', default='/eos/home-j/jiehan/data_for_norm_float', help='directory of training inputs')
+    parser.add_argument('-i', '--inputFolder', action='store', default='/eos/home-j/jiehan/data_for_norm_float_v1', help='directory of training inputs')
     parser.add_argument('-m', '--modelFolder', action='store', default='/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/models', help='directory of BDT models')
-    parser.add_argument('-o', '--outputFolder', action='store', default='/eos/home-j/jiehan/data_for_norm_float/output', help='directory for outputs')
+    parser.add_argument('-o', '--outputFolder', action='store', default='/eos/home-j/jiehan/data_for_norm_float_v1/output', help='directory for outputs')
     parser.add_argument('-r', '--region', action='store', choices=['two_jet', 'one_jet', 'zero_jet', 'zero_to_one_jet', 'VH_ttH', 'all_jet'], default='zero_jet', help='Region to process')
     parser.add_argument('-cat', '--category', action='store', nargs='+', help='apply only for specific categories')
 
