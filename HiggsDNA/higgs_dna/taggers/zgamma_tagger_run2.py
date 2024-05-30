@@ -142,9 +142,9 @@ class ZGammaTaggerRun2(Tagger):
 
     def calculate_selection(self, events):
         """
-        Select photons and create diphoton pairs.
-        Add a record "Diphoton" to events array with relevant information about each diphoton pair.
-        In principle, there can be more than one Diphoton pair per event.
+        Select leptons and photons and create zgamma pairs.
+        Add a record "zgamma" to events array with relevant information about each zgamma pair.
+        In principle, there can be more than one zgamma pair per event.
         """
 
         # Determine what type of rho variable is available in nanoAOD
@@ -199,8 +199,8 @@ class ZGammaTaggerRun2(Tagger):
 
     def produce_and_select_zgammas(self, events, rho, options):
         """
-        Perform diphoton preselection.
-        For events with more than 2 photons, more than 1 diphoton candidate
+        Perform zgammas preselection.
+        For events with more than 2 leptons and 1 photon, more than 1 zgamma candidate
         per event is possible.
 
         :param events: events array to calculate diphoton candidates from
