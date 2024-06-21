@@ -17,19 +17,19 @@ path = "/eos/home-j/jiehan/root/outputs/"
 channel = "two_jet"
 tree = "test"
 var = "bdt_score_t"
-bins = 50
-x_range = (0.5, 1)
+bins = 100
+x_range = (0, 1)
 blind_range = (120, 130)
 x_title = "Dijet BDT score"
 y_title = "Events/{:.2f}".format((x_range[1]-x_range[0])/bins)
 sub_y_title = "S/#sqrt{B}"
-selections = ["bdt_score_VBF>0.4"]
+selections = ["H_mass>120", "H_mass<130"]
 
 # Dataset list
 sig_file_list = [
     ["sig.root"],
-    "ggH.root",
-    "VBF.root"
+    "ggH_M125.root",
+    "VBF_M125.root"
 ]
 mc_file_list = [
     "ZGToLLG.root",
@@ -92,13 +92,13 @@ sig_yields, sig_hist_list = [], []
 for i, sig in enumerate(sig_file_list):
     if isinstance(sig, list):
         for sub_sig in sig:
-            arrays = pic.read_file(path+channel+"/"+sub_sig, var, tree, selections)
+            arrays, _ = pic.read_file(path+channel+"/"+sub_sig, var, tree, selections)
             if "sig_hist" in globals():
                 sig_hist, _, yields = pic.get_hist(arrays, var, ratio, "sig_{}".format(i), bins, x_range, sig_hist)
             else:
                 sig_hist, _, yields = pic.get_hist(arrays, var, ratio, "sig_{}".format(i), bins, x_range)
     else:
-        arrays = pic.read_file(path+channel+"/"+sig, var, tree, selections)
+        arrays, _ = pic.read_file(path+channel+"/"+sig, var, tree, selections)
         sig_hist, _, yields = pic.get_hist(arrays, var, ratio, "sig_{}".format(i), bins, x_range)
     plot.Set(sig_hist, LineWidth=2, LineStyle=i+1)
     sig_hist_list.append(sig_hist)
@@ -111,13 +111,13 @@ mc_yields, mc_hist_list = [], []
 for i, bkg in enumerate(mc_file_list):
     if isinstance(bkg, list):
         for sub_bkg in bkg:
-            arrays = pic.read_file(path+channel+"/"+sub_bkg, var, tree, selections)
+            arrays, _ = pic.read_file(path+channel+"/"+sub_bkg, var, tree, selections)
             if file_hist in globals():
                 file_hist, _, yields = pic.get_hist(arrays, var, sb_ratio, "mc_{}".format(i), bins, x_range, file_hist)
             else:
                 file_hist, _, yields = pic.get_hist(arrays, var, sb_ratio, "mc_{}".format(i), bins, x_range)
     else: 
-        arrays = pic.read_file(path+channel+"/"+bkg, var, tree, selections)
+        arrays, _ = pic.read_file(path+channel+"/"+bkg, var, tree, selections)
         file_hist, _, yields = pic.get_hist(arrays, var, sb_ratio, "mc_{}".format(i), bins, x_range)
     mc_hist.Add(file_hist)
     mc_hist_list.append(file_hist)
@@ -131,14 +131,13 @@ print("==============================")
 print("Finish reading skimmed ntuples")
 print("==============================")
 
-rp = pic.get_S_over_sqrtB(sig_hist_list[0], mc_hist, ratio, (0.,0.2005))
+rp = pic.get_S_over_sqrtB(sig_hist_list[0], mc_hist, ratio, (0.,0.5005))
 
 line = ROOT.TLine()
 plot.Set(line, LineStyle=2, LineWidth=2, LineColor=ROOT.kRed)
 
 c1.Update()
 pads[0].cd()
-# plot.Set(pads[0], Logy=1)
 h_stack.Draw("hist")
 plot.Set(h_stack.GetXaxis(), LabelSize=0)
 plot.Set(h_stack.GetYaxis(), Title=y_title)
@@ -150,10 +149,11 @@ plot.Set(sig_hist, MarkerStyle=1, MarkerSize=3)
 plot.Set(h_stack, Maximum=1.3*pads[0].GetFrame().GetY2())
 # plot.Set(h_stack, Maximum=0.045)
 
-x1, x2 = 0.61, 0.8
-line.DrawLine(x1, 0, x1, 0.5*pads[0].GetFrame().GetY2())
-line.DrawLine(x2, 0, x2, 0.5*pads[0].GetFrame().GetY2())
+# x1, x2 = 0.61, 0.8
+# line.DrawLine(x1, 0, x1, 0.5*pads[0].GetFrame().GetY2())
+# line.DrawLine(x2, 0, x2, 0.5*pads[0].GetFrame().GetY2())
 
+plot.Set(pads[0], Logy=1)
 pads[0].Update()
 
 legend = plot.PositionedLegend(0.65, 0.3, 3, 0.015)
@@ -172,8 +172,8 @@ pads[1].cd()
 rp.Draw("E")
 # plot.Set(pads[1], Logy=1)
 # line.DrawLine(0.29, 0, 0.29, 0.26)
-line.DrawLine(x1, 0, x1, 0.2)
-line.DrawLine(x2, 0, x2, 0.2)
+# line.DrawLine(x1, 0, x1, 0.2)
+# line.DrawLine(x2, 0, x2, 0.2)
 # plot.DrawHorizontalLine(pads[1], line, 1)
 # plot.Set(rp, MarkerStyle=7, MarkerSize=2)
 rp.GetXaxis().SetTitle(x_title)

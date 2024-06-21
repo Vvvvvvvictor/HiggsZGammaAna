@@ -10,9 +10,13 @@ from sklearn.metrics import roc_curve, auc, confusion_matrix, roc_auc_score
 from sklearn.preprocessing import StandardScaler, QuantileTransformer
 import xgboost as xgb
 from tabulate import tabulate
+#from bayes_opt import BayesianOptimization
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+#import logging
 from pdb import set_trace
+#logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+#logging.getLogger('matplotlib.font_manager').disabled = True
 import ROOT
 ROOT.gErrorIgnoreLevel = ROOT.kError + 1
 
@@ -30,9 +34,9 @@ def getArgs():
     parser.add_argument('--corr', action='store_true', default=True, help='Plot corelation between each training variables')
     parser.add_argument('--importance', action='store_true', default=True, help='Plot importance of variables, parameter "gain" is recommanded')
     parser.add_argument('--roc', action='store_true', default=True, help='Plot ROC')
-    parser.add_argument('--optuna', action='store_true', default=False, help='Run hyperparameter tuning using optuna')
-    parser.add_argument('--n-calls', action='store', type=int, default=36, help='Steps of hyperparameter tuning using optuna')
-    parser.add_argument('--continue-optuna', action='store', type=int, default=0, help='Continue tuning hyperparameters using optuna')
+    parser.add_argument('--skopt', action='store_true', default=False, help='Run hyperparameter tuning using skopt')
+    parser.add_argument('--n-calls', action='store', type=int, default=36, help='Steps of hyperparameter tuning using skopt')
+    parser.add_argument('--skopt-plot', action='store_true', default=False, help='Plot skopt results')
 
     parser.add_argument('-s', '--shield', action='store', type=int, default=-1, help='Which variables needs to be shielded')
     parser.add_argument('-a', '--add', action='store', type=int, default=-1, help='Which variables needs to be added')
@@ -61,7 +65,6 @@ class XGBoostHandler(object):
               """)
 
         args=getArgs()
-        self.continue_optuna = args.continue_optuna
         self.n_calls = args.n_calls
         self._shield = args.shield
         self._add = args.add
@@ -211,8 +214,6 @@ class XGBoostHandler(object):
         if fold == -1:
             self.params = [{'eval_metric': ['auc', 'logloss']}]
             fold = 0
-        else:
-            self.params[fold] = {'eval_metric': ['auc', 'logloss']}
         for key in params:
             self.params[fold][key] = params[key]
 
@@ -591,51 +592,151 @@ class XGBoostHandler(object):
             with open('%s/BDT_tsf_%s_%d.pkl' %(self._outputFolder, self._region, fold), 'wb') as f:
                 pickle.dump(self.m_tsf[fold], f, -1)
 
-    def optunaHP(self, fold=0):
-        import optuna
-        from xgboost import XGBClassifier
-        import optuna.visualization as vis
+    def skoptHP(self, fold):
 
-        def objective(trial):
-            params = {
-                'max_depth': trial.suggest_int('max_depth', 3, 50),
-                'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.05, log=True),
-                'subsample': trial.suggest_float('subsample', 0.2, 1.0),
-                'colsample_bytree': trial.suggest_float('colsample_bytree', 0.2, 1.0),
-                'gamma': trial.suggest_float('gamma', 1e-6, 10, log=True),
-                'min_child_weight': trial.suggest_int('min_child_weight', 1, 50),
-                'max_delta_step': trial.suggest_int('max_delta_step', 10, 100),
-            }
-            
-            self.setParams(params, fold)
+        import skopt
+        from skopt import dump
+        from skopt import Optimizer
+        from skopt import gbrt_minimize, gp_minimize
+        from skopt.utils import use_named_args
+        from skopt.space import Real, Categorical, Integer
+
+        print ('default param: ', self._region, fold, self.params[fold])
+
+        search_space = [Real(0.0, 1.0, name='alpha'),
+                Real(0.01, 1, name='colsample_bytree'),
+                Real(0.01, 10, name='gamma'),
+                Real(1, 20, name='max_delta_step'),
+                Real(0.0, 1.0, name='subsample'),
+                Real(0.01, 0.1, name='eta'),
+                Integer(1, 50, name='min_child_weight'),
+                Integer(1, 20, name='max_leaves'),
+                Integer(3, 25, name='max_depth')
+        ]
+
+        def objective(param):
+
+            self.setParams(param, fold)
+            # self.setParams({'eval_metric': ['auc']}, fold)
             self.trainModel(fold, self.params[fold])
             self.testModel(fold)
             auc = self.getAUC(fold)[-1]
-            
-            return auc
-        
-        exp_dir = 'models/optuna/'
+            return -auc
+
+        search_names = [var.name for var in search_space]
+
+        opt = Optimizer(search_space, # TODO: Add noise
+                    n_initial_points=12,
+                    acq_optimizer_kwargs={'n_jobs':8})
+
+        n_calls = self.n_calls
+        exp_dir = 'models/skopt/'
+
         if not os.path.exists(exp_dir):
             os.makedirs(exp_dir)
 
-        study_name = f"study_fold_{fold}"  # Unique study name
-        storage_name = f"sqlite:///{exp_dir}optuna_study_fold_{fold}.sqlite3"  # Storage name for SQLite
-        if not self.continue_optuna and os.path.exists(f"{exp_dir}optuna_study_fold_{fold}.sqlite3"):
-            os.remove(f"{exp_dir}optuna_study_fold_{fold}.sqlite3")
-        self.study = optuna.create_study(
-                sampler=optuna.samplers.TPESampler(),
-                study_name=study_name, 
-                storage=storage_name, 
-                load_if_exists=True, 
-                direction='maximize'
-            )
-        self.study.optimize(objective, n_trials=self.n_calls)
+        for i in range(n_calls):
+
+            sampled_point = opt.ask()
+            param = dict(zip(search_names, sampled_point))
+            # param = {key.decode(): val for key, val in param.items()}
+            print('Point:', i+1, param)
+            f_val = objective(param)
+            print ('AUC:', -f_val)
+            opt_result = opt.tell(sampled_point, f_val)
+
+            with open(exp_dir + 'optimizer_region_'+self._region+'_fold'+str(fold) + '.pkl', 'wb') as fp:
+                
+                dump(opt, fp)
+
+            with open(exp_dir + 'results_region_'+self._region+'_fold'+str(fold) + '.pkl', 'wb') as fp:
+                # Delete objective function before saving. To be used when results have been loaded,
+                # the objective function must then be imported from this script.
+
+                if opt_result.specs is not None:
+
+                    if 'func' in opt_result.specs['args']:
+                        res_without_func = copy.deepcopy(opt_result)
+                        del res_without_func.specs['args']['func']
+                        dump(res_without_func, fp)
+                    else:
+                        dump(opt_result, fp)
+
+                else:
+
+                    dump(opt_result, fp)
+
+        print(opt_result)
+
+        opt_result_x = [float(i) for i in opt_result.x]
+        param = dict(zip(search_names, opt_result_x))
+        for name in search_names[-3:]:
+            param[name] = int(param[name])
+        self.setParams(param, fold)
+
+        with open(exp_dir + 'BDT_region_'+self._region+'_fold'+str(fold) + '.json', 'w') as fp:
+
+            json.dump(self.params[fold], fp)
+            print('Save to ', exp_dir + 'BDT_region_'+self._region+'_fold'+str(fold) + '.json')
+
+
+    def skoptPlot(self, fold):
+
+        from skopt import load
+        from skopt.plots import plot_objective, plot_evaluations, plot_convergence
+
+        plt.switch_backend('agg') # For outputting plots when running on a server
+        plt.ioff() # Turn off interactive mode, so that figures are only saved, not displayed
+        plt.style.use('seaborn-paper')
+        font_size = 9
+        label_font_size = 8
+
+        plt.rcParams.update({'font.size'        : font_size,
+                 'axes.titlesize'   : font_size,
+                 'axes.labelsize'   : font_size,
+                 'xtick.labelsize'  : label_font_size,
+                 'ytick.labelsize'  : label_font_size,
+                 'figure.figsize'   : (5,4)}) # w,h
+
+        exp_dir = 'models/skopt/'
+        fig_dir = 'plots/skopt/figures/BDT_region_'+self._region+'_fold'+str(fold)+'/'
+
+        if not os.path.exists(fig_dir):
+            os.makedirs(fig_dir)
+
+        # Plots expect default rcParams
+        plt.rcdefaults()
+
+        # Load results
+        res_loaded = load(exp_dir + 'results_region_'+self._region+'_fold'+str(fold) + '.pkl')
+        print(res_loaded)
+
+        # Plot evaluations
+        fig,ax = plt.subplots()
+        ax = plot_evaluations(res_loaded)
+        plt.tight_layout()
+        plt.savefig(fig_dir + 'evaluations.pdf')
+
+        # Plot objective
+        fig,ax = plt.subplots()
+        ax = plot_objective(res_loaded)
+        plt.tight_layout()
+        plt.savefig(fig_dir + 'objective.pdf')
+
+        # Plot convergence
+        fig,ax = plt.subplots()
+        ax = plot_convergence(res_loaded)
+        plt.tight_layout()
+        plt.savefig(fig_dir + 'convergence.pdf')
+
+        ## Plot regret
+        #fig,ax = plt.subplots()
+        #ax = plot_regret(res_loaded)
+        #plt.tight_layout()
+        #plt.savefig(fig_dir + 'regret.pdf')
+
+        print ('Saved skopt figures in ' + fig_dir)
         
-        best_params_path = f"{exp_dir}BDT_region_{self._region}_fold{fold}.json"
-     
-        self.setParams(self.study.best_params, fold)
-        with open(best_params_path, 'w') as f:
-            json.dump(self.params[fold], f)
 
 def main():
 
@@ -662,7 +763,7 @@ def main():
         xgb_model.plot_corr("sig")
         xgb_model.plot_corr("bkg")
 
-    # xgb_model.reweightSignal()
+    xgb_model.reweightSignal()
 
     # looping over the "4 folds"
     for i in args.fold:
@@ -676,9 +777,9 @@ def main():
 
         xgb_model.prepareData(i)
 
-        if args.optuna:
+        if args.skopt: 
             try:
-                xgb_model.optunaHP(i)
+                xgb_model.skoptHP(i)
             except KeyboardInterrupt:
                 print('Finishing on SIGINT.')
             continue
@@ -698,6 +799,11 @@ def main():
         xgb_model.transformScore(i)
 
         if args.save: xgb_model.save(i)
+    
+    if args.skopt_plot: 
+        for i in args.fold:
+            xgb_model.skoptPlot(i)
+        return
 
     print('------------------------------------------------------------------------------')
     print('Finished training.')

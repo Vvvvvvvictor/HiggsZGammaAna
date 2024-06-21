@@ -518,11 +518,11 @@ class AnalysisManager():
 
         for file in files:
             try:
-                f = uproot.open(file, timeout = 300)
+                f = uproot.open(file, timeout = 300, num_workers=1)
             except Exception:
                 if (os.system(f"xrdcp '{file}' '/tmp/{os.getpid()}/{os.path.basename(file)}'")):
                     raise RuntimeError("xrdcp failed")
-                f = uproot.open(f'/tmp/{os.getpid()}/{os.path.basename(file)}')
+                f = uproot.open(f'/tmp/{os.getpid()}/{os.path.basename(file)}',timeout = 300, num_workers=1)
 
             runs = f["Runs"]
             # if "genEventCount" in runs.keys() and "genEventSumw" in runs.keys():
@@ -559,6 +559,9 @@ class AnalysisManager():
                 duplicated_remove_cut = duplicated_sample_remover.calculate_selection(file, tree)
 
                 trimmed_branches = [x for x in branches if x in tree.keys()]
+                # event_file = awkward.Array([])
+                # for array in tree.iterate(trimmed_branches, library="ak", how='zip', step_size=100000):
+                #     event_file.concatenate(array)
                 events_file = tree.arrays(trimmed_branches, library = "ak", how = "zip") #TODO: There is a bug here.
 
                 events_file = events_file[duplicated_remove_cut]
@@ -567,11 +570,17 @@ class AnalysisManager():
                 overlap_cut = mc_overlap_remover.overlap_selection(file, tree)
 
                 trimmed_branches = [x for x in branches if x in tree.keys()]
+                # event_file = awkward.Array([])
+                # for array in tree.iterate(trimmed_branches, library="ak", how='zip', step_size=100000):
+                #     event_file.concatenate(array)
                 events_file = tree.arrays(trimmed_branches, library = "ak", how = "zip") #TODO: There is a bug here.
 
                 events_file = events_file[overlap_cut]
 
             f.close()
+            
+            # # FIXME: DANGEROUS!
+            # events_file = events_file[(events_file["run"]==316470) & (events_file["luminosityBlock"]==370) & (events_file["event"]==486186232)]
 
             logger.debug("[AnalysisManager : Load samples] Sample type: %s" % events_file.type)
 

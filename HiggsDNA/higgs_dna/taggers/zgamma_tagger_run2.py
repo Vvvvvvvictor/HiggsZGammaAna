@@ -303,8 +303,9 @@ class ZGammaTaggerRun2(Tagger):
 
         if "2016" not in self.year:
             year = self.year[:4]
-
-        b_jet_cut = jets.btagDeepFlavB > self.options["btag_med"][year]
+            b_jet_cut = jets.btagDeepFlavB > self.options["btag_med"][year]
+        else:
+            b_jet_cut = jets.btagDeepFlavB > self.options["btag_med"][self.year]
         jets = awkward.with_field(jets, b_jet_cut, "is_med_bjet") 
 
         # Add object fields to events array
@@ -407,42 +408,24 @@ class ZGammaTaggerRun2(Tagger):
         trigger_cut = single_ele_trigger_cut | double_ele_trigger_cut | single_mu_trigger_cut  | double_mu_trigger_cut
         ele_trigger_cut = single_ele_trigger_cut | double_ele_trigger_cut
         mu_trigger_cut = single_mu_trigger_cut  | double_mu_trigger_cut
-
-        #### !!!!!! remove os cut through this part
-        ee_pairs = awkward.combinations(electrons, 2, fields = ["LeadLepton", "SubleadLepton"])
-        mm_pairs = awkward.combinations(muons, 2, fields = ["LeadLepton", "SubleadLepton"])
-        z_cands = awkward.concatenate([ee_pairs, mm_pairs], axis = 1)
-        z_cands["ZCand"] = z_cands.LeadLepton + z_cands.SubleadLepton
-        z_cands = z_cands[awkward.argsort(abs(z_cands.ZCand.mass - 91.1876), axis = 1)]
-        ####
-
-        z_ee_pairs = z_cands[z_cands.LeadLepton.id == 11]
-        z_mm_pairs = z_cands[z_cands.LeadLepton.id == 13]
-
+        
+        # a trick that give 0 to the empty array
         if self.year is not None:
             year = self.year[:4]
-            e_cut = z_ee_pairs.LeadLepton.pt > self.options["lead_ele_pt"][year]
-            m_cut = z_mm_pairs.LeadLepton.pt > self.options["lead_mu_pt"][year]
+            e_cut = awkward.fill_none(awkward.pad_none(electrons.pt, 1, axis=1)[:, 0], 0) > self.options["lead_ele_pt"][year]
+            m_cut = awkward.fill_none(awkward.pad_none(muons.pt, 1, axis=1)[:, 0], 0) > self.options["lead_mu_pt"][year]
         else:
-            e_cut = z_ee_pairs.LeadLepton.pt > 25
-            m_cut = z_mm_pairs.LeadLepton.pt > 20
-        ee_cut = (z_ee_pairs.LeadLepton.pt > 25) & (z_ee_pairs.SubleadLepton.pt > 15)
-        mm_cut = (z_mm_pairs.LeadLepton.pt > 20) & (z_mm_pairs.SubleadLepton.pt > 10)
-        z_ee_cands = z_ee_pairs[(double_ele_trigger_cut & ee_cut) | (single_ele_trigger_cut & e_cut)]
-        ee_trigger_pt_cut = awkward.fill_none(awkward.num(z_ee_cands) >= 1, False)
-        z_mm_cands = z_mm_pairs[(double_mu_trigger_cut & mm_cut) | (single_mu_trigger_cut & m_cut)]
-        mm_trigger_pt_cut = awkward.fill_none(awkward.num(z_mm_cands) >= 1, False)
+            e_cut = awkward.fill_none(awkward.pad_none(electrons.pt, 1, axis=1)[:, 0], 0) > 25
+            m_cut = awkward.fill_none(awkward.pad_none(muons.pt, 1, axis=1)[:, 0], 0) > 20
+        ee_cut = (awkward.fill_none(awkward.pad_none(electrons.pt, 1, axis=1)[:, 0], 0) > 25) & (awkward.fill_none(awkward.pad_none(electrons.pt, 2, axis=1)[:, 1], 0) > 15)
+        mm_cut = (awkward.fill_none(awkward.pad_none(muons.pt, 1, axis=1)[:, 0], 0) > 20) & (awkward.fill_none(awkward.pad_none(muons.pt, 2, axis=1)[:, 1], 0) > 10)
+        
+        ele_trigger_pt_cut = (single_ele_trigger_cut & e_cut) | (double_ele_trigger_cut & ee_cut)
+        mu_trigger_pt_cut = (single_mu_trigger_cut & m_cut) | (double_mu_trigger_cut & mm_cut)
+        trigger_pt_cut = (single_ele_trigger_cut & e_cut) | (double_ele_trigger_cut & ee_cut) | (single_mu_trigger_cut & m_cut) | (double_mu_trigger_cut & mm_cut)
 
-        z_cands = awkward.concatenate([z_ee_cands, z_mm_cands], axis = 1)
-        pair_cut = awkward.num(z_cands) >= 1
-
-        os_cut = (z_cands.LeadLepton.charge * z_cands.SubleadLepton.charge) == -1
-        z_cands = z_cands[os_cut]
-        os_cut = awkward.num(z_cands) >= 1
-
-        z_cands["ZCand"] = z_cands.LeadLepton + z_cands.SubleadLepton # these add as 4-vectors since we registered them as "Momentum4D" objects
-        #mass_cut = (z_cands.ZCand.mass > 80.) & (z_cands.ZCand.mass < 100.)
-        mass_cut = z_cands.ZCand.mass > 50.
+        mass_cut = (z_cands.ZCand.mass > 80.) & (z_cands.ZCand.mass < 100.)
+        # mass_cut = z_cands.ZCand.mass > 50.
         z_cands = z_cands[mass_cut] # OSSF lepton pairs with m_ll > 50.
 
         # # Construct di-electron/di-muon pairs
@@ -562,7 +545,7 @@ class ZGammaTaggerRun2(Tagger):
                 dummy_value = DUMMY_VALUE
             )
 
-        all_cuts = has_z_cand & has_gamma_cand & sel_h_1 & sel_h_2 & sel_h_3
+        all_cuts = trigger_pt_cut & has_z_cand & has_gamma_cand & sel_h_1 & sel_h_2 & sel_h_3
 
         for cut_type in ["zgammas", "zgammas_ele", "zgammas_mu", "zgammas_w", "zgammas_ele_w", "zgammas_mu_w"]:
             if "_w" in cut_type:
@@ -585,27 +568,31 @@ class ZGammaTaggerRun2(Tagger):
                 cut2 = cut1 & ele_trigger_cut
             elif "mu" in cut_type:
                 cut2 = cut1 & mu_trigger_cut
-            cut3 = cut2 & pair_cut
+            cut3 = cut2 & trigger_pt_cut
             if "ele" in cut_type:
-                cut3 = cut2 & ee_trigger_pt_cut
+                cut3 = cut2 & ele_trigger_pt_cut
             elif "mu" in cut_type:
-                cut3 = cut2 & mm_trigger_pt_cut
+                cut3 = cut2 & mu_trigger_pt_cut
             cut4 = cut3 & has_gamma_cand
-            cut5 = cut4 & os_cut
-            cut6 = cut5 & has_z_cand
-            cut7 = cut6 & sel_h_1
-            cut8 = cut7 & sel_h_2
-            cut9 = cut8 & sel_h_3            
+            cut5 = cut4 & has_z_cand
+            cut6 = cut5 & sel_h_1
+            cut7 = cut6 & sel_h_2
+            cut8 = cut7 & sel_h_3            
 
             self.register_event_cuts(
                 # names = ["all", "N_lep_sel", "trig_cut", "lead_lep_pt_cut", "sub_lep_pt_cut", "has_g_cand", "has_z_cand", "sel_h_1", "sel_h_2", "sel_h_3"],
                 # results = [cut0, cut1, cut2, cut3, cut4, cut5, cut6, cut7, cut8, cut9],
-                names = ["all", "N_lep_sel", "trig_cut", "lep_pt_cut", "has_g_cand", "os_cut", "has_z_cand", "sel_h_1", "sel_h_2", "sel_h_3", "all_cut"],
-                results = [cut0, cut1, cut2, cut3, cut4, cut5, cut6, cut7, cut8, cut9, all_cuts],
+                names = ["all", "N_lep_sel", "trig_cut", "lep_pt_cut", "has_g_cand", "has_z_cand", "sel_h_1", "sel_h_2", "sel_h_3", "all_cut"],
+                results = [cut0, cut1, cut2, cut3, cut4, cut5, cut6, cut7, cut8, all_cuts],
                 events = events,
                 cut_type = cut_type,
                 weighted = weighted
             )
+            # cut_names = ["N_lep_sel", "trig_cut", "lep_pt_cut", "has_g_cand", "os_cut", "has_z_cand", "sel_h_1", "sel_h_2", "sel_h_3"]
+            # for cut, cut_name in zip([cut1, cut2, cut3, cut4, cut5, cut6, cut7, cut8, cut9], cut_names):
+            #     awkward_utils.add_field(events, f"{cut_type}_{cut_name}", cut)
+
+        # all_cuts = cut0
 
         # checked_cut = (z_ee_cut | z_mumu_cut) & pair_cut
         # checked_events = events[checked_cut]
@@ -646,28 +633,28 @@ class ZGammaTaggerRun2(Tagger):
             )
 
 
-        # bing with control regions
-        #var_CR1 = ((photons.isScEtaEB & (photons.mvaID > self.options["photons"]["mvaID_barrel"])) | (photons.isScEtaEE & (photons.mvaID > self.options["photons"]["mvaID_endcap"])))
-        var_CR1 = gamma_cand.mvaID_WP80
-        var_CR2 = gamma_cand.mvaID_WP90
-        var_CR3 = gamma_e_veto
-        SR = (var_CR1) & (var_CR3)
-        CR1 = (~var_CR1) & (var_CR2) & (var_CR3)
-        CR2 = (~var_CR2) & (var_CR3)
-        CR3 = (var_CR1) & (~var_CR3)
-        CR4 = (~var_CR1) & (var_CR2) & (~var_CR3)
-        CR5 = (~var_CR2) & (~var_CR3)
+        # # bing with control regions
+        # #var_CR1 = ((photons.isScEtaEB & (photons.mvaID > self.options["photons"]["mvaID_barrel"])) | (photons.isScEtaEE & (photons.mvaID > self.options["photons"]["mvaID_endcap"])))
+        # var_CR1 = gamma_cand.mvaID_WP80
+        # var_CR2 = gamma_cand.mvaID_WP90
+        # var_CR3 = gamma_e_veto
+        # SR = (var_CR1) & (var_CR3)
+        # CR1 = (~var_CR1) & (var_CR2) & (var_CR3)
+        # CR2 = (~var_CR2) & (var_CR3)
+        # CR3 = (var_CR1) & (~var_CR3)
+        # CR4 = (~var_CR1) & (var_CR2) & (~var_CR3)
+        # CR5 = (~var_CR2) & (~var_CR3)
         
-        SR = awkward.fill_none(SR, value = False)
-        CR1 = awkward.fill_none(CR1, value=False)
-        CR2 = awkward.fill_none(CR2, value=False)
-        CR3 = awkward.fill_none(CR3, value=False)
-        CR4 = awkward.fill_none(CR4, value=False)
-        CR5 = awkward.fill_none(CR5, value=False)
-        regions = awkward.where(SR, 0, awkward.where(CR1, 1, awkward.where(CR2, 2, awkward.where(CR3, 3, awkward.where(CR4, 4, awkward.where(CR5, 5, -1))))))
-        for i in range(5000):
-           print("SR:", SR[i], "CR1:", CR1[i], "CR2", CR2[i], "CR3", CR3[i], "CR4", CR4[i], "CR5", CR5[i], "var_CR1", var_CR1[i], "var_CR2", var_CR2[i], "var_CR3", var_CR3[i], "regions:", regions[i])
-        awkward_utils.add_field(events, "regions",  regions)
+        # SR = awkward.fill_none(SR, value = False)
+        # CR1 = awkward.fill_none(CR1, value=False)
+        # CR2 = awkward.fill_none(CR2, value=False)
+        # CR3 = awkward.fill_none(CR3, value=False)
+        # CR4 = awkward.fill_none(CR4, value=False)
+        # CR5 = awkward.fill_none(CR5, value=False)
+        # regions = awkward.where(SR, 0, awkward.where(CR1, 1, awkward.where(CR2, 2, awkward.where(CR3, 3, awkward.where(CR4, 4, awkward.where(CR5, 5, -1))))))
+        # for i in range(5000):
+        #    print("SR:", SR[i], "CR1:", CR1[i], "CR2", CR2[i], "CR3", CR3[i], "CR4", CR4[i], "CR5", CR5[i], "var_CR1", var_CR1[i], "var_CR2", var_CR2[i], "var_CR3", var_CR3[i], "regions:", regions[i])
+        # awkward_utils.add_field(events, "regions",  regions)
 
 
         elapsed_time = time.time() - start
@@ -815,8 +802,8 @@ class ZGammaTaggerRun2(Tagger):
         # use_central_nano = options["use_central_nano"] # indicates whether we are using central nanoAOD (with some branches that are necessary for full diphoton preselection missing) or custom nanoAOD (with these branches added)
 
 
-        # all_cuts = pt_cut & eta_cut & id_cut & e_veto_cut
-        all_cuts = pt_cut & eta_cut # bing for CR selection
+        all_cuts = pt_cut & eta_cut & id_cut & e_veto_cut
+        # all_cuts = pt_cut & eta_cut # bing for CR selection
 
         self.register_cuts(
                 names = ["pt", "eta", "id", "e_veto", "all"],

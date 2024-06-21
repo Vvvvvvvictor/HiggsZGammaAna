@@ -209,7 +209,7 @@ def categorizing(input_path, region, variable, sigs, bkgs, nscan, minN, transfor
     TODO: first parameter must >= 1, 0 is banned.
     '''
 
-    cgz.smooth_sim(1, SorB='B')
+    # cgz.smooth_sim(1, SorB='B')
 
 #################################################################################################
         

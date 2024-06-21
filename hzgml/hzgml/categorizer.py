@@ -433,7 +433,7 @@ class categorizer(object):
 
         if nbin == 1:
 
-            if floatB: return [], 0
+            if floatB: return [], 0, 0
 
             nsig, dsig = self.h_sig.IntegralAndError(bl, br)
             nbkg, dbkg = self.h_bkg.IntegralAndError(bl, br)

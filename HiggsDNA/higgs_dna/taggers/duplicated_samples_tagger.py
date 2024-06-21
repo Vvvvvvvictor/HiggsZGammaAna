@@ -31,7 +31,10 @@ class DuplicatedSamplesTagger(Tagger):
         # Use HLT to select the events that is not duplicated
         self.hlt_branch = [x for x in self.input if x in tree.keys()]
         self.hlt_branch.append("run")
-        data = tree.arrays(self.hlt_branch, library='ak', how='zip')
+        # data = awkward.Array([])
+        # for array in tree.iterate(self.hlt_branch, library="ak", how='zip', step_size=100000):
+        #     data.concatenate(array)
+        data = tree.arrays(self.hlt_branch, library="ak", how='zip')
 
         logger.debug("Duplicated_samples:  events fileds %s" % data.fields)
 
@@ -80,6 +83,7 @@ class DuplicatedSamplesTagger(Tagger):
         cut = cut>0
         logger.debug("Duplicated_samples:  cut type %s" % cut.type)
         logger.debug("Duplicated_samples:  selected samples: %s(%s)" % (sum(cut), len(cut)))
+        del data
         return cut
 
     def get_double_muon_trig(self, data):
