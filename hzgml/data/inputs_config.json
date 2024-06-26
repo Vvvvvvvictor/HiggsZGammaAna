@@ -1,9 +1,6 @@
 {
     "sample_list": {
-        "Data": [
-            "two_jet"
-        ],
-        "ZGToLLG": [
+        "ZG2JtoG2L2J": [
             "two_jet"
         ]
     }

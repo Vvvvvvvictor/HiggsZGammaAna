@@ -1,8 +1,11 @@
 #!/bin/bash                                                                                                                                                                       
 echo "==============STARTED=============="
 
-input="/eos/home-j/jiehan/parquet/nanov9/"
-target="/eos/home-j/jiehan/root/skimmed_ntuples/"
+# input="/eos/home-j/jiehan/parquet/nanov9/"
+# target="/eos/home-j/jiehan/root/skimmed_ntuples/"
+input="/eos/home-j/jiehan/parquet/nanov9/data_for_norm_v1/"
+target="/eos/home-j/jiehan/data_for_norm_v1/"
+
 
 years=(2016preVFP 2016postVFP 2017 2018)
 
@@ -34,7 +37,8 @@ process_sample() {
         if [ "$type" = "signal" ]; then
             command+="-i ${input}${type}/${sample}_M125_${year}/merged_nominal.parquet "
         else
-            command+="-i ${input}${type}/${sample}_${year}/merged_nominal.parquet "
+            # command+="-i ${input}${type}/${sample}_${year}/merged_nominal.parquet "
+            command+="-i ${input}/${sample}_${year}/merged_nominal.parquet "
         fi
         if [ "$type" = "Data" ]; then
             command+="-o ${target}data/${year}.root"
@@ -55,35 +59,35 @@ process_sample() {
     echo "Sample $sample completed successfully."
 }
 
-# 处理 signal 样本
-
-samples=(ggH VBF WplusH WminusH ZH ttH)
-type="signal"
-for sample in "${samples[@]}"; do
-    mkdir -p "$target$sample"
-    # 存储后台任务的进程ID列表
-    pid_list=()
-
-    # 调用函数处理样本数据
-    process_sample "$sample" "$type"
-done
-
-# 处理 data 样本
-
-samples=(Data)
-type="data"
-for sample in "${samples[@]}"; do
-    mkdir -p "$target$sample"
-    # 存储后台任务的进程ID列表
-    pid_list=()
-
-    # 调用函数处理样本数据
-    process_sample "$sample" "$type"
-done
+# # 处理 signal 样本
+# 
+# samples=(ggH VBF WplusH WminusH ZH ttH)
+# type="signal"
+# for sample in "${samples[@]}"; do
+#     mkdir -p "$target$sample"
+#     # 存储后台任务的进程ID列表
+#     pid_list=()
+# 
+#     # 调用函数处理样本数据
+#     process_sample "$sample" "$type"
+# done
+# 
+# # 处理 data 样本
+# 
+# samples=(Data)
+# type="data"
+# for sample in "${samples[@]}"; do
+#     mkdir -p "$target$sample"
+#     # 存储后台任务的进程ID列表
+#     pid_list=()
+# 
+#     # 调用函数处理样本数据
+#     process_sample "$sample" "$type"
+# done
 
 # 处理 bkgmc 样本
 
-samples=(ZGToLLG DYJetsToLL WGToLNuG ZG2JToG2L2J EWKZ2J TT TTGJets TGJets ttWJets ttZJets WW WZ ZZ)
+samples=(ZG2JToG2L2J) # ZGToLLG DYJetsToLL WGToLNuG ZG2JToG2L2J EWKZ2J TT TTGJets TGJets ttWJets ttZJets WW WZ ZZ)
 # samples=(ZGToLLG)
 type="bkgmc"
 for sample in "${samples[@]}"; do
