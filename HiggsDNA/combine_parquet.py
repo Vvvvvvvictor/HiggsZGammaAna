@@ -50,8 +50,8 @@ def merge_parquet_files(folder_path, output_file):
         del combined_df
 
 # 文件夹路径和输出文件名
-folder_path = "/eos/home-j/jiehan/parquet/nanov9/data/Data_EGamma_2018A_2018"
-output_file = "/eos/home-j/jiehan/parquet/nanov9/data/Data_EGamma_2018A_2018/merge.parquet"
+folder_path = "/eos/home-j/jiehan/parquet/nanov9/data/Data_2018"
+output_file = "/eos/home-j/jiehan/parquet/nanov9/data/Data_2018/merged_nominal.parquet"
 
 # 执行合并
 merge_parquet_files(folder_path, output_file)
