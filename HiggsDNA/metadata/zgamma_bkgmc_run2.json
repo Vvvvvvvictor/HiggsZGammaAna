@@ -25,10 +25,17 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
+<<<<<<< HEAD
             "DYJetsToLL"
         ],
         "years": [
             "2016postVFP"
+=======
+            "ZG2JToG2L2J"
+        ],
+        "years": [
+            "2016preVFP", "2016postVFP", "2017", "2018"
+>>>>>>> 0a1443ddd30e7de7324e36ae4a34dacbebf59ffc
         ]
     },
     "variables_of_interest": [

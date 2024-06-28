@@ -2,6 +2,7 @@
 .vscode
 */*.cc
 */*log*
+HiggsDNA/log
 *bin
 *.eps
 *.png
