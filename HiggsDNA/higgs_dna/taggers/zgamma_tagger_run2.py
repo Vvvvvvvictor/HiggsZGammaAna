@@ -392,8 +392,8 @@ class ZGammaTaggerRun2(Tagger):
         photons = awkward.concatenate([photons[non_overlap_photon_mask] for non_overlap_photon_mask in non_overlap_photon_masks], axis = 1)
         
             
-        # for i in range(5000):
-        #    print("SR:", SR[i], "CR1:", CR1[i], "CR2", CR2[i], "CR3", CR3[i], "CR4", CR4[i], "CR5", CR5[i], "var_CR1", var_CR1[i], "var_CR2", var_CR2[i], "var_CR3", var_CR3[i], "regions:", regions[i])
+        #for i in range(5000):
+        #   print("SR:", SR[i], "CR1:", CR1[i], "CR2", CR2[i], "CR3", CR3[i], "CR4", CR4[i], "CR5", CR5[i], "var_CR1", var_CR1[i], "var_CR2", var_CR2[i], "var_CR3", var_CR3[i], "regions:", regions[i])
         awkward_utils.add_field(events, "regions",  regions)
 
         ee_pairs = awkward.combinations(electrons, 2, fields = ["LeadLepton", "SubleadLepton"])
@@ -542,7 +542,7 @@ class ZGammaTaggerRun2(Tagger):
             )
 
         # Make gamma candidate-level cuts
-        has_gamma_cand = (awkward.num(photons) >= 1) #& (events.n_iso_photons == 0) # only for dy samples
+        has_gamma_cand = (awkward.num(photons) >= 1)#& (events.n_iso_photons == 0) # only for dy samples
         gamma_cand = awkward.firsts(photons)
         gamma_mvaID_WPL = ((gamma_cand.isScEtaEB & (gamma_cand.mvaID > self.options["photons"]["mvaID_barrel"])) | (gamma_cand.isScEtaEE & (gamma_cand.mvaID > self.options["photons"]["mvaID_endcap"])))
         gamma_e_veto = gamma_cand.electronVeto > self.options["photons"]["e_veto"]

@@ -25,10 +25,10 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "ZGToLLG"
+            "DYJetsToLL"
         ],
         "years": [
-            "2017"
+            "2016postVFP"
         ]
     },
     "variables_of_interest": [

@@ -22,6 +22,8 @@ unset __conda_setup
 cd /afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/Plotter
 conda activate hzgml
 
-python scripts/HZGamma_ZReFit.py --doReFit --splitJobs --nJobs 10 --iJob $1
+#python scripts/HZGamma_ZReFit.py --doReFit --splitJobs --nJobs 10 --iJob $1
+
+bash scripts/run_skim_ntuples.sh $1
 
 echo "running done"

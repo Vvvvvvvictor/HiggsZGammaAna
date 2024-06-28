@@ -238,7 +238,7 @@ class Job():
         if self.status == "retired":
             return False
 
-        if self.n_attempts >= 5 or self.force_retirement:
+        if self.n_attempts >= 15 or self.force_retirement:
             logger.info("[Job : submit] Job '%s_%d' has been submitted %d times, retiring job. Jobs can be unretired with run_analysis.py through the `--unretire_jobs` option." % (self.name, self.idx, self.n_attempts))
             self.status = "retired"
             self.n_attempts = 0
