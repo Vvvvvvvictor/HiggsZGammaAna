@@ -30,7 +30,7 @@ def getArgs():
     parser.add_argument('-i', '--inputFolder', action='store', default='/eos/home-j/jiehan/data_for_norm_float_v1', help='directory of training inputs')
     parser.add_argument('-m', '--modelFolder', action='store', default='/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/models', help='directory of BDT models')
     parser.add_argument('-o', '--outputFolder', action='store', default='/eos/home-j/jiehan/data_for_norm_float_v1/output', help='directory for outputs')
-    parser.add_argument('-r', '--region', action='store', choices=['two_jet', 'one_jet', 'zero_jet', 'zero_to_one_jet', 'VH_ttH', 'all_jet'], default='zero_jet', help='Region to process')
+    parser.add_argument('-r', '--region', action='store', choices=['two_jet', 'one_jet', 'zero_jet', 'zero_to_one_jet', 'VH_ttH', 'all_jet'], default='two_jet', help='Region to process')
     parser.add_argument('-cat', '--category', action='store', nargs='+', help='apply only for specific categories')
 
     return parser.parse_args()
@@ -177,6 +177,7 @@ class ApplyXGBHandler(object):
                 for i in range(4):
                     bst = xgb.Booster()
                     bst.load_model('%s/BDT_%s_%d.h5'%(self._modelFolder, model, i))
+                    # bst = pickle.load(open('%s/BDT_%s_%d.pkl'%(self._modelFolder, model, i), "rb" ), encoding = 'latin1' ) # FIXME: need to change depending on region
                     self.m_models[model].append(bst)
                     del bst
 
@@ -221,7 +222,7 @@ class ApplyXGBHandler(object):
                 data = file[self._inputTree].arrays(library='pd')
                 data = data[(data["H_mass"]>100) & (data["H_mass"]<180) & (data["Z_mass"] + data["H_mass"] > 185)]
                 
-                output_selection = (data['regions'] == 2)
+                output_selection = ((data['regions'] == 2))
                 
                 # get the distribution of 'gamma_mvaID' with 'region==0', and mimic the distribution to 'region==2'
                 gamma_mvaID_dist_B = data[(data['regions'] == 0) & (data['gamma_eta'] < 1.5)]['gamma_mvaID'].values
@@ -229,21 +230,28 @@ class ApplyXGBHandler(object):
                 prob_dist_B, gamma_mvaID_dist_B = np.histogram(gamma_mvaID_dist_B, bins=100, density=True)
                 prob_dist_E, gamma_mvaID_dist_E = np.histogram(gamma_mvaID_dist_E, bins=100, density=True)
                 gamma_mvaID_dist_B, gamma_mvaID_dist_E = (gamma_mvaID_dist_B[1:] + gamma_mvaID_dist_B[:-1])/2, (gamma_mvaID_dist_E[1:] + gamma_mvaID_dist_E[:-1])/2
-                sampled_values_B = np.random.choice(gamma_mvaID_dist_B, size=data[output_selection & (data['gamma_eta'] < 1.5)].shape[0], p=prob_dist_B/sum(prob_dist_B))
-                sampled_values_E = np.random.choice(gamma_mvaID_dist_E, size=data[output_selection & (data['gamma_eta'] > 1.5)].shape[0], p=prob_dist_E/sum(prob_dist_E))
-                data.loc[output_selection & (data['gamma_eta'] < 1.5), 'gamma_mvaID'] = sampled_values_B
-                data.loc[output_selection & (data['gamma_eta'] > 1.5), 'gamma_mvaID'] = sampled_values_E
-                
-                data = data[output_selection & (data["Z_mass"] > 80) & (data["Z_mass"] < 100)]
                 
                 if not os.path.isdir('figures/fake'): 
                     os.makedirs('figures/fake')
                 
                 plt.figure()
-                plt.hist(data['gamma_mvaID'], bins=100, histtype='step', label='gamma_mvaID')
-                plt.legend()
+                plt.hist(data[(data['regions'] == 2)]['gamma_mvaID'], bins=100, histtype='step', label='Original', density=True)
+                
+                sampled_values_B = np.random.choice(gamma_mvaID_dist_B, size=data[output_selection & (data['gamma_eta'] < 1.5)].shape[0], p=prob_dist_B/sum(prob_dist_B))
+                sampled_values_E = np.random.choice(gamma_mvaID_dist_E, size=data[output_selection & (data['gamma_eta'] > 1.5)].shape[0], p=prob_dist_E/sum(prob_dist_E))
+                data.loc[output_selection & (data['gamma_eta'] < 1.5), 'gamma_mvaID'] = sampled_values_B
+                data.loc[output_selection & (data['gamma_eta'] > 1.5), 'gamma_mvaID'] = sampled_values_E
+                
+                plt.hist(data[(data['regions'] == 2)]['gamma_mvaID'], bins=100, histtype='step', label='Transformed', density=True)
+                plt.legend(fontsize=28)
+                plt.xlabel('gamma_mvaID', fontsize=28)
+                plt.ylabel('a.u.', fontsize=28)
+                plt.title("Transformed gamma_mvaID", fontsize=36)
+                plt.yscale('log')
                 name = filename.split('/')[-1].split('.')[0]
                 plt.savefig(f'figures/fake/{name}_mimic_gamma_mvaID.png')
+
+                data = data[output_selection & (data["Z_mass"] > 80) & (data["Z_mass"] < 100)]
 
                 for i in range(4):
 
@@ -298,12 +306,12 @@ def main():
     xgb.setOutputFolder(args.outputFolder)
 
     xgb.loadModels()
-    xgb.loadTransformer()
+    xgb.loadTransformer() # FIXME: need to change depending on region
 
     # with open('/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/data/inputs_config.json') as f:
     #     config = json.load(f)
     # sample_list = config['sample_list']
-    sample_list = ["Data", "ZGToLLG"]
+    sample_list = ["Data"] # "Data", "ZGToLLG", "ZG2JToG2L2J", "DYJets_2J"
 
     for category in sample_list:
         if args.category and category not in args.category: continue

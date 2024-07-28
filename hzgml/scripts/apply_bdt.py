@@ -235,7 +235,8 @@ class ApplyXGBHandler(object):
             out_data = pd.DataFrame()
             for filename in tqdm(sorted(f_list), desc='XGB INFO: Applying BDTs to %s samples' % category, bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
                 file = uproot.open(filename)
-                for data in file[self._inputTree].iterate(branches, library='pd', step_size=self._chunksize):
+                # for data in file[self._inputTree].iterate(branches, library='pd', step_size=self._chunksize):
+                for data in file[self._inputTree].iterate(library='pd', step_size=self._chunksize):
                     data = self.preselect(data)
                     # data = data[data.Z_sublead_lepton_pt >= 15]
                     # if category == "DYJetsToLL":
@@ -248,7 +249,8 @@ class ApplyXGBHandler(object):
                     for i in range(4):
 
                         data_s = data[data[self.randomIndex]%4 == i]
-                        data_o = data_s[outputbraches]
+                        data_o = data_s
+                        # data_o = data_s[outputbraches]
 
                         for model in self.train_variables.keys():
                             x_Events = data_s[self.train_variables[model]]

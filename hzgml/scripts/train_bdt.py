@@ -27,7 +27,7 @@ def getArgs():
     parser.add_argument('-p', '--params', action='store', type=dict, default=None, help='json string.') #type=json.loads
     parser.add_argument('--hyperparams_path', action='store', default=None, help='path of hyperparameters json') 
     parser.add_argument('--save', action='store_true', help='Save model weights to HDF5 file')
-    parser.add_argument('--corr', action='store_true', default=True, help='Plot corelation between each training variables')
+    parser.add_argument('--corr', action='store_true', default=False, help='Plot corelation between each training variables')
     parser.add_argument('--importance', action='store_true', default=True, help='Plot importance of variables, parameter "gain" is recommanded')
     parser.add_argument('--roc', action='store_true', default=True, help='Plot ROC')
     parser.add_argument('--optuna', action='store_true', default=False, help='Run hyperparameter tuning using optuna')
@@ -600,8 +600,8 @@ class XGBoostHandler(object):
             params = {
                 'max_depth': trial.suggest_int('max_depth', 3, 50),
                 'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.05, log=True),
-                'subsample': trial.suggest_float('subsample', 0.2, 1.0),
-                'colsample_bytree': trial.suggest_float('colsample_bytree', 0.2, 1.0),
+                'subsample': trial.suggest_float('subsample', 0.4, 1.0),
+                'colsample_bytree': trial.suggest_float('colsample_bytree', 0.4, 1.0),
                 'gamma': trial.suggest_float('gamma', 1e-6, 10, log=True),
                 'min_child_weight': trial.suggest_int('min_child_weight', 1, 50),
                 'max_delta_step': trial.suggest_int('max_delta_step', 10, 100),
@@ -623,7 +623,7 @@ class XGBoostHandler(object):
         if not self.continue_optuna and os.path.exists(f"{exp_dir}optuna_study_fold_{fold}.sqlite3"):
             os.remove(f"{exp_dir}optuna_study_fold_{fold}.sqlite3")
         self.study = optuna.create_study(
-                sampler=optuna.samplers.TPESampler(),
+                sampler=optuna.samplers.TPESampler(n_startup_trials=10, multivariate=True, group=True),
                 study_name=study_name, 
                 storage=storage_name, 
                 load_if_exists=True, 

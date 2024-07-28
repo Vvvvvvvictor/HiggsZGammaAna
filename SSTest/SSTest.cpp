@@ -47,6 +47,13 @@ using namespace std;
 
 void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_fun = "bern2")
 {
+    double mgg_low=105, mgg_high=170, bin_size=65;
+    if (channel.EqualTo("two_jet") & cat == 3)
+    {
+        mgg_low = 105;
+        mgg_high = 140;
+        bin_size = 35;
+    }
     //background MC template
     TH1F* hbkg;
     TFile* fbkg = TFile::Open(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/bkg_sig_template.root"));
@@ -57,7 +64,7 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     // TFile* fbkg = TFile::Open(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/bkg_template_v3_cut2/bkg/bkg_0sig_cat%d.root", cat));
     // hbkg = (TH1F*)fbkg->Get(Form("mass_cat%d", cat));
     double dataevents = hbkg->Integral();
-    double mcsbevents = hbkg->Integral(0,22)+hbkg->Integral(28,80);
+    double mcsbevents = hbkg->Integral(0,122-mgg_low)+hbkg->Integral(bin_size-(mgg_high-128),bin_size);
 	
     //signal MC
     TFile* fsig = TFile::Open(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/bkg_sig_template.root"));
@@ -80,12 +87,11 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     // TH1F* hsb = (TH1F*)fsb->Get(Form("mass_cat%d_data", cat));
 	double sbevents = hsb->Integral();
 
-    hbkg->Scale(sbevents/mcsbevents);
+    // hbkg->Scale(sbevents/mcsbevents);
 
     cout << "\n\tFinish preparing data!!!\n" << endl;
 
     //initializing
-    double mgg_low=100, mgg_high=180;
     RooRealVar mH("mH", "mH", 125.38, mgg_low, mgg_high);
     mH.setMin( mgg_low );
     mH.setMax( mgg_high );
@@ -109,11 +115,11 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     RooRealVar sigma_b4(Form("sigma_b4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("sigma_b4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),3.,1.,15.);
     RooRealVar sigma_b5(Form("sigma_b5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("sigma_b5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),3.,1.,15.);
     
-    RooRealVar step_b1(Form("step_b1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("step_b1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),105.,95,115.);
-    RooRealVar step_b2(Form("step_b2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("step_b2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),105.,95.,115.);
-    RooRealVar step_b3(Form("step_b3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("step_b3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),101.,95,115.);
-    RooRealVar step_b4(Form("step_b4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("step_b4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),101.,95,115.);
-    RooRealVar step_b5(Form("step_b5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("step_b5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),101.,95,115.);
+    RooRealVar step_b1(Form("step_b1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("step_b1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),110.,95,115.);
+    RooRealVar step_b2(Form("step_b2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("step_b2_env_pdf_ele_mu_cat%d_2020_13TeV",cat),110.,95.,115.);
+    RooRealVar step_b3(Form("step_b3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("step_b3_env_pdf_ele_mu_cat%d_2020_13TeV",cat),110.,95,115.);
+    RooRealVar step_b4(Form("step_b4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("step_b4_env_pdf_ele_mu_cat%d_2020_13TeV",cat),110.,95,115.);
+    RooRealVar step_b5(Form("step_b5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("step_b5_env_pdf_ele_mu_cat%d_2020_13TeV",cat),110.,95,115.);
 
     RooRealVar p0(Form("p0_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("p0_env_pdf_ele_mu_cat%d_2020_13TeV",cat),15);
     RooRealVar b1p1(Form("b1p1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),Form("b1p1_env_pdf_ele_mu_cat%d_2020_13TeV",cat),1,-15.,15.);
@@ -311,7 +317,7 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     bkg_model_fit = bkg_model->fitTo(*dfr,Range("range"),SplitRange(true),Save(1),Minimizer("Minuit2","minimize"),SumW2Error(kTRUE),EvalErrorWall(false)); 
     bkg_npars = bkg_model_fit->floatParsFinal().getSize();
     frame_bkg = mH.frame(Title(Form("Data side band with %s pdf", bkg_fun.Data())));
-    bkg_ndof = 74-bkg_npars;
+    bkg_ndof = bin_size-128+122-bkg_npars;
     dfr->plotOn(frame_bkg, Cut("mH>128 || mH<122"));
     bkg_model->plotOn(frame_bkg,NormRange("range_low,signal,range_high"));
     chi2 = frame_bkg->chiSquare(bkg_npars);
@@ -332,7 +338,7 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     //background function fit
     bkg_model_fit = bkg_model->fitTo(*dbkg,Save(1),Minimizer("Minuit2","minimize"),SumW2Error(kTRUE),EvalErrorWall(false));
     bkg_npars = bkg_model_fit->floatParsFinal().getSize();
-    bkg_ndof = 80-bkg_npars;
+    bkg_ndof = bin_size-bkg_npars;
     frame_bkg = mH.frame(Title(Form("Background with %s pdf", bkg_fun.Data())));
     dbkg->plotOn(frame_bkg);
     bkg_model->plotOn(frame_bkg);
@@ -364,9 +370,9 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     RooRealVar MH("MH","MH",125., 124., 126.); 
     RooGaussian sig_gau("sig_gau","sig_gau",mH,MH,sigma);
     
-    RooRealVar sigma_CB("sigma_CB","sigma_CB",0.5, 0.1, 1.); 
+    RooRealVar sigma_CB("sigma_CB","sigma_CB",0.5, 0.1, 4.); 
     RooRealVar alpha("alpha","alpha",0.5, 0., 1.0); 
-    RooRealVar n_CB("n_CB","n_CB",12.,1.,20.); 
+    RooRealVar n_CB("n_CB","n_CB",12.,1.,50.); 
     RooRealVar fracG1("fracG1","fracG1",0.1,0.,1.0); 
     RooCBShape CBshape("CBShape", "CBShape", mH, MH, sigma_CB, alpha, n_CB);
     RooAddPdf* signal = new RooAddPdf("signal","signal",RooArgList(sig_gau, CBshape),fracG1);
@@ -376,7 +382,7 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     RooFitResult *signal_fit;
     signal_fit = signal->fitTo(*dsig,Save(1),Minimizer("Minuit2","minimize"),SumW2Error(kTRUE),EvalErrorWall(false)); //FIXME kTRUE or kFALSE
     int sig_npars = signal_fit->floatParsFinal().getSize();
-    int sig_ndof = 160-sig_npars;
+    int sig_ndof = 2*bin_size-sig_npars;
     RooPlot *frame_sig = mH.frame(Title("Signal with distorted Gaussian pdf"));
     dsig->plotOn(frame_sig, DataError(RooAbsData::SumW2));
     signal->plotOn(frame_sig);
@@ -419,7 +425,7 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     fit_status = model_fit->status();
     dmc = nsig.getError();
     data_npars = model_fit->floatParsFinal().getSize();
-    data_ndof = 80-data_npars;
+    data_ndof = bin_size-data_npars;
     ddata->plotOn(frame_data, Name("data"), DataError(RooAbsData::SumW2));
     RooHist *plotdata = (RooHist*)frame_data->getObject(frame_data->numItems()-1);
     model->plotOn(frame_data, Name("fitmcweight"));
@@ -438,7 +444,7 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     if (delta > 0.2 * dss) status = "Fail";
 
     data_npars = model_fit->floatParsFinal().getSize();
-    data_ndof = 80-data_npars;
+    data_ndof = 65-data_npars;
 
     // if(ss < 0) frame_data->SetMinimum(ss);
     // ddata->plotOn(frame_data, Name("data"), DataError(RooAbsData::SumW2));

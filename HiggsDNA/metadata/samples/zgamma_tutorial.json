@@ -19,6 +19,13 @@
             "2018": "/eos/home-j/jiehan/Signal_madgraph_for_ML/VBFHToZG_ZToLL_TuneCP5_13TeV_madgraphMLM_pythia8/24UL18/merged_files/"
         }
     },
+    "DYJets_overlap": {
+        "xs": 6077.22,
+        "bf": 1,
+        "files": {
+            "2017": ["root://xrootd-cms.infn.it//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/100000/04426F83-BF53-0440-B2D1-F2DD9AB96EB8.root"]
+        }
+    },
     "ggH_M125": {
         "xs": 48.58,
         "bf": 0.000154793142,

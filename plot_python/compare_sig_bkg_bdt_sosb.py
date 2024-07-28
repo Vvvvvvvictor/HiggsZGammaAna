@@ -28,8 +28,8 @@ selections = ["H_mass>120", "H_mass<130"]
 # Dataset list
 sig_file_list = [
     ["sig.root"],
-    "ggH_M125.root",
-    "VBF_M125.root"
+    "ggH.root",
+    "VBF.root"
 ]
 mc_file_list = [
     "ZGToLLG.root",
@@ -170,6 +170,9 @@ print("========================")
 
 pads[1].cd()
 rp.Draw("E")
+boundaries = [0.24, 0.47, 0.82, 0.9]
+for i in range(4):
+    line.DrawLine(boundaries[i], 0, boundaries[i], 0.5)
 # plot.Set(pads[1], Logy=1)
 # line.DrawLine(0.29, 0, 0.29, 0.26)
 # line.DrawLine(x1, 0, x1, 0.2)
@@ -185,7 +188,7 @@ print("Finish drawing lower pad")
 print("========================")
 
 plot.DrawCMSLogo(c1, "CMS", "Preliminary", 0, 0., -0.02, 1.2, cmsTextSize=0.55);
-plot.DrawCMSLogo(c1, "41.5 fb^{-1} (13 TeV)", "", 3, 0., -0.02, 1.2, cmsTextSize=0.45);
+plot.DrawCMSLogo(c1, "137 fb^{-1} (13 TeV)", "", 3, 0., -0.02, 1.2, cmsTextSize=0.45);
 
 print("========================")
 print("Finish adding CMS word")
