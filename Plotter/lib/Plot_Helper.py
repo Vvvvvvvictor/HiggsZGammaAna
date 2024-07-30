@@ -18,7 +18,8 @@ def LoadNtuples(ana_cfg):
             #    ntuples[sample]. Add( '{}/{}/{}.root'.format(ana_cfg.sample_loc, sample, year))
             ntuples[sample]. Add( '{}/{}/{}_{}.root'.format(ana_cfg.sample_loc, sample, ana_cfg.treename, ana_cfg.year))
         else:
-            ntuples[sample]. Add('{}/{}/{}.root'.format(ana_cfg.sample_loc, sample, ana_cfg.year))
+            #ntuples[sample]. Add('{}/{}/{}.root'.format(ana_cfg.sample_loc, sample, ana_cfg.year))
+            ntuples[sample]. Add( '{}/{}/{}.root'.format(ana_cfg.sample_loc, sample, ana_cfg.year))
 
 
     return ntuples

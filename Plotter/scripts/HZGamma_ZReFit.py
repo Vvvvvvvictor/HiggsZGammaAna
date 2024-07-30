@@ -18,6 +18,8 @@ parser.add_argument("-i", "--input", dest="input", default="./Data/2017/ZReFit/d
 parser.add_argument("-y", "--Year", dest="year", default="2017", help="which year's datasetes")
 parser.add_argument("-t", "--tree", dest="tree", default="passedEvents", help="Tree name")
 parser.add_argument("-c", "--channel", dest="channel", default="", help="ele/mu channel?")
+parser.add_argument('--single_check', dest='single_check', action='store_true', default=False, help='single_check refit')
+parser.add_argument('--ievent', type=int, dest='ievent', default=1, help="Event id for single_check")
 parser.add_argument('--trueLineshapeFit', dest='trueLineshapeFit', action='store_true', default=False, help='Fit Gen Z true lineshape')
 parser.add_argument("--genFile", dest="genFile", default="./Data/2017/ZReFit/data_genZ/ggH.root", help="Path of the input Gen datasets")
 parser.add_argument('--binningFit', dest='binningFit', action='store_true', default=False, help='Fit with nBins')
@@ -155,7 +157,8 @@ def ZConstrainReFit(treeName, outpath, splitJobs):
     #cat = 'zero_to_one_jet'
     #cat = 'two_jet'
     cat = args.tree
-    analyzer_cfg = AC.Analyzer_Config(channel='inclusive', year=args.year, treename=cat)
+    #analyzer_cfg = AC.Analyzer_Config(channel='inclusive', year=args.year, treename=cat)
+    analyzer_cfg = AC.Analyzer_Config(channel='ggH', year=args.year, treename=cat)
     analyzer_cfg.Print_Config()
 
     analyzer_cfg.plot_output_path = "{}/ZRefit_plots".format(outpath)
@@ -163,7 +166,8 @@ def ZConstrainReFit(treeName, outpath, splitJobs):
     ntuples = LoadNtuples(analyzer_cfg)
 
     truelineshape_ele = Zrefit.getParameters("{}/GenZ_truelineshapeele.txt".format(args.truelineshape))
-    truelineshape_mu = Zrefit.getParameters("{}/GenZ_truelineshapemu.txt".format(args.truelineshape))
+    #truelineshape_mu = Zrefit.getParameters("{}/GenZ_truelineshapemu.txt".format(args.truelineshape))
+    truelineshape_mu = Zrefit.getParameters("{}/GenZ_truelineshapemu_anders.txt".format(args.truelineshape))
 
     #for sample in analyzer_cfg.samp_names:
     for sample in [args.sampleName]:
@@ -212,6 +216,10 @@ def ZConstrainReFit(treeName, outpath, splitJobs):
 
             #if iEvt > 1: break
             #if iEvt > 5000: continue
+            if args.single_check:
+                if ntup.event != args.ievent: 
+                    continue
+
             if (iEvt % 100000 == 1):
                 print("looking at event %d" %iEvt)
             #if (iEvt == 5): break
@@ -230,6 +238,7 @@ def ZConstrainReFit(treeName, outpath, splitJobs):
             gamma = TLorentzVector()
             gamma_fsr = TLorentzVector()
             Z = TLorentzVector()
+            Z_fsr = TLorentzVector()
             Higgs = TLorentzVector()
 
             l1.SetPtEtaPhiM(ntup.Z_lead_lepton_pt, ntup.Z_lead_lepton_eta, ntup.Z_lead_lepton_phi, ntup.Z_lead_lepton_mass)
@@ -279,15 +288,33 @@ def ZConstrainReFit(treeName, outpath, splitJobs):
             if fsr_clean:
                 Z_refit = l1_refit + l2_refit + gamma_fsr
                 Higgs_refit = Z_refit + gamma
-                Z = l1 + l2 + gamma_fsr
+                Z = l1 + l2
+                Z_fsr = l1 + l2 + gamma_fsr
             else:
                 Z_refit = l1_refit + l2_refit
                 Higgs_refit = Z_refit + gamma
                 Z = l1 + l2
+                Z_fsr = l1 + l2
+
+            Higgs = Z_fsr + gamma
 
             #print("[[INFO]]: ", l1.Pt(), l1_pterr, l1.Eta(), l1.Phi(), l1.M(), l2.Pt(), l2_pterr, l2.Eta(), l2.Phi(), l2.M())
             #print("[[INFO]]: ", ntup.Z_lead_lepton_ptE_error, ntup.Z_sublead_lepton_ptE_error)
             #print("[[INFO]]: id: {}, l1_pt: {}, l1_pt_err: {}, l2_pt: {}, l2_pt_err: {}, l1_refit_pt: {}, l2_refit_pt: {}, Z_mass1: {}, Z_mass2: {}, Z_mass_refit: {}".format(ntup.Z_lead_lepton_id, l1.Pt(), l1_pterr, l2.Pt(), l2_pterr, l1_refit_pt, l2_refit_pt, ntup.Z_mass, Z.M(), Z_refit.M()))
+            #if n_fsr>0:
+            #    print("[[INFO]] fsr event:", ntup.event)
+            #    sys.exit(0)
+            if args.single_check:
+                print("[[INFO]] lepton1: l1_id: {}, l1_pt: {}, l1_eta: {}, l1_phi: {}, l1_pterr: {}, l1_pt_refit: {}, l1_eta_refit: {}, l1_phi_refit: {}".format(ntup.Z_lead_lepton_id, l1.Pt(), l1.Eta(), l1.Phi(), l1_pterr, l1_refit.Pt(), l1_refit.Eta(), l1_refit.Phi()))
+                print("[[INFO]] lepton2: l2_id: {}, l2_pt: {}, l2_eta: {}, l2_phi: {}, l2_pterr: {}, l2_pt_refit: {}, l2_eta_refit: {}, l2_phi_refit: {}".format(ntup.Z_sublead_lepton_id, l2.Pt(), l2.Eta(), l2.Phi(), l2_pterr, l2_refit.Pt(), l2_refit.Eta(), l2_refit.Phi()))
+                print("[[INFO]] photon: photon_pt: {}, photon_eta: {}, photon_phi: {}".format(gamma.Pt(), gamma.Eta(), gamma.Phi()))
+                print("[[INFO]] photon_fsr: photon_fsr_pt: {}, photon_fsr_eta: {}, photon_fsr_phi: {}, photon_fsr_pterr: {}".format(gamma_fsr.Pt(), gamma_fsr.Eta(), gamma_fsr.Phi(), fsr_pterr))
+                print("[[INFO]] Z: Z_mass: {}, Z_pt: {}, Z_eta: {}, Z_phi: {}".format(Z.M(), Z.Pt(), Z.Eta(), Z.Phi()))
+                print("[[INFO]] Z_fsr: Z_fsr_mass: {}, Z_fsr_pt: {}, Z_fsr_eta: {}, Z_fsr_phi: {}".format(Z_fsr.M(), Z_fsr.Pt(), Z_fsr.Eta(), Z_fsr.Phi()))
+                print("[[INFO]] Z_refit: Z_refit_mass: {}, Z_refit_pt: {}, Z_refit_eta: {}, Z_refit_phi: {}".format(Z_refit.M(), Z_refit.Pt(), Z_refit.Eta(), Z_refit.Phi()))
+                print("[[INFO]] Z: H_mass: {}, H_pt: {}, H_eta: {}, H_phi: {}".format(Higgs.M(), Higgs.Pt(), Higgs.Eta(), Higgs.Phi()))
+                print("[[INFO]] Z: H_refit_mass: {}, H_refit_pt: {}, H_refit_eta: {}, H_refit_phi: {}".format(Higgs_refit.M(), Higgs_refit.Pt(), Higgs_refit.Eta(), Higgs_refit.Phi()))
+                sys.exit(0)
 
             branch_new["Z_lead_lepton_E"][0] = l1.E()
             branch_new["Z_sublead_lepton_E"][0] = l2.E()

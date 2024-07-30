@@ -452,8 +452,7 @@ void SSTest_core_function(int cat = 0, int sig = 0, TString channel = "two_jet")
   // CMS_hzg_mass->setMax( hbkg->GetBinCenter(hbkg->GetNbinsX()) + hbkg->GetBinWidth(hbkg->GetNbinsX()) );
 
   //background function fit
-  //RooDataHist* dbkg = new RooDataHist("bkg","dataset with x", *CMS_hzg_mass, hbkg);
-  RooDataHist* dbkg = new RooDataHist("bkg","dataset with x", *CMS_hzg_mass, Import(*hbkg, kTRUE));
+  RooDataHist* dbkg = new RooDataHist("bkg","dataset with x", *CMS_hzg_mass, hbkg);
   RooDataHist* dsb = new RooDataHist("data_sb","dataset with x", *CMS_hzg_mass, hsb);
   // cout<<"bkg hist integral "<<hbkg->Integral()<<" "<<dbkg->sumEntries()<<endl;
 
@@ -461,7 +460,6 @@ void SSTest_core_function(int cat = 0, int sig = 0, TString channel = "two_jet")
   RooRealVar nbkg("nbkg","nbkg",dataevents, 0.01*dataevents, 2*dataevents);
 
   RooRealVar nsig_ss("nsig_ss","nsig_ss",0,-100*sigevents,100*sigevents);
-  //RooRealVar nsig_ss("nsig_ss","nsig_ss",0.5,0,1);
   RooRealVar nbkg_ss("nbkg_ss","nbkg_ss",dataevents, 0.01*dataevents, 2*dataevents);
 
   for (vector<string>::iterator funcType=functionClasses.begin(); funcType!=functionClasses.end(); funcType++){
@@ -469,7 +467,7 @@ void SSTest_core_function(int cat = 0, int sig = 0, TString channel = "two_jet")
     TString bkg_fun;
     ofstream output(Form("./outputs1/%s_%d_%dxsig.txt", channel.Data(), cat, sig), ofstream::app);
     // TFile *f = new TFile(Form("./outputs/%s_%d_%dxsig.root", channel.Data(), cat, sig),"UPDATE"); 
-    while (order < 8){ //FIXME
+    while (order < 2){ //FIXME
       RooAbsPdf *bkgPdf = getPdf(*funcType,order,CMS_hzg_mass,"");
       bkg_fun = Form("%s%d", funcType->c_str(), order);
       order++;
@@ -581,22 +579,9 @@ void SSTest_core_function(int cat = 0, int sig = 0, TString channel = "two_jet")
         hdata->Add(hsig, sig);
         hdata->SetName("asimov data");
         // hdata->Write(hdata->GetName(), TObject::kOverwrite);
-        //RooDataHist* ddata = new RooDataHist("data_bin","dataset with x", *CMS_hzg_mass, hdata);
-        RooDataHist* ddata = new RooDataHist("data_bin","dataset with x", *CMS_hzg_mass, Import(*hdata, kTRUE));
+        RooDataHist* ddata = new RooDataHist("data_bin","dataset with x", *CMS_hzg_mass, hdata);
 
         // asimov dataset fit
-
-        // bing
-        /*
-        int error_test=0;
-        if (error_test){
-          RooAddPdf* model = new RooAddPdf("model","model",RooArgList(*sigPdf, *bkgPdf),RooArgList(nsig,nbkg));
-          RooFitResult *model_fit;
-          int data_npars, data_ndof;
-        }
-        else {
-        */
-
         
         RooAddPdf* model = new RooAddPdf("model","model",RooArgList(*sigPdf, *bkgPdf),RooArgList(nsig,nbkg));
         RooFitResult *model_fit;
@@ -617,54 +602,35 @@ void SSTest_core_function(int cat = 0, int sig = 0, TString channel = "two_jet")
         data_npars = model_fit->floatParsFinal().getSize();
         data_ndof = 80-data_npars;
         
-        // get nsig_mc/dmc from NLL curve
-        std::vector<double> nsig_vals;
-        std::vector<double> nll_vals;
+
+        RooAddPdf* model_nll_mc = new RooAddPdf("model_nll_mc","model_nll_mc",RooArgList(*sigPdf, *bkgPdf),RooArgList(nsig,nbkg));
+
+        std::vector<double> nsig_mc_vals;
+        std::vector<double> nll_mc_vals;
         for (double nsig_val = -100; nsig_val <= 100; nsig_val += 1) {
           nsig.setVal(nsig_val);
           nsig.setConstant(true);
           
-          //RooNLLVar *nll_mc = new RooNLLVar("nll_mc", "nll_mc", *model, *ddata, RooFit::DataError(RooAbsData::SumW2), RooFit::Extended(kTRUE));
-          RooAbsReal* nll_mc = model->createNLL(*ddata, SumW2Error(kTRUE));
+          RooNLLVar *nll_mc = new RooNLLVar("nll_mc", "nll_mc", *model_nll_mc, *ddata, RooFit::DataError(RooAbsData::SumW2));
+          
           RooMinuit m(*nll_mc);
           m.migrad();
           
-          nsig_vals.push_back(nsig_val);
-          nll_vals.push_back(nll_mc->getVal());
+          nsig_mc_vals.push_back(nsig_val);
+          nll_mc_vals.push_back(nll_mc->getVal());
           
           nsig.setConstant(false);
         }
 
-        // find the mini NLL and the +/- sigma error
-        auto min_it = std::min_element(nll_vals.begin(), nll_vals.end());
-        int min_nll_mc_index = std::distance(nll_vals.begin(), min_it);
-        double min_nsig_mc = nsig_vals[min_nll_mc_index];
+        auto min_it = std::min_element(nll_mc_vals.begin(), nll_mc_vals.end());
+        int min_nll_mc_index = std::distance(nll_mc_vals.begin(), min_it);
+        double min_nsig_mc = nsig_mc_vals[min_nll_mc_index];
         double min_nll_mc = *min_it;
 
-        // 查找NLL值增加1的位置
-        double target_nll = min_nll_mc + 1;
-        double left_nsig = -1, right_nsig = -1;
-
-        // 向左查找
-        for (int i = min_nll_mc_index; i >= 0; --i) {
-          if (nll_vals[i] >= target_nll) {
-            left_nsig = nsig_vals[i];
-            break;
-          }
-        }
-
-        // 向右查找
-        for (int i = min_nll_mc_index; i < nll_vals.size(); ++i) {
-          if (nll_vals[i] >= target_nll) {
-            right_nsig = nsig_vals[i];
-            break;
-          }
-        }
-
-        double dmc_nll = (std::abs(left_nsig) > std::abs(right_nsig)) ? std::abs(left_nsig) : std::abs(right_nsig);
+        
 
         TCanvas* c = new TCanvas("c", "NLL Curve", 800, 600);
-        TGraph* graph = new TGraph(nsig_vals.size(), &nsig_vals[0], &nll_vals[0]);
+        TGraph* graph = new TGraph(nsig_mc_vals.size(), &nsig_mc_vals[0], &nll_mc_vals[0]);
         graph->SetTitle("NLL Curve;nsig;NLL");
         graph->Draw("AL");
         c->SaveAs(Form("./test1/nllmc_shape_%s_cat%d_%s.pdf",channel.Data(),cat,bkg_fun.Data()));
@@ -678,7 +644,7 @@ void SSTest_core_function(int cat = 0, int sig = 0, TString channel = "two_jet")
         model->plotOn(frame_data, Name("fit"));
         chi2 = frame_data->chiSquare(data_npars);
         prob = TMath::Prob(chi2*data_ndof, data_ndof);
-        output << "\t" << bkg_fun.Data() << "\tdata(MC):\tnpars = " << data_npars << "\tchi^2 = " << chi2 << "\tprob = " << prob << "\tsig_NLL = " <<min_nsig_mc << "\tdmc_NLL = " << dmc_nll << endl;
+        output << "\t" << bkg_fun.Data() << "\tdata(MC):\tnpars = " << data_npars << "\tchi^2 = " << chi2 << "\tprob = " << prob << "\tNLL = " << model_fit->minNll() << endl;
 
         model_fit = model->fitTo(*ddata,RooFit::Save(1),RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kFALSE), RooFit::Extended(kTRUE)); //FIXME kTRUE or kFALSE
         ss = nsig.getVal();
@@ -687,60 +653,6 @@ void SSTest_core_function(int cat = 0, int sig = 0, TString channel = "two_jet")
         data_ndof = 80-data_npars;
         tot_err = sqrt(dss*dss+ss*ss);
         delta = abs(ss)-2*dmc;
-
-
-        // get ss/dss from NLL curve
-        std::vector<double> nsig_ss_vals;
-        std::vector<double> nll_ss_vals;
-        for (double nsig_ss_val = -100; nsig_ss_val <= 100; nsig_ss_val += 1) {
-          nsig.setVal(nsig_ss_val);
-          nsig.setConstant(true);
-          
-          //RooNLLVar *nll_ss = new RooNLLVar("nll_ss", "nll_ss", *model, *ddata, RooFit::DataError(RooAbsData::Poisson), RooFit::Extended(kTRUE));
-          //RooAbsReal* nll_mc = model_nll_mc->createNLL(*ddata);
-          RooAbsReal* nll_ss = model->createNLL(*ddata, SumW2Error(kFALSE));
-          RooMinuit m(*nll_ss);
-          m.migrad();
-          
-          nsig_ss_vals.push_back(nsig_ss_val);
-          nll_ss_vals.push_back(nll_ss->getVal());
-          
-          nsig.setConstant(false);
-        }
-
-        // find the mini NLL and the +/- sigma error
-        auto min_it_ss = std::min_element(nll_ss_vals.begin(), nll_ss_vals.end());
-        int min_nll_ss_index = std::distance(nll_ss_vals.begin(), min_it_ss);
-        double ss_nll = nsig_ss_vals[min_nll_ss_index];
-        double min_nll_ss = *min_it_ss;
-
-        // 查找NLL值增加1的位置
-        double target_ss_nll = min_nll_ss + 1;
-        double left_nsig_ss = -1, right_nsig_ss = -1;
-
-        // 向左查找
-        for (int i = min_nll_ss_index; i >= 0; --i) {
-          if (nll_ss_vals[i] >= target_ss_nll) {
-            left_nsig_ss = nsig_ss_vals[i];
-            break;
-          }
-        }
-
-        // 向右查找
-        for (int i = min_nll_ss_index; i < nll_ss_vals.size(); ++i) {
-          if (nll_ss_vals[i] >= target_ss_nll) {
-            right_nsig_ss = nsig_ss_vals[i];
-            break;
-          }
-        }
-
-        double dss_nll = (std::abs(left_nsig_ss) > std::abs(right_nsig_ss)) ? std::abs(left_nsig_ss) : std::abs(right_nsig_ss);
-
-        TCanvas* c_ss = new TCanvas("c", "NLL Curve", 800, 600);
-        TGraph* graph_ss = new TGraph(nsig_ss_vals.size(), &nsig_ss_vals[0], &nll_ss_vals[0]);
-        graph_ss->SetTitle("NLL Curve;nsig;NLL");
-        graph_ss->Draw("AL");
-        c_ss->SaveAs(Form("./test1/nllss_shape_%s_cat%d_%s.pdf",channel.Data(),cat,bkg_fun.Data()));
 
         //RooAbsReal* nll_ss = model->createNLL(*ddata, RooFit::Extended());
         //RooMinimizer(*nll_ss).migrad();
@@ -774,7 +686,7 @@ void SSTest_core_function(int cat = 0, int sig = 0, TString channel = "two_jet")
         frame_data->SetTitleSize(0.056, "Y");
         frame_data->SetTitleOffset(0.75, "Y");
         // model->Write(model->GetName(), TObject::kOverwrite);
-        output << "\t" << bkg_fun.Data() << "\tdata(Psu):\tnpars = " << data_npars << "\tchi^2 = " << chi2 << "\tprob = " << prob << "\tss_nll = " << ss_nll << "\tdss_nll = " << dss_nll << endl;
+        output << "\t" << bkg_fun.Data() << "\tdata(Psu):\tnpars = " << data_npars << "\tchi^2 = " << chi2 << "\tprob = " << prob << endl;
         output << "\t" << bkg_fun.Data() << "\tSS:\tnsig = " << ss << "\tdmc = " << dmc << "\tss_cor = " << ss_cor << "\tdss = " << dss << "\ttot_err = " << tot_err << "\tstatus = " << status.Data() << "\n" << endl;
         // output << "\tnbkg = " << nbkg.getVal() << "\tnbkg_err = " << nbkg.getError() << "\n" << endl;
         TLegend *leg = new TLegend(0.6,0.65,0.88,0.88);

@@ -51,6 +51,7 @@ class Analyzer_Config:
                 #mvaCut = 0.8365
             elif self.year == '2017':
                 self.sample_loc       = '/eos/user/z/zewang/HZGamma_data/run2UL/skimmed_ntuples'
+                #self.sample_loc       = '/afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/Plotter/Data/2017'
                 self.out_dir          = 'plots_17UL'
                 self.root_output_name = "HZGamma_plot_data17_{0}_{1}.root".format(self.out_region_name,self.treename)
                 self.BDT_filename     = "/publicfs/cms/user/wangzebing/ALP/Analysis_code/MVA/weight/nodR/model_ALP_BDT_param_2017.pkl"
@@ -62,7 +63,7 @@ class Analyzer_Config:
                 self.BDT_filename     = "/publicfs/cms/user/wangzebing/ALP/Analysis_code/MVA/weight/nodR/model_ALP_BDT_param_2018.pkl"
                 #mvaCut = 0.9766
             elif 'run2' in self.year:
-                self.sample_loc       = '/eos/user/z/zewang/HZGamma_data/run2UL/skimmed_ntuples'
+                self.sample_loc       = '/eos/user/z/zewang/HZGamma_data/run2UL/skimmed_ntuples_v1'
                 self.out_dir          = 'plots_run2UL'
                 self.root_output_name = "ALP_plot_run2_{0}_{1}.root".format(self.out_region_name,self.treename)
                 self.BDT_filename     = "/afs/cern.ch/work/z/zewang/private/HZGamma/HiggsZGammaAna/Plotter/Data/UL/BDT/model_HZGamma_BDT_zero_to_one_jet_fullrange.pkl"

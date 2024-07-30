@@ -1,0 +1,84 @@
+	Bernstein1	sb:	npars = 1 	chi^2 = 3.21922	prob = 1.93895e-15
+	Bernstein1	bkg:	npars = 1 	chi^2 = 1.8181	prob = 1.21074e-05
+	Bernstein1	sig:	npars = 6	chi^2 = 52.5402	prob = 0
+	Bernstein1	data(MC):	npars = 3	chi^2 = 2.69488	prob = 6.37948e-14	sig_NLL = -47	dmc_NLL = 90
+	Bernstein1	data(Psu):	npars = 3	chi^2 = 2.69488	prob = 6.37948e-14	ss_nll = -47	dss_nll = 90
+	Bernstein1	SS:	nsig = -47.3779	dmc = 18.9863	ss_cor = -9.40542	dss = 30.1047	tot_err = 56.1334	status = Fail
+
+	Bernstein2	sb:	npars = 2 	chi^2 = 3.73085	prob = 8.39894e-20
+	Bernstein2	bkg:	npars = 2 	chi^2 = 1.65167	prob = 0.000260058
+	Bernstein2	sig:	npars = 6	chi^2 = 52.5402	prob = 0
+	Bernstein2	data(MC):	npars = 4	chi^2 = 2.30528	prob = 8.3573e-10	sig_NLL = -27	dmc_NLL = 72
+	Bernstein2	data(Psu):	npars = 4	chi^2 = 2.30528	prob = 8.3573e-10	ss_nll = -27	dss_nll = 72
+	Bernstein2	SS:	nsig = -27.1163	dmc = 20.0558	ss_cor = 0	dss = 31.9105	tot_err = 41.8757	status = Pass
+
+	Bernstein3	sb:	npars = 3 	chi^2 = 2.55933	prob = 1.35978e-09
+	Bernstein3	bkg:	npars = 3 	chi^2 = 1.0488	prob = 0.362584
+	Bernstein3	sig:	npars = 6	chi^2 = 52.5402	prob = 0
+	Bernstein3	data(MC):	npars = 5	chi^2 = 1.24073	prob = 0.077282	sig_NLL = 28	dmc_NLL = 79
+	Bernstein3	data(Psu):	npars = 5	chi^2 = 1.24073	prob = 0.077282	ss_nll = 28	dss_nll = 79
+	Bernstein3	SS:	nsig = 27.5224	dmc = 23.6624	ss_cor = 0	dss = 35.4509	tot_err = 44.8804	status = Pass
+
+	Bernstein4	sb:	npars = 4 	chi^2 = 3.78759	prob = 1.09594e-19
+	Bernstein4	bkg:	npars = 4 	chi^2 = 0.922121	prob = 0.669551
+	Bernstein4	sig:	npars = 6	chi^2 = 52.5402	prob = 0
+	Bernstein4	data(MC):	npars = 6	chi^2 = 1.11602	prob = 0.231328	sig_NLL = 28	dmc_NLL = 83
+	Bernstein4	data(Psu):	npars = 6	chi^2 = 1.11602	prob = 0.231328	ss_nll = 28	dss_nll = 83
+	Bernstein4	SS:	nsig = 36.7245	dmc = 24.0013	ss_cor = 0	dss = 37.3267	tot_err = 52.3639	status = Pass
+
+	Bernstein5	sb:	npars = 5 	chi^2 = 3.66143	prob = 2.89386e-18
+	Bernstein5	bkg:	npars = 5 	chi^2 = 0.885583	prob = 0.749944
+	Bernstein5	sig:	npars = 6	chi^2 = 52.5402	prob = 0
+	Bernstein5	data(MC):	npars = 7	chi^2 = 1.13565	prob = 0.200526	sig_NLL = 16	dmc_NLL = 71
+	Bernstein5	data(Psu):	npars = 7	chi^2 = 1.13565	prob = 0.200526	ss_nll = 16	dss_nll = 71
+	Bernstein5	SS:	nsig = 15.4992	dmc = 27.5515	ss_cor = 0	dss = 38.1542	tot_err = 41.1821	status = Pass
+
+	Bernstein6	sb:	npars = 6 	chi^2 = 4.19798	prob = 1.20812e-22
+	Bernstein6	bkg:	npars = 6 	chi^2 = 0.861624	prob = 0.796309
+	Bernstein6	sig:	npars = 6	chi^2 = 52.5402	prob = 0
+	Bernstein6	data(MC):	npars = 8	chi^2 = 1.15517	prob = 0.173165	sig_NLL = 5	dmc_NLL = 65
+	Bernstein6	data(Psu):	npars = 8	chi^2 = 1.15524	prob = 0.17308	ss_nll = 1	dss_nll = 65
+	Bernstein6	SS:	nsig = 5.79461	dmc = 74.6882	ss_cor = 0	dss = 39.3996	tot_err = 39.8234	status = Pass
+
+	Bernstein1	sb:	npars = 1 	chi^2 = 3.21922	prob = 1.93895e-15
+	Bernstein1	bkg:	npars = 1 	chi^2 = 1.8181	prob = 1.21074e-05
+	Bernstein1	sig:	npars = 6	chi^2 = 52.5402	prob = 0
+	Bernstein1	data(MC):	npars = 3	chi^2 = 2.69488	prob = 6.37948e-14	sig_NLL = -47	dmc_NLL = 90
+	Bernstein1	data(Psu):	npars = 3	chi^2 = 2.69488	prob = 6.37948e-14	ss_nll = -47	dss_nll = 90
+	Bernstein1	SS:	nsig = -47.3779	dmc = 18.9863	ss_cor = -9.40542	dss = 30.1047	tot_err = 56.1334	status = Fail
+
+	Bernstein2	sb:	npars = 2 	chi^2 = 3.73085	prob = 8.39894e-20
+	Bernstein2	bkg:	npars = 2 	chi^2 = 1.65167	prob = 0.000260058
+	Bernstein2	sig:	npars = 6	chi^2 = 52.5402	prob = 0
+	Bernstein2	data(MC):	npars = 4	chi^2 = 2.30528	prob = 8.3573e-10	sig_NLL = -27	dmc_NLL = 72
+	Bernstein2	data(Psu):	npars = 4	chi^2 = 2.30528	prob = 8.3573e-10	ss_nll = -27	dss_nll = 72
+	Bernstein2	SS:	nsig = -27.1163	dmc = 20.0558	ss_cor = 0	dss = 31.9105	tot_err = 41.8757	status = Pass
+
+	Bernstein3	sb:	npars = 3 	chi^2 = 2.55933	prob = 1.35978e-09
+	Bernstein3	bkg:	npars = 3 	chi^2 = 1.0488	prob = 0.362584
+	Bernstein3	sig:	npars = 6	chi^2 = 52.5402	prob = 0
+	Bernstein3	data(MC):	npars = 5	chi^2 = 1.24073	prob = 0.077282	sig_NLL = 28	dmc_NLL = 79
+	Bernstein3	data(Psu):	npars = 5	chi^2 = 1.24073	prob = 0.077282	ss_nll = 28	dss_nll = 79
+	Bernstein3	SS:	nsig = 27.5224	dmc = 23.6624	ss_cor = 0	dss = 35.4509	tot_err = 44.8804	status = Pass
+
+	Bernstein4	sb:	npars = 4 	chi^2 = 3.78759	prob = 1.09594e-19
+	Bernstein4	bkg:	npars = 4 	chi^2 = 0.922121	prob = 0.669551
+	Bernstein4	sig:	npars = 6	chi^2 = 52.5402	prob = 0
+	Bernstein4	data(MC):	npars = 6	chi^2 = 1.11602	prob = 0.231328	sig_NLL = 28	dmc_NLL = 83
+	Bernstein4	data(Psu):	npars = 6	chi^2 = 1.11602	prob = 0.231328	ss_nll = 28	dss_nll = 83
+	Bernstein4	SS:	nsig = 36.7245	dmc = 24.0013	ss_cor = 0	dss = 37.3267	tot_err = 52.3639	status = Pass
+
+	Bernstein5	sb:	npars = 5 	chi^2 = 3.66143	prob = 2.89386e-18
+	Bernstein5	bkg:	npars = 5 	chi^2 = 0.885583	prob = 0.749944
+	Bernstein5	sig:	npars = 6	chi^2 = 52.5402	prob = 0
+	Bernstein5	data(MC):	npars = 7	chi^2 = 1.13565	prob = 0.200526	sig_NLL = 16	dmc_NLL = 71
+	Bernstein5	data(Psu):	npars = 7	chi^2 = 1.13565	prob = 0.200526	ss_nll = 16	dss_nll = 71
+	Bernstein5	SS:	nsig = 15.4992	dmc = 27.5515	ss_cor = 0	dss = 38.1542	tot_err = 41.1821	status = Pass
+
+	Bernstein6	sb:	npars = 6 	chi^2 = 4.19798	prob = 1.20812e-22
+	Bernstein6	bkg:	npars = 6 	chi^2 = 0.861624	prob = 0.796309
+	Bernstein6	sig:	npars = 6	chi^2 = 52.5402	prob = 0
+	Bernstein6	data(MC):	npars = 8	chi^2 = 1.15517	prob = 0.173165	sig_NLL = 5	dmc_NLL = 65
+	Bernstein6	data(Psu):	npars = 8	chi^2 = 1.15524	prob = 0.17308	ss_nll = 1	dss_nll = 65
+	Bernstein6	SS:	nsig = 5.79461	dmc = 74.6882	ss_cor = 0	dss = 39.3996	tot_err = 39.8234	status = Pass
+

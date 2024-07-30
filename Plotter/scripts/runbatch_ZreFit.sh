@@ -27,4 +27,6 @@ conda activate hzgml
 python scripts/HZGamma_ZReFit.py --doReFit -y run2 --truelineshape ./Data/UL/run2_01jet/ZReFit -o ./Data/UL/run2_01jet/ZReFit --tree zero_to_one_jet --splitJobs --nJobs 20 --iJob $1 --sampleName sig #--verbose
 #python scripts/HZGamma_ZReFit.py --plotReFit -y run2_refit --tree zero_to_one_jet --sampleName sig -o ./Data/UL/run2_01jet/ZReFit --verbose -c ele
 
+#python scripts/HZGamma_ZReFit.py --doReFit -y 2017 --truelineshape ./Data/UL/run2_01jet/ZReFit -o ./Data/UL/run2_01jet/ZReFit --sampleName ggH --single_check --ievent 9 --verbose
+
 echo "running done"

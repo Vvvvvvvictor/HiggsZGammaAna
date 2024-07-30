@@ -2,22 +2,8 @@ from ROOT import *
 from array import array
 import math
 
-def getParameters(file):
-    params = {}
-    
-    f = open(file)
-    for line in f.readlines():
-        line = line.strip('\n')
-        params[line.split()[0]] = float(line.split()[1])
-
-    return params
-
-
-def branch_setup(tree):
-    global variables_branch, variables_name
-
-    variables_branch = {}
-    variables_name = [
+'''
+variables_name = [
     "H_pt",
     "H_eta",
     "H_phi",
@@ -191,6 +177,141 @@ def branch_setup(tree):
     'jet4G_deltaR',
     'reweight',
     'BDT_score'
+    ]
+'''
+
+def getParameters(file):
+    params = {}
+    
+    f = open(file)
+    for line in f.readlines():
+        line = line.strip('\n')
+        params[line.split()[0]] = float(line.split()[1])
+
+    return params
+
+
+def branch_setup(tree):
+    global variables_branch, variables_name
+
+    variables_branch = {}
+    variables_name = [
+    "H_pt",
+    "H_eta",
+    "H_phi",
+    "H_mass",
+    "Z_pt",
+    "Z_eta",
+    "Z_phi",
+    "Z_mass",
+    "Z_lead_lepton_pt",
+    "Z_lead_lepton_eta",
+    "Z_lead_lepton_phi",
+    "Z_lead_lepton_mass",
+    "Z_lead_lepton_charge",
+    "Z_lead_lepton_id",
+    "Z_lead_lepton_ptE_error",
+    "Z_sublead_lepton_pt",
+    "Z_sublead_lepton_eta",
+    "Z_sublead_lepton_phi",
+    "Z_sublead_lepton_mass",
+    "Z_sublead_lepton_charge",
+    "Z_sublead_lepton_id",
+    "Z_sublead_lepton_ptE_error",
+    "electron_1_energyErr",
+    "electron_2_energyErr",
+    "electron_3_energyErr",
+    "electron_4_energyErr",
+    "muon_1_ptErr",
+    "muon_2_ptErr",
+    "muon_3_ptErr",
+    "muon_4_ptErr",
+    "gamma_pt",
+    "gamma_eta",
+    "gamma_phi",
+    "gamma_mass",
+    "gamma_mvaID",
+    "gamma_energyErr",
+    "gamma_sieie",
+    "gamma_hoe",
+    "gamma_r9",
+    "gamma_chiso",
+    "gamma_alliso",
+    "gamma_mvaID_WP80",
+    "gamma_mvaID_WPL",
+    "gamma_fsr_pt",
+    "gamma_fsr_eta",
+    "gamma_fsr_phi",
+    "gamma_fsr_mass",
+    "gamma_fsr_relIso03",
+    "gamma_fsr_dROverEt2",
+    "jet_1_pt",
+    "jet_1_eta",
+    "jet_1_phi",
+    "jet_1_mass",
+    "jet_1_btagDeepFlavB",
+    "jet_2_pt",
+    "jet_2_eta",
+    "jet_2_phi",
+    "jet_2_mass",
+    "jet_2_btagDeepFlavB",
+    "jet_3_pt",
+    "jet_3_eta",
+    "jet_3_phi",
+    "jet_3_mass",
+    "jet_3_btagDeepFlavB",
+    "jet_4_pt",
+    "jet_4_eta",
+    "jet_4_phi",
+    "jet_4_mass",
+    "jet_4_btagDeepFlavB",
+    "additional_lepton_1_pt",
+    "additional_lepton_1_eta",
+    "additional_lepton_1_phi",
+    "additional_lepton_1_mass",
+    "additional_lepton_1_charge",
+    "additional_lepton_1_id",
+    "additional_lepton_2_pt",
+    "additional_lepton_2_eta",
+    "additional_lepton_2_phi",
+    "additional_lepton_2_mass",
+    "additional_lepton_2_charge",
+    "additional_lepton_2_id",
+    "GenHzgHiggs_pt",
+    "GenHzgHiggs_eta",
+    "GenHzgHiggs_phi",
+    "GenHzgHiggs_mass",
+    "GenHzgLeadGenChild_pt",
+    "GenHzgLeadGenChild_eta",
+    "GenHzgLeadGenChild_phi",
+    "GenHzgLeadGenChild_mass",
+    "GenHzgLeadGenChild_pdgId",
+    "GenHzgSubleadGenChild_pt",
+    "GenHzgSubleadGenChild_eta",
+    "GenHzgSubleadGenChild_phi",
+    "GenHzgSubleadGenChild_mass",
+    "GenHzgSubleadGenChild_pdgId",
+    "GenHzgLeadGenChildChild1_pt",
+    "GenHzgLeadGenChildChild1_eta",
+    "GenHzgLeadGenChildChild1_phi",
+    "GenHzgLeadGenChildChild1_mass",
+    "GenHzgLeadGenChildChild1_pdgId",
+    "GenHzgLeadGenChildChild1_pt",
+    "GenHzgLeadGenChildChild2_eta",
+    "GenHzgLeadGenChildChild2_phi",
+    "GenHzgLeadGenChildChild2_mass",
+    "GenHzgLeadGenChildChild2_pdgId",
+    "n_jets",
+    "n_leptons",
+    "n_electrons",
+    "n_muons",
+    "n_iso_photons",
+    "MET_pt",
+    "MET_phi",
+    "weight_central",
+    "run",
+    "event",
+    "luminosityBlock"
     ]
     
     # setup the branchs
