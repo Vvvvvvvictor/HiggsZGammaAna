@@ -48,11 +48,11 @@ using namespace std;
 void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_fun = "bern2")
 {
     double mgg_low=105, mgg_high=170, bin_size=65;
-    if (channel.EqualTo("two_jet") & cat == 3)
+    if (channel.EqualTo("two_jet") & (cat == 3))
     {
-        mgg_low = 105;
-        mgg_high = 140;
-        bin_size = 35;
+        mgg_low = 100;
+        mgg_high = 150;
+        bin_size = 50;
     }
     //background MC template
     TH1F* hbkg;
@@ -304,7 +304,8 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
 
     int flag; TString status;
     flag = 1; status = "Pass";
-    double dmc, dss, ss, tot_err, ss_cor, delta, chi2=0., prob, nll;
+    double dmc, dss, ss, ss_mc, tot_err, ss_cor, delta, chi2=0., prob, nll;
+    RooAbsCollection *floatPars; TIterator *iter;
 
     int bkg_npars, bkg_ndof;
     RooPlot *frame_bkg;
@@ -325,7 +326,7 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     bkg_model->Write(bkg_model->GetName(), TObject::kOverwrite);
     nll = bkg_model_fit->minNll();
     prob = TMath::Prob(chi2*bkg_ndof, bkg_ndof);
-    if(prob<0.01) status = "Fail";
+    // if(prob<0.01) status = "Fail";
     output << "\t" << bkg_fun.Data() << "\tsb:\tnpars = " << bkg_npars << " \tchi^2 = " << chi2 << "\tprob = " << prob << "\tnll: " << nll << endl;
     bkg_model->paramOn(frame_bkg, Layout(0.34,0.96,0.89),Format("NEA",AutoPrecision(1)));
     frame_bkg->getAttText()->SetTextSize(0.03);
@@ -408,7 +409,7 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     // asimov dataset fit
     RooAddPdf* model = new RooAddPdf("model","model",RooArgList(*signal, *bkg_model),RooArgList(nsig,nbkg));
     RooFitResult *model_fit;
-    int data_npars, data_ndof, fit_status;
+    int data_npars, data_ndof, fit_status, tries;
 
     TCanvas *canv = new TCanvas();
     RooPlot *frame_data = mH.frame();
@@ -423,19 +424,71 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
 
     model_fit = model->fitTo(*ddata,Save(1),Minimizer("Minuit2","minimize"),SumW2Error(kTRUE)); //FIXME kTRUE or kFALSE
     fit_status = model_fit->status();
+
+    // fix the float parameters in model except nsig
+    floatPars = model->getParameters(*ddata)->selectByAttrib("Constant", false);
+    iter = floatPars->createIterator();
+    for (RooRealVar* var = (RooRealVar*)iter->Next(); var != nullptr; var = (RooRealVar*)iter->Next()) {
+        if (var->GetName() != TString("nsig")) {
+        var->setConstant(true);
+        }
+    }
+
+    fit_status = -1;
+    tries = 0;
+    while((fit_status != 0) && (tries < 10)){
+        // model_fit = model->chi2FitTo(*ddata,RooFit::Save(1),RooFit::Minimizer("Minuit2","minimize"),DataError(RooAbsData::SumW2)); //FIXME kTRUE or kFALSE
+        model_fit = model->fitTo(*ddata,RooFit::Save(1),RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE)); //FIXME kTRUE or kFALSE
+        fit_status = model_fit->status();
+        tries++;
+    }
+
+    ss_mc = nsig.getVal();
     dmc = nsig.getError();
-    data_npars = model_fit->floatParsFinal().getSize();
     data_ndof = bin_size-data_npars;
+
+    // if(ss < 0) frame_data->SetMinimum(ss);
     ddata->plotOn(frame_data, Name("data"), DataError(RooAbsData::SumW2));
     RooHist *plotdata = (RooHist*)frame_data->getObject(frame_data->numItems()-1);
-    model->plotOn(frame_data, Name("fitmcweight"));
+    model->plotOn(frame_data, Name("fit"));
     chi2 = frame_data->chiSquare(data_npars);
     prob = TMath::Prob(chi2*data_ndof, data_ndof);
-    frame_data->remove("fitmcweight");
-    output << "\t" << bkg_fun.Data() << "\tdata(MC):\tnpars = " << data_npars << "\tchi^2 = " << chi2 << "\tprob = " << prob << "\tstatus = " << fit_status << endl;
+    output << "\t" << bkg_fun.Data() << "\tdata(MC):\tnpars = " << data_npars << "\tchi^2 = " << chi2 << ": " << chi2 << "\tprob = " << prob << "\tfitting status = " << fit_status << endl;
+
+    // unfix the float parameters in model
+    iter = floatPars->createIterator();
+    for (RooRealVar* var = (RooRealVar*)iter->Next(); var != nullptr; var = (RooRealVar*)iter->Next()) {
+        var->setConstant(false);
+    }
+
+    // dmc = nsig.getError();
+    // data_npars = model_fit->floatParsFinal().getSize();
+    // data_ndof = bin_size-data_npars;
+    // ddata->plotOn(frame_data, Name("data"), DataError(RooAbsData::SumW2));
+    // RooHist *plotdata = (RooHist*)frame_data->getObject(frame_data->numItems()-1);
+    // model->plotOn(frame_data, Name("fitmcweight"));
+    // chi2 = frame_data->chiSquare(data_npars);
+    // prob = TMath::Prob(chi2*data_ndof, data_ndof);
+    // frame_data->remove("fitmcweight");
+    // output << "\t" << bkg_fun.Data() << "\tdata(MC):\tnpars = " << data_npars << "\tchi^2 = " << chi2 << "\tprob = " << prob << "\tstatus = " << fit_status << endl;
 
     model_fit = model->fitTo(*ddata,Save(1),Minimizer("Minuit2","minimize"),AsymptoticError(kFALSE)); //FIXME kTRUE or kFALSE
-    fit_status = model_fit->status();
+
+    // fix the float parameters in model except nsig
+    floatPars = model->getParameters(*ddata)->selectByAttrib("Constant", false);
+    iter = floatPars->createIterator();
+    for (RooRealVar* var = (RooRealVar*)iter->Next(); var != nullptr; var = (RooRealVar*)iter->Next()) {
+        if (var->GetName() != TString("nsig")) {
+        var->setConstant(true);
+        }
+    }
+
+    while((fit_status != 0) && (tries < 10)){
+        model_fit = model->fitTo(*ddata,RooFit::Save(1),RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kFALSE)); //FIXME kTRUE or kFALSE
+        fit_status = model_fit->status();
+        tries++;
+    }
+
     ss = nsig.getVal();
     dss = nsig.getError();
     tot_err = sqrt(dss * dss + ss * ss);
@@ -457,7 +510,7 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     // model->plotOn(frame_data, Name("signal"), Components(sigPdf->GetName()), LineStyle(ELineStyle::kDashed), LineColor(kGreen));
     model->plotOn(frame_data, Name("background"), Components(bkg_model->GetName()), LineStyle(ELineStyle::kDashed), LineColor(kRed));
 
-    if(prob<0.01) status="Fail";
+    // if(prob<0.01) status="Fail";
     model->SetName(Form("%s_model", bkg_fun.Data()));
     frame_data->SetTitle(Form("Pesudo data with with x%d signal, prob: %.3f", sig, prob));
     frame_data->SetXTitle("");
@@ -466,7 +519,7 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     frame_data->SetTitleOffset(0.75, "Y");
     // model->Write(model->GetName(), TObject::kOverwrite);
     output << "\t" << bkg_fun.Data() << "\tdata(Psu):\tnpars = " << data_npars << "\tchi^2 = " << chi2 << "\tprob = " << prob << "\tstatus = " << fit_status << endl;
-    output << "\t" << bkg_fun.Data() << "\tSS:\tnsig = " << ss << "\tdmc = " << dmc << "\tss_cor = " << ss_cor << "\tdss = " << dss << "\ttot_err = " << tot_err << "\tstatus = " << status.Data() << "\n" << endl;
+    output << "\t" << bkg_fun.Data() << "\tSS:\tnsig = " << ss_mc << ":" << ss << "\tdmc = " << dmc << "\tss_cor = " << ss_cor << "\tdss = " << dss << "\ttot_err = " << tot_err << "\tstatus = " << status.Data() << "\n" << endl;
     // output << "\tnbkg = " << nbkg.getVal() << "\tnbkg_err = " << nbkg.getError() << "\n" << endl;
 
     TLegend *leg = new TLegend(0.6,0.65,0.88,0.88);

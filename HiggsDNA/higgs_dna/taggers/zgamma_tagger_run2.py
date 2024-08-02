@@ -259,6 +259,9 @@ class ZGammaTaggerRun2(Tagger):
         # lepton-photon overlap removal 
         clean_photon_mask = object_selections.delta_R(photons, muons, 0.4) & object_selections.delta_R(photons, electrons, 0.4)
         photons = photons[clean_photon_mask]
+        
+        # clean_elePhoton_mask = (photons.electronIdx == -1) # FIXME: this is a temporary fixuy78
+        
 
         # Jets
         jet_cut = jet_selections.select_jets(

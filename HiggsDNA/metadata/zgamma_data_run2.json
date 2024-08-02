@@ -192,6 +192,7 @@
         "Photon_vidNestedWPBitmap",
         "Photon_mvaID",
         "Photon_electronVeto",
+        "Photon_electronIdx",
         "Photon_sieie",
         "Photon_energyErr",
         "Photon_r9",

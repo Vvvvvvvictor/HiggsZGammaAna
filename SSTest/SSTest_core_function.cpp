@@ -10,6 +10,7 @@
 // #include "../interface/RooPowerLawSum.h"
 #include "RooKeysPdf.h"
 #include "RooAddPdf.h"
+#include "RooExtendPdf.h"
 #include "RooDataHist.h"
 #include "RooHistPdf.h"
 #include "RooArgList.h"
@@ -55,12 +56,12 @@ RooAbsPdf* getsigPdfPdf(RooRealVar* obs_var){
 
 RooAbsPdf* getBernsteinxZGMCShape(string prefix, int cat, int order, RooRealVar* obs_var){
   //bing add ZGMCShape
-  TFile *ZGMC_file = new TFile("./ZGCoreShape_01jet.root");
-  RooWorkspace *w = (RooWorkspace *)ZGMC_file->Get("w");
-  RooAbsPdf *ZGMCShape = w->pdf(Form("CoreShape_ZG_NAF_cat%d",cat));
-  // TFile *ZGMC_file = new TFile("./ZGCoreShape_fromMC_01jet_v4.root");
+  // TFile *ZGMC_file = new TFile("./ZGCoreShape_01jet.root");
   // RooWorkspace *w = (RooWorkspace *)ZGMC_file->Get("w");
-  // RooAbsPdf *ZGMCShape = w->pdf(Form("CoreShape_MC_cat%d",cat));
+  // RooAbsPdf *ZGMCShape = w->pdf(Form("CoreShape_ZG_NAF_cat%d",cat));
+  TFile *ZGMC_file = new TFile("./ZGCoreShape_fromMC_01jet_v4.root");
+  RooWorkspace *w = (RooWorkspace *)ZGMC_file->Get("w");
+  RooAbsPdf *ZGMCShape = w->pdf(Form("CoreShape_MC_cat%d",cat));
   w->var("CMS_hzg_mass")->setRange(105, 170);
   ZGMC_file->Close();
 
@@ -112,6 +113,21 @@ RooAbsPdf* getBernsteinxZGMCShape(string prefix, int cat, int order, RooRealVar*
     RooEffProd *bernZGMC = new RooEffProd(Form("%s_bern7xZG",prefix.c_str()),Form("%s_bern7xZG",prefix.c_str()), *ZGMCShape, *bern);
     return bernZGMC;
   	// return bern;
+  // } else if (order==8) {
+  // 	RooBernsteinFast<8> *bern = new RooBernsteinFast<8>(prefix.c_str(),prefix.c_str(),*obs_var,*coeffList);
+  //   RooEffProd *bernZGMC = new RooEffProd(Form("%s_bern8xZG",prefix.c_str()),Form("%s_bern8xZG",prefix.c_str()), *ZGMCShape, *bern);
+  //   return bernZGMC;
+  // 	// return bern;
+  // } else if (order==9) {
+  // 	RooBernsteinFast<9> *bern = new RooBernsteinFast<9>(prefix.c_str(),prefix.c_str(),*obs_var,*coeffList);
+  //   RooEffProd *bernZGMC = new RooEffProd(Form("%s_bern9xZG",prefix.c_str()),Form("%s_bern9xZG",prefix.c_str()), *ZGMCShape, *bern);
+  //   return bernZGMC;
+  // 	// return bern;
+  // } else if (order==10) {
+  // 	RooBernsteinFast<10> *bern = new RooBernsteinFast<10>(prefix.c_str(),prefix.c_str(),*obs_var,*coeffList);
+  //   RooEffProd *bernZGMC = new RooEffProd(Form("%s_bern10xZG",prefix.c_str()),Form("%s_bern10xZG",prefix.c_str()), *ZGMCShape, *bern);
+  //   return bernZGMC;
+  // 	// return bern;
   } else {
 	  return NULL;
   }
@@ -475,11 +491,12 @@ void SSTest_core_function(int cat = 0, int sig = 0, TString channel = "zero_to_o
       RooAbsPdf *bkgPdf = getPdf(*funcType,cat,order,CMS_hzg_mass,"");
       bkg_fun = Form("%s%d", funcType->c_str(), order);
       order++;
-      int flag, fit_status; TString status;
-      double dmc, dss, ss, tot_err, ss_cor, delta, chi2, prob;
+      int flag, fit_status, tries; TString status;
+      double dmc, dss, ss, ss_mc, tot_err, ss_cor, delta, chi2, prob;
       RooFitResult *bkgPdf_fit, *bkg_model_fit;
       RooAbsPdf *bkg_model = bkgPdf;
       RooNLLVar nllt;
+      RooAbsCollection *floatPars; TIterator *iter;
       if (bkgPdf){
         flag = 1; status = "Pass";
         // Data side band fitting
@@ -496,23 +513,37 @@ void SSTest_core_function(int cat = 0, int sig = 0, TString channel = "zero_to_o
         CMS_hzg_mass->setRange("range_low",mgg_low,122);
         CMS_hzg_mass->setRange("signal",122,128);
         CMS_hzg_mass->setRange("range_high",128,mgg_high);
+        CMS_hzg_mass->setRange("FULL",mgg_low,mgg_high); 
+
+        // RooRealVar N("N", "Extended term", 0, 200000);
+        // RooExtendPdf extmodel("extmodel", "Extended model", *bkgPdf, N, "FULL");
 
         //background function fit
-        bkg_model_fit = bkg_model->fitTo(*dsb,Range("range"),SplitRange(true),Save(1),Minimizer("Minuit2","minimize"),SumW2Error(kTRUE));
+
+        // bkg_model_fit = extmodel.fitTo(*dsb,Range("range"),SplitRange(true),Save(1),Minimizer("Minuit2","minimize"),SumW2Error(kTRUE));
+
+        bkg_model_fit = bkg_model->fitTo(*dsb,Range("range"),Save(1),Minimizer("Minuit2","minimize"),SumW2Error(kFALSE));
+
         fit_status = bkg_model_fit->status();
         bkg_npars = bkg_model_fit->floatParsFinal().getSize();
         frame_bkg = CMS_hzg_mass->frame(Title(Form("Data side band with %s pdf", bkg_fun.Data())));
         bkg_ndof = bin_size-128+122-bkg_npars;
         dsb->plotOn(frame_bkg, Cut("CMS_hzg_mass>128 | CMS_hzg_mass<122"));
         bkg_model->plotOn(frame_bkg,NormRange("range_low,range_high"));
+        // bkg_model->plotOn(frame_bkg, NormRange("FULL"));
         chi2 = frame_bkg->chiSquare(bkg_npars);
+
+        // extmodel.SetName(bkg_fun);
+        // extmodel.Write(bkg_model->GetName(), TObject::kOverwrite);
+        
         bkg_model->SetName(bkg_fun);
         bkg_model->Write(bkg_model->GetName(), TObject::kOverwrite);
+        
         nll = bkg_model_fit->minNll();
         prob = TMath::Prob(chi2*bkg_ndof, bkg_ndof);
         // if(prob<0.05) status = "Fail";
         bkgPdf->Write(bkgPdf->GetName(), TObject::kOverwrite);
-        output << "\t" << bkg_fun.Data() << "\tsb:\tnpars = " << bkg_npars << " \tchi^2 = " << chi2 << "\tprob = " << prob << '\tfitting status = ' << fit_status << endl;
+        output << "\t" << bkg_fun.Data() << "\tsb:\tnpars = " << bkg_npars << " \tchi^2 = " << chi2 << "\tprob = " << prob << "\tfitting status = " << fit_status << endl;
         bkgPdf->paramOn(frame_bkg, RooFit::Layout(0.55,0.96,0.89),RooFit::Format("NEA",AutoPrecision(1)));
         frame_bkg->getAttText()->SetTextSize(0.03);
         frame_bkg->Draw();
@@ -537,7 +568,7 @@ void SSTest_core_function(int cat = 0, int sig = 0, TString channel = "zero_to_o
         prob = TMath::Prob(chi2*bkg_ndof, bkg_ndof);
         // if (prob < 0.05) status = "Fail";
         // bkgPdf->Write(bkgPdf->GetName(), TObject::kOverwrite);
-        output << "\t" << bkg_fun.Data() << "\tbkg:\tnpars = " << bkg_npars << " \tchi^2 = " << chi2 << "\tprob = " << prob << '\tfitting status = ' << fit_status << endl;
+        output << "\t" << bkg_fun.Data() << "\tbkg:\tnpars = " << bkg_npars << " \tchi^2 = " << chi2 << "\tprob = " << prob << "\tfitting status = " << fit_status << endl;
         frame_bkg->Draw();
         // RooHist *hpull = frame_bkg->pullHist();
         // RooPlot *frame3 = CMS_hzg_mass->frame(Title("Pull Distribution"));
@@ -568,7 +599,7 @@ void SSTest_core_function(int cat = 0, int sig = 0, TString channel = "zero_to_o
         sigPdf->plotOn(frame_sig);
         sigPdf->paramOn(frame_sig, RooFit::Layout(0.55,0.96,0.89),RooFit::Format("NEA",AutoPrecision(1)));
         // sigPdf->Write(sigPdf->GetName(), TObject::kOverwrite);
-        output << "\t" << bkg_fun.Data() << "\tsig:\tnpars = " << sig_npars << "\tchi^2 = " << frame_sig->chiSquare(sig_npars) << "\tprob = " << TMath::Prob(frame_sig->chiSquare(sig_npars)*sig_ndof, sig_ndof) << '\tfitting status = ' << fit_status << endl;
+        output << "\t" << bkg_fun.Data() << "\tsig:\tnpars = " << sig_npars << "\tchi^2 = " << frame_sig->chiSquare(sig_npars) << "\tprob = " << TMath::Prob(frame_sig->chiSquare(sig_npars)*sig_ndof, sig_ndof) << "\tfitting status = " << fit_status << endl;
         frame_sig->Draw();
         gPad->Print(Form("./test/sigPdf_shape_%s_cat%d_%s.pdf",channel.Data(),cat,bkg_fun.Data()));
         for (RooRealVar *p = (RooRealVar *)sigit->Next(); p != 0; p = (RooRealVar *)sigit->Next()) p->setConstant(kTRUE);
@@ -583,7 +614,7 @@ void SSTest_core_function(int cat = 0, int sig = 0, TString channel = "zero_to_o
         // hdata->Write(hdata->GetName(), TObject::kOverwrite);
         RooDataHist* ddata = new RooDataHist("data_bin","dataset with x", *CMS_hzg_mass, hdata);
 
-        // asimov dataset fit
+        // pesudo dataset fit
         RooAddPdf* model = new RooAddPdf("model","model",RooArgList(*sigPdf, *bkgPdf),RooArgList(nsig,nbkg));
         RooFitResult *model_fit;
         int data_npars, data_ndof;
@@ -598,17 +629,44 @@ void SSTest_core_function(int cat = 0, int sig = 0, TString channel = "zero_to_o
         pad2->Draw();
         pad1->cd();
 
-        // model_fit = model->chi2FitTo(*ddata,RooFit::Save(1),RooFit::Minimizer("Minuit2","minimize"),DataError(RooAbsData::SumW2)); //FIXME kTRUE or kFALSE
-        // fit_status = model_fit->status();
-        RooChi2Var chi2Fit("chi2", "chi2", *model, *ddata);
-        RooMinuit minuit(chi2Fit);
-        minuit.migrad();
-        minuit.hesse();  // Calculate the hesse matrix
-        fit_status = minuit.save()->status();
+        fit_status = -1;
+        tries = 0;
+        while((fit_status != 0) && (tries < 10)){
+          model_fit = model->chi2FitTo(*ddata,RooFit::Save(1),RooFit::Minimizer("Minuit2","minimize"),DataError(RooAbsData::SumW2)); //FIXME kTRUE or kFALSE
+          fit_status = model_fit->status();
+          data_npars = model_fit->floatParsFinal().getSize();
+          ss_mc = nsig.getVal();
+          output << "\t" << bkg_fun.Data() << "\tdata(MC):\tnpars = " << data_npars << "\tss = " << ss_mc << "\tfitting status = " << fit_status << endl;
+          tries++;
+        }
 
+        // fix the float parameters in model except nsig
+        floatPars = model->getParameters(*ddata)->selectByAttrib("Constant", false);
+        iter = floatPars->createIterator();
+        for (RooRealVar* var = (RooRealVar*)iter->Next(); var != nullptr; var = (RooRealVar*)iter->Next()) {
+          if (var->GetName() != TString("nsig")) {
+            var->setConstant(true);
+          }
+        }
+
+        // RooChi2Var chi2Fit("chi2", "chi2", *model, *ddata);
+        // RooMinuit minuit(chi2Fit);
+        // minuit.migrad();
+        // minuit.hesse();  // Calculate the hesse matrix
+        // fit_status = minuit.save()->status();
+        // data_npars = minuit.save()->floatParsFinal().getSize();
+
+        fit_status = -1;
+        tries = 0;
+        while((fit_status != 0) && (tries < 10)){
+          // model_fit = model->chi2FitTo(*ddata,RooFit::Save(1),RooFit::Minimizer("Minuit2","minimize"),DataError(RooAbsData::SumW2)); //FIXME kTRUE or kFALSE
+          model_fit = model->fitTo(*ddata,RooFit::Save(1),RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE)); //FIXME kTRUE or kFALSE
+          fit_status = model_fit->status();
+          tries++;
+        }
+
+        ss_mc = nsig.getVal();
         dmc = nsig.getError();
-        data_npars = minuit.save()->floatParsFinal().getSize();
-        // data_npars = model_fit->floatParsFinal().getSize();
         data_ndof = bin_size-data_npars;
 
         // if(ss < 0) frame_data->SetMinimum(ss);
@@ -617,13 +675,40 @@ void SSTest_core_function(int cat = 0, int sig = 0, TString channel = "zero_to_o
         model->plotOn(frame_data, Name("fit"));
         chi2 = frame_data->chiSquare(data_npars);
         prob = TMath::Prob(chi2*data_ndof, data_ndof);
-        output << "\t" << bkg_fun.Data() << "\tdata(MC):\tnpars = " << data_npars << "\tchi^2 = " << chi2 << ": " << chi2 << "\tprob = " << prob << '\tfitting status = ' << fit_status << endl;
+        output << "\t" << bkg_fun.Data() << "\tdata(MC):\tnpars = " << data_npars << "\tchi^2 = " << chi2 << ": " << chi2 << "\tprob = " << prob << "\tfitting status = " << fit_status << endl;
+        
+        // unfix the float parameters in model
+        iter = floatPars->createIterator();
+        for (RooRealVar* var = (RooRealVar*)iter->Next(); var != nullptr; var = (RooRealVar*)iter->Next()) {
+          var->setConstant(false);
+        }
 
-        model_fit = model->fitTo(*ddata,RooFit::Save(1),RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kFALSE)); //FIXME kTRUE or kFALSE
-        fit_status = model_fit->status();
+        fit_status = -1;
+        tries = 0;
+        while((fit_status != 0) && (tries < 10)){
+          model_fit = model->fitTo(*ddata,RooFit::Save(1),RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kFALSE)); //FIXME kTRUE or kFALSE
+          fit_status = model_fit->status();
+          data_npars = model_fit->floatParsFinal().getSize();
+          tries++;
+        }
+
+        // fix the float parameters in model except nsig
+        floatPars = model->getParameters(*ddata)->selectByAttrib("Constant", false);
+        iter = floatPars->createIterator();
+        for (RooRealVar* var = (RooRealVar*)iter->Next(); var != nullptr; var = (RooRealVar*)iter->Next()) {
+          if (var->GetName() != TString("nsig")) {
+            var->setConstant(true);
+          }
+        }
+
+        while((fit_status != 0) && (tries < 10)){
+          model_fit = model->fitTo(*ddata,RooFit::Save(1),RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kFALSE)); //FIXME kTRUE or kFALSE
+          fit_status = model_fit->status();
+          tries++;
+        }
+
         ss = nsig.getVal();
         dss = nsig.getError();
-        data_npars = model_fit->floatParsFinal().getSize();
         data_ndof = bin_size-data_npars;
         tot_err = sqrt(dss*dss+ss*ss);
         delta = abs(ss)-2*dmc;
@@ -640,7 +725,7 @@ void SSTest_core_function(int cat = 0, int sig = 0, TString channel = "zero_to_o
         RooCurve* nomSumCurve = (RooCurve*)frame_data->getObject(frame_data->numItems()-1);
         chi2 = frame_data->chiSquare(data_npars);
         prob = TMath::Prob(chi2*data_ndof, data_ndof);
-        model->plotOn(frame_data, Name("background"), Components(bkgPdf->GetName()), LineStyle(ELineStyle::kDashed), LineColor(kRed));
+        model->plotOn(frame_data, Name("background"), Components(bkgPdf->GetName()), LineStyle(ELineStyle::kDashed), LineColor(kGreen));
         RooCurve* nomBkgCurve = (RooCurve*)frame_data->getObject(frame_data->numItems()-1);
 
         model->SetName(Form("%s_model", bkg_fun.Data()));
@@ -656,8 +741,8 @@ void SSTest_core_function(int cat = 0, int sig = 0, TString channel = "zero_to_o
         RooCurve* nomSigCurve = (RooCurve*)frame_data->getObject(frame_data->numItems()-1);
 
         // model->Write(model->GetName(), TObject::kOverwrite);
-        output << "\t" << bkg_fun.Data() << "\tdata(Psu):\tnpars = " << data_npars << "\tchi^2 = " << chi2 << "\tprob = " << prob << '\tfitting status = ' << fit_status << endl;
-        output << "\t" << bkg_fun.Data() << "\tSS:\tnsig = " << ss << "\tdmc = " << dmc << "\tss_cor = " << ss_cor << "\tdss = " << dss << "\ttot_err = " << tot_err << "\tstatus = " << status.Data() << "\n" << endl;
+        output << "\t" << bkg_fun.Data() << "\tdata(Psu):\tnpars = " << data_npars << "\tchi^2 = " << chi2 << "\tprob = " << prob << "\tfitting status = " << fit_status << endl;
+        output << "\t" << bkg_fun.Data() << "\tSS:\tnsig = " << ss_mc << ":" << ss << "\tdmc = " << dmc << "\tss_cor = " << ss_cor << "\tdss = " << dss << "\ttot_err = " << tot_err << "\tstatus = " << status.Data() << "\n" << endl;
         // output << "\tnbkg = " << nbkg.getVal() << "\tnbkg_err = " << nbkg.getError() << "\n" << endl;
         TLegend *leg = new TLegend(0.6,0.65,0.88,0.88);
         leg->SetFillColor(0);

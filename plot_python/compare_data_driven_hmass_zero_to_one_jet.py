@@ -160,6 +160,8 @@ def draw(data_cr, zg_cr, ewkzg_cr, bkg_list, bounds):
     data_cr_hist, bin_edges = np.histogram(data_cr_mod["H_mass"], bins=80, weights=data_cr_mod["weight"], range=[100, 180])
     zg_cr_hist, bin_edges = np.histogram(zg_cr_mod["H_mass"], bins=80, weights=zg_cr_mod["weight"], range=[100, 180])
     ewkzg_cr_hist, bin_edges = np.histogram(ewkzg_cr_mod["H_mass"], bins=80, weights=ewkzg_cr_mod["weight"], range=[100, 180])
+    
+    cr_err_hist = (np.histogram(data_cr_mod["H_mass"], bins=80, weights=data_cr_mod["weight"]**2, range=[100, 180])[0] + np.histogram(zg_cr_mod["H_mass"], bins=80, weights=zg_cr_mod["weight"]**2, range=[100, 180])[0] + np.histogram(ewkzg_cr_mod["H_mass"], bins=80, weights=ewkzg_cr_mod["weight"]**2, range=[100, 180])[0]) ** 0.5
 
     # cr_hist = (data_cr_hist - zg_cr_hist)
     cr_hist = (data_cr_hist - zg_cr_hist - ewkzg_cr_hist)
@@ -167,10 +169,13 @@ def draw(data_cr, zg_cr, ewkzg_cr, bkg_list, bounds):
     plt.figure()
     bkg_hists = []
     bkg_sum = 0
+    bkg_err_hist = np.zeros(80)
     for bkg_cr in bkg_samples:
         bkg_cr_hist, bin_edges = np.histogram(bkg_cr["H_mass"], bins=80, weights=bkg_cr["weight"], range=[100, 180])
         bkg_hists.append(bkg_cr_hist)
+        bkg_err_hist += np.histogram(bkg_cr["H_mass"], bins=80, weights=bkg_cr["weight"]**2, range=[100, 180])[0]
         bkg_sum = bkg_sum + np.sum(bkg_cr_hist[np.where((bin_edges[1:]<120) | (bin_edges[:-1]>130))])
+    bkg_err_hist = bkg_err_hist ** 0.5
     
     data_hist, bin_edges = np.histogram(data_sr[(data_sr["H_mass"]<120) | (data_sr["H_mass"]>130)]["H_mass"], bins=80, weights=data_sr[(data_sr["H_mass"]<120) | (data_sr["H_mass"]>130)]["weight"], range=[100, 180])
     cr_side_band = cr_hist[np.where((bin_edges[1:]<120) | (bin_edges[:-1]>130))]
@@ -181,36 +186,40 @@ def draw(data_cr, zg_cr, ewkzg_cr, bkg_list, bounds):
 
     bkg_hist_sum = bkg_hists + [cr_hist*sf]
     ratio = (data_hist / np.sum(bkg_hist_sum, axis=0))
+    ratio_test = (data_hist - np.sum(bkg_hists, axis=0)) / cr_hist / sf
+    ratio_test_err = ((np.sqrt(data_hist) / cr_hist / sf)**2) ** 0.5# + (bkg_err_hist / cr_hist / sf)**2 + (cr_err_hist * (data_hist - np.sum(bkg_hists, axis=0)) / cr_hist**2 / sf**2)**2) ** 0.5
 
     # fit this ratio distribution with linear function
     from scipy.optimize import curve_fit
-    def linear(x, a, b, c):
-        return a*x**2 + b*x + c
+    def linear(x, a, b, c, d, e, f):
+        return a*x**5 + b*x**4 + c*x**3 + d*x**2 + e*x + f
     
     x = bin_edges[:-1]+np.diff(bin_edges)/2
-    y = ratio[np.where((x<120) | (x>130))]
-    yerr = 1/data_hist[np.where((x<120) | (x>130))]
+    y = ratio_test[np.where((x<120) | (x>130))]
+    # yerr = 1/(data_hist - np.sum(bkg_hists, axis=0))[np.where((x<120) | (x>130))]
+    yerr = ratio_test_err[np.where((x<120) | (x>130))]
     x = x[np.where((x<120) | (x>130))]
     popt, pcov = curve_fit(linear, x-100, y, sigma=yerr, absolute_sigma=True)
     perr = np.sqrt(np.diag(pcov))
     print(popt, perr)
 
     # correct the bkg_hist_sum and ratio with the fitted function
-    bkg_hist_sum = [bkg_hist_sum[i] * linear(bin_edges[:-1]+np.diff(bin_edges)/2-100, *popt) for i in range(len(bkg_hist_sum))]
+    # bkg_hist_sum = [bkg_hist_sum[i] * linear(bin_edges[:-1]+np.diff(bin_edges)/2-100, *popt) for i in range(len(bkg_hist_sum))]
+    bkg_hist_sum = [cr_hist*sf*linear(bin_edges[:-1]+np.diff(bin_edges)/2-100, *popt)] + bkg_hists
 
     # Add a ratio plot in the lower panel
     fig, [ax1, ax2, ax3] = plt.subplots(3, 1, gridspec_kw={"height_ratios": [4, 1, 1], "hspace": 0}, sharex='col')
 
     ax1.set_title(f"Data vs Bkg.: {bounds[0]:.2f} < BDT < {bounds[1]:.2f}") 
-    hep.histplot(bkg_hist_sum, bins=bin_edges, label=bkg_list+["Fake photon"], stack=True, histtype="fill", ax=ax1) 
+    hep.histplot(bkg_hist_sum, bins=bin_edges, label=["Fake photon"]+bkg_list, stack=True, histtype="fill", ax=ax1) 
     ax1.errorbar(bin_edges[:-1]+np.diff(bin_edges)/2, data_hist, fmt='o', label="Data", yerr=np.sqrt(data_hist), color='k')
-    ax1.legend(ncol=2, fontsize=16)
+    ax1.legend(ncol=1, fontsize=16)
     ax1.set_xlim(100, 180)
     ax1.grid()
     ax1.label_outer()
 
     ax2.errorbar(bin_edges[:-1]+np.diff(bin_edges)/2, ratio, yerr=np.sqrt(data_hist)/np.sum(bkg_hist_sum), fmt='o')
-    ax2.plot(bin_edges[:-1]+np.diff(bin_edges)/2, linear(bin_edges[:-1]+np.diff(bin_edges)/2-100, *popt), 'r--')
+    # ax2.plot(bin_edges[:-1]+np.diff(bin_edges)/2, linear(bin_edges[:-1]+np.diff(bin_edges)/2-100, *popt)+ratio-ratio_test, 'r--')
     ax2.text(103, 1.45, "pre-fit")
     ax2.axhline(y=1, color='k', linestyle='--')
     ax2.set_ylim(0.2, 1.8)
@@ -232,6 +241,19 @@ def draw(data_cr, zg_cr, ewkzg_cr, bkg_list, bounds):
 
     plt.tight_layout()
     plt.savefig(f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/01J/compare_data_driven_bkg_{bounds[0]}_{bounds[1]}.png")
+    plt.clf()
+    
+    # plt.errorbar(bin_edges[:-1]+np.diff(bin_edges)/2, ratio_test, yerr=np.sqrt(data_hist-np.sum(bkg_hists, axis=0))/cr_hist/sf, fmt='o', label="Data", color='k')
+    plt.errorbar(x, y, yerr=yerr, fmt='o', label="Data", color='k')
+    plt.plot(bin_edges[:-1]+np.diff(bin_edges)/2, linear(bin_edges[:-1]+np.diff(bin_edges)/2-100, *popt), 'r--', label="Fit")
+    plt.axhline(y=1, color='k', linestyle='--')
+    plt.legend()
+    plt.ylim(-3, 4)
+    plt.xlim(100, 180)
+    plt.xlabel("Higgs Mass")
+    plt.ylabel("Dat. / Fake Bkg.")
+    plt.grid()
+    plt.savefig(f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/01J/compare_data_driven_bkg_fit_{bounds[0]}_{bounds[1]}.png")
 
 # Plot
 for i in range(0, len(boundaries)-1):

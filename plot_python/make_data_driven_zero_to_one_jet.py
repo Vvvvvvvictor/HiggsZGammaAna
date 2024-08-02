@@ -43,9 +43,9 @@ print(boundaries)
 
 
 bkg_list = ["ZGToLLG", "ZG2JToG2L2J"]#, "EWKZ2J", "ZG2JToG2L2J", "WGToLNuG", "TT", "TTGJets", "TGJets", "WW", "WZ", "ZZ", "ttZJets", "ttWJets"]
-def apply(data_cr, zg_cr, ewkzg_cr, bkg_list, bounds):
-    data_cr, zg_cr = data_cr[(data_cr["bdt_score"]>bounds[0]) & (data_cr["bdt_score"]<bounds[1])], zg_cr[(zg_cr["bdt_score"]>bounds[0]) & (zg_cr["bdt_score"]<bounds[1])]
-    ewkzg_cr = ewkzg_cr[(ewkzg_cr["bdt_score"]>bounds[0]) & (ewkzg_cr["bdt_score"]<bounds[1])]
+def apply(in_data_cr, in_zg_cr, in_ewkzg_cr, bkg_list, bounds):
+    data_cr, zg_cr = in_data_cr[(in_data_cr["bdt_score"]>bounds[0]) & (in_data_cr["bdt_score"]<bounds[1])], in_zg_cr[(in_zg_cr["bdt_score"]>bounds[0]) & (in_zg_cr["bdt_score"]<bounds[1])]
+    ewkzg_cr = in_ewkzg_cr[(in_ewkzg_cr["bdt_score"]>bounds[0]) & (in_ewkzg_cr["bdt_score"]<bounds[1])]
     
     data_gpt_hist, bin_edges = np.histogram(data_cr["Z_pt"], bins=100, weights=data_cr["weight"], range=[0, 100])
     data_gpt_hist[-1] += np.sum(data_cr[data_cr["Z_pt"] > 100]["weight"])
@@ -86,6 +86,8 @@ def apply(data_cr, zg_cr, ewkzg_cr, bkg_list, bounds):
     data_cr_hist, bin_edges = np.histogram(data_cr_mod["H_mass"], bins=80, weights=data_cr_mod["weight"], range=[100, 180])
     zg_cr_hist, bin_edges = np.histogram(zg_cr_mod["H_mass"], bins=80, weights=zg_cr_mod["weight"], range=[100, 180])
     ewkzg_cr_hist, bin_edges = np.histogram(ewkzg_cr_mod["H_mass"], bins=80, weights=ewkzg_cr_mod["weight"], range=[100, 180])
+   
+    cr_err_hist = (np.histogram(data_cr_mod["H_mass"], bins=80, weights=data_cr_mod["weight"]**2, range=[100, 180])[0] + np.histogram(zg_cr_mod["H_mass"], bins=80, weights=zg_cr_mod["weight"]**2, range=[100, 180])[0] + np.histogram(ewkzg_cr_mod["H_mass"], bins=80, weights=ewkzg_cr_mod["weight"]**2, range=[100, 180])[0]) ** 0.5
 
     # cr_hist = (data_cr_hist - zg_cr_hist)
     cr_hist = (data_cr_hist - zg_cr_hist - ewkzg_cr_hist)
@@ -93,37 +95,50 @@ def apply(data_cr, zg_cr, ewkzg_cr, bkg_list, bounds):
     plt.figure()
     bkg_hists = []
     bkg_sum = 0
+    bkg_err_hist = np.zeros(80)
     for bkg_cr in bkg_samples:
         bkg_cr_hist, bin_edges = np.histogram(bkg_cr["H_mass"], bins=80, weights=bkg_cr["weight"], range=[100, 180])
         bkg_hists.append(bkg_cr_hist)
+        bkg_err_hist += np.histogram(bkg_cr["H_mass"], bins=80, weights=bkg_cr["weight"]**2, range=[100, 180])[0]
         bkg_sum = bkg_sum + np.sum(bkg_cr_hist[np.where((bin_edges[1:]<120) | (bin_edges[:-1]>130))])
+    bkg_err_hist = bkg_err_hist ** 0.5
     
     data_hist, bin_edges = np.histogram(data_sr[(data_sr["H_mass"]<120) | (data_sr["H_mass"]>130)]["H_mass"], bins=80, weights=data_sr[(data_sr["H_mass"]<120) | (data_sr["H_mass"]>130)]["weight"], range=[100, 180])
     cr_side_band = cr_hist[np.where((bin_edges[1:]<120) | (bin_edges[:-1]>130))]
     sf = (np.sum(data_hist)-bkg_sum)/np.sum(cr_side_band)
+    # print(np.sum(data_hist)-bkg_sum, np.sum(cr_side_band), sf)
+  
+    # print(cr_hist)
 
     bkg_hist_sum = bkg_hists + [cr_hist*sf]
     ratio = (data_hist / np.sum(bkg_hist_sum, axis=0))
+    ratio_test = (data_hist - np.sum(bkg_hists, axis=0)) / cr_hist / sf
+    ratio_test_err = ((np.sqrt(data_hist) / cr_hist / sf)**2) ** 0.5# + (bkg_err_hist / cr_hist / sf)**2 + (cr_err_hist * (data_hist - np.sum(bkg_hists, axis=0)) / cr_hist**2 / sf**2)**2) ** 0.5
 
     # fit this ratio distribution with linear function
     from scipy.optimize import curve_fit
-    def linear(x, a, b, c):
-        return a*x**2 + b*x + c
+    def linear(x, a, b, c, d, e, f):
+        return a*x**5 + b*x**4 + c*x**3 + d*x**2 + e*x + f
     
     x = bin_edges[:-1]+np.diff(bin_edges)/2
-    y = ratio[np.where((x<120) | (x>130))]
-    yerr = 1/data_hist[np.where((x<120) | (x>130))]
+    y = ratio_test[np.where((x<120) | (x>130))]
+    # yerr = 1/(data_hist - np.sum(bkg_hists, axis=0))[np.where((x<120) | (x>130))]
+    yerr = ratio_test_err[np.where((x<120) | (x>130))]
     x = x[np.where((x<120) | (x>130))]
-    popt, pcov = curve_fit(linear, x-100, y, sigma=yerr, absolute_sigma=True)
+    popt, pcov = curve_fit(linear, x-100, y, sigma=yerr)
     perr = np.sqrt(np.diag(pcov))
     print(popt, perr)
 
     # correct the bkg_hist_sum and ratio with the fitted function
-    bkg_hist_sum = [bkg_hist_sum[i] * linear(bin_edges[:-1]+np.diff(bin_edges)/2-100, *popt) for i in range(len(bkg_hist_sum))]
+    # bkg_hist_sum = [bkg_hist_sum[i] * linear(bin_edges[:-1]+np.diff(bin_edges)/2-100, *popt) for i in range(len(bkg_hist_sum))]
+    # bkg_hist_sum = bkg_hists + [cr_hist*sf*linear(bin_edges[:-1]+np.diff(bin_edges)/2-100, *popt)]
 
-    data_cr['weight'] = data_cr['weight'] * sf * linear(data_cr["H_mass"], *popt)
-    zg_cr['weight'] = zg_cr['weight'] * sf * linear(zg_cr["H_mass"], *popt)
-    ewkzg_cr['weight'] = ewkzg_cr['weight'] * sf * linear(ewkzg_cr["H_mass"], *popt)
+    data_cr['weight'] = data_cr['weight'] * sf * linear(data_cr["H_mass"]-100, *popt)
+    data_cr['tag'] = np.zeros(len(data_cr))
+    zg_cr['weight'] = zg_cr['weight'] * sf * linear(zg_cr["H_mass"]-100, *popt) * -1
+    zg_cr['tag'] = np.ones(len(zg_cr))
+    ewkzg_cr['weight'] = ewkzg_cr['weight'] * sf * linear(ewkzg_cr["H_mass"]-100, *popt) * -1
+    ewkzg_cr['tag'] = np.ones(len(ewkzg_cr)) * 2
 
     output = pd.concat([data_cr, zg_cr, ewkzg_cr])
 
