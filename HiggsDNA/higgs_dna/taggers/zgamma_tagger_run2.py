@@ -224,12 +224,17 @@ class ZGammaTaggerRun2(Tagger):
             name = "SelectedElectron",
             tagger = self
         )
-
+        
         electrons = awkward_utils.add_field(
             events = events,
             name = "SelectedElectron",
             data = events.Electron[electron_cut]
         )
+        
+        # generate the index in the original array and add to electrons
+        arr = awkward.local_index(events.Electron["pt"], axis=1)[electron_cut]
+        electron_idx = awkward.mask(arr, awkward.num(arr) > 0)
+        awkward_utils.add_field(events = electrons, name = "Idx", data = electron_idx)
 
         # Muons
         muon_cut = lepton_selections.select_muons(
@@ -250,6 +255,7 @@ class ZGammaTaggerRun2(Tagger):
         # Photons
         photon_selection = self.select_photons(
                 photons = events.Photon,
+                electrons = electrons,
                 rho = rho,
                 options = self.options["photons"]
         )
@@ -257,12 +263,9 @@ class ZGammaTaggerRun2(Tagger):
         photons = events.Photon[photon_selection]
         
         # lepton-photon overlap removal 
-        clean_photon_mask = object_selections.delta_R(photons, muons, 0.4) & object_selections.delta_R(photons, electrons, 0.4)
+        clean_photon_mask = object_selections.delta_R(photons, muons, 0.3) & object_selections.delta_R(photons, electrons, 0.3)
         photons = photons[clean_photon_mask]
         
-        # clean_elePhoton_mask = (photons.electronIdx == -1) # FIXME: this is a temporary fixuy78
-        
-
         # Jets
         jet_cut = jet_selections.select_jets(
             jets = events.Jet,
@@ -775,7 +778,7 @@ class ZGammaTaggerRun2(Tagger):
         return zgammas 
         
 
-    def select_photons(self, photons, rho, options):
+    def select_photons(self, photons, electrons, rho, options):
         """
         Enforces all photon cuts that are commmon to both
         leading and subleading photons in the diphoton preselection.
@@ -800,17 +803,41 @@ class ZGammaTaggerRun2(Tagger):
         # eta_cut = ((photons.isScEtaEB & (photons.mvaID > options["mvaID_barrel"])) | (photons.isScEtaEE & (photons.mvaID > options["mvaID_endcap"])))
 
         # electron veto
-        e_veto_cut = photons.electronVeto > options["e_veto"]
+        e_veto_cut = (photons.electronVeto > options["e_veto"])
+        print(e_veto_cut)
+        
+        results = []
+        for subarr1, subarr2 in zip(photons.electronIdx, electrons.Idx):
+            if subarr2 is None:
+                subresults = [[False]] * len(subarr1)
+            else:
+                subresults = []
+                # print(subarr1, subarr2)
+                for item in subarr1:
+                    subresult = item == subarr2
+                    subresults.append(subresult)
+            # print(awkward.sum(awkward.Array(subresults), axis=1) == 0)
+            try:
+                results.append(awkward.sum(awkward.Array(subresults), axis=1) == 0)
+            except:
+                results.append([])
+                # print(subarr1, subarr2, awkward.Array(subresults))
+
+        eg_overlap_cut = awkward.Array(results)
+        # print(eg_overlap_cut)
+        
+        # eg_overlap_cut = awkward.Array([awkward.Array([awkward.sum([item == subarr2]) for item in subarr1]) == 0 for subarr1, subarr2 in zip(photons.electronIdx, electrons.Idx)])
+
 
         # use_central_nano = options["use_central_nano"] # indicates whether we are using central nanoAOD (with some branches that are necessary for full diphoton preselection missing) or custom nanoAOD (with these branches added)
 
 
-        all_cuts = pt_cut & eta_cut & id_cut & e_veto_cut
+        all_cuts = pt_cut & eta_cut & id_cut & e_veto_cut & eg_overlap_cut
         # all_cuts = pt_cut & eta_cut # bing for CR selection
 
         self.register_cuts(
-                names = ["pt", "eta", "id", "e_veto", "all"],
-                results = [pt_cut, eta_cut, id_cut, e_veto_cut, all_cuts],
+                names = ["pt", "eta", "id", "e_veto", "ele_pho_overlap", "all"],
+                results = [pt_cut, eta_cut, id_cut, e_veto_cut, eg_overlap_cut, all_cuts],
                 cut_type = "photon"
         )
 

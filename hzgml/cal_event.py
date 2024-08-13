@@ -5,7 +5,7 @@ from pdb import set_trace
 
 path = "/eos/home-j/jiehan/root/outputs/zero_to_one_jet"
 # filename = "data_driven_bkg"
-# tree = "test"
+# tree = "zero_to_one_jet"
 # filename = "DYJets_01J"
 # tree = "zero_to_one_jet"
 filenames = ["DYJets_01J", "ZGToLLG", "ZG2JToG2L2J"]

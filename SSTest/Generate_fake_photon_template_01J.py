@@ -8,14 +8,14 @@ from pdb import set_trace
 log_path = "/eos/home-j/jiehan/root/outputs/"
 data_driven_path = "/eos/home-j/jiehan/data_for_norm_float_v1/output/"
 true_bkg_list = ["ZGToLLG", "ZG2JToG2L2J"]
-data_driven_bkg_list = ["Data", "ZGToLLG", "ZG2JToG2L2J"]
+data_driven_bkg_list = ["data_driven_bkg"]
 sig_list = ["ggH", "VBF", "WminusH", "WplusH", "ZH", "ttH"]
 data_list = ["Data"]
 channels = ["zero_to_one_jet"]
 com_sel = []
 target_path = "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/bkg_sig_template.root"
 
-xmin, xmax, nbin = 100, 180, 80
+xmin, xmax, nbin = 100, 180, 320
 f = ROOT.TFile(target_path, "RECREATE")
 
 for chan in channels:
@@ -78,48 +78,16 @@ for chan in channels:
         fake_bkg_hist.Sumw2()
         true_bkg_hist.Sumw2()
         
-        true_bkg_sb = 0
         for i, bkg in enumerate(true_bkg_list):
             arrays = ut.ReadFile(log_path+"{}/{}.root".format(chan, bkg), tree=chan, selections = selections)
-            true_bkg_sb += np.sum(arrays.query("H_mass<122 | H_mass>128")["weight"])
             true_bkg_hist, true_yield_h = ut.AddHist(arrays, "H_mass", true_bkg_hist)
             
-        fake_bkg_sb = 0
         for i, bkg in enumerate(data_driven_bkg_list):
-            arrays = ut.ReadFile(data_driven_path+"{}/{}_fake.root".format(chan, bkg), tree=chan, selections = selections)
-            if bkg != "Data":
-                arrays["weight"] = arrays["weight"] * (-1)
-            fake_bkg_sb += np.sum(arrays.query("H_mass<122 | H_mass>128")["weight"])
+            arrays = ut.ReadFile(log_path+"{}/{}.root".format(chan, bkg), tree=chan, selections = selections)
             fake_bkg_hist, fake_yield_h = ut.AddHist(arrays, "H_mass", fake_bkg_hist)
-        fake_bkg_hist.Scale((data_yield_h - true_bkg_sb)/fake_bkg_sb)
         
-        bkg_hist = true_bkg_hist.Clone()
-        bkg_hist.Add(fake_bkg_hist)
-
-        bkg_hist_py = np.zeros(nbin)
-        for i in range(1, nbin + 1):
-            bkg_hist_py[i-1] = bkg_hist.GetBinContent(i)
-
-        ratio = data_hist_py / bkg_hist_py
-
-        from scipy.optimize import curve_fit
-        def linear(x, a, b, c):
-            return a*x**2 + b*x + c
-        
-        bin_edges = np.linspace(xmin, xmax, nbin+1)
-        x = bin_edges[:-1]+np.diff(bin_edges)/2
-        mask = np.where((x<122) | (x>128))
-        y = ratio[mask]
-        yerr = 1/data_hist_py[mask]
-        x = x[mask]
-        popt, pcov = curve_fit(linear, x-100, y, sigma=yerr, absolute_sigma=True)
-        perr = np.sqrt(np.diag(pcov))
-        print(popt, perr)
-
-        x = bin_edges[:-1]+np.diff(bin_edges)/2
-        bkg_hist_py_mod = bkg_hist_py * linear(x-100, *popt)
-        for i in range(1, nbin + 1):
-            bkg_hist.SetBinContent(i, bkg_hist_py_mod[i-1])
+        bkg_hist = fake_bkg_hist.Clone()
+        bkg_hist.Add(true_bkg_hist)
             
         bkg_hist.Write(name)
         
@@ -132,9 +100,7 @@ for chan in channels:
         fake_bkg_hist = ROOT.TH1D(name,name, nbin, xmin, xmax)
         fake_bkg_hist.Sumw2()
         for i, bkg in enumerate(data_driven_bkg_list):
-            arrays = ut.ReadFile(data_driven_path+"{}/{}_fake.root".format(chan, bkg), tree=chan, selections = selections + ["gamma_relpt>0.3"])
-            if bkg != "Data":
-                arrays["weight"] = arrays["weight"] * (-1)
+            arrays = ut.ReadFile(log_path+"{}/{}.root".format(chan, bkg), tree=chan, selections = selections + ["gamma_relpt>0.3"])
             fake_bkg_hist, fake_yield_h = ut.AddHist(arrays, "H_mass", fake_bkg_hist)
         fake_bkg_hist.Scale(1./fake_bkg_hist.Integral())
         fake_bkg_hist.Write(name)
@@ -143,7 +109,7 @@ for chan in channels:
         fake_bkg_hist = ROOT.TH1D(name,name, nbin, xmin, xmax)
         fake_bkg_hist.Sumw2()
         for i, bkg in enumerate(data_driven_bkg_list):
-            arrays = ut.ReadFile(data_driven_path+"{}/{}_fake.root".format(chan, bkg), tree=chan, selections = selections + ["gamma_relpt<=0.3"])
+            arrays = ut.ReadFile(log_path+"{}/{}.root".format(chan, bkg), tree=chan, selections = selections + ["gamma_relpt<=0.3"])
             if bkg != "Data":
                 arrays["weight"] = arrays["weight"] * (-1)
             fake_bkg_hist, fake_yield_h = ut.AddHist(arrays, "H_mass", fake_bkg_hist)

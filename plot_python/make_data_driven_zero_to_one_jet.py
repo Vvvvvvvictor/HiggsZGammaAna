@@ -133,11 +133,14 @@ def apply(in_data_cr, in_zg_cr, in_ewkzg_cr, bkg_list, bounds):
     # bkg_hist_sum = [bkg_hist_sum[i] * linear(bin_edges[:-1]+np.diff(bin_edges)/2-100, *popt) for i in range(len(bkg_hist_sum))]
     # bkg_hist_sum = bkg_hists + [cr_hist*sf*linear(bin_edges[:-1]+np.diff(bin_edges)/2-100, *popt)]
 
-    data_cr['weight'] = data_cr['weight'] * sf * linear(data_cr["H_mass"]-100, *popt)
+    data_cr['weight_cor'] = data_cr['weight'] * sf * linear(data_cr["H_mass"]-100, *popt)
+    data_cr['weight_sf'] = data_cr['weight'] * sf
     data_cr['tag'] = np.zeros(len(data_cr))
-    zg_cr['weight'] = zg_cr['weight'] * sf * linear(zg_cr["H_mass"]-100, *popt) * -1
+    zg_cr['weight_cor'] = zg_cr['weight'] * sf * linear(zg_cr["H_mass"]-100, *popt) * -1
+    zg_cr['weight_sf'] = zg_cr['weight'] * sf * -1
     zg_cr['tag'] = np.ones(len(zg_cr))
-    ewkzg_cr['weight'] = ewkzg_cr['weight'] * sf * linear(ewkzg_cr["H_mass"]-100, *popt) * -1
+    ewkzg_cr['weight_cor'] = ewkzg_cr['weight'] * sf * linear(ewkzg_cr["H_mass"]-100, *popt) * -1
+    ewkzg_cr['weight_sf'] = ewkzg_cr['weight'] * sf * -1
     ewkzg_cr['tag'] = np.ones(len(ewkzg_cr)) * 2
 
     output = pd.concat([data_cr, zg_cr, ewkzg_cr])
@@ -145,9 +148,9 @@ def apply(in_data_cr, in_zg_cr, in_ewkzg_cr, bkg_list, bounds):
     return output
 
 # Apply
-with uproot.recreate("/eos/home-j/jiehan/root/outputs/zero_to_one_jet/data_driven_bkg.root") as output_file:
+with uproot.recreate("/eos/home-j/jiehan/root/outputs/zero_to_one_jet/data_driven_bkg_v2.root") as output_file:
     output_dataframe = pd.DataFrame()
     for i in range(0, len(boundaries)-1):
         partial_output = apply(data_cr, zg_cr, ewkzg_cr, bkg_list, [boundaries[i], boundaries[i+1]])
         output_dataframe = pd.concat([output_dataframe, partial_output])
-    output_file['test'] = output_dataframe
+    output_file['zero_to_one_jet'] = output_dataframe

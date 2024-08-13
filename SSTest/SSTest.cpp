@@ -47,12 +47,12 @@ using namespace std;
 
 void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_fun = "bern2")
 {
-    double mgg_low=105, mgg_high=170, bin_size=65;
+    double mgg_low=105, mgg_high=170, bin_size=260;
     if (channel.EqualTo("two_jet") & (cat == 3))
     {
         mgg_low = 100;
         mgg_high = 150;
-        bin_size = 50;
+        bin_size = 200;
     }
     //background MC template
     TH1F* hbkg;
@@ -497,7 +497,7 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     if (delta > 0.2 * dss) status = "Fail";
 
     data_npars = model_fit->floatParsFinal().getSize();
-    data_ndof = 65-data_npars;
+    data_ndof = bin_size-data_npars;
 
     // if(ss < 0) frame_data->SetMinimum(ss);
     // ddata->plotOn(frame_data, Name("data"), DataError(RooAbsData::SumW2));
@@ -508,7 +508,7 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
 
     // RooHist *plotdata = (RooHist*)frame_data->getObject(frame_data->numItems()-1);
     // model->plotOn(frame_data, Name("signal"), Components(sigPdf->GetName()), LineStyle(ELineStyle::kDashed), LineColor(kGreen));
-    model->plotOn(frame_data, Name("background"), Components(bkg_model->GetName()), LineStyle(ELineStyle::kDashed), LineColor(kRed));
+    model->plotOn(frame_data, Name("background"), Components(bkg_model->GetName()), LineStyle(ELineStyle::kDashed), LineColor(kGreen));
 
     // if(prob<0.01) status="Fail";
     model->SetName(Form("%s_model", bkg_fun.Data()));
@@ -566,7 +566,7 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     hdummy->GetYaxis()->SetNdivisions(808);
 
     TLine *line3 = new TLine(mgg_low,0.,mgg_high,0.);
-    line3->SetLineColor(kBlue);
+    line3->SetLineColor(kRed);
     //line3->SetLineStyle(kDashed);
     line3->SetLineWidth(5.0);
     line3->Draw();

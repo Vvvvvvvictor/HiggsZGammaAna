@@ -191,8 +191,8 @@ def draw(data_cr, zg_cr, ewkzg_cr, bkg_list, bounds):
 
     # fit this ratio distribution with linear function
     from scipy.optimize import curve_fit
-    def linear(x, a, b, c, d, e, f):
-        return a*x**5 + b*x**4 + c*x**3 + d*x**2 + e*x + f
+    def linear(x, a, b, c, d):
+        return a + b*x + c*x**2 + d*x**3
     
     x = bin_edges[:-1]+np.diff(bin_edges)/2
     y = ratio_test[np.where((x<120) | (x>130))]

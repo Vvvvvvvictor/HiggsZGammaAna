@@ -11,7 +11,7 @@ if [ -f "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/outputs/"$chan
 rm "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/outputs/"$chan"_"$cat"_"$sig"xsig.txt";
 touch "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/outputs/"$chan"_"$cat"_"$sig"xsig.txt";
 fi
-# for fun in "bern2" "bern3" "bern4" "bern5" #"gauxexp1" "gauxexp3" "gauxexp5" "gauxpow1" "gauxpow3" "gauxpow5" "gauxlau1" "gauxlau2" "gauxlau3" "gauxlau4" "gauxlau5"
+# for fun in "bern2" "bern3" "bern4" "bern5" "gauxexp1" "gauxexp3" "gauxexp5" "gauxpow1" "gauxpow3" "gauxpow5" "gauxlau1" "gauxlau2" "gauxlau3" "gauxlau4" "gauxlau5"
 # # fun="gauxexp5" 
 # do
 # root -l -q '/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/SSTest.cpp('$cat', '$sig', "'$chan'", "'$fun'")';
