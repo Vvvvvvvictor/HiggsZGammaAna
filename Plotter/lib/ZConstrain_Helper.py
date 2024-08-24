@@ -368,8 +368,8 @@ def MakeZReFitModel(PTRECO1_lep, PTErr1_lep, Theta1_lep, Phi1_lep, M1, PTRECO2_l
     #lep
     pTRECO1_lep = RooRealVar("pTRECO1_lep", "pTRECO1_lep", PTRECO1_lep, 5., 500.)
     pTRECO2_lep = RooRealVar("pTRECO2_lep", "pTRECO2_lep", PTRECO2_lep, 5., 500.)
-    pTMean1_lep = RooRealVar("pTMean1_lep", "pTMean1_lep", PTRECO1_lep, max(5.0, PTRECO1_lep-2*PTErr1_lep), PTRECO1_lep+2*PTErr1_lep)
-    pTMean2_lep = RooRealVar("pTMean2_lep", "pTMean2_lep", PTRECO2_lep, max(5.0, PTRECO2_lep-2*PTErr2_lep), PTRECO2_lep+2*PTErr2_lep)
+    pTMean1_lep = RooRealVar("pTMean1_lep", "pTMean1_lep", PTRECO1_lep, max(5.0, PTRECO1_lep-3*PTErr1_lep), PTRECO1_lep+3*PTErr1_lep)
+    pTMean2_lep = RooRealVar("pTMean2_lep", "pTMean2_lep", PTRECO2_lep, max(5.0, PTRECO2_lep-3*PTErr2_lep), PTRECO2_lep+3*PTErr2_lep)
     pTSigma1_lep = RooRealVar("pTSigma1_lep", "pTSigma1_lep", PTErr1_lep)
     pTSigma2_lep = RooRealVar("pTSigma2_lep", "pTSigma2_lep", PTErr2_lep)
     theta1_lep = RooRealVar("theta1_lep", "theta1_lep", Theta1_lep)
@@ -382,7 +382,7 @@ def MakeZReFitModel(PTRECO1_lep, PTErr1_lep, Theta1_lep, Phi1_lep, M1, PTRECO2_l
 
     # gamma
     pTRECO1_gamma = RooRealVar("pTRECO1_gamma", "pTRECO1_gamma", PTRECO1_gamma, 5., 500.)
-    pTMean1_gamma = RooRealVar("pTMean1_gamma", "pTMean1_gamma", PTRECO1_gamma, max(0.5, PTRECO1_gamma-2*PTErr1_gamma), PTRECO1_gamma+2*PTErr1_gamma)
+    pTMean1_gamma = RooRealVar("pTMean1_gamma", "pTMean1_gamma", PTRECO1_gamma, max(0.5, PTRECO1_gamma-3*PTErr1_gamma), PTRECO1_gamma+3*PTErr1_gamma)
     pTSigma1_gamma = RooRealVar("pTSigma1_gamma", "pTSigma1_gamma", PTErr1_gamma)
     theta1_gamma = RooRealVar("theta1_gamma", "theta1_gamma", Theta1_gamma)
     phi1_gamma = RooRealVar("phi1_gamma", "phi1_gamma", Phi1_gamma)
@@ -436,13 +436,16 @@ def MakeZReFitModel(PTRECO1_lep, PTErr1_lep, Theta1_lep, Phi1_lep, M1, PTRECO2_l
     alphaCB = RooRealVar("alphaCB","",truelineshape_params["alphaCB"])
     nCB = RooRealVar("nCB","",truelineshape_params["nCB"])
     meanGauss1 = RooRealVar("meanGauss1","",truelineshape_params["meanGauss1"])
-    sigmaGauss1 = RooRealVar("sigmaGauss1","",truelineshape_params["sigmaGauss1"], 0.0001, 1000.)
+    #sigmaGauss1 = RooRealVar("sigmaGauss1","",truelineshape_params["sigmaGauss1"], 0.0001, 1000.)
+    sigmaGauss1 = RooRealVar("sigmaGauss1","",truelineshape_params["sigmaGauss1"])
     f1 = RooRealVar("f1","",truelineshape_params["f1"])
     meanGauss2 = RooRealVar("meanGauss2","",truelineshape_params["meanGauss2"])
-    sigmaGauss2 = RooRealVar("sigmaGauss2","",truelineshape_params["sigmaGauss2"], 0.0001, 1000.)
+    #sigmaGauss2 = RooRealVar("sigmaGauss2","",truelineshape_params["sigmaGauss2"], 0.0001, 1000.)
+    sigmaGauss2 = RooRealVar("sigmaGauss2","",truelineshape_params["sigmaGauss2"])
     f2 = RooRealVar("f2","",truelineshape_params["f2"])
     meanGauss3 = RooRealVar("meanGauss3","",truelineshape_params["meanGauss3"])
-    sigmaGauss3 = RooRealVar("sigmaGauss3","",truelineshape_params["sigmaGauss3"], 0.0001, 1000.)
+    #sigmaGauss3 = RooRealVar("sigmaGauss3","",truelineshape_params["sigmaGauss3"], 0.0001, 1000.)
+    sigmaGauss3 = RooRealVar("sigmaGauss3","",truelineshape_params["sigmaGauss3"])
     f3 = RooRealVar("f3","",truelineshape_params["f3"])
 
     singleCB = RooCBShape("singleCB", "", mZ, meanCB, sigmaCB, alphaCB, nCB)
@@ -472,13 +475,21 @@ def MakeZReFitModel(PTRECO1_lep, PTErr1_lep, Theta1_lep, Phi1_lep, M1, PTRECO2_l
     sigmaGauss3.setConstant(kTRUE)
     f3.setConstant(kTRUE)
 
-    model = RooProdPdf("model","",RooArgList(gauss1_lep, gauss2_lep, CBplusGaussplusGaussplusGauss))
+    
+    #model = RooProdPdf("model","",RooArgList(gauss1_lep, gauss2_lep, CBplusGaussplusGaussplusGauss))
+
+    if n_fsr == 1:
+        model = RooProdPdf("model","",RooArgList(gauss1_lep, gauss2_lep, gauss1_gamma, CBplusGaussplusGaussplusGauss))
+        rastmp = RooArgSet(pTRECO1_lep, pTRECO2_lep, pTRECO1_gamma)
+    else:
+        model = RooProdPdf("model","",RooArgList(gauss1_lep, gauss2_lep, CBplusGaussplusGaussplusGauss))
+        rastmp = RooArgSet(pTRECO1_lep, pTRECO2_lep)
 
     #print("DEBUG: MakeZReFitModel: model float parameters: ", E1_lep, E2_lep, p1v3D2, p1D2)
     #print("DEBUG: MakeZReFitModel: model float parameters: ", sigmaGauss1, pTRECO1_lep, pTMean1_lep, pTSigma1_lep, pTMean2_lep, pTSigma2_lep, mZ)
 
     # make fit
-    rastmp = RooArgSet(pTRECO1_lep, pTRECO2_lep)
+    #rastmp = RooArgSet(pTRECO1_lep, pTRECO2_lep)
 
     pTs = RooDataSet("pTs","pTs", rastmp)
     pTs.add(rastmp)
@@ -487,12 +498,21 @@ def MakeZReFitModel(PTRECO1_lep, PTErr1_lep, Theta1_lep, Phi1_lep, M1, PTRECO2_l
     if n_fsr == 1:
         r = model.fitTo(pTs, RooFit.Save(),RooFit.Constrain(RooArgSet(pTMean1_lep, pTMean2_lep, pTMean1_gamma)),RooFit.PrintLevel(-1),RooFit.PrintEvalErrors(-1))
     else:
-        r = model.fitTo(pTs, RooFit.Save(),RooFit.Constrain(RooArgSet(pTMean1_lep, pTMean2_lep)),RooFit.PrintLevel(-1),RooFit.PrintEvalErrors(-1))
+        #r = model.fitTo(pTs, RooFit.Save(),RooFit.Constrain(RooArgSet(pTMean1_lep, pTMean2_lep)),RooFit.PrintLevel(-1),RooFit.PrintEvalErrors(-1))
+        r = model.fitTo(pTs, RooFit.Save(),RooFit.Constrain(RooArgSet(pTMean1_lep, pTMean2_lep)), RooFit.PrintLevel(-1),RooFit.PrintEvalErrors(-1))
 
     #print("DEBUG: MakeZReFitModel: model float parameters: ", sigmaGauss1, pTRECO1_lep, pTMean1_lep, pTSigma1_lep, pTMean2_lep, pTSigma2_lep, mZ)
 
     covMatrix = r.covarianceMatrix()
+    status_ = r.status()
+    covmat_status_ = r.covQual()
+    minnll_ = r.minNll()
     finalPars = r.floatParsFinal()
+    print("[INFO]", status_, covmat_status_)
+
+    size = covMatrix.GetNcols()
+    #covMatrixZ1_.ResizeTo(size, size)
+    #covMatrixZ1_ = covMatrix
 
     pT1_lep_refit = pTMean1_lep.getVal()
     pT2_lep_refit = pTMean2_lep.getVal()

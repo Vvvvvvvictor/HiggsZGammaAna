@@ -213,6 +213,8 @@ def ZConstrainReFit(treeName, outpath, splitJobs):
         # loop through all the events
         for iEvt in range( nEvts ):
             ntup.GetEvent(iEvt)
+            if ntup.event == 9: 
+                print(ntup.event)
 
             #if iEvt > 1: break
             #if iEvt > 5000: continue
