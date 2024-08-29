@@ -10,6 +10,11 @@ target="/eos/home-j/jiehan/data_for_norm_v1/"
 # years=(2016preVFP 2016postVFP 2017 2018)
 years=(2018)
 
+<<<<<<< HEAD
+done
+
+
+=======
 # 函数定义：执行命令并处理错误
 execute_command() {
     local cmd="$1"
@@ -122,5 +127,6 @@ for sample in "${samples[@]}"; do
 # ######################
 # Non prompt MC sample
 # ######################
+>>>>>>> 0a1443ddd30e7de7324e36ae4a34dacbebf59ffc
 
 echo "==============FINISHED==========="
