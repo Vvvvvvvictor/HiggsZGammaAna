@@ -21,7 +21,7 @@ def getArgs():
     parser.add_argument('-c', '--config', action='store', nargs=2, default=['/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/data/training_config_BDT.json', '/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/data/apply_config_BDT.json'], help='Region to process')
     parser.add_argument('-i', '--inputFolder', action='store', default='/eos/home-j/jiehan/data_for_norm_float_v1', help='directory of training inputs')
     parser.add_argument('-m', '--modelFolder', action='store', default='/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/models', help='directory of BDT models')
-    parser.add_argument('-o', '--outputFolder', action='store', default='/eos/home-j/jiehan/data_for_norm_float_v1/output', help='directory for outputs')
+    parser.add_argument('-o', '--outputFolder', action='store', default='/eos/home-j/jiehan/data_for_norm_float_v1/output_WP80', help='directory for outputs')
     parser.add_argument('-r', '--region', action='store', choices=['two_jet', 'one_jet', 'zero_jet', 'zero_to_one_jet', 'VH_ttH', 'all_jet'], default='zero_to_one_jet', help='Region to process')
     parser.add_argument('-cat', '--category', action='store', nargs='+', help='apply only for specific categories')
     parser.add_argument('-s', '--sample', action='store', nargs='+', help='apply only for specific samples')
@@ -58,7 +58,7 @@ class ApplyXGBHandler(object):
         self.preselections = "H_mass > 100 & H_mass < 180 & H_mass + Z_mass > 185"
         
         # select control region or signal region
-        self.postselctions = "Z_mass > 80 & Z_mass < 100 & regions == 2"
+        self.postselctions = "Z_mass > 80 & Z_mass < 100 & ((regions == 2) | (regions == 1))"
         # self.postselctions = "Z_mass > 80 & Z_mass < 100 & regions == 0"
         
     def readApplyConfig(self, path):

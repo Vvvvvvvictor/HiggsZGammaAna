@@ -59,9 +59,18 @@ RooAbsPdf* getBernsteinxZGMCShape(string prefix, int cat, int order, RooRealVar*
   // TFile *ZGMC_file = new TFile("./ZGCoreShape_01jet.root");
   // RooWorkspace *w = (RooWorkspace *)ZGMC_file->Get("w");
   // RooAbsPdf *ZGMCShape = w->pdf(Form("CoreShape_ZG_NAF_cat%d",cat));
-  TFile *ZGMC_file = new TFile("./ZGCoreShape_fromMC_01jet_v4.root");
+
+  TFile *ZGMC_file = new TFile("./ZGCoreShape_01jet_histSmooth.root");
   RooWorkspace *w = (RooWorkspace *)ZGMC_file->Get("w");
-  RooAbsPdf *ZGMCShape = w->pdf(Form("CoreShape_MC_cat%d",cat));
+  RooAbsPdf *ZGMCShape = w->pdf(Form("CoreShape_ZG_NAF_cat%d",cat));
+
+  // TFile *ZGMC_file = new TFile("./ZGCoreShape_fromMC_01jet_v4.root");
+  // RooWorkspace *w = (RooWorkspace *)ZGMC_file->Get("w");
+  // RooAbsPdf *ZGMCShape = w->pdf(Form("CoreShape_MC_cat%d",cat));
+
+  // TFile *ZGMC_file = new TFile("./ZGCoreShape_fromFake_01jet.root");
+  // RooWorkspace *w = (RooWorkspace *)ZGMC_file->Get("w");
+  // RooAbsPdf *ZGMCShape = w->pdf(Form("CoreShape_MC_cat%d",cat));
   w->var("CMS_hzg_mass")->setRange(105, 170);
   ZGMC_file->Close();
 
@@ -435,7 +444,7 @@ void SSTest_core_function(int cat = 0, int sig = 0, TString channel = "zero_to_o
 
   //background MC template
   TH1F* hbkg;
-  TFile* fbkg = TFile::Open(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/bkg_sig_template.root"));
+  TFile* fbkg = TFile::Open(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/NAF_SSTest_template.root"));
   if (fbkg->GetListOfKeys()->Contains((Form("bkg_%s_cat%d",channel.Data(), cat))))
       hbkg = (TH1F*)fbkg->Get(Form("bkg_%s_cat%d",channel.Data(), cat));
   else
@@ -675,7 +684,8 @@ void SSTest_core_function(int cat = 0, int sig = 0, TString channel = "zero_to_o
         int data_npars, data_ndof;
         canv = new TCanvas();
         
-        RooPlot *frame_data;
+        RooPlot *frame_data, *frame_data_trash;
+        frame_data_trash = CMS_hzg_mass->frame();
         frame_data = CMS_hzg_mass->frame();
         pad1 = new TPad("pad1","pad1",0,0.25,1,1);
         pad2 = new TPad("pad2","pad2",0,0,1,0.35);
@@ -729,8 +739,10 @@ void SSTest_core_function(int cat = 0, int sig = 0, TString channel = "zero_to_o
         // if(ss < 0) frame_data->SetMinimum(ss);
         ddata->plotOn(frame_data, Name("data"), DataError(RooAbsData::SumW2));
         plotdata = (RooHist*)frame_data->getObject(frame_data->numItems()-1);
-        model->plotOn(frame_data, Name("fit"));
-        chi2 = frame_data->chiSquare(data_npars);
+        ddata->plotOn(frame_data_trash, Name("data"), DataError(RooAbsData::SumW2));
+        plotdata = (RooHist*)frame_data_trash->getObject(frame_data_trash->numItems()-1);
+        model->plotOn(frame_data_trash, Name("fit"));
+        chi2 = frame_data_trash->chiSquare(data_npars);
         prob = TMath::Prob(chi2*data_ndof, data_ndof);
         output << "\t" << bkg_fun.Data() << "\tdata(MC):\tnpars = " << data_npars << "\tchi^2 = " << chi2 << ": " << chi2 << "\tprob = " << prob << "\tfitting status = " << fit_status << endl;
         
@@ -783,7 +795,7 @@ void SSTest_core_function(int cat = 0, int sig = 0, TString channel = "zero_to_o
         chi2 = frame_data->chiSquare(data_npars);
         prob = TMath::Prob(chi2*data_ndof, data_ndof);
         model->plotOn(frame_data, Name("background"), Components(bkgPdf->GetName()), LineStyle(ELineStyle::kDashed), LineColor(kGreen));
-         nomBkgCurve = (RooCurve*)frame_data->getObject(frame_data->numItems()-1);
+        nomBkgCurve = (RooCurve*)frame_data->getObject(frame_data->numItems()-1);
 
         model->SetName(Form("%s_model", bkg_fun.Data()));
         frame_data->SetTitle(Form("Pesudo data with with x%d signal, prob: %.3f", sig, prob));
@@ -832,7 +844,7 @@ void SSTest_core_function(int cat = 0, int sig = 0, TString channel = "zero_to_o
         hdummy->SetStats(0);
         hdummy->SetMaximum(hdatasub->GetHistogram()->GetMaximum()+1);
         hdummy->SetMinimum(hdatasub->GetHistogram()->GetMinimum()-1);
-        hdummy->GetYaxis()->SetTitle("data - fit PDF");
+        hdummy->GetYaxis()->SetTitle("data - bkg PDF");
         hdummy->GetYaxis()->SetTitleOffset(0.35);
         hdummy->GetYaxis()->SetTitleSize(0.12);
         hdummy->GetYaxis()->SetLabelSize(0.09);

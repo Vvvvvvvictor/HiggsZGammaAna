@@ -51,11 +51,23 @@ def select_objects(objects, cuts = {}, clean = {}, name = "none", tagger = None)
 
         if cut_ is not None:
             cut_results.append(cut_)
+            
+    if "Jet" in name:
+        new_jet = awkward.flatten(objects)[:, None]
+        num_jet = awkward.num(objects)
 
     for other_objects, info in clean.items():
-        cut_ = delta_R(objects, info["objects"], info["min_dr"])
+        if "Jet" in name and other_objects in ["muons", "electrons"]:
+            unflatten_jet = awkward.unflatten(objects.pt, [1]*sum(num_jet), axis=-1)
+            new_obj = awkward.flatten(awkward.broadcast_arrays(awkward.unflatten(awkward.flatten(info["objects"]), [1]*awkward.fill_none(awkward.num(info["objects"]), 0))[:,None], objects.pt)[0])
+            mask = awkward.flatten(abs(new_jet.pt[:, :, None]-new_obj.pt), axis=-1) < new_obj.pt
+            cut_ = awkward.unflatten(awkward.flatten(delta_R(new_jet, new_obj[mask], info["min_dr"])), num_jet)
+        else:
+            cut_ = delta_R(objects, info["objects"], info["min_dr"])
         cut_names.append("dR with '%s' > %.2f" % (other_objects, info["min_dr"]))
         cut_results.append(cut_)
+        
+    # awkward.where(awkward.is_none(base_array), [] ,awkward.unflatten(awkward.unflatten(awkward.flatten(base_array), [1]*awkward.sum(awkward.num(base_array))), awkward.num(base_array, axis=1)))
 
     all_cuts = objects.pt > 0
     for i, cut in enumerate(cut_results):
