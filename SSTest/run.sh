@@ -1,10 +1,10 @@
-for cat in 2 3
+for cat in 0 1 2 3
 do
 # cat=0
 # for sig in 0 1 2 5 10 20
 # do
 sig=0
-# for chan in "zero_jet" "one_jet" "two_jet" "VH_ttH"
+# for chan in "zero_jet" "one_jet" "two_jet" "VH_ttH" "zero_to_one_jet"
 chan="two_jet"
 # do
 if [ -f "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/outputs/"$chan"_"$cat"_"$sig"xsig.txt" ]; then

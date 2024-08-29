@@ -1,11 +1,14 @@
-#!/usr/bin/env python
-import copy
+import uproot
+import numpy as np
 import os
+import matplotlib.pyplot as plt
+import mplhep as hep
+plt.style.use(hep.style.CMS)
+
+import copy
 from argparse import ArgumentParser
 import json
-import numpy as np
 import pandas as pd
-import uproot
 # from root_pandas import *
 import pickle
 from sklearn.preprocessing import StandardScaler, QuantileTransformer
@@ -18,6 +21,8 @@ import ROOT
 ROOT.gErrorIgnoreLevel = ROOT.kError + 1
 pd.options.mode.chained_assignment = None
 
+from scipy.ndimage import gaussian_filter1d
+
 def getArgs():
     """Get arguments from command line."""
     parser = ArgumentParser()
@@ -25,11 +30,8 @@ def getArgs():
     parser.add_argument('-i', '--inputFolder', action='store', default='/eos/home-j/jiehan/data_for_norm_float_v1', help='directory of training inputs')
     parser.add_argument('-m', '--modelFolder', action='store', default='/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/models', help='directory of BDT models')
     parser.add_argument('-o', '--outputFolder', action='store', default='/eos/home-j/jiehan/data_for_norm_float_v1/output', help='directory for outputs')
-    parser.add_argument('-r', '--region', action='store', choices=['two_jet', 'one_jet', 'zero_jet', 'zero_to_one_jet', 'VH_ttH', 'all_jet'], default='zero_jet', help='Region to process')
+    parser.add_argument('-r', '--region', action='store', choices=['two_jet', 'one_jet', 'zero_jet', 'zero_to_one_jet', 'VH_ttH', 'all_jet'], default='two_jet', help='Region to process')
     parser.add_argument('-cat', '--category', action='store', nargs='+', help='apply only for specific categories')
-
-    parser.add_argument('-s', '--shield', action='store', type=int, default=-1, help='Which variables needs to be shielded')
-    parser.add_argument('-a', '--add', action='store', type=int, default=-1, help='Which variables needs to be added')
 
     return parser.parse_args()
 
@@ -43,9 +45,6 @@ class ApplyXGBHandler(object):
         print('===============================')
 
         args=getArgs()
-        self._shield = args.shield
-        self._add = args.add
-
         self._region = region
         self._inputFolder = ''
         self._inputTree = region if region else 'inclusive'
@@ -105,8 +104,6 @@ class ApplyXGBHandler(object):
         try:
             stream = open(configPath, 'r')
             configs = json.loads(stream.read())
-            # if (self._add>=0):
-            #     configs["common"]["train_variables"].append(configs["common"]["+train_variables"][self._add])
    
             config = configs["common"]
 
@@ -122,12 +119,8 @@ class ApplyXGBHandler(object):
                     # read from the region specific settings
                     if model in configs.keys():
                         config = configs[model]
-                        if self._add >= 0:
-                            config["+train_variables"].append(config["test_variables"][self._add])
                         if 'train_variables' in config.keys(): self.train_variables[model] = config['train_variables'][:]
                         if '+train_variables' in config.keys(): self.train_variables[model] += config['+train_variables']
-                        if self._shield >= 0:
-                            self.train_variables[model].pop(self._shield)
 
                         print("\n\n")
                         print(self.train_variables[model])
@@ -184,6 +177,7 @@ class ApplyXGBHandler(object):
                 for i in range(4):
                     bst = xgb.Booster()
                     bst.load_model('%s/BDT_%s_%d.h5'%(self._modelFolder, model, i))
+                    # bst = pickle.load(open('%s/BDT_%s_%d.pkl'%(self._modelFolder, model, i), "rb" ), encoding = 'latin1' ) # FIXME: need to change depending on region
                     self.m_models[model].append(bst)
                     del bst
 
@@ -200,24 +194,11 @@ class ApplyXGBHandler(object):
     def applyBDT(self, category, scale=1):
         outputbraches = copy.deepcopy(self._outbranches)
         branches = copy.deepcopy(self._branches)
-        # branches += ["Z_sublead_lepton_pt", "gamma_mvaID_WP80", "gamma_mvaID_WPL"]
+        branches += ["gamma_mvaID_WPL", 'regions', "gamma_eta", "Z_mass", "H_mass"]
         outputbraches += []
-        # if category == "DYJetsToLL":
-        #     branches.append('n_iso_photons')
-        # if category != "data_fake" and category != "mc_true" and category != "mc_med":
-        #     branches.append('gamma_mvaID_WP80')
-        # if category == "data_fake" or category == "mc_true" or category == "mc_med":
-        #     branches += ['weight_err']
-        #     outputbraches += ['weight_err']
-        if category == "mc_true" or category == "mc_med":
-            branches += ['tagger']
-            outputbraches += ['tagger']
-
-        # print(branches)
-        # print(outputbraches)
         
         outputContainer = self._outputFolder + '/' + self._region
-        output_path = outputContainer + '/%s.root' % category
+        output_path = outputContainer + '/%s_fake.root' % category
         if not os.path.isdir(outputContainer): os.makedirs(outputContainer)
         if os.path.isfile(output_path): os.remove(output_path)
 
@@ -236,36 +217,47 @@ class ApplyXGBHandler(object):
             for filename in tqdm(sorted(f_list), desc='XGB INFO: Applying BDTs to %s samples' % category, bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
                 print(filename)
                 file = uproot.open(filename)
-<<<<<<< HEAD
                 print(self._inputTree)
+                print(branches)
                 data = file[self._inputTree].arrays(library='pd')
-                print(data)
-                # for data in file[self._inputTree].iterate(branches, library='pd', step_size=self._chunksize):
-                #     data = self.preselect(data)
-=======
-                # for data in file[self._inputTree].iterate(branches, library='pd', step_size=self._chunksize):
-                for data in file[self._inputTree].iterate(library='pd', step_size=self._chunksize):
-                    data = self.preselect(data)
->>>>>>> main
-                    # data = data[data.Z_sublead_lepton_pt >= 15]
-                    # if category == "DYJetsToLL":
-                    #     data = data[data.n_iso_photons == 0]
-                    # if category != "data_fake" and category != "mc_true" and category != "mc_med":
-                    #     pass
-                    #     # data = data[data.gamma_mvaID_WP80 > 0] #TODO: check this one
-                    #     data = data[data.gamma_mvaID_WPL > 0] #TODO: check this one
+                data = data[(data["H_mass"]>100) & (data["H_mass"]<180) & (data["Z_mass"] + data["H_mass"] > 185)]
+                
+                output_selection = ((data['regions'] == 2))
+                
+                # get the distribution of 'gamma_mvaID' with 'region==0', and mimic the distribution to 'region==2'
+                gamma_mvaID_dist_B = data[(data['regions'] == 0) & (data['gamma_eta'] < 1.5)]['gamma_mvaID'].values
+                gamma_mvaID_dist_E = data[(data['regions'] == 0) & (data['gamma_eta'] > 1.5)]['gamma_mvaID'].values
+                prob_dist_B, gamma_mvaID_dist_B = np.histogram(gamma_mvaID_dist_B, bins=100, density=True)
+                prob_dist_E, gamma_mvaID_dist_E = np.histogram(gamma_mvaID_dist_E, bins=100, density=True)
+                gamma_mvaID_dist_B, gamma_mvaID_dist_E = (gamma_mvaID_dist_B[1:] + gamma_mvaID_dist_B[:-1])/2, (gamma_mvaID_dist_E[1:] + gamma_mvaID_dist_E[:-1])/2
+                
+                if not os.path.isdir('figures/fake'): 
+                    os.makedirs('figures/fake')
+                
+                plt.figure()
+                plt.hist(data[(data['regions'] == 2)]['gamma_mvaID'], bins=100, histtype='step', label='Original', density=True)
+                
+                sampled_values_B = np.random.choice(gamma_mvaID_dist_B, size=data[output_selection & (data['gamma_eta'] < 1.5)].shape[0], p=prob_dist_B/sum(prob_dist_B))
+                sampled_values_E = np.random.choice(gamma_mvaID_dist_E, size=data[output_selection & (data['gamma_eta'] > 1.5)].shape[0], p=prob_dist_E/sum(prob_dist_E))
+                data.loc[output_selection & (data['gamma_eta'] < 1.5), 'gamma_mvaID'] = sampled_values_B
+                data.loc[output_selection & (data['gamma_eta'] > 1.5), 'gamma_mvaID'] = sampled_values_E
+                
+                plt.hist(data[(data['regions'] == 2)]['gamma_mvaID'], bins=100, histtype='step', label='Transformed', density=True)
+                plt.legend(fontsize=28)
+                plt.xlabel('gamma_mvaID', fontsize=28)
+                plt.ylabel('a.u.', fontsize=28)
+                plt.title("Transformed gamma_mvaID", fontsize=36)
+                plt.yscale('log')
+                name = filename.split('/')[-1].split('.')[0]
+                plt.savefig(f'figures/fake/{name}_mimic_gamma_mvaID.png')
+
+                data = data[output_selection & (data["Z_mass"] > 80) & (data["Z_mass"] < 100)]
 
                 for i in range(4):
 
-<<<<<<< HEAD
                     data_s = data[data[self.randomIndex]%4 == i]
                     data_o = data_s
                     # data_o = data_s[outputbraches]
-=======
-                        data_s = data[data[self.randomIndex]%4 == i]
-                        data_o = data_s
-                        # data_o = data_s[outputbraches]
->>>>>>> main
 
                     for model in self.train_variables.keys():
                         x_Events = data_s[self.train_variables[model]]
@@ -286,18 +278,18 @@ class ApplyXGBHandler(object):
             print(out_data)
             output_file[self._inputTree] = out_data
 
-            for tree in "inclusive", "zero_jet", "one_jet", "two_jet", "zero_to_one_jet", "VH_ttH":
-                print(tree)
-                out_data = pd.DataFrame()
-                if tree == self._inputTree: continue
-                for filename in tqdm(sorted(f_list), desc='XGB INFO: Applying BDTs to %s samples' % category, bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
-                    print(filename)
-                    file = uproot.open(filename)
-                    data = file[tree].arrays(library='pd')
-                    out_data = pd.concat([out_data, data], ignore_index=True, sort=False)
-                    print(data)
-                output_file[tree] = out_data
-                print(out_data)
+            # for tree in "inclusive", "zero_jet", "one_jet", "two_jet", "zero_to_one_jet", "VH_ttH":
+            #     print(tree)
+            #     out_data = pd.DataFrame()
+            #     if tree == self._inputTree: continue
+            #     for filename in tqdm(sorted(f_list), desc='XGB INFO: Applying BDTs to %s samples' % category, bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
+            #         print(filename)
+            #         file = uproot.open(filename)
+            #         data = file[tree].arrays(library='pd')
+            #         out_data = pd.concat([out_data, data], ignore_index=True, sort=False)
+            #         print(data)
+            #     output_file[tree] = out_data
+            #     print(out_data)
 
             del out_data, data_s, data_o, data
 
@@ -314,11 +306,12 @@ def main():
     xgb.setOutputFolder(args.outputFolder)
 
     xgb.loadModels()
-    xgb.loadTransformer()
+    xgb.loadTransformer() # FIXME: need to change depending on region
 
-    with open('/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/data/inputs_config.json') as f:
-        config = json.load(f)
-    sample_list = config['sample_list']
+    # with open('/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/data/inputs_config.json') as f:
+    #     config = json.load(f)
+    # sample_list = config['sample_list']
+    sample_list = ["Data"] # "Data", "ZGToLLG", "ZG2JToG2L2J", "DYJets_2J"
 
     for category in sample_list:
         if args.category and category not in args.category: continue
@@ -328,3 +321,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+ 

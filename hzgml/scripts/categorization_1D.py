@@ -11,7 +11,7 @@
 #
 #
 import os
-from ROOT import TFile, TH1F, TH1, gROOT
+from ROOT import TFile, TH1F, TH1, gROOT, TH2, TH2F
 from argparse import ArgumentParser
 import numpy as np
 import pandas as pd
@@ -81,7 +81,7 @@ def gettingsig(input_path, region, variable, boundaries, transform, estimate):
         for data in tqdm(file['test'].iterate(columns, library='pd', step_size=500000), desc=f'Loading {category}', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
     
             if 'sid' in category:
-                data = data[(data.H_mass >= 100) & (data.H_mass <= 180) & ((data.H_mass < 122) | (data.H_mass > 128))]
+                data = data[(data.H_mass >= 100) & (data.H_mass <= 180) & ((data.H_mass < 120) | (data.H_mass > 130))]
                 data['w'] = data.weight
 
             elif 'tot' in category:
@@ -89,7 +89,7 @@ def gettingsig(input_path, region, variable, boundaries, transform, estimate):
                 data['w'] = data.weight
 
             else:
-                data = data[(data.H_mass >= 122) & (data.H_mass <= 128)]
+                data = data[(data.H_mass >= 120) & (data.H_mass <= 130)]
                 data['w'] = data.weight
            
             # print(data)
@@ -140,21 +140,60 @@ def categorizing(input_path, region, variable, sigs, bkgs, nscan, minN, transfor
         f_data_sid = TFile('%s/%s/data.root' % (input_path, region))
         t_data_sid = f_data_sid.Get('test')
 
+
+#################################################################################################
+
+    # nmass = 10
+
+    # h_sig = TH2F('h_sig','h_sig',nscan,0,1, nmass, 120, 130)
+    # h_bkg = TH2F('h_bkg','h_bkg',nscan,0,1, nmass, 120, 130)
+
+    # t_sig.Draw(f"H_mass:{variable}_score{'_t' if transform else ''}>>h_sig", "weight*%f*((event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
+
+    # # filling bkg histograms
+    # if estimate in ["fullSim", "fullSimrw"]:
+    #     h_bkgmc_cen = TH2F('h_bkgmc_cen', 'h_bkgmc_cen', nscan, 0., 1., nmass, 120, 130)
+    #     t_bkgmc.Draw(f"H_mass:{variable}_score{'_t' if transform else ''}>>h_bkgmc_cen", "weight*%f*((event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
+    # if estimate in ["fullSimrw"]:
+    #     h_bkgmc_sid = TH1F('h_bkgmc_sid', 'h_bkgmc_sid', nscan, 0., 1.)
+    #     t_bkgmc.Draw(f"{variable}_score{'_t' if transform else ''}>>h_bkgmc_sid", "weight*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=120&&H_mass<=130)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
+    # if estimate in ["fullSimrw", "data_sid"]:
+    #     h_data_sid = TH1F('h_data_sid', 'h_data_sid', nscan, 0., 1.)
+    #     t_data_sid.Draw(f"{variable}_score{'_t' if transform else ''}>>h_data_sid", "weight*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=120&&H_mass<=130)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
+
+    # if estimate == "data_sid":
+    #     h_data_sid.Scale(0.20)
+    #     cgz = categorizer_shape(h_sig, h_data_sid)
+    # elif estimate == "fullSimrw":
+    #     cgz = categorizer_shape(h_sig, h_bkgmc_cen, h_bkg_rw_num=h_data_sid, h_bkg_rw_den=h_bkgmc_sid)
+    # elif estimate == "fullSim":
+    #     cgz = categorizer_shape(h_sig, h_bkgmc_cen)
+    
+    # # cgz.smooth(1, nscan, SorB='B', function='Epoly2')
+    # '''
+    # uncomment upper line to fit a function to the BDT distribution. Usage: categorizer.smooth(left_bin_to_fit, right_bin_to_fit, SorB='S' (for signal) or 'B' (for bkg), function='Epoly2', printMessage=False (switch to "True" to print message))
+    # TODO: first parameter must >= 1, 0 is banned.
+    # '''
+
+    # cgz.smooth_sim(1, SorB='B')
+
+#################################################################################################  
+ 
     h_sig = TH1F('h_sig','h_sig',nscan,0,1)
     h_bkg = TH1F('h_bkg','h_bkg',nscan,0,1)
 
-    t_sig.Draw(f"{variable}_score{'_t' if transform else ''}>>h_sig", "weight*%f*((H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
+    t_sig.Draw(f"{variable}_score{'_t' if transform else ''}>>h_sig", "weight*%f*((H_mass>=120&&H_mass<=130)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
 
     # filling bkg histograms
     if estimate in ["fullSim", "fullSimrw"]:
         h_bkgmc_cen = TH1F('h_bkgmc_cen', 'h_bkgmc_cen', nscan, 0., 1.)
-        t_bkgmc.Draw(f"{variable}_score{'_t' if transform else ''}>>h_bkgmc_cen", "weight*%f*((H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
+        t_bkgmc.Draw(f"{variable}_score{'_t' if transform else ''}>>h_bkgmc_cen", "weight*%f*((H_mass>=120&&H_mass<=130)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
     if estimate in ["fullSimrw"]:
         h_bkgmc_sid = TH1F('h_bkgmc_sid', 'h_bkgmc_sid', nscan, 0., 1.)
-        t_bkgmc.Draw(f"{variable}_score{'_t' if transform else ''}>>h_bkgmc_sid", "weight*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
+        t_bkgmc.Draw(f"{variable}_score{'_t' if transform else ''}>>h_bkgmc_sid", "weight*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=120&&H_mass<=130)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
     if estimate in ["fullSimrw", "data_sid"]:
         h_data_sid = TH1F('h_data_sid', 'h_data_sid', nscan, 0., 1.)
-        t_data_sid.Draw(f"{variable}_score{'_t' if transform else ''}>>h_data_sid", "weight*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
+        t_data_sid.Draw(f"{variable}_score{'_t' if transform else ''}>>h_data_sid", "weight*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=120&&H_mass<=130)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
 
     if estimate == "data_sid":
         h_data_sid.Scale(0.20)
@@ -164,28 +203,28 @@ def categorizing(input_path, region, variable, sigs, bkgs, nscan, minN, transfor
     elif estimate == "fullSim":
         cgz = categorizer(h_sig, h_bkgmc_cen)
     
-    # cgz.smooth(1, nscan, SorB='B', function='Epoly2')
+    # cgz.smooth(50, nscan, SorB='B', function='Epoly2')
     '''
     uncomment upper line to fit a function to the BDT distribution. Usage: categorizer.smooth(left_bin_to_fit, right_bin_to_fit, SorB='S' (for signal) or 'B' (for bkg), function='Epoly2', printMessage=False (switch to "True" to print message))
     TODO: first parameter must >= 1, 0 is banned.
     '''
 
-    cgz.smooth_sim(1, SorB='B')
+    # cgz.smooth_sim(1, SorB='B')
+
+#################################################################################################
         
-    bmax, zmax = cgz.fit(1, nscan, nbin, minN=minN, floatB=floatB, earlystop=earlystop, pbar=True)
+    bmax, zmax, umax = cgz.fit(1, nscan, nbin, minN=minN, floatB=floatB, earlystop=earlystop, pbar=True)
     print(bmax)
     boundaries = bmax
     boundaries_values = [(i-1.)/nscan for i in boundaries]
     print('=========================================================================')
     print(f'Fold number {fold}')
-    print(f'The maximal significance:  {zmax}')
+    print(f'The maximal significance:  {zmax:.5f} +/- {umax:.5f}')
     print('Boundaries: ', boundaries_values)
     print('=========================================================================')
 
     return boundaries, boundaries_values, zmax
     
-
-
 def main():
 
     gROOT.SetBatch(True)

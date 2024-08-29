@@ -61,10 +61,10 @@ class MCOverlapTagger(Tagger):
         Filling "1" on corresponding digit when the particle meets one of the 14 conditions, else remaining "0".
         Echo paticles can meet more than one kind of condition, thus, more than one digit in "statusFlags" is "1".
         """
-        iso_photons_cut = (data.GenPart.pdgId == 22) & (data.GenPart.pt > 15) & (abs(data.GenPart.eta) < 2.6) & (( (data.GenPart.statusFlags // numpy.power(2, 0)) % 2 == 1 ) | ( (data.GenPart.statusFlags // numpy.power(2, 8)) % 2 == 1 ))
+        iso_photons_cut = (data.GenPart.pdgId == 22) & (data.GenPart.pt > 9) & (( (data.GenPart.statusFlags & 0x1) != 0 ) | ( (data.GenPart.statusFlags & 0x100) != 0 )) #& (abs(data.GenPart.eta) < 2.6)
         iso_photons = data.GenPart[iso_photons_cut]
 
-        truth_objects_cut =  (data.GenPart.pdgId != 22) & (data.GenPart.pt > 5) & ( (data.GenPart.statusFlags // numpy.power(2, 8)) % 2 == 1 ) 
+        truth_objects_cut =  (data.GenPart.pdgId != 22) & (data.GenPart.pt > 5) & ( (data.GenPart.statusFlags & 0x100) != 0 ) 
         truth_objects = data.GenPart[truth_objects_cut]
 
         iso_cut = object_selections.delta_R(iso_photons, truth_objects, 0.05)

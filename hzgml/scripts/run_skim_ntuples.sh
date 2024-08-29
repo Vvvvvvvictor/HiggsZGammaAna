@@ -7,7 +7,8 @@ input="/eos/home-j/jiehan/parquet/nanov9/data_for_norm_v1/"
 target="/eos/home-j/jiehan/data_for_norm_v1/"
 
 
-years=(2016preVFP 2016postVFP 2017 2018)
+# years=(2016preVFP 2016postVFP 2017 2018)
+years=(2018)
 
 # 函数定义：执行命令并处理错误
 execute_command() {
@@ -35,7 +36,7 @@ process_sample() {
     for year in "${years[@]}"; do
         command="python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py "
         if [ "$type" = "signal" ]; then
-            command+="-i ${input}${type}/${sample}_M125_${year}/merged_nominal.parquet "
+            command+="-i ${input}${type}/${sample}_${year}/merged_nominal.parquet "
         else
             # command+="-i ${input}${type}/${sample}_${year}/merged_nominal.parquet "
             command+="-i ${input}/${sample}_${year}/merged_nominal.parquet "
@@ -80,13 +81,18 @@ process_sample() {
 #     mkdir -p "$target$sample"
 #     # 存储后台任务的进程ID列表
 #     pid_list=()
+<<<<<<< HEAD
 # 
+=======
+
+>>>>>>> main
 #     # 调用函数处理样本数据
 #     process_sample "$sample" "$type"
 # done
 
-# 处理 bkgmc 样本
+# # 处理 bkgmc 样本
 
+<<<<<<< HEAD
 samples=(ZG2JToG2L2J) # ZGToLLG DYJetsToLL WGToLNuG ZG2JToG2L2J EWKZ2J TT TTGJets TGJets ttWJets ttZJets WW WZ ZZ)
 # samples=(ZGToLLG)
 type="bkgmc"
@@ -94,10 +100,19 @@ for sample in "${samples[@]}"; do
     mkdir -p "$target$sample"
     # 存储后台任务的进程ID列表
     pid_list=()
+=======
+# samples=(ZGToLLG DYJetsToLL WGToLNuG ZG2JToG2L2J EWKZ2J TT TTGJets TGJets ttWJets ttZJets WW WZ ZZ)
+# # samples=(ZGToLLG)
+# type="bkgmc"
+# for sample in "${samples[@]}"; do
+#     mkdir -p "$target$sample"
+#     # 存储后台任务的进程ID列表
+#     pid_list=()
+>>>>>>> main
 
-    # 调用函数处理样本数据
-    process_sample "$sample" "$type"
-done
+#     # 调用函数处理样本数据
+#     process_sample "$sample" "$type"
+# done
 
 # Use fake photon background estimation with data-driven
 

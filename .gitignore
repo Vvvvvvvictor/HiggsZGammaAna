@@ -190,3 +190,6 @@ cython_debug/
 *.err
 *.out
 HiggsDNA/nanov9
+HiggsDNA/eos
+HiggsDNA/log
+HiggsDNA/log

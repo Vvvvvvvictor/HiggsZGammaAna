@@ -6,13 +6,18 @@ import numpy as np
 from pdb import set_trace
 
 
-VAR = "H_mass"
-XLABLE = r"$M_{ll\gamma}$"
-BINS = 40
-RMIN = 100
-RMAX = 180
+# VAR = "H_mass"
+# XLABLE = r"$M_{ll\gamma}$"
+# BINS = 40
+# RMIN = 100
+# RMAX = 180
+VAR = "n_jets"
+XLABLE = r"$n_{j}$"
+BINS = 5
+RMIN = 1
+RMAX = 6
 WEIGHT = "weight"
-PATH = "/eos/user/j/jiehan/root/skimmed_ntuples_two_jet/"
+PATH = "/eos/user/j/jiehan/root/skimmed_ntuples/"
 
 bkg_mc_file_list = [
     ["ZGToLLG"],
@@ -25,7 +30,7 @@ bkg_mc_file_list = [
     ["WW", "WZ", "ZZ"]
 ]
 data_file_list = [
-    ["data"]
+    ["Data"]
 ]
 
 bkg_mc_hist_list, data_hist_list = [], []
@@ -41,11 +46,11 @@ def convert_parquet_to_hist(file_list, hist_list):
             # print(sum(samples[samples["n_iso_photons"]==0][WEIGHT]))
             samples = samples[samples["n_iso_photons"]==0]
             # samples[WEIGHT]*=3
-        if "ZG" in data:
-            # print(sum(samples[samples["n_iso_photons"]>0][WEIGHT]))
-            # print(sum(samples[samples["n_iso_photons"]==0][WEIGHT]))
-            samples = samples[samples["n_iso_photons"]>0]
-            # samples[WEIGHT]*=3
+        # if "ZG" in data:
+        #     # print(sum(samples[samples["n_iso_photons"]>0][WEIGHT]))
+        #     # print(sum(samples[samples["n_iso_photons"]==0][WEIGHT]))
+        #     samples = samples[samples["n_iso_photons"]>0]
+        #     # samples[WEIGHT]*=3
         if "H_mass" in VAR and "data" in data:
             samples = samples[(samples["H_mass"]<122) | (samples["H_mass"]>128)]
         hist, bins = np.histogram(samples[VAR], bins=BINS, range=[RMIN, RMAX], weights=samples[WEIGHT])
@@ -55,14 +60,14 @@ def convert_root_to_hist(file_list, hist_list):
     for type in file_list:
         type_hist = np.zeros(BINS)
         for data in type:
-            # set_trace()
-            print("Reading", PATH+data+"/two_jet_run2.root:two_jet", "...")
-            samples = uproot.open(PATH+data+"/two_jet_run2.root:two_jet").arrays(library="pd")
-            if ("H_mass" in VAR and "data" in data) or "H_mass" not in VAR:
-                samples = samples[(samples["H_mass"]<122) | (samples["H_mass"]>128)]
-            print(samples["weight"].sum())
-            hist, bins = np.histogram(samples[VAR], bins=BINS, range=[RMIN, RMAX], weights=samples[WEIGHT])
-            type_hist = type_hist + hist
+            for year in ["2016preVFP", "2016postVFP", "2017", "2018"]:
+                print("Reading", PATH+data+f"/{year}.root:inclusive", "...")
+                samples = uproot.open(PATH+data+f"/{year}.root:inclusive").arrays([VAR, "H_mass", "weight"] if "H_mass" not in VAR else [VAR, "weight"], library="pd")
+                if ("H_mass" in VAR and "Data" in data) or "H_mass" not in VAR:
+                    samples = samples[(samples["H_mass"]<120) | (samples["H_mass"]>130)]
+                print(samples["weight"].sum())
+                hist, bins = np.histogram(samples[VAR], bins=BINS, range=[RMIN, RMAX], weights=samples[WEIGHT])
+                type_hist = type_hist + hist
         hist_list.append(type_hist)
 
 # convert_parquet_to_hist(data_list, data_hist_list)

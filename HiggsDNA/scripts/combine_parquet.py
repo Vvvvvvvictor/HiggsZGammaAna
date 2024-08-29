@@ -1,57 +1,38 @@
 import os
 import pandas as pd
-from tqdm import tqdm
-import psutil
+import pyarrow as pa
+import pyarrow.parquet as pq
 
-def sizeof_fmt(num, suffix='B'):
-    for unit in ['','Ki','Mi','Gi','Ti','Pi','Ei','Zi']:
-        if abs(num) < 1024.0:
-            return "%3.1f %s%s" % (num, unit, suffix)
-        num /= 1024.0
-    return "%.1f %s%s" % (num, 'Yi', suffix)
+# 指定文件夹路径
+folder_path = '/eos/user/j/jiehan/parquet/nanov9/data/Data_EGamma_2018A_2018/'
+output_file = os.path.join(folder_path, 'merged.parquet')
 
-def get_memory_usage():
-    process = psutil.Process(os.getpid())
-    return process.memory_info().rss
+# 查找所有符合条件的文件
+parquet_files = []
+for root, dirs, files in os.walk(folder_path):
+    for file in files:
+        if file.startswith('output_job_') and file.endswith('_nominal.parquet'):
+            parquet_files.append(os.path.join(root, file))
 
-def merge_parquet_files(folder_path, output_file):
-    # 获取文件夹中所有子文件夹的路径
-    subfolders = [f.path for f in os.scandir(folder_path) if f.is_dir()]
+# 检查是否找到了符合条件的文件
+if not parquet_files:
+    print("No matching parquet files found.")
+else:
+    # 初始化写入器
+    writer = None
+
+    # 逐个读取并追加到合并的 Parquet 文件
+    for file in parquet_files:
+        print(f"Processing {file}...")
+        df = pd.read_parquet(file)
+        table = pa.Table.from_pandas(df)
+
+        if writer is None:
+            # 对于第一个文件，创建新的 Parquet 文件
+            writer = pq.ParquetWriter(output_file, table.schema)
+        writer.write_table(table)
     
-    # 获取第一个子文件夹中的第一个Parquet文件的schema
-    first_parquet_file = next((f.path for f in os.scandir(subfolders[0]) if f.is_file() and f.name.endswith('.parquet')), None)
-    if not first_parquet_file:
-        print("No Parquet files found in the folder")
-        return
+    if writer:
+        writer.close()
     
-    # 合并每个子文件夹中的 Parquet 文件
-    for subfolder in tqdm(subfolders, desc="Combining parquet files:", bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
-        parquet_files = [f.path for f in os.scandir(subfolder) if f.is_file() and f.name.endswith('.parquet')]
-        # 用于存储所有 Parquet 文件的 DataFrame
-        dfs = []
-        for parquet_file in parquet_files:
-            # 逐个读取 Parquet 文件并将其转换为 DataFrame
-            df = pd.read_parquet(parquet_file)
-            dfs.append(df)
-            
-            # 输出程序占用的内存空间
-            print("Memory usage: {}".format(sizeof_fmt(get_memory_usage())))
-            
-            # 清理内存
-            del df
-        
-        # 合并所有 DataFrame
-        combined_df = pd.concat(dfs, ignore_index=True)
-        
-        # 将合并后的 DataFrame 写入到输出文件中
-        combined_df.to_parquet(output_file, index=False)
-        
-        # 清理内存
-        del combined_df
-
-# 文件夹路径和输出文件名
-folder_path = "/eos/home-j/jiehan/parquet/nanov9/data_for_norm_v1/Data_2017"
-output_file = "/eos/home-j/jiehan/parquet/nanov9/data_for_norm_v1/Data_2017/merge.parquet"
-
-# 执行合并
-merge_parquet_files(folder_path, output_file)
+    print(f"Merged file saved to {output_file}")
