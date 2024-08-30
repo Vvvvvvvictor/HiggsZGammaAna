@@ -8,7 +8,7 @@ plt.style.use(hep.style.CMS)
 from pdb import set_trace
 
 # Load data
-branches = ["H_mass", "weight", "bdt_score_t"]
+branches = ["H_mass", "weight", "bdt_score_t", "regions"]
 data_cr = uproot.open("/eos/home-j/jiehan/data_for_norm_float_v1/output/two_jet/Data_fake.root")["two_jet"].arrays(branches, library="pd")
 zg_cr = uproot.open("/eos/home-j/jiehan/data_for_norm_float_v1/output/two_jet/ZGToLLG_fake.root")["two_jet"].arrays(branches, library="pd")
 ewkzg_cr = uproot.open("/eos/home-j/jiehan/data_for_norm_float_v1/output/two_jet/ZG2JToG2L2J_fake.root")["two_jet"].arrays(branches, library="pd")
@@ -157,8 +157,8 @@ def draw(data_cr, zg_cr, ewkzg_cr, bkg_list, fake_bkg_list, bounds):
     plt.clf()
     
 # Plot
-for i in range(0, len(boundaries)-1):
-    draw(data_cr, zg_cr, ewkzg_cr, bkg_list, fake_bkg_list, [boundaries[i], boundaries[i+1]])
+# for i in range(0, len(boundaries)-1):
+#     draw(data_cr, zg_cr, ewkzg_cr, bkg_list, fake_bkg_list, [boundaries[i], boundaries[i+1]])
     
 ##############################################################################
 # Compare data-driven photon samples with MC samples in control region
@@ -191,6 +191,7 @@ def draw(data_cr, bkg_list, bounds):
 # Plot
 # for i in range(0, len(boundaries)-1):
 #     draw(data_cr, bkg_list, [boundaries[i], boundaries[i+1]])
+draw(data_cr, bkg_list, [0, 1])
 
 ###############################################################################
 # Compare data-driven photon samples plus MC samples(SR) with data(SR) for different variables distributions
@@ -239,7 +240,6 @@ for i in range(len(variables)):
         plt.subplot(2, 1, 1)
         cmap = plt.get_cmap('tab20')  # 'tab20' has 20 different colors
         colors = [cmap(i) for i in range(len(bkg_list))]
-        # set_trace()
         norm_mc_sr_hists = [mc_sr_hist/np.sum(mc_sr_hists) for mc_sr_hist in mc_sr_hists]
         hep.histplot(norm_mc_sr_hists, bins=bin_edges, label=bkg_list, stack=True, histtype="fill", color=colors)
         plt.errorbar(bin_edges[:-1]+np.diff(bin_edges)/2, data_driven_hist/np.sum(data_driven_hist), fmt='o', label="Data driven", yerr=np.sqrt(data_driven_hist)/np.sum(data_driven_hist), color='k')
@@ -259,7 +259,7 @@ for i in range(len(variables)):
         plt.grid()
         
         plt.tight_layout()
-        # plt.savefig(f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/2J/compare_data_driven_bkg_{variables[i]}_{bounds[0]}_{bounds[1]}.png")
+        plt.savefig(f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/2J/compare_data_driven_bkg_{variables[i]}_{bounds[0]}_{bounds[1]}.png")
         plt.clf()
 
 
