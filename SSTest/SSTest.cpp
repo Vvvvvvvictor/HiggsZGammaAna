@@ -584,10 +584,9 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     // line3->SetLineWidth(5.0);
     // line3->Draw();
 
-    nomSigCurve->Draw("L SAME");
-
     hdatasub->SetMarkerStyle(8);
     hdatasub->Draw("PESAME");
+    nomSigCurve->Draw("L SAME");
     canv->SaveAs(Form("./test/pesudo_data_shape_%s_cat%d_%s.pdf",channel.Data(),cat,bkg_fun.Data()));
 
     // gPad->Print(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/test/pesudo_data_shape_%s_cat%d_%s.pdf",channel.Data(),cat,bkg_fun.Data()));

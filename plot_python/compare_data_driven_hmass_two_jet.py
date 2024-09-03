@@ -62,8 +62,8 @@ def draw(data_cr, zg_cr, ewkzg_cr, dy_sr, bounds):
     plt.clf()
     
 # Plot
-# for i in range(0, len(boundaries)-1):
-#     draw(data_cr, zg_cr, ewkzg_cr, dy_sr, [boundaries[i], boundaries[i+1]])
+for i in range(0, len(boundaries)-1):
+    draw(data_cr, zg_cr, ewkzg_cr, dy_sr, [boundaries[i], boundaries[i+1]])
     
 ##############################################################################
 # Compare data-driven photon samples plus true photon samples(SR) with data(SR)
@@ -141,6 +141,7 @@ def draw(data_cr, zg_cr, ewkzg_cr, bkg_list, fake_bkg_list, bounds):
     ax1.errorbar(bin_edges[:-1] + np.diff(bin_edges) / 2, data_hist, fmt='o', label="Data", yerr=np.sqrt(data_hist), color='k')
     ax1.legend(ncol=2, fontsize=16)
     ax1.set_xlim(100, 180)
+    ax1.annotate(f"Scale fractor: {sf:.2f}", xy=(0.7, 0.8), xycoords='axes fraction', fontsize=20)
     ax1.grid()
 
     ax2.errorbar(bin_edges[:-1] + np.diff(bin_edges) / 2, ratio, yerr=np.sqrt(data_hist) / np.sum(final_bkg_hists, axis=0), fmt='o')
@@ -157,8 +158,8 @@ def draw(data_cr, zg_cr, ewkzg_cr, bkg_list, fake_bkg_list, bounds):
     plt.clf()
     
 # Plot
-# for i in range(0, len(boundaries)-1):
-#     draw(data_cr, zg_cr, ewkzg_cr, bkg_list, fake_bkg_list, [boundaries[i], boundaries[i+1]])
+for i in range(0, len(boundaries)-1):
+    draw(data_cr, zg_cr, ewkzg_cr, bkg_list, fake_bkg_list, [boundaries[i], boundaries[i+1]])
     
 ##############################################################################
 # Compare data-driven photon samples with MC samples in control region
@@ -177,14 +178,24 @@ def draw(data_cr, bkg_list, bounds):
         bkg_hist_list.append(bkg_cr_hist)
     
     plt.figure()
+    fig, [ax1, ax2] = plt.subplots(2, 1, gridspec_kw={"height_ratios": [4, 1]})
     # print(bkg_hist_list)
-    hep.histplot(bkg_hist_list, bins=bin_edges, label=bkg_list, stack=True, histtype="fill")
+    hep.histplot(bkg_hist_list, bins=bin_edges, label=[bkg_list[i]+f"({sum(bkg_hist_list[i]):.2f})" for i in range(len(bkg_list))], stack=True, histtype="fill", ax=ax1)
     # print(data_cr_hist)
-    plt.errorbar(bin_edges[:-1]+np.diff(bin_edges)/2, data_cr_hist, fmt='o', label="Data", yerr=np.sqrt(data_cr_hist), color='k')
-    plt.legend(fontsize=16, loc="best")
-    plt.title(f"Data vs bkg: {bounds[0]} < BDT < {bounds[1]}")
-    plt.xlim(100, 180)
-    plt.grid()
+    ax1.errorbar(bin_edges[:-1]+np.diff(bin_edges)/2, data_cr_hist, fmt='o', label=f"Data({sum(data_cr_hist):.2f})", yerr=np.sqrt(data_cr_hist), color='k')
+    ax1.legend(fontsize=16, loc="best")
+    ax1.set_title(f"Data vs bkg: {bounds[0]} < BDT < {bounds[1]}")
+    ax1.set_xlim(100, 180)
+    ax1.set_ylabel("Events")
+    ax1.grid()
+    
+    ax2.errorbar(bin_edges[:-1]+np.diff(bin_edges)/2, data_cr_hist/np.sum(bkg_hist_list, axis=0), fmt='o', yerr=np.sqrt(data_cr_hist)/np.sum(bkg_hist_list, axis=0))
+    ax2.axhline(y=1, color='k', linestyle='--')
+    ax2.set_ylim(0, 2)
+    ax2.set_xlim(100, 180)
+    ax2.set_xlabel("Higgs Mass")
+    ax2.set_ylabel("Data / Bkg.")
+    
     plt.savefig(f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/2J/compare_data_mc_cr_hmass_{bounds[0]}_{bounds[1]}.png")
     plt.clf()
     
@@ -305,6 +316,7 @@ def draw(data_sr, bkg_srs, bkg_list, bounds):
     ax1.set_title(f"Data vs bkg(SR): {bounds[0]} < BDT < {bounds[1]}")
     ax1.set_xlim(100, 180)
     ax1.grid()
+    ax1.annotate(f"Scale fractor: {sf:.2f}", xy=(0.7, 0.5), xycoords='axes fraction', fontsize=20)
 
     ratio = data_hist / np.where(np.sum(bkg_hists, axis=0) <= 0, np.nan, np.sum(bkg_hists, axis=0))
     ax2.errorbar(bin_edges[:-1] + np.diff(bin_edges) / 2, ratio, yerr=np.sqrt(data_hist) / np.sum(bkg_hists, axis=0), fmt='o')
@@ -319,5 +331,5 @@ def draw(data_sr, bkg_srs, bkg_list, bounds):
     plt.savefig(f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/2J/compare_data_mc_sr_hmass_{bounds[0]}_{bounds[1]}.png")
     
 # Plot
-# for i in range(0, len(boundaries)-1):
-#     draw(data_sr, bkg_srs, bkg_list, [boundaries[i], boundaries[i+1]])
+for i in range(0, len(boundaries)-1):
+    draw(data_sr, bkg_srs, bkg_list, [boundaries[i], boundaries[i+1]])
