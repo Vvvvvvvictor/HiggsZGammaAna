@@ -607,50 +607,51 @@ class ZGammaTaggerRun2(Tagger):
                         ((awkward.num(events.Photon) >= 0) if "2016" in self.year else events.Flag_ecalBadCalibFilter) # 2016 dummy cut, all True
                         )
         
-        all_cuts = trigger_pt_cut & has_z_cand & has_gamma_cand & sel_h_1 & sel_h_2 & sel_h_3 & event_filter
+        # all_cuts = trigger_pt_cut & has_z_cand & has_gamma_cand & sel_h_1 & sel_h_2 & sel_h_3 & event_filter
+        all_cuts = trigger_pt_cut & has_z_cand & has_gamma_cand & event_filter
 
-        for cut_type in ["zgammas", "zgammas_ele", "zgammas_mu", "zgammas_w", "zgammas_ele_w", "zgammas_mu_w"]:
-            if "_w" in cut_type:
-                if hasattr(events, 'Generator_weight'):
-                    weighted = True
-                else:
-                    continue
-            else:
-                weighted = False
+        # for cut_type in ["zgammas", "zgammas_ele", "zgammas_mu", "zgammas_w", "zgammas_ele_w", "zgammas_mu_w"]:
+        #     if "_w" in cut_type:
+        #         if hasattr(events, 'Generator_weight'):
+        #             weighted = True
+        #         else:
+        #             continue
+        #     else:
+        #         weighted = False
 
-            cut0 = awkward.num(events.Photon) >= 0
+        #     cut0 = awkward.num(events.Photon) >= 0
 
-            cut1 = z_ee_cut | z_mumu_cut
-            if "ele" in cut_type:
-                cut1 = z_ee_cut
-            elif "mu" in cut_type:
-                cut1 = z_mumu_cut
-            cut2 = cut1 & trigger_cut
-            if "ele" in cut_type:
-                cut2 = cut1 & ele_trigger_cut
-            elif "mu" in cut_type:
-                cut2 = cut1 & mu_trigger_cut
-            cut3 = cut2 & trigger_pt_cut
-            if "ele" in cut_type:
-                cut3 = cut2 & ele_trigger_pt_cut
-            elif "mu" in cut_type:
-                cut3 = cut2 & mu_trigger_pt_cut
-            cut4 = cut3 & has_gamma_cand
-            cut5 = cut4 & has_z_cand
-            cut6 = cut5 & sel_h_1
-            cut7 = cut6 & sel_h_2
-            cut8 = cut7 & sel_h_3
-            cut9 = cut8 & event_filter      
+        #     cut1 = z_ee_cut | z_mumu_cut
+        #     if "ele" in cut_type:
+        #         cut1 = z_ee_cut
+        #     elif "mu" in cut_type:
+        #         cut1 = z_mumu_cut
+        #     cut2 = cut1 & trigger_cut
+        #     if "ele" in cut_type:
+        #         cut2 = cut1 & ele_trigger_cut
+        #     elif "mu" in cut_type:
+        #         cut2 = cut1 & mu_trigger_cut
+        #     cut3 = cut2 & trigger_pt_cut
+        #     if "ele" in cut_type:
+        #         cut3 = cut2 & ele_trigger_pt_cut
+        #     elif "mu" in cut_type:
+        #         cut3 = cut2 & mu_trigger_pt_cut
+        #     cut4 = cut3 & has_gamma_cand
+        #     cut5 = cut4 & has_z_cand
+        #     cut6 = cut5 & sel_h_1
+        #     cut7 = cut6 & sel_h_2
+        #     cut8 = cut7 & sel_h_3
+        #     cut9 = cut8 & event_filter      
 
-            self.register_event_cuts(
-                # names = ["all", "N_lep_sel", "trig_cut", "lead_lep_pt_cut", "sub_lep_pt_cut", "has_g_cand", "has_z_cand", "sel_h_1", "sel_h_2", "sel_h_3"],
-                # results = [cut0, cut1, cut2, cut3, cut4, cut5, cut6, cut7, cut8, cut9],
-                names = ["all", "N_lep_sel", "trig_cut", "lep_pt_cut", "has_g_cand", "has_z_cand", "sel_h_1", "sel_h_2", "sel_h_3", "event", "all cuts"],
-                results = [cut0, cut1, cut2, cut3, cut4, cut5, cut6, cut7, cut8, cut9, all_cuts],
-                events = events,
-                cut_type = cut_type,
-                weighted = weighted
-            )
+        #     self.register_event_cuts(
+        #         # names = ["all", "N_lep_sel", "trig_cut", "lead_lep_pt_cut", "sub_lep_pt_cut", "has_g_cand", "has_z_cand", "sel_h_1", "sel_h_2", "sel_h_3"],
+        #         # results = [cut0, cut1, cut2, cut3, cut4, cut5, cut6, cut7, cut8, cut9],
+        #         names = ["all", "N_lep_sel", "trig_cut", "lep_pt_cut", "has_g_cand", "has_z_cand", "sel_h_1", "sel_h_2", "sel_h_3", "event", "all cuts"],
+        #         results = [cut0, cut1, cut2, cut3, cut4, cut5, cut6, cut7, cut8, cut9, all_cuts],
+        #         events = events,
+        #         cut_type = cut_type,
+        #         weighted = weighted
+        #     )
             # cut_names = ["N_lep_sel", "trig_cut", "lep_pt_cut", "has_g_cand", "os_cut", "has_z_cand", "sel_h_1", "sel_h_2", "sel_h_3"]
             # for cut, cut_name in zip([cut1, cut2, cut3, cut4, cut5, cut6, cut7, cut8, cut9], cut_names):
             #     awkward_utils.add_field(events, f"{cut_type}_{cut_name}", cut)
@@ -715,13 +716,8 @@ class ZGammaTaggerRun2(Tagger):
         # CR4 = awkward.fill_none(CR4, value=False)
         # CR5 = awkward.fill_none(CR5, value=False)
         # regions = awkward.where(SR, 0, awkward.where(CR1, 1, awkward.where(CR2, 2, awkward.where(CR3, 3, awkward.where(CR4, 4, awkward.where(CR5, 5, -1))))))
-<<<<<<< HEAD
-        # # for i in range(5000):
-        # #    print("SR:", SR[i], "CR1:", CR1[i], "CR2", CR2[i], "CR3", CR3[i], "CR4", CR4[i], "CR5", CR5[i], "var_CR1", var_CR1[i], "var_CR2", var_CR2[i], "var_CR3", var_CR3[i], "regions:", regions[i])
-=======
         # for i in range(5000):
         #    print("SR:", SR[i], "CR1:", CR1[i], "CR2", CR2[i], "CR3", CR3[i], "CR4", CR4[i], "CR5", CR5[i], "var_CR1", var_CR1[i], "var_CR2", var_CR2[i], "var_CR3", var_CR3[i], "regions:", regions[i])
->>>>>>> main
         # awkward_utils.add_field(events, "regions",  regions)
 
 
@@ -877,8 +873,8 @@ class ZGammaTaggerRun2(Tagger):
 
         # use_central_nano = options["use_central_nano"] # indicates whether we are using central nanoAOD (with some branches that are necessary for full diphoton preselection missing) or custom nanoAOD (with these branches added)
 
-        all_cuts = pt_cut & eta_cut & id_cut & e_veto_cut & eg_overlap_cut
-        # all_cuts = pt_cut & eta_cut # bing for CR selection
+        # all_cuts = pt_cut & eta_cut & id_cut & e_veto_cut & eg_overlap_cut
+        all_cuts = pt_cut & eta_cut & eg_overlap_cut # bing for CR selection
 
         self.register_cuts(
                 names = ["pt", "eta", "id", "e_veto", "ele_pho_overlap", "all"],
