@@ -428,7 +428,8 @@ def MakeZReFitModel(PTRECO1_lep, PTErr1_lep, Theta1_lep, Phi1_lep, M1, PTRECO2_l
     else:
         mZ = RooFormulaVar("mZ", "TMath::Sqrt(2*@0+@1*@1+@2*@2)", RooArgList(p1D2, m1, m2))
         #mZ = RooRealVar("mZ", "TMath::Sqrt(2*p1D2+m1*m1+m2*m2)", 91.0, 50., 130.)
-    #mZ.setVal(91.0)
+    print("DEBUG: MakeZReFitModel before fit: pTMean1_lep={}, pTMean2_lep={}, theta1_lep={}, theta2_lep={}, phi1_lep={}, phi2_lep={}".format(pTMean1_lep.getVal(), pTMean2_lep.getVal(), theta1_lep.getVal(), theta2_lep.getVal(), phi1_lep.getVal(),  phi2_lep.getVal()))
+    print("DEBUG: MakeZReFitModel before fit: p1v3D2={}, p1D2={}, p1v3Dph1={}, p1Dph1={}, p2v3Dph1={}, p2Dph1={}, mZ={}".format(p1v3D2.getVal(), p1D2.getVal(), p1v3Dph1.getVal(), p1Dph1.getVal(), p2v3Dph1.getVal(),  p2Dph1.getVal(), mZ.getVal()))
 
     # true shape
     meanCB = RooRealVar("meanCB","",truelineshape_params["meanCB"])
@@ -496,12 +497,30 @@ def MakeZReFitModel(PTRECO1_lep, PTErr1_lep, Theta1_lep, Phi1_lep, M1, PTRECO2_l
 
     #r = model.fitTo(pTs, RooFit.Save(),RooFit.Constrain(mZ),RooFit.PrintLevel(-1), RooFit.PrintEvalErrors(-1))
     if n_fsr == 1:
-        r = model.fitTo(pTs, RooFit.Save(),RooFit.Constrain(RooArgSet(pTMean1_lep, pTMean2_lep, pTMean1_gamma)),RooFit.PrintLevel(-1),RooFit.PrintEvalErrors(-1))
+        #r = model.fitTo(pTs, RooFit.Save(),RooFit.Constrain(RooArgSet(pTMean1_lep, pTMean2_lep, pTMean1_gamma)),RooFit.PrintLevel(-1),RooFit.PrintEvalErrors(-1))
+
+        nll_test = RooNLLVar("nll_test", "nll_test", model, pTs, RooFit.Constrain(RooArgSet(pTMean1_lep, pTMean2_lep, pTMean1_gamma)))
+        minimizer = RooMinimizer(nll_test)
+        minimizer.setMaxIterations(1000)
+        minimizer.setEps(1e-5)
+        minimizer.setStrategy(0)
+        minimizer.minimize("Minuit2","migrad")
+
+        #minimizer.setEps(1)
+        #minimizer.setOffsetting(True)
+        #minimizer.setStrategy(0)
+        #minimizer.minimize("Minuit2","migrad")
+
+        minimizer.hesse()
+        r = minimizer.save()
+        minnll = nll_test.getVal()
+
     else:
         #r = model.fitTo(pTs, RooFit.Save(),RooFit.Constrain(RooArgSet(pTMean1_lep, pTMean2_lep)),RooFit.PrintLevel(-1),RooFit.PrintEvalErrors(-1))
         r = model.fitTo(pTs, RooFit.Save(),RooFit.Constrain(RooArgSet(pTMean1_lep, pTMean2_lep)), RooFit.PrintLevel(-1),RooFit.PrintEvalErrors(-1))
 
     #print("DEBUG: MakeZReFitModel: model float parameters: ", sigmaGauss1, pTRECO1_lep, pTMean1_lep, pTSigma1_lep, pTMean2_lep, pTSigma2_lep, mZ)
+    print("DEBUG: MakeZReFitModel after fit: p1v3D2={}, p1D2={}, p1v3Dph1={}, p1Dph1={}, p2v3Dph1={}, p2Dph1={}, mZ={}".format(p1v3D2.getVal(), p1D2.getVal(), p1v3Dph1.getVal(), p1Dph1.getVal(), p2v3Dph1.getVal(),  p2Dph1.getVal(), mZ.getVal()))
 
     covMatrix = r.covarianceMatrix()
     status_ = r.status()
