@@ -48,6 +48,12 @@
             ]
         }
     },
+    "ggH_test_local": {"xs": 48.58,
+    "bf": 0.000154793142,
+    "files": {
+        "2017": [
+            "/eos/project/h/htozg-dy-privatemc/shsong/Customized/HZgMC17/Run2017HZG/RunIISummer20UL17NanoAODv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/240908_121218/AED2B035-3C41-E044-92B7-5A908898EE0F_Skim.root"
+        ]}},
     "ggH_M120": {
         "xs": 48.58,
         "bf": 0.000154793142,

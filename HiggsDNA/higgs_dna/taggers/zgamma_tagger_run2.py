@@ -294,9 +294,13 @@ class ZGammaTaggerRun2(Tagger):
             name = "SelectedJet",
             data = events.Jet[jet_cut]
         )
-
+        photon = awkward_utils.add_field(
+                events = events,
+                name = "Photon",
+                data = events.Photon[photon_selection],
+        )
         FSRphoton_selection = self.select_FSRphotons(
-                FSRphotons = events.FsrPhoton,
+                FSRphotons = events.Photon,
                 electrons = electrons,
                 photons = photons,
                 options = self.options["FSRphotons"]
