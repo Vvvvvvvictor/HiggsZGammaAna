@@ -300,7 +300,7 @@ class ZGammaTaggerRun2(Tagger):
                 data = events.Photon[photon_selection],
         )
         FSRphoton_selection = self.select_FSRphotons(
-                FSRphotons = events.Photon,
+                FSRphotons = events.FsrPhoton,
                 electrons = electrons,
                 photons = photons,
                 options = self.options["FSRphotons"]

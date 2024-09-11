@@ -422,7 +422,20 @@
         "MET_T1_pt_unclustEnDown",
         "Muon_corrected_pt",
         "Muon_correctedUp_pt",
-        "Muon_correctedDown_pt"
+        "Muon_correctedDown_pt",
+        "Flag_goodVertices",
+        "Flag_globalSuperTightHalo2016Filter",
+        "Flag_HBHENoiseFilter",
+        "Flag_HBHENoiseIsoFilter",
+        "Flag_EcalDeadCellTriggerPrimitiveFilter",
+        "Flag_BadPFMuonFilter",
+        "Flag_BadChargedCandidateFilter",
+        "Flag_eeBadScFilter",
+        "Flag_hfNoisyHitsFilter",
+        "Flag_ecalBadCalibFilter",
+        "Flag_BadPFMuonDzFilter",
+        "TrigObj_id",
+        "TrigObj_filterBits"
     ],
     "branch_map" : {
         "mc" : [
