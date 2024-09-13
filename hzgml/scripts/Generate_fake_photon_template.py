@@ -4,6 +4,7 @@ import os
 import matplotlib.pyplot as plt
 import mplhep as hep
 plt.style.use(hep.style.CMS)
+import gc
 
 import copy
 from argparse import ArgumentParser
@@ -21,6 +22,7 @@ import ROOT
 ROOT.gErrorIgnoreLevel = ROOT.kError + 1
 pd.options.mode.chained_assignment = None
 
+from scipy.stats import gaussian_kde
 from scipy.ndimage import gaussian_filter1d
 
 def getArgs():
@@ -234,37 +236,71 @@ class ApplyXGBHandler(object):
                 # prob_dist_E, gamma_mvaID_dist_E = np.histogram(gamma_mvaID_dist_E, bins=100, density=True)
                 # gamma_mvaID_dist_B, gamma_mvaID_dist_E = (gamma_mvaID_dist_B[1:] + gamma_mvaID_dist_B[:-1])/2, (gamma_mvaID_dist_E[1:] + gamma_mvaID_dist_E[:-1])/2
                 
-                gamma_mvaID_dist_B, gamma_mvaID_dist_E = pd.read_pickle("/eos/user/j/jiehan/data_for_norm_float_v1/gamma_mvaID_2J_B.pkl"), pd.read_pickle("/eos/user/j/jiehan/data_for_norm_float_v1/gamma_mvaID_2J_E.pkl")
-                prob_dist_B, gamma_mvaID_dist_B = np.histogram(gamma_mvaID_dist_B['gamma_mvaID'], bins=100, density=True)
-                prob_dist_E, gamma_mvaID_dist_E = np.histogram(gamma_mvaID_dist_E['gamma_mvaID'], bins=100, density=True)
-                gamma_mvaID_dist_B, gamma_mvaID_dist_E = np.linspace(0.42, 1, 101)[1:]-(1-0.42)/200, np.linspace(0.14, 1, 101)[1:]-(1-0.14)/200
                 
-                plt.plot(gamma_mvaID_dist_B, prob_dist_B, label='B')
-                plt.plot(gamma_mvaID_dist_E, prob_dist_E, label='E')
+                # Load the data
+                gamma_mvaID_dist_B = pd.read_pickle("/eos/user/j/jiehan/data_for_norm_float_v1/gamma_mvaID_2J_B.pkl")['gamma_mvaID']
+                gamma_mvaID_dist_E = pd.read_pickle("/eos/user/j/jiehan/data_for_norm_float_v1/gamma_mvaID_2J_E.pkl")['gamma_mvaID']
+
+                # KDE for each distribution
+                kde_B = gaussian_kde(gamma_mvaID_dist_B, bw_method='scott')
+                kde_E = gaussian_kde(gamma_mvaID_dist_E, bw_method='scott')
+
+                # Define the ranges for sampling
+                min_B, max_B = gamma_mvaID_dist_B.min(), gamma_mvaID_dist_B.max()
+                min_E, max_E = gamma_mvaID_dist_E.min(), gamma_mvaID_dist_E.max()
+
+                # Generate probability distributions using KDE
+                gamma_mvaID_x_B = np.linspace(0.42, 1, 101)[1:] - (1-0.42)/200
+                gamma_mvaID_x_E = np.linspace(0.14, 1, 101)[1:] - (1-0.14)/200
+
+                prob_dist_B = kde_B(gamma_mvaID_x_B)
+                prob_dist_E = kde_E(gamma_mvaID_x_E)
+
+                # Plot the original and smoothed distributions
+                plt.figure()
+                plt.clf()
                 
-                # smooth the distribution
-                prob_dist_B, prob_dist_E = gaussian_filter1d(prob_dist_B, 5), gaussian_filter1d(prob_dist_E, 5)
-                
-                plt.plot(gamma_mvaID_dist_B, prob_dist_B, label='B_smooth')
-                plt.plot(gamma_mvaID_dist_E, prob_dist_E, label='E_smooth')
+                plt.hist(gamma_mvaID_dist_B, bins=100, histtype='step', label='B_original', density=True)
+                plt.hist(gamma_mvaID_dist_E, bins=100, histtype='step', label='E_original', density=True)
+
+                plt.plot(gamma_mvaID_x_B, prob_dist_B, label='B_smooth')
+                plt.plot(gamma_mvaID_x_E, prob_dist_E, label='E_smooth')
+
                 plt.legend()
                 plt.xlabel('gamma_mvaID', fontsize=28)
                 plt.ylabel('a.u.', fontsize=28)
                 plt.title("gamma_mvaID distribution", fontsize=36)
-                plt.savefig(f'figures/fake/smooth_gamma_mvaID.png')
-                
+                plt.savefig('figures/fake/smooth_gamma_mvaID.png')
+
                 plt.clf()
-            
-                plt.hist(data[(data['regions'] == 2)]['gamma_mvaID'], bins=100, histtype='step', label='Original', density=True)
-                
-                sampled_values_B = np.random.choice(gamma_mvaID_dist_B, size=data[output_selection & (data['gamma_eta'] < 1.5)].shape[0], p=prob_dist_B/sum(prob_dist_B))
-                sampled_values_E = np.random.choice(gamma_mvaID_dist_E, size=data[output_selection & (data['gamma_eta'] > 1.5)].shape[0], p=prob_dist_E/sum(prob_dist_E))
+
+                # Plot histogram of the original data
+                plt.hist(data[(data['regions'] == 2)]['gamma_mvaID'], bins=100, histtype='step', label='Original')
+
+                # Sampling from KDE
+                def sample_from_kde(kde, size, min_val, max_val):
+                    sampled_values = np.empty(size)
+                    samples = kde.resample(20*size).flatten()
+                    mask = (samples >= min_val) & (samples <= max_val)
+                    if np.sum(mask) >= size:
+                        sampled_values = np.random.choice(samples[mask], size=size, replace=False)
+
+                    return sampled_values
+
+                # Sample values for each category
+                data_filtered_B = data[output_selection & (data['gamma_eta'] < 1.5)]
+                data_filtered_E = data[output_selection & (data['gamma_eta'] > 1.5)]
+
+                sampled_values_B = sample_from_kde(kde_B, data_filtered_B.shape[0], min_B, max_B)
+                sampled_values_E = sample_from_kde(kde_E, data_filtered_E.shape[0], min_E, max_E)
+                print(sampled_values_B)
+
+                # Assign sampled values to the DataFrame
                 data.loc[output_selection & (data['gamma_eta'] < 1.5), 'gamma_mvaID'] = sampled_values_B
                 data.loc[output_selection & (data['gamma_eta'] > 1.5), 'gamma_mvaID'] = sampled_values_E
-                
-                # data.loc[output_selection, 'gamma_mvaID'] = np.array([1]*data[output_selection].shape[0])
-                
-                plt.hist(data[(data['regions'] == 2)]['gamma_mvaID'], bins=100, histtype='step', label='Transformed', density=True)
+
+                # Plot histogram of the transformed data
+                plt.hist(data[(data['regions'] == 2)]['gamma_mvaID'], bins=100, histtype='step', label='Transformed')
                 plt.legend(fontsize=28)
                 plt.xlabel('gamma_mvaID', fontsize=28)
                 plt.ylabel('a.u.', fontsize=28)
@@ -273,6 +309,7 @@ class ApplyXGBHandler(object):
                 name = filename.split('/')[-1].split('.')[0]
                 plt.savefig(f'figures/fake/{name}_mimic_gamma_mvaID.png')
 
+                # Further filter data
                 data = data[output_selection & (data["Z_mass"] > 80) & (data["Z_mass"] < 100)]
 
                 for i in range(4):
@@ -314,6 +351,7 @@ class ApplyXGBHandler(object):
             #     print(out_data)
 
             del out_data, data_s, data_o, data
+            gc.collect()
 
 
 def main():

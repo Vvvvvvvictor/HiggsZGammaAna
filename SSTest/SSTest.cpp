@@ -337,7 +337,7 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     bkg_model->paramOn(frame_bkg, Layout(0.34,0.96,0.89),Format("NEA",AutoPrecision(1)));
     frame_bkg->getAttText()->SetTextSize(0.03);
     frame_bkg->Draw();
-    gPad->Print(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/test/data_sb_shape_%s_cat%d_%s.pdf",channel.Data(),cat,bkg_fun.Data()));
+    gPad->Print(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/test/data_sb_shape_%s_cat%d_%s.png",channel.Data(),cat,bkg_fun.Data()));
 
     cout << "\t=================================" << endl;
     cout << "\n\t Finish data side band fit\n" << endl;
@@ -360,7 +360,7 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     // RooPlot *frame3 = mH.frame(Title("Pull Distribution"));
     // frame3->addPlotable(hpull, "P");
     // frame3->Draw();
-    gPad->Print(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/test/mc_bkg_shape_%s_cat%d_%s.pdf",channel.Data(),cat,bkg_fun.Data()));
+    gPad->Print(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/test/mc_bkg_shape_%s_cat%d_%s.png",channel.Data(),cat,bkg_fun.Data()));
 
     // RooAbsCollection *m_bkgParameters = bkg_model->getParameters(RooArgSet())->selectByAttrib("Constant", false);
     // TIterator *it = m_bkgParameters->createIterator();
@@ -397,7 +397,7 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     signal->Write(signal->GetName(), TObject::kOverwrite);
     output << "\t" << bkg_fun.Data() << "\tsig:\tnpars = " << sig_npars << "\tchi^2 = " << frame_sig->chiSquare(sig_npars) << "\tprob = " << TMath::Prob(frame_sig->chiSquare(sig_npars)*sig_ndof, sig_ndof) << endl;
     frame_sig->Draw();
-    gPad->Print(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/test/signal_shape_%s_cat%d_%s.pdf",channel.Data(),cat,bkg_fun.Data()));
+    gPad->Print(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/test/signal_shape_%s_cat%d_%s.png",channel.Data(),cat,bkg_fun.Data()));
 
 
     sigma.setConstant(true);MH.setConstant(true);sigma_CB.setConstant(true);alpha.setConstant(true);n_CB.setConstant(true);fracG1.setConstant(true);
@@ -587,15 +587,15 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     hdatasub->SetMarkerStyle(8);
     hdatasub->Draw("PESAME");
     nomSigCurve->Draw("L SAME");
-    canv->SaveAs(Form("./test/pesudo_data_shape_%s_cat%d_%s.pdf",channel.Data(),cat,bkg_fun.Data()));
+    canv->SaveAs(Form("./test/pesudo_data_shape_%s_cat%d_%s.png",channel.Data(),cat,bkg_fun.Data()));
 
-    // gPad->Print(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/test/pesudo_data_shape_%s_cat%d_%s.pdf",channel.Data(),cat,bkg_fun.Data()));
+    // gPad->Print(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/test/pesudo_data_shape_%s_cat%d_%s.png",channel.Data(),cat,bkg_fun.Data()));
 
     // RooHist *hpull = frame_data->pullHist();
     // RooPlot *frame3 = mH.frame(Title("Pull Distribution"));
     // frame3->addPlotable(hpull, "P");
     // frame3->Draw();
-    // gPad->Print(Form("test/%s_cat%d_%s_%dsig.pdf",channel.Data(),cat,bkg_fun.Data(),sig));
+    // gPad->Print(Form("test/%s_cat%d_%s_%dsig.png",channel.Data(),cat,bkg_fun.Data(),sig));
 
     cout << "\t=================================" << endl;
     cout << "\n\t Finish asimov data fit\n" << endl;

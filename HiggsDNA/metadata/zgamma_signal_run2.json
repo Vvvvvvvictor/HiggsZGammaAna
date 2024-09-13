@@ -25,10 +25,10 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "ggH_M125", "VBF_M125", "WplusH_M125", "WminusH_M125", "ZH_M125", "ttH_M125"
+            "ggH_M125"
         ],
         "years": [
-            "2016preVFP", "2016postVFP", "2017", "2018"
+            "2017"
         ]
     },
     "variables_of_interest": [
@@ -156,14 +156,29 @@
         "weight_central",
         "run",
         "event",
-        "luminosityBlock"
+        "luminosityBlock",
+        "z_mumu",
+        "z_ee"
     ],
     "branches": [
         "L1PreFiringWeight_Nom",
         "btagWeight_DeepCSVB",
         "btagWeight_CSVV2",
         "genWeight",
-	    "Generator_weight",
+        "Generator_weight",
+        "Flag_goodVertices",
+        "Flag_globalSuperTightHalo2016Filter",
+        "Flag_HBHENoiseFilter",
+        "Flag_HBHENoiseIsoFilter",
+        "Flag_EcalDeadCellTriggerPrimitiveFilter",
+        "Flag_BadPFMuonFilter",
+        "Flag_BadPFMuonDzFilter",
+        "Flag_hfNoisyHitsFilter",
+        "Flag_eeBadScFilter",
+        "Flag_ecalBadCalibFilterV2",
+        "Flag_ecalBadCalibFilter",
+        "Flag_BadChargedCandidateFilter",
+        "Flag_muonBadTrackFilter",
         "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL",
         "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ",
         "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL",
@@ -191,12 +206,11 @@
         "Photon_vidNestedWPBitmap",
         "Photon_mvaID",
         "Photon_electronVeto",
+        "Photon_electronIdx",
         "Photon_sieie",
         "Photon_energyErr",
         "Photon_r9",
         "Photon_hoe",
-        "Photon_genPartIdx",
-        "Photon_genPartFlav",
         "Photon_pfRelIso03_chg",
         "Photon_pfRelIso03_all",
         "Photon_isScEtaEB",
@@ -265,6 +279,8 @@
         "GenPart_pt",
         "GenPart_status",
         "GenPart_statusFlags",
+        "TrigObj_id",
+        "TrigObj_filterBits",
         "genWeight",
         "run",
         "event",

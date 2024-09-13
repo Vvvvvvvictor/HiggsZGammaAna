@@ -11,9 +11,9 @@ branches = ["H_mass", "weight", "bdt_score_t", "regions"]
 data_cr = uproot.open("/eos/home-j/jiehan/data_for_norm_float_v1/output/two_jet/Data_fake.root")["two_jet"].arrays(branches, library="pd")
 zg_cr = uproot.open("/eos/home-j/jiehan/data_for_norm_float_v1/output/two_jet/ZGToLLG_fake.root")["two_jet"].arrays(branches, library="pd")
 ewkzg_cr = uproot.open("/eos/home-j/jiehan/data_for_norm_float_v1/output/two_jet/ZG2JToG2L2J_fake.root")["two_jet"].arrays(branches, library="pd")
-dy_sr = uproot.open("/eos/home-j/jiehan/root/outputs/two_jet/DYJetsToLL.root")["test"].arrays(branches, library="pd")
+dy_sr = uproot.open("/eos/home-j/jiehan/root/output/two_jet/DYJetsToLL.root")["test"].arrays(branches, library="pd")
 
-boundaries = [float(i) for i in open("/eos/home-j/jiehan/root/outputs/significances/bin_binaries_1D_two_jet.txt", "r").readlines()[2].split()[1:]]
+boundaries = [float(i) for i in open("/eos/home-j/jiehan/root/output/significances/bin_binaries_1D_two_jet.txt", "r").readlines()[2].split()[1:]]
 boundaries = [0.0] + boundaries
 print(boundaries)
 
@@ -35,7 +35,7 @@ def apply(data_cr, zg_cr, ewkzg_cr, bkg_list, fake_bkg_list, bounds):
 
     fake_bkg_sum = 0
     for fake_bkg in fake_bkg_list:
-        fake_bkg_sample = uproot.open(f"/eos/home-j/jiehan/root/outputs/two_jet/{fake_bkg}.root")["test"].arrays(branches, library="pd")
+        fake_bkg_sample = uproot.open(f"/eos/home-j/jiehan/root/output/two_jet/{fake_bkg}.root")["test"].arrays(branches, library="pd")
         fake_bkg_sample = fake_bkg_sample[(fake_bkg_sample["bdt_score_t"] > bounds[0]) & (fake_bkg_sample["bdt_score_t"] < bounds[1])]
         fake_bkg_sum += np.sum(fake_bkg_sample["weight"])
 
@@ -43,11 +43,11 @@ def apply(data_cr, zg_cr, ewkzg_cr, bkg_list, fake_bkg_list, bounds):
     
     bkg_samples = []
     for bkg in bkg_list:
-        bkg_sample = uproot.open(f"/eos/home-j/jiehan/root/outputs/two_jet/{bkg}.root")["test"].arrays(branches, library="pd")
+        bkg_sample = uproot.open(f"/eos/home-j/jiehan/root/output/two_jet/{bkg}.root")["test"].arrays(branches, library="pd")
         bkg_sample = bkg_sample.query("bdt_score_t > @bounds[0] and bdt_score_t < @bounds[1]")
         bkg_samples.append(bkg_sample)
         
-    data_sr = uproot.open("/eos/home-j/jiehan/root/outputs/two_jet/data.root")["test"].arrays(branches, library="pd")
+    data_sr = uproot.open("/eos/home-j/jiehan/root/output/two_jet/data.root")["test"].arrays(branches, library="pd")
     data_sr = data_sr[(data_sr["bdt_score_t"] > bounds[0]) & (data_sr["bdt_score_t"] < bounds[1])]
     
     num_data_side_band = np.sum(data_sr[(data_sr["H_mass"] < 120) | (data_sr["H_mass"] > 130)]["weight"])
@@ -78,9 +78,9 @@ def apply(data_cr, zg_cr, ewkzg_cr, bkg_list, fake_bkg_list, bounds):
     return output
 
 # Apply
-with uproot.recreate("/eos/home-j/jiehan/root/outputs/two_jet/data_driven_bkg_v3.root") as output_file:
+with uproot.recreate("/eos/home-j/jiehan/root/output/two_jet/data_driven_bkg_v3.root") as output_file:
     output_dataframe = pd.DataFrame()
     for i in range(0, len(boundaries)-1):
         partial_output = apply(data_cr, zg_cr, ewkzg_cr, bkg_list, fake_bkg_list, [boundaries[i], boundaries[i+1]])
         output_dataframe = pd.concat([output_dataframe, partial_output])
-    output_file['test'] = output_dataframe
+    output_file['two_jet'] = output_dataframe
