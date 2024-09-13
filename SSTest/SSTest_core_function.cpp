@@ -60,9 +60,9 @@ RooAbsPdf* getBernsteinxZGMCShape(string prefix, int cat, int order, RooRealVar*
   // RooWorkspace *w = (RooWorkspace *)ZGMC_file->Get("w");
   // RooAbsPdf *ZGMCShape = w->pdf(Form("CoreShape_ZG_NAF_cat%d",cat));
 
-  TFile *ZGMC_file = new TFile("./ZGCoreShape_01jet_histSmooth.root");
-  RooWorkspace *w = (RooWorkspace *)ZGMC_file->Get("w");
-  RooAbsPdf *ZGMCShape = w->pdf(Form("CoreShape_ZG_NAF_cat%d",cat));
+  // TFile *ZGMC_file = new TFile("./ZGCoreShape_01jet_histSmooth.root");
+  // RooWorkspace *w = (RooWorkspace *)ZGMC_file->Get("w");
+  // RooAbsPdf *ZGMCShape = w->pdf(Form("CoreShape_ZG_NAF_cat%d",cat));
 
   // TFile *ZGMC_file = new TFile("./ZGCoreShape_fromMC_01jet_v4.root");
   // RooWorkspace *w = (RooWorkspace *)ZGMC_file->Get("w");
@@ -71,7 +71,12 @@ RooAbsPdf* getBernsteinxZGMCShape(string prefix, int cat, int order, RooRealVar*
   // TFile *ZGMC_file = new TFile("./ZGCoreShape_fromFake_01jet.root");
   // RooWorkspace *w = (RooWorkspace *)ZGMC_file->Get("w");
   // RooAbsPdf *ZGMCShape = w->pdf(Form("CoreShape_MC_cat%d",cat));
-  w->var("CMS_hzg_mass")->setRange(105, 170);
+
+  TFile *ZGMC_file = new TFile("/eos/user/j/jiehan/flashggFinalFit/ZGCoreShape/ZGCoreShape_2jet.root");
+  RooWorkspace *w = (RooWorkspace *)ZGMC_file->Get("w");
+  RooAbsPdf *ZGMCShape = w->pdf(Form("CoreShape_ZG_NAF_allcat"));
+
+  w->var("CMS_hzg_mass")->setRange(100, 170);
   ZGMC_file->Close();
 
   RooArgList *coeffList = new RooArgList();
@@ -148,9 +153,16 @@ RooAbsPdf* getBernsteinxZGMCShape(string prefix, int cat, int order, RooRealVar*
 
 RooAbsPdf* getExponentialZGMCShape(string prefix, int order, RooRealVar* obs_var){
   //bing add ZGMCShape
-  TFile *ZGMC_file = new TFile("./ZGMCShape_fromMC_01J_v4.root");
+  // TFile *ZGMC_file = new TFile("./ZGMCShape_fromMC_01J_v4.root");
+  // RooWorkspace *w = (RooWorkspace *)ZGMC_file->Get("w");
+  // RooAbsPdf *ZGMCShape = w->pdf("ZGMCShape");
+
+  TFile *ZGMC_file = new TFile("/eos/user/j/jiehan/flashggFinalFit/ZGCoreShape/ZGCoreShape_2jet.root");
   RooWorkspace *w = (RooWorkspace *)ZGMC_file->Get("w");
-  RooAbsPdf *ZGMCShape = w->pdf("ZGMCShape");
+  RooAbsPdf *ZGMCShape = w->pdf(Form("CoreShape_ZG_NAF_allcat"));
+
+  w->var("CMS_hzg_mass")->setRange(100, 170);
+
   ZGMC_file->Close();
 
   if(order%2==0) return NULL;
@@ -240,9 +252,16 @@ RooAbsPdf* getExponentialZGMCShape(string prefix, int order, RooRealVar* obs_var
 
 RooAbsPdf* getPowerLawZGMCShape(string prefix, int order, RooRealVar* obs_var){
   //bing add ZGMCShape
-  TFile *ZGMC_file = new TFile("./ZGMCShape.root");
+  // TFile *ZGMC_file = new TFile("./ZGMCShape.root");
+  // RooWorkspace *w = (RooWorkspace *)ZGMC_file->Get("w");
+  // RooAbsPdf *ZGMCShape = w->pdf("ZGMCShape");
+
+  TFile *ZGMC_file = new TFile("/eos/user/j/jiehan/flashggFinalFit/ZGCoreShape/ZGCoreShape_2jet.root");
   RooWorkspace *w = (RooWorkspace *)ZGMC_file->Get("w");
-  RooAbsPdf *ZGMCShape = w->pdf("ZGMCShape");
+  RooAbsPdf *ZGMCShape = w->pdf(Form("CoreShape_ZG_NAF_allcat"));
+
+  w->var("CMS_hzg_mass")->setRange(100, 170);
+
   ZGMC_file->Close();
 
   if(order%2==0) return NULL;
@@ -333,9 +352,16 @@ RooAbsPdf* getPowerLawZGMCShape(string prefix, int order, RooRealVar* obs_var){
 RooAbsPdf* getLaurentZGMCShape(string prefix, int order, RooRealVar* obs_var){
  
   //bing add ZGMCShape
-  TFile *ZGMC_file = new TFile("./ZGMCShape.root");
+  // TFile *ZGMC_file = new TFile("./ZGMCShape.root");
+  // RooWorkspace *w = (RooWorkspace *)ZGMC_file->Get("w");
+  // RooAbsPdf *ZGMCShape = w->pdf("ZGMCShape");
+
+  TFile *ZGMC_file = new TFile("/eos/user/j/jiehan/flashggFinalFit/ZGCoreShape/ZGCoreShape_2jet.root");
   RooWorkspace *w = (RooWorkspace *)ZGMC_file->Get("w");
-  RooAbsPdf *ZGMCShape = w->pdf("ZGMCShape");
+  RooAbsPdf *ZGMCShape = w->pdf(Form("CoreShape_ZG_NAF_allcat"));
+
+  w->var("CMS_hzg_mass")->setRange(100, 170);
+
   ZGMC_file->Close();
 
   double coeff1_lau1, coeff2_lau1, coeff1_lau2, coeff2_lau2, coeff3_lau2, coeff1_lau3, coeff2_lau3, coeff3_lau3, coeff4_lau3, coeff1_lau4, coeff2_lau4, coeff3_lau4, coeff4_lau4, coeff5_lau4, coeff1_lau5, coeff2_lau5, coeff3_lau5, coeff4_lau5, coeff5_lau5, coeff6_lau5; 
@@ -440,11 +466,11 @@ RooAbsPdf* getPdf(string type, int cat, int order, RooRealVar* obs_var, const ch
 }
 
 void SSTest_core_function(int cat = 0, int sig = 0, TString channel = "zero_to_one_jet"){
-  double mgg_low = 105, mgg_high = 170, bin_size = 4;
+  double mgg_low = 100, mgg_high = 170, bin_size = 4;
 
   //background MC template
   TH1F* hbkg;
-  TFile* fbkg = TFile::Open(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/NAF_SSTest_template.root"));
+  TFile* fbkg = TFile::Open(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/bkg_sig_template.root"));
   if (fbkg->GetListOfKeys()->Contains((Form("bkg_%s_cat%d",channel.Data(), cat))))
       hbkg = (TH1F*)fbkg->Get(Form("bkg_%s_cat%d",channel.Data(), cat));
   else
@@ -474,9 +500,9 @@ void SSTest_core_function(int cat = 0, int sig = 0, TString channel = "zero_to_o
 
   vector<string> functionClasses;
   functionClasses.push_back("Bernstein");
-  // functionClasses.push_back("Exponential");
-  // functionClasses.push_back("PowerLaw");
-  // functionClasses.push_back("Laurent");
+  functionClasses.push_back("Exponential");
+  functionClasses.push_back("PowerLaw");
+  functionClasses.push_back("Laurent");
 
   //initializing
   RooRealVar* CMS_hzg_mass = new RooRealVar("CMS_hzg_mass", "CMS_hzg_mass", 125.38, mgg_low, mgg_high);
@@ -491,31 +517,33 @@ void SSTest_core_function(int cat = 0, int sig = 0, TString channel = "zero_to_o
   RooRealVar nsig("nsig","nsig",0,-50*sigevents,50*sigevents);
   RooRealVar nbkg("nbkg","nbkg",dataevents, 0.1*dataevents, 2*dataevents);
 
+  int order;
+  TString bkg_fun;
+  int flag, fit_status, tries; TString status;
+  double dmc, dss, ss, ss_mc, tot_err, ss_cor, delta, chi2, prob;
+  RooFitResult *bkgPdf_fit, *bkg_model_fit;
+  RooAbsPdf *bkg_model;
+  RooNLLVar nllt;
+  RooAbsCollection *floatPars; TIterator *iter;
+  int bkg_npars, bkg_ndof;
+  double nll;
+  RooPlot *frame_bkg;
+
   for (vector<string>::iterator funcType=functionClasses.begin(); funcType!=functionClasses.end(); funcType++){
-    int order = 1;
-    TString bkg_fun;
+    order = 1;
     ofstream output(Form("./outputs/%s_%d_%dxsig.txt", channel.Data(), cat, sig), ofstream::app);
     // TFile *f = new TFile(Form("./outputs/%s_%d_%dxsig.root", channel.Data(), cat, sig),"UPDATE"); 
     while (order < 8){ //FIXME
       RooAbsPdf *bkgPdf = getPdf(*funcType,cat,order,CMS_hzg_mass,"");
       bkg_fun = Form("%s%d", funcType->c_str(), order);
       order++;
-      int flag, fit_status, tries; TString status;
-      double dmc, dss, ss, ss_mc, tot_err, ss_cor, delta, chi2, prob;
-      RooFitResult *bkgPdf_fit, *bkg_model_fit;
-      RooAbsPdf *bkg_model = bkgPdf;
-      RooNLLVar nllt;
-      RooAbsCollection *floatPars; TIterator *iter;
+      bkg_model = bkgPdf;
       if (bkgPdf){
         flag = 1; status = "Pass";
         // Data side band fitting
         // hbkg->Write(hbkg->GetName(), TObject::kOverwrite);
         // hsb->Write(hsb->GetName(), TObject::kOverwrite);
         // hsig->Write(hsig->GetName(), TObject::kOverwrite);
-
-        int bkg_npars, bkg_ndof;
-        double nll;
-        RooPlot *frame_bkg;
 
         // cout << *bkgPdf << " " << *dsb << endl;
 

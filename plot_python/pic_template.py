@@ -21,8 +21,8 @@ def read_file(file, var=None, tree="inclusive", selections=[]):
             variables.append(i)
     decro_sel, var_not_exist = [], []
     for i in selections:
-        var_can = list(set([j for j in re.split('\W+', i) if not j.isdigit()]))
-        # print(var_can)
+        var_can = list(set([j for j in re.split('\W+', i) if not j.isdigit() and j]))
+        print(var_can)
         variables += var_can
         for j in var_can:
             i = i.replace(j, "arrays."+j)
@@ -34,9 +34,11 @@ def read_file(file, var=None, tree="inclusive", selections=[]):
             var_not_exist.append(var)
     variables = [x for x in variables if x not in var_not_exist]
     arrays = data.arrays(variables,library='pd')
-    for i in decro_sel:
-        print(i)
-        arrays = arrays[eval(i)]
+    # for i in decro_sel:
+    #     print(i)
+    #     arrays = arrays[eval(i)]
+    for i in selections:
+        arrays = arrays.query(i)
     return arrays, var_not_exist
 
 def get_hist(arrays, variable, ratio, name, bins, range, hist=None, selections=[]):

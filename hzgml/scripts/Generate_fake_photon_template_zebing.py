@@ -99,6 +99,7 @@ class ApplyXGBHandler(object):
                     
                     # only control region need to change mvaID
                     sample_data = self.changeMvaID(sample_data)
+                    # sample_data["gamma_mvaID"] = sample_data["gamma_mvaID"].apply(lambda x: 1)
                     
                     sample_data = sample_data.query(self.postselctions)
                     sample_data["bdt_score"] = self.model.predict_proba(sample_data[self.trainVariables].to_numpy())[:, 1]
@@ -123,19 +124,17 @@ class ApplyXGBHandler(object):
         """
         # 核密度估计并重新采样函数
         def kde_resample(data, condition, gamma_eta_selection):
-            gamma_mvaID_values = data[condition]['gamma_mvaID'].values
+            # gamma_mvaID_values = data[condition]['gamma_mvaID'].values
+            gamma_mvaID_values = pd.read_pickle(f"/eos/user/j/jiehan/data_for_norm_float_v1/gamma_mvaID_01J_{condition}.pkl")['gamma_mvaID'].values
+            
             kde = gaussian_kde(gamma_mvaID_values)
             gamma_mvaID_range = np.linspace(min(gamma_mvaID_values), max(gamma_mvaID_values), 1000)
             prob_dist = kde(gamma_mvaID_range)
             return np.random.choice(gamma_mvaID_range, size=data.query(gamma_eta_selection).shape[0], p=prob_dist/prob_dist.sum())
 
-        # 条件
-        condition_B = (data['regions'] == 0) & (data['gamma_eta'] < 1.5)
-        condition_E = (data['regions'] == 0) & (data['gamma_eta'] > 1.5)
-
         # 重新采样并应用
-        data.loc[data['gamma_eta'] < 1.5, 'gamma_mvaID'] = kde_resample(data, condition_B, "gamma_eta < 1.5")
-        data.loc[data['gamma_eta'] > 1.5, 'gamma_mvaID'] = kde_resample(data, condition_E, "gamma_eta > 1.5")
+        data.loc[(data['gamma_eta'] < 1.5) & (data['gamma_eta'] > -1.5), 'gamma_mvaID'] = kde_resample(data, "B", "(gamma_eta < 1.5) & (gamma_eta > -1.5)")
+        data.loc[(data['gamma_eta'] > 1.5) | (data['gamma_eta'] < -1.5), 'gamma_mvaID'] = kde_resample(data, "E", "(gamma_eta > 1.5) | (gamma_eta < -1.5)")
         
         return data
         

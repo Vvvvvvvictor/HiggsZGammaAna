@@ -48,6 +48,12 @@
             ]
         }
     },
+    "ggH_test_local": {"xs": 48.58,
+    "bf": 0.000154793142,
+    "files": {
+        "2017": [
+            "/afs/cern.ch/user/s/shsong/CMSSW_10_6_20/src/PhysicsTools/NanoAODTools/python/postprocessing/analysis/nanoAOD_skim/E3D30224-C63D-CC48-9259-B0BE9FED9BB1_Skim.root"
+        ]}},
     "ggH_M120": {
         "xs": 48.58,
         "bf": 0.000154793142,

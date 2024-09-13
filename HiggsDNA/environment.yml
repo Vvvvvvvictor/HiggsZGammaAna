@@ -16,7 +16,7 @@ dependencies:
   - pip
   - pyaml
   - pyarrow
-  - python
+  - python=3.9
   - rich
   - tqdm
   - uproot

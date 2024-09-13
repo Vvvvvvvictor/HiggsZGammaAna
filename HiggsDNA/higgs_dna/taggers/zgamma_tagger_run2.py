@@ -263,7 +263,8 @@ class ZGammaTaggerRun2(Tagger):
         photons = events.Photon[photon_selection]
         
         # lepton-photon overlap removal 
-        clean_photon_mask = object_selections.delta_R(photons, muons, 0.3) & object_selections.delta_R(photons, electrons, 0.3)
+        clean_photon_mask = awkward.fill_none(object_selections.delta_R(photons, muons, 0.3), True) & awkward.fill_none(object_selections.delta_R(photons, electrons, 0.3), True)
+        # object_selections.delta_R(photons, muons, 0.3) & object_selections.delta_R(photons, electrons, 0.3)
         photons = photons[clean_photon_mask]
 <<<<<<< HEAD
 
@@ -299,7 +300,11 @@ class ZGammaTaggerRun2(Tagger):
             name = "SelectedJet",
             data = events.Jet[jet_cut]
         )
-
+        photon = awkward_utils.add_field(
+                events = events,
+                name = "Photon",
+                data = events.Photon[photon_selection],
+        )
         FSRphoton_selection = self.select_FSRphotons(
                 FSRphotons = events.FsrPhoton,
                 electrons = electrons,
@@ -330,7 +335,7 @@ class ZGammaTaggerRun2(Tagger):
                 dummy_value = DUMMY_VALUE
             )
 
-        n_electrons = awkward.num(electrons)
+        n_electrons = awkward.fill_none(awkward.num(electrons), 0)
         # N_e_cut = n_electrons>=2
         awkward_utils.add_field(events, "n_electrons", n_electrons, overwrite=True)
 
@@ -456,8 +461,8 @@ class ZGammaTaggerRun2(Tagger):
             single_ele_trigger_cut = awkward.any((events.TrigObj.id == 11) & ((events.TrigObj.filterBits & 0x400) != 0), axis=1) & single_ele_trigger_cut
 
         trigger_cut = single_ele_trigger_cut | double_ele_trigger_cut | single_mu_trigger_cut  | double_mu_trigger_cut
-        ele_trigger_cut = single_ele_trigger_cut #| double_ele_trigger_cut
-        mu_trigger_cut = single_mu_trigger_cut  #| double_mu_trigger_cut
+        ele_trigger_cut = single_ele_trigger_cut | double_ele_trigger_cut
+        mu_trigger_cut = single_mu_trigger_cut  | double_mu_trigger_cut
         
         # a trick that give 0 to the empty array
         if self.year is not None:
@@ -470,9 +475,14 @@ class ZGammaTaggerRun2(Tagger):
         ee_cut = (awkward.fill_none(awkward.pad_none(electrons.pt, 1, axis=1)[:, 0], 0) > 25) & (awkward.fill_none(awkward.pad_none(electrons.pt, 2, axis=1)[:, 1], 0) > 15)
         mm_cut = (awkward.fill_none(awkward.pad_none(muons.pt, 1, axis=1)[:, 0], 0) > 20) & (awkward.fill_none(awkward.pad_none(muons.pt, 2, axis=1)[:, 1], 0) > 10)
         
-        ele_trigger_pt_cut = (single_ele_trigger_cut & e_cut) #| (double_ele_trigger_cut & ee_cut)
-        mu_trigger_pt_cut = (single_mu_trigger_cut & m_cut) #| (double_mu_trigger_cut & mm_cut)
+        ele_trigger_pt_cut = (single_ele_trigger_cut & e_cut) | (double_ele_trigger_cut & ee_cut)
+        mu_trigger_pt_cut = (single_mu_trigger_cut & m_cut) | (double_mu_trigger_cut & mm_cut)
         trigger_pt_cut = (single_ele_trigger_cut & e_cut) | (double_ele_trigger_cut & ee_cut) | (single_mu_trigger_cut & m_cut) | (double_mu_trigger_cut & mm_cut)
+        
+        z_mumu = z_mumu_cut & mu_trigger_pt_cut
+        z_ee = z_ee_cut & ele_trigger_pt_cut
+        awkward_utils.add_field(events, "z_mumu", z_mumu, overwrite=True)
+        awkward_utils.add_field(events, "z_ee", z_ee, overwrite=True)
 
         mass_cut = (z_cands.ZCand.mass > 80.) & (z_cands.ZCand.mass < 100.)
         # mass_cut = z_cands.ZCand.mass > 50.
@@ -546,7 +556,7 @@ class ZGammaTaggerRun2(Tagger):
         awkward_utils.add_field(gamma_cand, "mass", awkward.ones_like(gamma_cand.pt) * 0) #TODO: run3 BUG
 
         # Add gamma-related fields to array
-        for field in ["pt", "eta", "phi", "mass", "mvaID", "energyErr", "sieie", "hoe", "r9", "mvaID_WP80"]:
+        for field in ["pt", "eta", "phi", "mass", "mvaID", "energyErr", "sieie", "hoe", "r9", "mvaID_WP80", "mvaID_WP90"]:
             awkward_utils.add_field(
                 events,
                 "gamma_%s" % field,
@@ -556,8 +566,6 @@ class ZGammaTaggerRun2(Tagger):
         awkward_utils.add_field(events, "gamma_chiso",  gamma_cand.pfRelIso03_chg) #run2
         awkward_utils.add_field(events, "gamma_alliso",  gamma_cand.pfRelIso03_all) #run2
         awkward_utils.add_field(events, "gamma_e_veto",  gamma_e_veto)
-        awkward_utils.add_field(events, "gamma_mvaID_WP80",  gamma_cand.mvaID_WP80)
-        awkward_utils.add_field(events, "gamma_mvaID_WP90",  gamma_cand.mvaID_WP90)
         # awkward_utils.add_field(events, "gamma_chiso",  gamma_cand.pfRelIso03_chg_quadratic) #run3
         # awkward_utils.add_field(events, "gamma_alliso",  gamma_cand.pfRelIso03_all_quadratic) #run3
         #awkward_utils.add_field(events, "gamma_mvaID_17",  gamma_cand.mvaID_Fall17V2) #run3
@@ -571,6 +579,8 @@ class ZGammaTaggerRun2(Tagger):
         sel_h_1 = awkward.fill_none(sel_h_1, value = False)
         sel_h_2 = awkward.fill_none(sel_h_2, value = False)
         sel_h_3 = awkward.fill_none(sel_h_3, value = False)
+        
+        print(f'!!!!has H: {sum(has_z_cand & has_gamma_cand & z_mumu_cut)} | {sum(has_z_cand & has_gamma_cand & z_ee_cut)}')
 
         # Add Higgs-related fields to array
         for field in ["pt", "eta", "phi", "mass"]:

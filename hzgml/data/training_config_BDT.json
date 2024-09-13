@@ -36,7 +36,7 @@
               "signal_preselections": [],
               "inputTree": "two_jet",
               "train_variables": ["delta_eta_jj", "delta_phi_jj", "delta_phi_zgjj",
-                                  "pt_balance", "photon_zeppenfeld", "mass_jj",
+                                  "pt_balance", "photon_zeppenfeld",
                                   "jet_1_pt", "jet1G_deltaR", "jet_1_btagDeepFlavB",
                                   "jet_2_pt", "jet2G_deltaR", "jet_2_btagDeepFlavB"
                                    ],

@@ -157,7 +157,9 @@
         "weight_central",
         "run",
         "event",
-        "luminosityBlock"
+        "luminosityBlock",
+        "z_mumu",
+        "z_ee"
     ],
     "branches": [
         "L1PreFiringWeight_Nom",

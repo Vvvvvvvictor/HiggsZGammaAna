@@ -19,17 +19,19 @@ echo "num: $2"
 echo "==================================================="
 echo "Shielded parameter is: $S . Added variables is: $A ."
 
-python scripts/train_bdt.py -r two_jet --optuna --n-calls 20 --continue-optuna 0
-for fold in {0..3};do
-python scripts/train_bdt.py -r two_jet --optuna --n-calls 40 --fold $fold --continue-optuna 1 
-done
-python scripts/train_bdt.py -r two_jet --save  --hyperparams_path "models/optuna"
+# python scripts/train_bdt.py -r two_jet --optuna --n-calls 20 --continue-optuna 0
+# for fold in {0..3};do
+# python scripts/train_bdt.py -r two_jet --optuna --n-calls 80 --fold $fold --continue-optuna 1 
+# done
+python scripts/train_bdt.py -r two_jet --save  --hyperparams_path "models/optuna_new_better"
 python scripts/apply_bdt.py -r two_jet
 python scripts/categorization_1D.py -r two_jet -b 4 --minN 10 --floatB
-python scripts/Generate_fake_photon_template.py -r two_jet
-python ../SSTest/Generate_template.py
-rm ../plot_python/pic/2J/*
-python ../plot_python/compare_data_driven_hmass_two_jet.py
+# python scripts/Generate_fake_photon_template.py -r two_jet
+# python ../plot_python/make_data_driven_two_jet.py 
+# python ../plot_python/compare_sig_bkg_bdt_sosb.py
+python ../SSTest/Generate_fake_photon_template_2J.py
+# rm ../plot_python/pic/2J/*
+# python ../plot_python/compare_data_driven_hmass_two_jet.py
 
 
 # # python scripts/train_bdt.py -r two_jet --skopt-plot --params '{"silent": 1, "eval_metric": ["logloss", "auc"], "grow_policy": "lossguide", "nthread": 4, "objective": "binary:logistic", "tree_method": "hist", "booster": "gbtree", "alpha": 0.5144783323380544, "colsample_bytree": 0.9588358073169332, "gamma": 3.3537213020169725, "max_delta_step": 19.5023193765768, "min_child_weight": 77.0, "subsample": 0.9644739775053346, "eta": 0.01681114970710191, "max_bin": 330.0, "max_depth": 6.0}'

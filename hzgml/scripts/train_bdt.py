@@ -68,7 +68,7 @@ class XGBoostHandler(object):
 
         self._region = region
 
-        self._inputFolder = '/eos/home-j/jiehan/root/skimmed_ntuples'#_two_jet_reindex'
+        self._inputFolder = '/eos/home-j/jiehan/root/skimmed_ntuples_two_jet_reindex'
         self._outputFolder = 'models'
         self._chunksize = 500000
         self._branches = []
