@@ -5,7 +5,7 @@ nCB	3.25604
 meanGauss1	96.4278
 meanGauss2	91.1649
 meanGauss3	91.1513
-sigmaGauss1	6.17
+sigmaGauss1	6.17509
 sigmaGauss2	0.856305
 sigmaGauss3	1.77148
 f1	0.86449

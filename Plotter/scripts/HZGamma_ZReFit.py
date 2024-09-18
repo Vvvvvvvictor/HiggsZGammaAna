@@ -166,8 +166,8 @@ def ZConstrainReFit(treeName, outpath, splitJobs):
     ntuples = LoadNtuples(analyzer_cfg)
 
     truelineshape_ele = Zrefit.getParameters("{}/GenZ_truelineshapeele.txt".format(args.truelineshape))
-    #truelineshape_mu = Zrefit.getParameters("{}/GenZ_truelineshapemu.txt".format(args.truelineshape))
-    truelineshape_mu = Zrefit.getParameters("{}/GenZ_truelineshapemu_anders.txt".format(args.truelineshape))
+    truelineshape_mu = Zrefit.getParameters("{}/GenZ_truelineshapemu.txt".format(args.truelineshape))
+    #truelineshape_mu = Zrefit.getParameters("{}/GenZ_truelineshapemu_anders.txt".format(args.truelineshape))
 
     #for sample in analyzer_cfg.samp_names:
     for sample in [args.sampleName]:
