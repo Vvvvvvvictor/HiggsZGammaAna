@@ -83,8 +83,8 @@ DEFAULT_OPTIONS = {
         "2016": 30,
         "2017": 35,
         "2018": 35,
-        "2022": 30,
-        "2023": 30
+        "2022": 35,
+        "2023": 35
     },
     "lead_mu_pt":{
         "2016": 25,
@@ -95,7 +95,7 @@ DEFAULT_OPTIONS = {
     },
     "jets" : {
         "pt" : 30.0,
-        "eta" : 4.7,
+        "eta" : 2.5,
         "dr_photons" : 0.4,
         "dr_electrons" : 0.4,
         "dr_muons" : 0.4,
@@ -222,7 +222,8 @@ class ZGammaTaggerRun2(Tagger):
             clean = {
             },
             name = "SelectedElectron",
-            tagger = self
+            tagger = self,
+            year = self.year[:4]
         )
         
         electrons = awkward_utils.add_field(
@@ -529,11 +530,13 @@ class ZGammaTaggerRun2(Tagger):
                 awkward.fill_none(getattr(gamma_cand, field), DUMMY_VALUE)
             )
         awkward_utils.add_field(events, "gamma_mvaID_WPL",  gamma_mvaID_WPL)
-        awkward_utils.add_field(events, "gamma_chiso",  gamma_cand.pfRelIso03_chg) #run2
-        awkward_utils.add_field(events, "gamma_alliso",  gamma_cand.pfRelIso03_all) #run2
         awkward_utils.add_field(events, "gamma_e_veto",  gamma_e_veto)
-        # awkward_utils.add_field(events, "gamma_chiso",  gamma_cand.pfRelIso03_chg_quadratic) #run3
-        # awkward_utils.add_field(events, "gamma_alliso",  gamma_cand.pfRelIso03_all_quadratic) #run3
+        if int(self.year[:4]) < 2020:
+            awkward_utils.add_field(events, "gamma_chiso",  gamma_cand.pfRelIso03_chg) #run2
+            awkward_utils.add_field(events, "gamma_alliso",  gamma_cand.pfRelIso03_all) #run2
+        elif int(self.year[:4]) > 2020:
+            awkward_utils.add_field(events, "gamma_chiso",  gamma_cand.pfRelIso03_chg_quadratic) #run3
+            awkward_utils.add_field(events, "gamma_alliso",  gamma_cand.pfRelIso03_all_quadratic) #run3
         #awkward_utils.add_field(events, "gamma_mvaID_17",  gamma_cand.mvaID_Fall17V2) #run3
 
         # Make Higgs candidate-level cuts
