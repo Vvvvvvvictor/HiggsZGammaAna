@@ -28,7 +28,8 @@
             "Data"
         ],
         "years": [
-            "2022preEE", "2022postEE"
+            "2022preEE",
+            "2022postEE"
         ]
     },
     "variables_of_interest": [
@@ -79,12 +80,20 @@
         "gamma_mvaID_WP90",
         "gamma_mvaID_WPL",
         "gamma_e_veto",
-        "gamma_fsr_pt",
-        "gamma_fsr_eta",
-        "gamma_fsr_phi",
-        "gamma_fsr_mass",
-        "gamma_fsr_relIso03",
-        "gamma_fsr_dROverEt2",
+        "gamma_fsr_1_pt",
+        "gamma_fsr_1_eta",
+        "gamma_fsr_1_phi",
+        "gamma_fsr_1_mass",
+        "gamma_fsr_1_relIso03",
+        "gamma_fsr_1_dROverEt2",
+        "gamma_fsr_1_muonIdx",
+        "gamma_fsr_2_pt",
+        "gamma_fsr_2_eta",
+        "gamma_fsr_2_phi",
+        "gamma_fsr_2_mass",
+        "gamma_fsr_2_relIso03",
+        "gamma_fsr_2_dROverEt2",
+        "gamma_fsr_2_muonIdx",
         "jet_1_pt",
         "jet_1_eta",
         "jet_1_phi",

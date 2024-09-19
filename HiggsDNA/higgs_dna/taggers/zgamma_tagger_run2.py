@@ -267,12 +267,7 @@ class ZGammaTaggerRun2(Tagger):
         clean_photon_mask = awkward.fill_none(object_selections.delta_R(photons, muons, 0.3), True) & awkward.fill_none(object_selections.delta_R(photons, electrons, 0.3), True)
         # object_selections.delta_R(photons, muons, 0.3) & object_selections.delta_R(photons, electrons, 0.3)
         photons = photons[clean_photon_mask]
-<<<<<<< HEAD
-
-
-=======
         
->>>>>>> main
         # Jets
         jet_cut = jet_selections.select_jets(
             jets = events.Jet,
@@ -376,7 +371,13 @@ class ZGammaTaggerRun2(Tagger):
         muons = awkward.Array(muons, with_name = "Momentum4D")
         FSRphotons = awkward.Array(FSRphotons, with_name = "Momentum4D")
 
-        #awkward_utils.add_field(events, "gamma_fsr_pt",  awkward.fill_none(FSRphotons.pt, DUMMY_VALUE))
+        awkward_utils.add_object_fields(
+                events = events,
+                name = "gamma_fsr",
+                objects = FSRphotons,
+                n_objects = 2,
+                dummy_value = DUMMY_VALUE
+            )
 
         # bing with control regions
         #var_CR1 = ((photons.isScEtaEB & (photons.mvaID > self.options["photons"]["mvaID_barrel"])) | (photons.isScEtaEE & (photons.mvaID > self.options["photons"]["mvaID_endcap"])))
@@ -669,18 +670,6 @@ class ZGammaTaggerRun2(Tagger):
             # for cut, cut_name in zip([cut1, cut2, cut3, cut4, cut5, cut6, cut7, cut8, cut9], cut_names):
             #     awkward_utils.add_field(events, f"{cut_type}_{cut_name}", cut)
 
-        ################## fsr recovery
-        #clean_FSRphoton_mask = object_selections.delta_R_fsrlep(FSRphotons, z_cand.LeadLepton, 0.001) & object_selections.delta_R_fsrlep(FSRphotons, z_cand.SubleadLepton, 0.001) & object_selections.delta_R_fsrGamma(FSRphotons, gamma_cand, 0.001)
-        #FSRphotons = FSRphotons[clean_FSRphoton_mask]
-        
-        FSRphotons = awkward.pad_none(FSRphotons,1)
-        for field in ["pt", "eta", "phi", "mass", "relIso03", "dROverEt2"]:
-            awkward_utils.add_field(
-                events = events,
-                name = "gamma_fsr_%s" % field,
-                data = awkward.fill_none(FSRphotons[field][:,0], DUMMY_VALUE)
-            )
-
 
         # # bing with control regions
         # #var_CR1 = ((photons.isScEtaEB & (photons.mvaID > self.options["photons"]["mvaID_barrel"])) | (photons.isScEtaEE & (photons.mvaID > self.options["photons"]["mvaID_endcap"])))
@@ -876,7 +865,9 @@ class ZGammaTaggerRun2(Tagger):
         FSR_iso_cut = FSRphotons.relIso03 < options["iso"]
         FSR_dROverEt2_cut = FSRphotons.dROverEt2 < options["dROverEt2"]
 
-        FSR_all_cuts = FSR_pt_cut & FSR_eta_cut & FSR_iso_cut & FSR_dROverEt2_cut
+        FSRphoton_clean = object_selections.delta_R(FSRphotons, electrons, 0.001) & object_selections.delta_R(FSRphotons, photons, 0.001)
+
+        FSR_all_cuts = FSR_pt_cut & FSR_eta_cut & FSR_iso_cut & FSR_dROverEt2_cut & FSRphoton_clean
 
         return FSR_all_cuts
 
