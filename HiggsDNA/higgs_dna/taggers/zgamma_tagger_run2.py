@@ -361,7 +361,13 @@ class ZGammaTaggerRun2(Tagger):
         muons = awkward.Array(muons, with_name = "Momentum4D")
         FSRphotons = awkward.Array(FSRphotons, with_name = "Momentum4D")
 
-        #awkward_utils.add_field(events, "gamma_fsr_pt",  awkward.fill_none(FSRphotons.pt, DUMMY_VALUE))
+        awkward_utils.add_object_fields(
+                events = events,
+                name = "gamma_fsr",
+                objects = FSRphotons,
+                n_objects = 2,
+                dummy_value = DUMMY_VALUE
+            )
 
         ee_pairs = awkward.combinations(electrons, 2, fields = ["LeadLepton", "SubleadLepton"])
         os_cut = (ee_pairs.LeadLepton.charge * ee_pairs.SubleadLepton.charge) == -1
@@ -623,41 +629,6 @@ class ZGammaTaggerRun2(Tagger):
         #     results = [has_z_cand, has_gamma_cand, sel_h_1, sel_h_2, sel_h_3, all_cuts],
         #     cut_type = "zgammas_unweighted"
         # )
-        ################## fsr recovery
-        #clean_FSRphoton_mask = object_selections.delta_R_fsrlep(FSRphotons, z_cand.LeadLepton, 0.001) & object_selections.delta_R_fsrlep(FSRphotons, z_cand.SubleadLepton, 0.001) & object_selections.delta_R_fsrGamma(FSRphotons, gamma_cand, 0.001)
-        #FSRphotons = FSRphotons[clean_FSRphoton_mask]
-        
-        FSRphotons = awkward.pad_none(FSRphotons,1)
-        for field in ["pt", "eta", "phi", "mass", "relIso03", "dROverEt2"]:
-            awkward_utils.add_field(
-                events = events,
-                name = "gamma_fsr_%s" % field,
-                data = awkward.fill_none(FSRphotons[field][:,0], DUMMY_VALUE)
-            )
-
-
-        # # bing with control regions
-        # #var_CR1 = ((photons.isScEtaEB & (photons.mvaID > self.options["photons"]["mvaID_barrel"])) | (photons.isScEtaEE & (photons.mvaID > self.options["photons"]["mvaID_endcap"])))
-        # var_CR1 = gamma_cand.mvaID_WP80
-        # var_CR2 = gamma_cand.mvaID_WP90
-        # var_CR3 = gamma_e_veto
-        # SR = (var_CR1) & (var_CR3)
-        # CR1 = (~var_CR1) & (var_CR2) & (var_CR3)
-        # CR2 = (~var_CR2) & (var_CR3)
-        # CR3 = (var_CR1) & (~var_CR3)
-        # CR4 = (~var_CR1) & (var_CR2) & (~var_CR3)
-        # CR5 = (~var_CR2) & (~var_CR3)
-        
-        # SR = awkward.fill_none(SR, value = False)
-        # CR1 = awkward.fill_none(CR1, value=False)
-        # CR2 = awkward.fill_none(CR2, value=False)
-        # CR3 = awkward.fill_none(CR3, value=False)
-        # CR4 = awkward.fill_none(CR4, value=False)
-        # CR5 = awkward.fill_none(CR5, value=False)
-        # regions = awkward.where(SR, 0, awkward.where(CR1, 1, awkward.where(CR2, 2, awkward.where(CR3, 3, awkward.where(CR4, 4, awkward.where(CR5, 5, -1))))))
-        # for i in range(5000):
-        #    print("SR:", SR[i], "CR1:", CR1[i], "CR2", CR2[i], "CR3", CR3[i], "CR4", CR4[i], "CR5", CR5[i], "var_CR1", var_CR1[i], "var_CR2", var_CR2[i], "var_CR3", var_CR3[i], "regions:", regions[i])
-        # awkward_utils.add_field(events, "regions",  regions)
 
 
         elapsed_time = time.time() - start
@@ -822,8 +793,10 @@ class ZGammaTaggerRun2(Tagger):
 
         FSR_iso_cut = FSRphotons.relIso03 < options["iso"]
         FSR_dROverEt2_cut = FSRphotons.dROverEt2 < options["dROverEt2"]
+        
+        FSRphoton_clean = object_selections.delta_R(FSRphotons, electrons, 0.001) & object_selections.delta_R(FSRphotons, photons, 0.001)
 
-        FSR_all_cuts = FSR_pt_cut & FSR_eta_cut & FSR_iso_cut & FSR_dROverEt2_cut
+        FSR_all_cuts = FSR_pt_cut & FSR_eta_cut & FSR_iso_cut & FSR_dROverEt2_cut & FSRphoton_clean
 
         return FSR_all_cuts
 
