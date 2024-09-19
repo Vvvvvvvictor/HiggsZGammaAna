@@ -95,7 +95,7 @@ DEFAULT_OPTIONS = {
     },
     "jets" : {
         "pt" : 30.0,
-        "eta" : 2.5,
+        "eta" : 4.7,
         "dr_photons" : 0.4,
         "dr_electrons" : 0.4,
         "dr_muons" : 0.4,
@@ -267,7 +267,6 @@ class ZGammaTaggerRun2(Tagger):
         clean_photon_mask = awkward.fill_none(object_selections.delta_R(photons, muons, 0.3), True) & awkward.fill_none(object_selections.delta_R(photons, electrons, 0.3), True)
         # object_selections.delta_R(photons, muons, 0.3) & object_selections.delta_R(photons, electrons, 0.3)
         photons = photons[clean_photon_mask]
-        
         # Jets
         jet_cut = jet_selections.select_jets(
             jets = events.Jet,
