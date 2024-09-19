@@ -38,9 +38,10 @@ class MCOverlapTagger(Tagger):
             return cut
 
         # Only use specific events in different MC NanoAOD
-        if "DYJetsToLL" in file or "EWKZ2J" in file or "TTTo2L2Nu" in file:
+        logger.debug("MC_overlap_samples:  file: %s" % file)
+        if "DYto2L" in file or "DYJetsToLL" in file or "EWKZ2J" in file or "TTTo2L2Nu" in file:
             cut = self.get_n_iso_photon(data) == 0
-        elif "ZGToLLG" in file or "ZG2JToG2L2J" in file or "TTGJets" in file:
+        elif "DYGto2LG" in file or "ZGToLLG" in file or "ZG2JToG2L2J" in file or "TTGJets" in file:
             cut = self.get_n_iso_photon(data) > 0
         
         # cut = cut>0
@@ -63,6 +64,8 @@ class MCOverlapTagger(Tagger):
         """
         iso_photons_cut = (data.GenPart.pdgId == 22) & (data.GenPart.pt > 9) & (( (data.GenPart.statusFlags & 0x1) != 0 ) | ( (data.GenPart.statusFlags & 0x100) != 0 )) #& (abs(data.GenPart.eta) < 2.6)
         iso_photons = data.GenPart[iso_photons_cut]
+        n_iso_photons = awkward.num(iso_photons, axis=1)
+        logger.debug("MC_overlap_samples: n_iso_photons: %s" % n_iso_photons)
 
         truth_objects_cut =  (data.GenPart.pdgId != 22) & (data.GenPart.pt > 5) & ( (data.GenPart.statusFlags & 0x100) != 0 ) 
         truth_objects = data.GenPart[truth_objects_cut]

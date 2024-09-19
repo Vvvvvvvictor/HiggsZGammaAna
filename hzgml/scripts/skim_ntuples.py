@@ -89,9 +89,9 @@ def compute_l_costheta(x):
     #cosTheta = a/k1
 
     ## photon and lepton
-    cosTheta = - (gamma_BZ.Vect()/gamma_BZ.Vect().R()).Dot(l1_BZ.Vect()/l1_BZ.Vect().R())
+    costheta = - (gamma_BZ.Vect()).Dot(l1_BZ.Vect())/gamma_BZ.Vect().R()/l1_BZ.Vect().R()
 
-    return cosTheta
+    return costheta
 
 def compute_l_phi(x):
     if (x.Z_lead_lepton_charge < 0 and x.Z_sublead_lepton_charge > 0): 
@@ -103,33 +103,42 @@ def compute_l_phi(x):
     else: print('leptons have same sign')
     Z = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.Z_pt, x.Z_eta, x.Z_phi, x.Z_mass)
     H = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.H_pt, x.H_eta, x.H_phi, x.H_mass)
-    H_beta = TLorentzVector(H.Px(), H.Py(), H.Pz(), H.E()).BoostVector()
-    l1_BH = Math.VectorUtil.boost(l1, -H_beta)
-    l2_BH = Math.VectorUtil.boost(l2, -H_beta)
-    Z_BH = Math.VectorUtil.boost(Z, -H_beta)
-    N1_BH = l1_BH.Vect().Cross(l2_BH.Vect())
-    N1_BH = N1_BH/N1_BH.R()
     
-    # beamAxis = TVector3 (0, 0, 1)
-    Z3_BH = Z_BH.Vect()/Z_BH.Vect().R()
-    # NSC_BH = (Z3_BH.Cross(beamAxis)).Unit()
-    # tmpSgnPhi1 = Z3_BH.Dot(N1_BH.Cross(NSC_BH))
-    
+    M, mll = x.H_mass, x.Z_mass
+    lZ = math.sqrt((H.Dot(Z) / M) ** 2 - mll ** 2)
+
     H_transverse_beta = TLorentzVector(H.Px(), H.Py(), H.Pz(), H.E()).BoostVector()
     H_transverse_beta.SetZ(0)
     hH = Math.VectorUtil.boost(H, -H_transverse_beta)
     hPz, hE = hH.Pz(), hH.E()
     q = Math.LorentzVector("ROOT::Math::PxPyPzE4D<float>")(0, 0, (hPz + hE) / 2, (hE + hPz) / 2)
     q = Math.VectorUtil.boost(q, H_transverse_beta)
+    qbar = Math.LorentzVector("ROOT::Math::PxPyPzE4D<float>")(0, 0, (hPz - hE) / 2, (hE - hPz) / 2)
+    qbar = Math.VectorUtil.boost(qbar, H_transverse_beta)
+
+    cosTheta = (qbar - q).Dot(Z)/(M * lZ)
+    sinTheta = math.sqrt(1 - cosTheta ** 2)
+    
+    H_beta = TLorentzVector(H.Px(), H.Py(), H.Pz(), H.E()).BoostVector()
+    l1_BH = Math.VectorUtil.boost(l1, -H_beta)
+    l2_BH = Math.VectorUtil.boost(l2, -H_beta)
+    Z_BH = Math.VectorUtil.boost(Z, -H_beta)
+    N1_BH = l1_BH.Vect().Cross(l2_BH.Vect())
+    
     q = Math.VectorUtil.boost(q, -H_beta)
     
-    NSC_BH = (Z_BH.Vect().Cross(q.Vect()))
-    NSC_BH = NSC_BH/NSC_BH.R()
-    tmpSgnPhi1 = - Z3_BH.Dot(N1_BH.Cross(NSC_BH))
+    # beamAxis = TVector3 (0, 0, 1)
+    Z3_BH = Z_BH.Vect()
+    # NSC_BH = (Z3_BH.Cross(beamAxis)).Unit()
+    # tmpSgnPhi1 = Z3_BH.Dot(N1_BH.Cross(NSC_BH))
+    
+    NSC_BH = (q.Vect().Cross(Z_BH.Vect()))
+    # tmpSgnPhi1 = - Z3_BH.Dot(N1_BH.Cross(NSC_BH))
+    tmpSgnPhi1 = - N1_BH.Dot(q.Vect())/q.Vect().R()/N1_BH.R()/sinTheta
     
     sgnPhi1 = 0.
     if (abs(tmpSgnPhi1)>0.): sgnPhi1 = tmpSgnPhi1/abs(tmpSgnPhi1)
-    dot_BH1SC = - N1_BH.Dot(NSC_BH)
+    dot_BH1SC = - N1_BH.Dot(NSC_BH)/NSC_BH.R()/N1_BH.R()
     if (abs(dot_BH1SC)>=1.): 
       print(dot_BH1SC)
       dot_BH1SC *= 1./abs(dot_BH1SC)
@@ -527,11 +536,15 @@ def main():
     data = preselect(data) #TODO add cutflow
     data = decorate(data)
     final_events += data.shape[0]
-    data_zero_jet = data[(data.n_jets == 0) & (data.n_leptons < 3)]
-    data_one_jet = data[(data.n_jets == 1) & (data.n_leptons < 3)]
-    data_two_jet = data[(data.n_jets >= 2) & (data.n_leptons < 3)]
-    data_zero_to_one_jet = data[(data.n_jets < 2) & (data.n_leptons < 3)]
+    data_zero_jet = data[(data.n_jets == 0) & (data.n_leptons < 3) & (data.MET_pt < 90)]
+    data_one_jet = data[(data.n_jets == 1) & (data.n_leptons < 3) & (data.MET_pt < 90)]
+    data_two_jet = data[(data.n_jets >= 2) & (data.n_leptons < 3) & (data.n_b_jets == 0)]
+    data_zero_to_one_jet = data[(data.n_jets < 2) & (data.n_leptons < 3) & (data.MET_pt < 90)]
+    data_VH = data[(data.n_leptons > 2) & (data.n_b_jets == 0)]
     data_VH_ttH =  data[data.n_leptons >= 3]
+    data_ZH = data[(data.n_leptons < 3) & (data.n_jets < 2) & (data.MET_pt > 90)]
+    data_ttH_had = data[(data.n_leptons == 2) & (data.n_jets >= 5) & (data.n_b_jets > 0)]
+    data_ttH_lep = data[((data.n_leptons == 2) & (data.n_jets >= 3) & (data.n_b_jets > 0)) | ((data.n_leptons >= 4) & (data.n_jets > 0) & (data.n_b_jets > 0))]
     with uproot.recreate(args.output) as f:
         f['inclusive'] = data
         f['zero_jet'] = data_zero_jet
@@ -539,6 +552,10 @@ def main():
         f['zero_to_one_jet'] = data_zero_to_one_jet
         f['two_jet'] = data_two_jet
         f['VH_ttH'] = data_VH_ttH
+        f['VH'] = data_VH
+        f['ZH'] = data_ZH
+        f['ttH_had'] = data_ttH_had
+        f['ttH_lep'] = data_ttH_lep
     # data.to_root(args.output, key='inclusive', mode='a', index=False)
     # data_zero_jet.to_root(args.output, key='zero_jet', mode='a', index=False)
     # data_one_jet.to_root(args.output, key='one_jet', mode='a', index=False)

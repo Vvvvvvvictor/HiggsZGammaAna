@@ -16,7 +16,7 @@
 
 using namespace std;
 
-void draw_2D(TString mode = "test", TString dataset = "bkgmc")
+void draw_2D(TString mode = "inclusive", TString dataset = "bkgmc")
 {
 
     cout << "\tNOW!!! We will draw the most beautiful PICTURE in the world" << endl;
@@ -24,15 +24,15 @@ void draw_2D(TString mode = "test", TString dataset = "bkgmc")
     cout << "\tLET'S GO!!!!!!" << endl;
     cout << "-------------------------------------------------------------------------------" << endl;
 
-    double X_axis[3] = {100, 0, 1};
-    double Y_axis[3] = {100, 0, 1};
+    double X_axis[3] = {100, -1e-4, 1e-4};
+    double Y_axis[3] = {6, 0, 6};
     // double X_axis[3] = {120, 0.000000000001, 0.03};
 
-    TString y_name = "bdt_score_t";
+    TString y_name = "n_jets";
     Float_t Y;
-    TString x_name = "bdt_score_VBF";
+    TString x_name = "weight";
     Float_t X;
-    TString file_dir = "/eos/home-j/jiehan/root/outputs/two_jet";
+    TString file_dir = "/eos/home-j/jiehan/root/skimmed_ntuples_run3";
     TString str_dir = "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml";
 
     int isbarrel = 1;
@@ -69,7 +69,8 @@ void draw_2D(TString mode = "test", TString dataset = "bkgmc")
     // h2->SetLineWidth(3);
     cout << "\n\tLoading file" << Form("%s/%s.root", file_dir.Data(), dataset.Data()) << "!......" << endl;
 
-    TFile *f = new TFile(Form("%s/%s.root", file_dir.Data(), dataset.Data()));
+    // TFile *f = new TFile(Form("%s/%s.root", file_dir.Data(), dataset.Data()));
+    TFile *f = new TFile(Form("%s/ZH_M125/2022postEE.root", file_dir.Data()));
 
     TTree *t = (TTree *)f->Get(mode.Data());
     Long64_t nentries = t->GetEntries();
@@ -108,9 +109,9 @@ void draw_2D(TString mode = "test", TString dataset = "bkgmc")
         // if ((match==1) & ((int(bit/(1<<5))%2==1) | (int(bit/(1<<5))%2==1)) & (isb==isbarrel))
         // if (isb==isbarrel)
         {
-            h2->Fill(X, Y, w);
-            sum+=w;
-            // h2->Fill(X, Y);
+            // h2->Fill(X, Y, w);
+            // sum+=w;
+            h2->Fill(X, Y);
             // h2->Fill(X, Y*pt);
             // h2->Fill(X*pt, Y);
             // h2->Fill(X*pt, Y/pt);
@@ -167,11 +168,11 @@ void draw_2D(TString mode = "test", TString dataset = "bkgmc")
 
     double vb = 0.41;
 
-    TLine *l0 = new TLine(vb,Y_axis[1],vb,Y_axis[2]);
-    // TLine *l0 = new TLine(-0.97,5,X_axis[2],5);
-    l0->SetLineColor(kBlue);
-    l0->SetLineWidth(3);
-    l0->Draw();
+    // TLine *l0 = new TLine(vb,Y_axis[1],vb,Y_axis[2]);
+    // // TLine *l0 = new TLine(-0.97,5,X_axis[2],5);
+    // l0->SetLineColor(kBlue);
+    // l0->SetLineWidth(3);
+    // l0->Draw();
 
     // TLine *l10 = new TLine(X_axis[1],0.02,vb,0.02);
     // // TLine *l1 = new TLine(-0.97,5,X_axis[2],5);
@@ -179,41 +180,41 @@ void draw_2D(TString mode = "test", TString dataset = "bkgmc")
     // l10->SetLineWidth(3);
     // l10->Draw();
 
-    TLine *l1 = new TLine(X_axis[1],0.27,vb,0.27);
-    // TLine *l1 = new TLine(-0.97,5,X_axis[2],5);
-    l1->SetLineColor(kBlue);
-    l1->SetLineWidth(3);
-    l1->Draw();
+    // TLine *l1 = new TLine(X_axis[1],0.27,vb,0.27);
+    // // TLine *l1 = new TLine(-0.97,5,X_axis[2],5);
+    // l1->SetLineColor(kBlue);
+    // l1->SetLineWidth(3);
+    // l1->Draw();
 
-    TLine *l2 = new TLine(X_axis[1],0.52,vb,0.52);
-    // TLine *l2 = new TLine(X_axis[1],1.5,-0.97,1.5);
-    l2->SetLineColor(kBlue);
-    l2->SetLineWidth(3);
-    l2->Draw();
+    // TLine *l2 = new TLine(X_axis[1],0.52,vb,0.52);
+    // // TLine *l2 = new TLine(X_axis[1],1.5,-0.97,1.5);
+    // l2->SetLineColor(kBlue);
+    // l2->SetLineWidth(3);
+    // l2->Draw();
 
-    TLine *l3 = new TLine(X_axis[1],0.64,vb,0.64);
-    // TLine *l3 = new TLine(-0.97, 0, -0.97, 5);
-    l3->SetLineColor(kBlue);
-    l3->SetLineWidth(3);
-    l3->Draw();
+    // TLine *l3 = new TLine(X_axis[1],0.64,vb,0.64);
+    // // TLine *l3 = new TLine(-0.97, 0, -0.97, 5);
+    // l3->SetLineColor(kBlue);
+    // l3->SetLineWidth(3);
+    // l3->Draw();
 
-    TLine *l4 = new TLine(vb,0.39,X_axis[2],0.39);
-    // TLine *l4 = new TLine(-0.97,5,X_axis[2],5);
-    l4->SetLineColor(kBlue);
-    l4->SetLineWidth(3);
-    l4->Draw();
+    // TLine *l4 = new TLine(vb,0.39,X_axis[2],0.39);
+    // // TLine *l4 = new TLine(-0.97,5,X_axis[2],5);
+    // l4->SetLineColor(kBlue);
+    // l4->SetLineWidth(3);
+    // l4->Draw();
 
-    TLine *l5 = new TLine(vb,0.62,X_axis[2],0.62);
-    // TLine *l5 = new TLine(X_axis[1],1.5,-0.97,1.5);
-    l5->SetLineColor(kBlue);
-    l5->SetLineWidth(3);
-    l5->Draw();
+    // TLine *l5 = new TLine(vb,0.62,X_axis[2],0.62);
+    // // TLine *l5 = new TLine(X_axis[1],1.5,-0.97,1.5);
+    // l5->SetLineColor(kBlue);
+    // l5->SetLineWidth(3);
+    // l5->Draw();
 
-    TLine *l6 = new TLine(vb,0.76,X_axis[2],0.76);
-    // TLine *l6 = new TLine(-0.97, 0, -0.97, 5);
-    l6->SetLineColor(kBlue);
-    l6->SetLineWidth(3);
-    l6->Draw();
+    // TLine *l6 = new TLine(vb,0.76,X_axis[2],0.76);
+    // // TLine *l6 = new TLine(-0.97, 0, -0.97, 5);
+    // l6->SetLineColor(kBlue);
+    // l6->SetLineWidth(3);
+    // l6->Draw();
 
     // TLatex *text = new TLatex();
     // text->SetNDC();
