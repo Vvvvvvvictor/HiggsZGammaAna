@@ -5,7 +5,7 @@
               "train_variables": ["Z_cos_theta", "lep_phi","lep_cos_theta",
                               "Z_lead_lepton_eta", "Z_sublead_lepton_eta", 
                               "l2g_deltaR", "l1g_deltaR", "gamma_eta",
-                              "gamma_mvaID", "gamma_ptRelErr", "H_ptt"
+                              "gamma_mvaID", "gamma_ptRelErr", "H_relpt"
                         ],
               "preselections": ["H_mass >= 100", "H_mass <= 180", "gamma_pt > 0"],
               "signal_preselections": [],
@@ -36,7 +36,7 @@
               "signal_preselections": [],
               "inputTree": "two_jet",
               "train_variables": ["delta_eta_jj", "delta_phi_jj", "delta_phi_zgjj",
-                                  "pt_balance", "photon_zeppenfeld", "mass_jj",
+                                  "pt_balance", "photon_zeppenfeld",
                                   "jet_1_pt", "jet1G_deltaR", "jet_1_btagDeepFlavB",
                                   "jet_2_pt", "jet2G_deltaR", "jet_2_btagDeepFlavB"
                                    ],

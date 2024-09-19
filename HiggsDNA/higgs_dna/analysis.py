@@ -27,7 +27,7 @@ from higgs_dna.utils.metis_utils import do_cmd
 from higgs_dna.taggers.duplicated_samples_tagger import DuplicatedSamplesTagger
 from higgs_dna.taggers.mc_overlap_tagger import MCOverlapTagger
 
-
+condor=False
 def run_analysis(config):
     """
     Function that gets run for each individual job. Performs the following:
@@ -73,8 +73,14 @@ def run_analysis(config):
 
     else:
         logger.debug("[run_analysis] No branch map.")
+    if not os.path.exists(config["dir"]):
+        output_dir = ""
+        config["summary_file"] = os.path.split(config["summary_file"])[-1]
+    else:
+        output_dir = os.path.abspath(config["dir"]) + "/"
 
     # Record n_events and sum_weights for scale1fb calculation
+    output_name = output_dir + config["output_name"]
     job_summary["n_events"] = len(events)
     job_summary["sum_weights"] = sum_weights
     t_elapsed_load = time.time() - t_start_load
@@ -92,41 +98,51 @@ def run_analysis(config):
         options = config["systematics"],
         sample = sample
     )
-    events = systematics_producer.produce(events)
-    t_elapsed_syst = time.time() - t_start_syst
-
-    ### 4. Apply tag sequence ###
-    t_start_taggers = time.time()
+    events = systematics_producer.produce_weights(events)
     tag_sequence = TagSequence(
         name = config["name"],
         tag_list = config["tag_sequence"],
-        sample = sample
-    )
-    events, tag_idx_map = tag_sequence.run(events)
-    t_elapsed_taggers = time.time() - t_start_taggers
-
-    ### 5. Compute remaining systematics that rely on tagger outputs ###
-    t_start_apply_syst = time.time()
-    events = systematics_producer.apply_remaining_weight_systs(events, tag_idx_map)
-    t_elapsed_apply_syst = time.time() - t_start_apply_syst
-    t_elapsed_syst += t_elapsed_apply_syst
-
-    # Record number of selected events for each SystematicWithIndependentCollection
+        sample = sample,
+        output_dir=config["output_dir"])
+    job_summary["outputs"] = {}
     job_summary["n_events_selected"] = {}
-    for syst_tag, syst_events in events.items():
-        job_summary["n_events_selected"][syst_tag] = len(syst_events)
+    t_elapsed_syst = 0.
+    t_elapsed_taggers = 0.
 
-    ### 6. Write selected events ###
-    # Sometimes this may be running on a remote node that does not have access to the full host filesystem.
-    # So, check if the relevant directories exist to save outputs in their full path and save them to current dir if not.
-    if not os.path.exists(config["dir"]):
-        output_dir = ""
-        config["summary_file"] = os.path.split(config["summary_file"])[-1] 
-    else: 
-        output_dir = os.path.abspath(config["dir"]) + "/"
-    output_name = output_dir + config["output_name"]
-    
-    job_summary["outputs"] = AnalysisManager.write_events(events, config["variables_of_interest"], output_name) 
+    # Systematics variations
+    for syst_name, ic_syst in systematics_producer.independent_collections.items():
+        if not systematics_producer.do_variations:
+            continue
+        current_time = time.time()
+        ics = ic_syst.produce(events)
+        t_elapsed_syst += time.time() - current_time        
+
+        for ic_name, events_ic in ics.items():
+            # If the IC modifies the nominal value of a branch, update this in the nominal events
+            if ic_name == "nominal":
+                events = events_ic
+                continue
+
+            # Otherwise, this is an up/down variation
+            syst_tag = syst_name + "_" + ic_name
+
+            current_time = time.time()
+
+            events_ic, tag_idx_map = tag_sequence.run(events_ic, syst_tag)
+            t_elapsed_taggers += time.time() - current_time
+
+            current_time = time.time()
+            events_ic = systematics_producer.apply_remaining_weight_systs(events_ic, syst_tag, tag_idx_map)
+            t_elapsed_syst += time.time() - current_time
+
+            job_summary["outputs"][syst_tag] = AnalysisManager.write_events(events_ic, config["variables_of_interest"], output_name, syst_tag)       
+            job_summary["n_events_selected"][syst_tag] = len(events_ic) 
+
+    # Nominal events
+    events, tag_idx_map = tag_sequence.run(events, NOMINAL_TAG)
+    events = systematics_producer.apply_remaining_weight_systs(events, NOMINAL_TAG, tag_idx_map)
+    job_summary["outputs"][NOMINAL_TAG] = AnalysisManager.write_events(events, config["variables_of_interest"], output_name, NOMINAL_TAG)
+    job_summary["n_events_selected"][NOMINAL_TAG] = len(events)
     t_elapsed = time.time() - t_start
 
     # Calculate performance metrics
@@ -136,12 +152,20 @@ def run_analysis(config):
     job_summary["time_frac_syst"] = t_elapsed_syst / t_elapsed
     job_summary["time_frac_taggers"] = t_elapsed_taggers / t_elapsed
     job_summary["successful"] = True
-
+    if not os.path.exists(config["dir"]):
+        output_dir = ""
+        config["summary_file"] = os.path.split(config["summary_file"])[-1] 
+    else: 
+        output_dir = os.path.abspath(config["dir"]) + "/"
+    output_name = output_dir + config["output_name"]
     # Dump json summary
-    with open(config["summary_file"], "w") as f_out:
+    if condor:
+      with open(config["summary_file"].split("/")[-1], "w") as f_out:
+        json.dump(job_summary, f_out, sort_keys = True, indent = 4)
+    else:
+      with open(config["summary_file"], "w") as f_out:
         json.dump(job_summary, f_out, sort_keys = True, indent = 4)
     return job_summary
-
 
 class AnalysisManager():
     """
@@ -594,7 +618,7 @@ class AnalysisManager():
 
 
     @staticmethod
-    def write_events(events, save_branches, name):
+    def write_events(events, save_branches, name, syst_tag):
         """
         For each set of events in ``events``, saves all fields in ``save_branches`` to a .parquet file.
 
@@ -607,37 +631,37 @@ class AnalysisManager():
         :returns: dictionary of keys from ``events`` : parquet file
         :rtype: dict
         """
-        outputs = {}
+        out_name = "%s_%s.parquet" % (name, syst_tag)
 
-        for syst_tag, syst_events in events.items():
-            if not len(syst_events) >= 1:
+        if not len(events) >= 1:
+            return out_name 
+        save_map = {}
+        for branch in save_branches:
+            if isinstance(branch, tuple) or isinstance(branch, list):
+                save_name = "_".join(branch)
+                if isinstance(branch, list):
+                    branch = tuple(branch)
+            else:
+                save_name = branch
+            if isinstance(branch, tuple):
+                present = branch[1] in events[branch[0]].fields
+            else:
+                present = branch in events.fields
+            if not present:
+                logger.warning("[AnalysisManager : write_events] Branch '%s' was not found in events array. This may be expected (e.g. gen info for a data file), but please ensure this makes sense to you." % str(branch))
                 continue
-            save_map = {}
-            for branch in save_branches:
-                if isinstance(branch, tuple) or isinstance(branch, list):
-                    save_name = "_".join(branch)
-                    if isinstance(branch, list):
-                        branch = tuple(branch)
-                else:
-                    save_name = branch
-                if isinstance(branch, tuple):
-                    present = branch[1] in syst_events[branch[0]].fields
-                else:
-                    present = branch in syst_events.fields
-                if not present:
-                    logger.warning("[AnalysisManager : write_events] Branch '%s' was not found in events array. This may be expected (e.g. gen info for a data file), but please ensure this makes sense to you." % str(branch))
-                    continue
-                save_map[save_name] = syst_events[branch]
+            save_map[save_name] = events[branch]
 
-            for field in syst_events.fields:
-                if "weight_" in field and not field in save_map.keys():
-                    save_map[field] = syst_events[field]
+        for field in events.fields:
+            if "weight_" in field and not field in save_map.keys():
+                save_map[field] = events[field]
 
-            syst_events = awkward.zip(save_map)
-            out_name = "%s_%s.parquet" % (name, syst_tag)
-
-            logger.debug("[AnalysisManager : write_events] Writing output file '%s'." % (out_name))
-            awkward.to_parquet(syst_events, out_name) 
-            outputs[syst_tag] = out_name
-
-        return outputs
+        events = awkward.zip(save_map, depth_limit=1)    
+        logger.debug("[AnalysisManager : write_events] Writing output file '%s'." % (out_name))
+        if condor:
+       	  #awkward.to_parquet(events, out_name.split("/")[-1],list_to32=True) 
+            awkward.to_parquet(events, out_name.split("/")[-1]) 
+        else:
+          #awkward.to_parquet(events, out_name,list_to32=True) 
+            awkward.to_parquet(events, out_name) 
+        return out_name

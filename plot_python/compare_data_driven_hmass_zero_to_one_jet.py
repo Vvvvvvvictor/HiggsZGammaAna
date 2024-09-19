@@ -29,9 +29,9 @@ def apply_sf_to_weights(data, sf, bin_edges):
 # Load data
 branches = ["H_mass", "Z_pt", "weight", "bdt_score", "gamma_relpt"]
 
-data_cr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output/zero_to_one_jet/Data_fake.root")["zero_to_one_jet"].arrays(branches, library="pd")
-zg_cr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output/zero_to_one_jet/ZGToLLG_fake.root")["zero_to_one_jet"].arrays(branches, library="pd")
-ewkzg_cr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output/zero_to_one_jet/ZG2JToG2L2J_fake.root")["zero_to_one_jet"].arrays(branches, library="pd")
+data_cr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output_WP80/zero_to_one_jet/Data_fake.root")["zero_to_one_jet"].arrays(branches, library="pd")
+zg_cr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output_WP80/zero_to_one_jet/ZGToLLG_fake.root")["zero_to_one_jet"].arrays(branches, library="pd")
+ewkzg_cr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output_WP80/zero_to_one_jet/ZG2JToG2L2J_fake.root")["zero_to_one_jet"].arrays(branches, library="pd")
     
 # boundaries = [float(i) for i in open("/eos/home-j/jiehan/root/outputs/significances/bin_binaries_1D_zero_to_one_jet.txt", "r").readlines()[2].split()[1:]]
 boundaries = [0.28379330039024353, 0.4557725191116333, 0.5796570777893066, 0.7069960236549377, 1.]
@@ -55,7 +55,7 @@ def draw(data_cr, zg_cr, ewkzg_cr, boundaries):
     bkg_sum = 0
     for i in range(len(bkg_list)):
         bkg = bkg_list[i]
-        bkg_cr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output/zero_to_one_jet/{bkg}.root")["zero_to_one_jet"].arrays(branches, library="pd")
+        bkg_cr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output_WP80/zero_to_one_jet/{bkg}.root")["zero_to_one_jet"].arrays(branches, library="pd")
         bkg_cr = bkg_cr[(bkg_cr["bdt_score"]>boundaries[0]) & (bkg_cr["bdt_score"]<boundaries[1])]
         bkg_cr_hist, bin_edges = np.histogram(bkg_cr["H_mass"], bins=80, weights=bkg_cr["weight"], range=[100, 180])
         bkg_hists.append(bkg_cr_hist)
@@ -75,8 +75,8 @@ def draw(data_cr, zg_cr, ewkzg_cr, boundaries):
     plt.savefig(f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/01J/compare_data_driven_hmass_{boundaries[0]}_{boundaries[1]}.png")
     
 # Plot
-# for i in range(0, len(boundaries)-1):
-#     draw(data_cr, zg_cr, ewkzg_cr, [boundaries[i], boundaries[i+1]])
+for i in range(0, len(boundaries)-1):
+    draw(data_cr, zg_cr, ewkzg_cr, [boundaries[i], boundaries[i+1]])
 
 ################################################################
 # Compare data and MC samples in control region
@@ -91,7 +91,7 @@ def draw(data_cr, bkg_list, bounds):
     bkg_hists = []
     for i in range(len(bkg_list)):
         bkg = bkg_list[i]
-        bkg_cr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output/zero_to_one_jet/{bkg}_fake.root")["zero_to_one_jet"].arrays(branches, library="pd")
+        bkg_cr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output_WP80/zero_to_one_jet/{bkg}_fake.root")["zero_to_one_jet"].arrays(branches, library="pd")
         bkg_cr = bkg_cr[(bkg_cr["bdt_score"]>bounds[0]) & (bkg_cr["bdt_score"]<bounds[1])]
         bkg_cr_hist, bin_edges = np.histogram(bkg_cr["H_mass"], bins=80, weights=bkg_cr["weight"], range=[100, 180])
         bkg_hists.append(bkg_cr_hist)
@@ -108,8 +108,8 @@ def draw(data_cr, bkg_list, bounds):
     plt.savefig(f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/01J/compare_data_mc_hmass_{bounds[0]}_{bounds[1]}.png")
     
 # Plot
-# for i in range(0, len(boundaries)-1):
-#     draw(data_cr, bkg_list, [boundaries[i], boundaries[i+1]])
+for i in range(0, len(boundaries)-1):
+    draw(data_cr, bkg_list, [boundaries[i], boundaries[i+1]])
 
 ################################################################
 # Compare true photon samples plus data-driven photon samples with data in signal region
@@ -131,11 +131,11 @@ def draw(data_cr, zg_cr, ewkzg_cr, bkg_list, bounds):
     
     bkg_samples = []
     for bkg in bkg_list:
-        bkg_sample = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output/zero_to_one_jet/{bkg}.root")["zero_to_one_jet"].arrays(branches, library="pd")
+        bkg_sample = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output_WP80/zero_to_one_jet/{bkg}.root")["zero_to_one_jet"].arrays(branches, library="pd")
         bkg_sample = bkg_sample[(bkg_sample["bdt_score"]>bounds[0]) & (bkg_sample["bdt_score"]<bounds[1])]
         bkg_samples.append(bkg_sample)
         
-    data_sr = uproot.open("/eos/home-j/jiehan/data_for_norm_float_v1/output/zero_to_one_jet/Data.root")["zero_to_one_jet"].arrays(branches, library="pd")
+    data_sr = uproot.open("/eos/home-j/jiehan/data_for_norm_float_v1/output_WP80/zero_to_one_jet/Data.root")["zero_to_one_jet"].arrays(branches, library="pd")
     data_sr = data_sr[(data_sr["bdt_score"]>bounds[0]) & (data_sr["bdt_score"]<bounds[1])]
     
     # bkg_gpt_hists = np.zeros(100)
@@ -191,8 +191,8 @@ def draw(data_cr, zg_cr, ewkzg_cr, bkg_list, bounds):
 
     # fit this ratio distribution with linear function
     from scipy.optimize import curve_fit
-    def linear(x, a, b, c, d, e, f):
-        return a*x**5 + b*x**4 + c*x**3 + d*x**2 + e*x + f
+    def linear(x, a, b, c, d):
+        return a + b*x + c*x**2 + d*x**3
     
     x = bin_edges[:-1]+np.diff(bin_edges)/2
     y = ratio_test[np.where((x<120) | (x>130))]
@@ -264,18 +264,18 @@ for i in range(0, len(boundaries)-1):
 ###############################################################################
 
 bkg_list = ["ZGToLLG", "ZG2JToG2L2J", "DYJets_01J"]
-data = uproot.open("/eos/home-j/jiehan/data_for_norm_float_v1/output/zero_to_one_jet/Data.root")["zero_to_one_jet"].arrays(branches, library="pd")
-bkgs = [uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output/zero_to_one_jet/{bkg}.root")["zero_to_one_jet"].arrays(branches, library="pd") for bkg in bkg_list]
+data = uproot.open("/eos/home-j/jiehan/data_for_norm_float_v1/output_WP80/zero_to_one_jet/Data.root")["zero_to_one_jet"].arrays(branches, library="pd")
+bkgs = [uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output_WP80/zero_to_one_jet/{bkg}.root")["zero_to_one_jet"].arrays(branches, library="pd") for bkg in bkg_list]
 
 def draw(data, bkgs, bounds):
     data = data[(data["bdt_score"]>bounds[0]) & (data["bdt_score"]<bounds[1])]
     data = data[(data["H_mass"]<122) | (data["H_mass"]>128)]
-    data_hist, bin_edges = np.histogram(data["H_mass"], bins=80, weights=data["weight"], range=[100, 180])
+    data_hist, bin_edges = np.histogram(data["H_mass"], bins=160, weights=data["weight"], range=[100, 180])
     
     bkg_hists = []
     for bkg in bkgs:
         bkg = bkg[(bkg["bdt_score"]>bounds[0]) & (bkg["bdt_score"]<bounds[1])]
-        bkg_hist, bin_edges = np.histogram(bkg["H_mass"], bins=80, weights=bkg["weight"], range=[100, 180])
+        bkg_hist, bin_edges = np.histogram(bkg["H_mass"], bins=160, weights=bkg["weight"], range=[100, 180])
         bkg_hists.append(bkg_hist)
     
     fig, [ax1, ax2] = plt.subplots(2, 1, gridspec_kw={"height_ratios": [4, 1]})
@@ -283,7 +283,7 @@ def draw(data, bkgs, bounds):
     ax1.errorbar(bin_edges[:-1]+np.diff(bin_edges)/2, data_hist, fmt='o', label="Data", yerr=np.sqrt(data_hist), color='k')
     ax1.legend(fontsize=16, loc="best")
     ax1.grid()
-    ax1.set_title(f"Data vs MC(SR): {bounds[0]} < BDT < {bounds[1]}")
+    ax1.set_title(f"Data vs MC(SR): {bounds[0]:.2f} < BDT < {bounds[1]:.2f}")
     ax1.set_xlabel("Higgs Mass")
     ax1.set_ylabel("Events")
     ax1.set_xlim(100, 180)
@@ -300,34 +300,34 @@ def draw(data, bkgs, bounds):
     plt.savefig(f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/01J/compare_data_mc_sr_{bounds[0]}_{bounds[1]}.png")
     
 # Plot
-# for i in range(0, len(boundaries)-1):
-#     draw(data, bkgs, [boundaries[i], boundaries[i+1]])
+for i in range(0, len(boundaries)-1):
+    draw(data, bkgs, [boundaries[i], boundaries[i+1]])
 
 ###############################################################################
 # Compare data and MC in Control region
 ###############################################################################
 
 bkg_list = ["ZGToLLG", "ZG2JToG2L2J", "DYJets_01J"]
-data = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output/zero_to_one_jet/Data_fake.root")["zero_to_one_jet"].arrays(branches, library="pd")
-bkgs = [uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output/zero_to_one_jet/{bkg}_fake.root")["zero_to_one_jet"].arrays(branches, library="pd") for bkg in bkg_list]
+data = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output_WP80/zero_to_one_jet/Data_fake.root")["zero_to_one_jet"].arrays(branches, library="pd")
+bkgs = [uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output_WP80/zero_to_one_jet/{bkg}_fake.root")["zero_to_one_jet"].arrays(branches, library="pd") for bkg in bkg_list]
 
 def draw(data, bkgs, bounds):
     data = data[(data["bdt_score"]>bounds[0]) & (data["bdt_score"]<bounds[1])]
-    data_hist, bin_edges = np.histogram(data["H_mass"], bins=80, weights=data["weight"], range=[100, 180])
+    data_hist, bin_edges = np.histogram(data["H_mass"], bins=160, weights=data["weight"], range=[100, 180])
     
     bkg_hists = []
     for bkg in bkgs:
         bkg = bkg[(bkg["bdt_score"]>bounds[0]) & (bkg["bdt_score"]<bounds[1])]
-        bkg_hist, bin_edges = np.histogram(bkg["H_mass"], bins=80, weights=bkg["weight"], range=[100, 180])
+        bkg_hist, bin_edges = np.histogram(bkg["H_mass"], bins=160, weights=bkg["weight"], range=[100, 180])
         bkg_hists.append(bkg_hist)
     
     fig, [ax1, ax2] = plt.subplots(2, 1, gridspec_kw={"height_ratios": [4, 1]})
-    hep.histplot(bkg_hists, bins=bin_edges, label=bkg_list, stack=True, histtype="fill", ax=ax1)
-    ax1.errorbar(bin_edges[:-1]+np.diff(bin_edges)/2, data_hist, fmt='o', label="Data", yerr=np.sqrt(data_hist), color='k')
+    hep.histplot(bkg_hists, bins=bin_edges, label=[bkg_list[i]+f"({sum(bkg_hists[i]):.2f})" for i in range(len(bkg_list))], stack=True, histtype="fill", ax=ax1)
+    ax1.errorbar(bin_edges[:-1]+np.diff(bin_edges)/2, data_hist, fmt='o', label=f"Data({sum(data_hist):.2f})", yerr=np.sqrt(data_hist), color='k')
     ax1.legend(fontsize=16, loc="best")
     ax1.grid()
     ax1.set_title(f"Data vs MC(CR): {bounds[0]} < BDT < {bounds[1]}")
-    ax1.set_xlabel("Higgs Mass")
+    # ax1.set_xlabel("Higgs Mass")
     ax1.set_ylabel("Events")
     ax1.set_xlim(100, 180)
     
@@ -345,6 +345,7 @@ def draw(data, bkgs, bounds):
 # Plot
 # for i in range(0, len(boundaries)-1):
 #     draw(data, bkgs, [boundaries[i], boundaries[i+1]])
+draw(data, bkgs, [0,1])
 
 ###############################################################################
 # Compare data-driven photon samples plus MC samples(SR) with data(SR) for different variables distributions
@@ -357,9 +358,9 @@ bkg_list = ["DYJets_01J"]
 true_bkg_list = ["ZGToLLG", "ZG2JToG2L2J"]
 branches = ["weight", "bdt_score", "gamma_relpt"] + variables
 
-data_cr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output/zero_to_one_jet/Data_fake.root")["zero_to_one_jet"].arrays(branches, library="pd")
-zg_cr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output/zero_to_one_jet/ZGToLLG_fake.root")["zero_to_one_jet"].arrays(branches, library="pd")
-ewkzg_cr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output/zero_to_one_jet/ZG2JToG2L2J_fake.root")["zero_to_one_jet"].arrays(branches, library="pd")
+data_cr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output_WP80/zero_to_one_jet/Data_fake.root")["zero_to_one_jet"].arrays(branches, library="pd")
+zg_cr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output_WP80/zero_to_one_jet/ZGToLLG_fake.root")["zero_to_one_jet"].arrays(branches, library="pd")
+ewkzg_cr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output_WP80/zero_to_one_jet/ZG2JToG2L2J_fake.root")["zero_to_one_jet"].arrays(branches, library="pd")
 
 for i in range(len(variables)):
     def draw(data_cr, zg_cr, ewkzg_cr, bkg_list, bounds, variable, xlabel, x_range):
@@ -375,7 +376,7 @@ for i in range(len(variables)):
         bkg_hists = []
         for i in range(len(bkg_list)):
             bkg = bkg_list[i]
-            bkg_sr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output/zero_to_one_jet/{bkg}.root")["zero_to_one_jet"].arrays(branches, library="pd")
+            bkg_sr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output_WP80/zero_to_one_jet/{bkg}.root")["zero_to_one_jet"].arrays(branches, library="pd")
             bkg_sr = bkg_sr[(bkg_sr["bdt_score"]>bounds[0]) & (bkg_sr["bdt_score"]<bounds[1]) & (bkg_sr["gamma_relpt"] > 0.3)]
             bkg_sr_hist, bin_edges = np.histogram(bkg_sr[variable], bins=xbin, weights=bkg_sr["weight"], range=x_range)
             bkg_hists.append(bkg_sr_hist)
@@ -397,27 +398,27 @@ for i in range(len(variables)):
         plt.savefig(f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/01J/compare_data_mc_{variable}_{bounds[0]}_{bounds[1]}.png")
     
     # Plot
-    # for j in range(0, len(boundaries)-1):
-    #     draw(data_cr, zg_cr, ewkzg_cr, bkg_list, [boundaries[j], boundaries[j+1]], variables[i], xlabels[i], x_ranges[i])
+    for j in range(0, len(boundaries)-1):
+        draw(data_cr, zg_cr, ewkzg_cr, bkg_list, [boundaries[j], boundaries[j+1]], variables[i], xlabels[i], x_ranges[i])
         
 for i in range(len(variables)):
     def draw(bkg_list, true_bkg_list, bounds, variable, xlabel, x_range):
-        data_sr = uproot.open("/eos/home-j/jiehan/data_for_norm_float_v1/output/zero_to_one_jet/Data.root")["zero_to_one_jet"].arrays(branches, library="pd")
-        data_sr = data_sr[(data_sr["bdt_score"]>bounds[0]) & (data_sr["bdt_score"]<bounds[1])]
-        data_sr_hist, bin_edges = np.histogram(data_sr[variable], bins=xbin, weights=data_sr["weight"], range=x_range)
+        data_sr = uproot.open("/eos/home-j/jiehan/data_for_norm_float_v1/output_WP80/zero_to_one_jet/Data.root")["zero_to_one_jet"].arrays(branches, library="pd")
+        data_sr = data_sr[(data_sr["bdt_score"]>bounds[0]) & (data_sr["bdt_score"]<bounds[1])].query("(H_mass < 120) | (H_mass > 130)")
+        data_sr_hist, bin_edges = np.histogram(data_sr[variable], bins=xbin*2, weights=data_sr["weight"], range=x_range)
         
         bkg_hists = []
         for i in range(len(bkg_list)):
             bkg = bkg_list[i]
-            bkg_sr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output/zero_to_one_jet/{bkg}.root")["zero_to_one_jet"].arrays(branches, library="pd")
+            bkg_sr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output_WP80/zero_to_one_jet/{bkg}.root")["zero_to_one_jet"].arrays(branches, library="pd")
             bkg_sr = bkg_sr[(bkg_sr["bdt_score"]>bounds[0]) & (bkg_sr["bdt_score"]<bounds[1])]
-            bkg_sr_hist, bin_edges = np.histogram(bkg_sr[variable], bins=xbin, weights=bkg_sr["weight"], range=x_range)
+            bkg_sr_hist, bin_edges = np.histogram(bkg_sr[variable], bins=xbin*2, weights=bkg_sr["weight"], range=x_range)
             bkg_hists.append(bkg_sr_hist)
         for i in range(len(true_bkg_list)):
             bkg = true_bkg_list[i]
-            bkg_sr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output/zero_to_one_jet/{bkg}.root")["zero_to_one_jet"].arrays(branches, library="pd")
+            bkg_sr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output_WP80/zero_to_one_jet/{bkg}.root")["zero_to_one_jet"].arrays(branches, library="pd")
             bkg_sr = bkg_sr[(bkg_sr["bdt_score"]>bounds[0]) & (bkg_sr["bdt_score"]<bounds[1])]
-            bkg_sr_hist, bin_edges = np.histogram(bkg_sr[variable], bins=xbin, weights=bkg_sr["weight"], range=x_range)
+            bkg_sr_hist, bin_edges = np.histogram(bkg_sr[variable], bins=xbin*2, weights=bkg_sr["weight"], range=x_range)
             bkg_hists.append(bkg_sr_hist)
             
         fig, [ax1, ax2] = plt.subplots(2, 1, gridspec_kw={"height_ratios": [4, 1]})
@@ -425,8 +426,8 @@ for i in range(len(variables)):
         ax1.errorbar(bin_edges[:-1]+np.diff(bin_edges)/2, data_sr_hist, fmt='o', label="Data", yerr=np.sqrt(data_sr_hist), color='k')
         ax1.legend(fontsize=16, loc="best")
         ax1.grid()
-        ax1.set_title(f"Data vs MC(SR): {bounds[0]} < BDT < {bounds[1]}")
-        ax1.set_xlabel(xlabel)
+        ax1.set_title(f"Data vs MC(SR): {bounds[0]:.2f} < BDT < {bounds[1]:.2f}")
+        # ax1.set_xlabel(xlabel) 
         ax1.set_ylabel("Events")
         ax1.set_xlim(x_range[0], x_range[1])
         
@@ -442,7 +443,7 @@ for i in range(len(variables)):
         plt.savefig(f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/01J/compare_data_mc_sr_{variable}_{bounds[0]}_{bounds[1]}.png")
         
     # Plot
-    # for j in range(0, len(boundaries)-1):
-    #     draw(bkg_list, true_bkg_list, [boundaries[j], boundaries[j+1]], variables[i], xlabels[i], x_ranges[i])
+    for j in range(0, len(boundaries)-1):
+        draw(bkg_list, true_bkg_list, [boundaries[j], boundaries[j+1]], variables[i], xlabels[i], x_ranges[i])
         
         

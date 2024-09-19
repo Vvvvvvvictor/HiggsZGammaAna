@@ -16,7 +16,7 @@ observation     -1
 bin             cat1    cat1       
 process         hza     bkg_mass 
 process         0       1
-rate            12.7272      1.0   
+rate            11.46      1.0   
 
 lumi_13TeV_Uncorrelated_17       lnN   1.02 -
 

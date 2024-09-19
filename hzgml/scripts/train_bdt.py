@@ -27,7 +27,7 @@ def getArgs():
     parser.add_argument('-p', '--params', action='store', type=dict, default=None, help='json string.') #type=json.loads
     parser.add_argument('--hyperparams_path', action='store', default=None, help='path of hyperparameters json') 
     parser.add_argument('--save', action='store_true', help='Save model weights to HDF5 file')
-    parser.add_argument('--corr', action='store_true', default=False, help='Plot corelation between each training variables')
+    parser.add_argument('--corr', action='store_true', default=True, help='Plot corelation between each training variables')
     parser.add_argument('--importance', action='store_true', default=True, help='Plot importance of variables, parameter "gain" is recommanded')
     parser.add_argument('--roc', action='store_true', default=True, help='Plot ROC')
     parser.add_argument('--optuna', action='store_true', default=False, help='Run hyperparameter tuning using optuna')
@@ -68,7 +68,7 @@ class XGBoostHandler(object):
 
         self._region = region
 
-        self._inputFolder = '/eos/home-j/jiehan/root/skimmed_ntuples'
+        self._inputFolder = '/eos/home-j/jiehan/root/skimmed_ntuples_two_jet_reindex'
         self._outputFolder = 'models'
         self._chunksize = 500000
         self._branches = []
@@ -610,9 +610,10 @@ class XGBoostHandler(object):
             self.setParams(params, fold)
             self.trainModel(fold, self.params[fold])
             self.testModel(fold)
-            auc = self.getAUC(fold)[-1]
+            eval_auc = self.getAUC(fold)[-1]
+            train_auc = self.getAUC(fold, 'train')[-1]
             
-            return auc
+            return eval_auc**2/((eval_auc + train_auc)/2)
         
         exp_dir = 'models/optuna/'
         if not os.path.exists(exp_dir):

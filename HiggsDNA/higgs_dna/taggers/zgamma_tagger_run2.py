@@ -224,12 +224,17 @@ class ZGammaTaggerRun2(Tagger):
             name = "SelectedElectron",
             tagger = self
         )
-
+        
         electrons = awkward_utils.add_field(
             events = events,
             name = "SelectedElectron",
             data = events.Electron[electron_cut]
         )
+        
+        # generate the index in the original array and add to electrons
+        arr = awkward.local_index(events.Electron["pt"], axis=1)[electron_cut]
+        electron_idx = awkward.mask(arr, awkward.num(arr) > 0)
+        awkward_utils.add_field(events = electrons, name = "Idx", data = electron_idx)
 
         # Muons
         muon_cut = lepton_selections.select_muons(
@@ -250,6 +255,7 @@ class ZGammaTaggerRun2(Tagger):
         # Photons
         photon_selection = self.select_photons(
                 photons = events.Photon,
+                electrons = electrons,
                 rho = rho,
                 options = self.options["photons"]
         )
@@ -257,12 +263,10 @@ class ZGammaTaggerRun2(Tagger):
         photons = events.Photon[photon_selection]
         
         # lepton-photon overlap removal 
-        clean_photon_mask = object_selections.delta_R(photons, muons, 0.4) & object_selections.delta_R(photons, electrons, 0.4)
+        clean_photon_mask = awkward.fill_none(object_selections.delta_R(photons, muons, 0.3), True) & awkward.fill_none(object_selections.delta_R(photons, electrons, 0.3), True)
+        # object_selections.delta_R(photons, muons, 0.3) & object_selections.delta_R(photons, electrons, 0.3)
         photons = photons[clean_photon_mask]
         
-        # clean_elePhoton_mask = (photons.electronIdx == -1) # FIXME: this is a temporary fixuy78
-        
-
         # Jets
         jet_cut = jet_selections.select_jets(
             jets = events.Jet,
@@ -273,6 +277,7 @@ class ZGammaTaggerRun2(Tagger):
                     "min_dr" : self.options["jets"]["dr_photons"]
                 },
                 "electrons" : {
+                    
                     "objects" : electrons,
                     "min_dr" : self.options["jets"]["dr_electrons"]
                 },
@@ -290,7 +295,11 @@ class ZGammaTaggerRun2(Tagger):
             name = "SelectedJet",
             data = events.Jet[jet_cut]
         )
-
+        photon = awkward_utils.add_field(
+                events = events,
+                name = "Photon",
+                data = events.Photon[photon_selection],
+        )
         FSRphoton_selection = self.select_FSRphotons(
                 FSRphotons = events.FsrPhoton,
                 electrons = electrons,
@@ -321,7 +330,7 @@ class ZGammaTaggerRun2(Tagger):
                 dummy_value = DUMMY_VALUE
             )
 
-        n_electrons = awkward.num(electrons)
+        n_electrons = awkward.fill_none(awkward.num(electrons), 0)
         # N_e_cut = n_electrons>=2
         awkward_utils.add_field(events, "n_electrons", n_electrons, overwrite=True)
 
@@ -413,6 +422,9 @@ class ZGammaTaggerRun2(Tagger):
             double_ele_trigger_cut = awkward.num(events.Photon) >= 0
             single_mu_trigger_cut = awkward.num(events.Photon) >= 0
             double_mu_trigger_cut = awkward.num(events.Photon) >= 0
+            
+        if "2017" in self.year:
+            single_ele_trigger_cut = awkward.any((events.TrigObj.id == 11) & ((events.TrigObj.filterBits & 0x400) != 0), axis=1) & single_ele_trigger_cut
 
         trigger_cut = single_ele_trigger_cut | double_ele_trigger_cut | single_mu_trigger_cut  | double_mu_trigger_cut
         ele_trigger_cut = single_ele_trigger_cut | double_ele_trigger_cut
@@ -432,6 +444,11 @@ class ZGammaTaggerRun2(Tagger):
         ele_trigger_pt_cut = (single_ele_trigger_cut & e_cut) | (double_ele_trigger_cut & ee_cut)
         mu_trigger_pt_cut = (single_mu_trigger_cut & m_cut) | (double_mu_trigger_cut & mm_cut)
         trigger_pt_cut = (single_ele_trigger_cut & e_cut) | (double_ele_trigger_cut & ee_cut) | (single_mu_trigger_cut & m_cut) | (double_mu_trigger_cut & mm_cut)
+        
+        z_mumu = z_mumu_cut & mu_trigger_pt_cut
+        z_ee = z_ee_cut & ele_trigger_pt_cut
+        awkward_utils.add_field(events, "z_mumu", z_mumu, overwrite=True)
+        awkward_utils.add_field(events, "z_ee", z_ee, overwrite=True)
 
         mass_cut = (z_cands.ZCand.mass > 80.) & (z_cands.ZCand.mass < 100.)
         # mass_cut = z_cands.ZCand.mass > 50.
@@ -505,7 +522,7 @@ class ZGammaTaggerRun2(Tagger):
         awkward_utils.add_field(gamma_cand, "mass", awkward.ones_like(gamma_cand.pt) * 0) #TODO: run3 BUG
 
         # Add gamma-related fields to array
-        for field in ["pt", "eta", "phi", "mass", "mvaID", "energyErr", "sieie", "hoe", "r9", "mvaID_WP80"]:
+        for field in ["pt", "eta", "phi", "mass", "mvaID", "energyErr", "sieie", "hoe", "r9", "mvaID_WP80", "mvaID_WP90"]:
             awkward_utils.add_field(
                 events,
                 "gamma_%s" % field,
@@ -515,8 +532,6 @@ class ZGammaTaggerRun2(Tagger):
         awkward_utils.add_field(events, "gamma_chiso",  gamma_cand.pfRelIso03_chg) #run2
         awkward_utils.add_field(events, "gamma_alliso",  gamma_cand.pfRelIso03_all) #run2
         awkward_utils.add_field(events, "gamma_e_veto",  gamma_e_veto)
-        awkward_utils.add_field(events, "gamma_mvaID_WP80",  gamma_cand.mvaID_WP80)
-        awkward_utils.add_field(events, "gamma_mvaID_WP90",  gamma_cand.mvaID_WP90)
         # awkward_utils.add_field(events, "gamma_chiso",  gamma_cand.pfRelIso03_chg_quadratic) #run3
         # awkward_utils.add_field(events, "gamma_alliso",  gamma_cand.pfRelIso03_all_quadratic) #run3
         #awkward_utils.add_field(events, "gamma_mvaID_17",  gamma_cand.mvaID_Fall17V2) #run3
@@ -530,6 +545,8 @@ class ZGammaTaggerRun2(Tagger):
         sel_h_1 = awkward.fill_none(sel_h_1, value = False)
         sel_h_2 = awkward.fill_none(sel_h_2, value = False)
         sel_h_3 = awkward.fill_none(sel_h_3, value = False)
+        
+        print(f'!!!!has H: {sum(has_z_cand & has_gamma_cand & z_mumu_cut)} | {sum(has_z_cand & has_gamma_cand & z_ee_cut)}')
 
         # Add Higgs-related fields to array
         for field in ["pt", "eta", "phi", "mass"]:
@@ -554,7 +571,19 @@ class ZGammaTaggerRun2(Tagger):
                 dummy_value = DUMMY_VALUE
             )
 
-        all_cuts = trigger_pt_cut & has_z_cand & has_gamma_cand & sel_h_1 & sel_h_2 & sel_h_3
+        event_filter = (events.Flag_goodVertices & 
+                        events.Flag_globalSuperTightHalo2016Filter & 
+                        events.Flag_HBHENoiseFilter & 
+                        events.Flag_HBHENoiseIsoFilter & 
+                        events.Flag_EcalDeadCellTriggerPrimitiveFilter & 
+                        events.Flag_BadPFMuonFilter & 
+                        events.Flag_BadPFMuonDzFilter & 
+                        events.Flag_hfNoisyHitsFilter & 
+                        events.Flag_eeBadScFilter & 
+                        ((awkward.num(events.Photon) >= 0) if "2016" in self.year else events.Flag_ecalBadCalibFilter) # 2016 dummy cut, all True
+                        )
+        
+        all_cuts = trigger_pt_cut & has_z_cand & has_gamma_cand & sel_h_1 & sel_h_2 & sel_h_3 & event_filter
 
         for cut_type in ["zgammas", "zgammas_ele", "zgammas_mu", "zgammas_w", "zgammas_ele_w", "zgammas_mu_w"]:
             if "_w" in cut_type:
@@ -586,13 +615,14 @@ class ZGammaTaggerRun2(Tagger):
             cut5 = cut4 & has_z_cand
             cut6 = cut5 & sel_h_1
             cut7 = cut6 & sel_h_2
-            cut8 = cut7 & sel_h_3            
+            cut8 = cut7 & sel_h_3
+            cut9 = cut8 & event_filter      
 
             self.register_event_cuts(
                 # names = ["all", "N_lep_sel", "trig_cut", "lead_lep_pt_cut", "sub_lep_pt_cut", "has_g_cand", "has_z_cand", "sel_h_1", "sel_h_2", "sel_h_3"],
                 # results = [cut0, cut1, cut2, cut3, cut4, cut5, cut6, cut7, cut8, cut9],
-                names = ["all", "N_lep_sel", "trig_cut", "lep_pt_cut", "has_g_cand", "has_z_cand", "sel_h_1", "sel_h_2", "sel_h_3", "all_cut"],
-                results = [cut0, cut1, cut2, cut3, cut4, cut5, cut6, cut7, cut8, all_cuts],
+                names = ["all", "N_lep_sel", "trig_cut", "lep_pt_cut", "has_g_cand", "has_z_cand", "sel_h_1", "sel_h_2", "sel_h_3", "event", "all cuts"],
+                results = [cut0, cut1, cut2, cut3, cut4, cut5, cut6, cut7, cut8, cut9, all_cuts],
                 events = events,
                 cut_type = cut_type,
                 weighted = weighted
@@ -746,7 +776,7 @@ class ZGammaTaggerRun2(Tagger):
         return zgammas 
         
 
-    def select_photons(self, photons, rho, options):
+    def select_photons(self, photons, electrons, rho, options):
         """
         Enforces all photon cuts that are commmon to both
         leading and subleading photons in the diphoton preselection.
@@ -771,17 +801,24 @@ class ZGammaTaggerRun2(Tagger):
         # eta_cut = ((photons.isScEtaEB & (photons.mvaID > options["mvaID_barrel"])) | (photons.isScEtaEE & (photons.mvaID > options["mvaID_endcap"])))
 
         # electron veto
-        e_veto_cut = photons.electronVeto > options["e_veto"]
+        e_veto_cut = (photons.electronVeto > options["e_veto"])
+        
+        new_pho = awkward.unflatten(awkward.unflatten(awkward.flatten(photons.electronIdx), [1]*awkward.sum(awkward.num(photons.electronIdx))), awkward.num(photons.electronIdx, axis=1))
+        new_ele = awkward.broadcast_arrays(electrons.Idx[:,None], new_pho, depth_limit=2)[0]
+        eg_overlap_cut = ~awkward.where(
+            awkward.is_none(electrons.Idx),
+            awkward.broadcast_arrays(photons.electronIdx, False)[1],
+            awkward.flatten(awkward.any(new_pho[:, :, None] == new_ele, axis=-2), axis=-1)
+        )
 
         # use_central_nano = options["use_central_nano"] # indicates whether we are using central nanoAOD (with some branches that are necessary for full diphoton preselection missing) or custom nanoAOD (with these branches added)
 
-
-        all_cuts = pt_cut & eta_cut & id_cut & e_veto_cut
+        all_cuts = pt_cut & eta_cut & id_cut & e_veto_cut & eg_overlap_cut
         # all_cuts = pt_cut & eta_cut # bing for CR selection
 
         self.register_cuts(
-                names = ["pt", "eta", "id", "e_veto", "all"],
-                results = [pt_cut, eta_cut, id_cut, e_veto_cut, all_cuts],
+                names = ["pt", "eta", "id", "e_veto", "ele_pho_overlap", "all"],
+                results = [pt_cut, eta_cut, id_cut, e_veto_cut, eg_overlap_cut, all_cuts],
                 cut_type = "photon"
         )
 

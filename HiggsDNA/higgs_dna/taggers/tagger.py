@@ -51,7 +51,7 @@ class Tagger():
         return events_updated[selection]
 
 
-    def run(self, events): 
+    def run(self, events, syst_tag = NOMINAL_TAG):
         """
         Return dictionary of boolean arrays of events to be selected
         by this tagger for each systematic variation,
@@ -63,23 +63,18 @@ class Tagger():
         :rtype: dict, dict 
         """
 
-        for syst_tag, syst_events in events.items():
-            self.current_syst = syst_tag
-   
-            if not len(syst_events) >= 1:
-                logger.debug("[Tagger] %s : event set : %s : 0 events passed to tagger, skipping running this tagger." % (self.name, syst_tag))
-                self.selection[syst_tag] = awkward.ones_like(syst_events, dtype=bool)
-                self.events[syst_tag] = syst_events
+        self.current_syst = syst_tag
+        if not len(events) >= 1:
+            logger.debug("[Tagger] %s : event set : %s : 0 events passed to tagger, skipping running this tagger." % (self.name, syst_tag))
+            selection = awkward.ones_like(events, dtype=bool)
+            self.selection[syst_tag] = selection
 
-            else:
-                selection, syst_events_updated = self.get_selection(syst_tag, syst_events)
-                self.selection[syst_tag] = selection
-                self.events[syst_tag] = syst_events_updated
-                logger.debug("[Tagger] %s : event set : %s : %d (%d) events before (after) selection" % (self.name, syst_tag, len(syst_events), len(syst_events_updated[self.selection[syst_tag]])))
-
-
-        return self.selection, self.events
-
+        else:
+            selection, events = self.calculate_selection(events)
+            print("after selection",events)
+            self.selection[syst_tag] = selection
+            logger.debug("[Tagger] %s : event set : %s : %d (%d) events before (after) selection" % (self.name, syst_tag, len(selection), awkward.sum(selection)))
+        return selection, events
 
     def set_selection(self, selection):
         """

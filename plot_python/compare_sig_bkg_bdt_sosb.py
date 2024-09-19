@@ -10,7 +10,7 @@ print("=====================================================================")
 
 # Basic set of picture's content
 ratio = 1
-mc_legend = ["SM ZG", "DYJets", "EWK Z+Jets", "EWK ZG", "TT", "TTG+Jets", "TTVJets", "Diboson"]
+mc_legend = ["SM ZG", "EWK ZG", "fake photon"]#"DYJets", "EWK Z+Jets", "EWK ZG", "TT", "TTG+Jets", "TTVJets", "Diboson"]
 sig_legend = ["sig", "ggH", "VBF"]
 # path = "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/final_fit/CMSSW_10_2_13/src/flashggFinalFit/InputData/outputs/"
 path = "/eos/home-j/jiehan/root/outputs/"
@@ -33,13 +33,14 @@ sig_file_list = [
 ]
 mc_file_list = [
     "ZGToLLG.root",
-    "DYJetsToLL.root",
-    "EWKZ2J.root",
+    # "DYJetsToLL.root",
+    # "EWKZ2J.root",
     "ZG2JToG2L2J.root",
-    "TT.root",
-    "TTGJets.root",
-    ["ttWJets.root", "ttZJets.root"],
-    ["WW.root", "WZ.root", "ZZ.root"]
+    # "TT.root",
+    # "TTGJets.root",
+    # ["ttWJets.root", "ttZJets.root"],
+    # ["WW.root", "WZ.root", "ZZ.root"]
+    "data_driven_bkg_v3.root"
 ]
 data_file_list = [
     "data.root"
@@ -156,8 +157,8 @@ plot.Set(h_stack, Maximum=1.3*pads[0].GetFrame().GetY2())
 plot.Set(pads[0], Logy=1)
 pads[0].Update()
 
-legend = plot.PositionedLegend(0.65, 0.3, 3, 0.015)
-plot.Set(legend, NColumns=2, TextSize=0.033, TextFont=62, FillStyle=0)
+legend = plot.PositionedLegend(0.75, 0.15, 3, 0.015)
+plot.Set(legend, NColumns=3, TextSize=0.025, TextFont=62, FillStyle=0)
 for i in range(len(sig_hist_list)):
     legend.AddEntry("sig_{}".format(i), sig_legend[i]+"({:4.2f})".format(sig_yields[i]), "l")
 for i in range(len(mc_file_list)):
@@ -170,7 +171,7 @@ print("========================")
 
 pads[1].cd()
 rp.Draw("E")
-boundaries = [0.24, 0.47, 0.82, 0.9]
+boundaries = [0.12, 0.49, 0.74, 0.86]
 for i in range(4):
     line.DrawLine(boundaries[i], 0, boundaries[i], 0.5)
 # plot.Set(pads[1], Logy=1)

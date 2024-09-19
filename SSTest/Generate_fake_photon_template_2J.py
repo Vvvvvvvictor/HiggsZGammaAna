@@ -26,7 +26,7 @@ for chan in channels:
         selections = com_sel + ["(bdt_score_t>{}) & (bdt_score_t<{})".format(binaries[cat], binaries[cat+1])]
         
         name = "sig_{}_cat{}".format(chan, cat)
-        sig_hist = ROOT.TH1D(name,name, 160, 100, 180)
+        sig_hist = ROOT.TH1D(name,name, 320, 100, 180)
         sig_hist.Sumw2()
         for i, sig in enumerate(sig_list):
             arrays = ut.ReadFile(log_path+"{}/{}.root".format(chan, sig), selections = selections)
@@ -34,7 +34,7 @@ for chan in channels:
         sig_hist.Write(name)
 
         name = "data_full_{}_cat{}".format(chan, cat)
-        data_hist = ROOT.TH1D(name,name, 80, 100, 180)
+        data_hist = ROOT.TH1D(name,name, 320, 100, 180)
         data_hist.Sumw2()
         for i, data in enumerate(data_list):
             arrays = ut.ReadFile(log_path+"{}/{}.root".format(chan, data), selections = selections)
@@ -42,7 +42,7 @@ for chan in channels:
         data_hist.Write(name)
 
         name = "data_{}_cat{}".format(chan, cat)
-        data_hist = ROOT.TH1D(name,name, 80, 100, 180)
+        data_hist = ROOT.TH1D(name,name, 320, 100, 180)
         data_hist.Sumw2()
         for i, data in enumerate(data_list):
             arrays = ut.ReadFile(log_path+"{}/{}.root".format(chan, data), selections = selections + ["(H_mass<122) | (H_mass>128)"])
@@ -50,7 +50,7 @@ for chan in channels:
         data_hist.Write(name)
         
         name = "data_zg_enriched_{}_cat{}".format(chan, cat)
-        data_hist = ROOT.TH1D(name,name, 80, 100, 180)
+        data_hist = ROOT.TH1D(name,name, 320, 100, 180)
         data_hist.Sumw2()
         for i, data in enumerate(data_list):
             arrays = ut.ReadFile(log_path+"{}/{}.root".format(chan, data), selections = selections + ["(H_mass<122) | (H_mass>128)", "gamma_relpt>0.4"])
@@ -58,7 +58,7 @@ for chan in channels:
         data_hist.Write(name)
         
         name = "data_dy_enriched_{}_cat{}".format(chan, cat)
-        data_hist = ROOT.TH1D(name,name, 80, 100, 180)
+        data_hist = ROOT.TH1D(name,name, 320, 100, 180)
         data_hist.Sumw2()
         for i, data in enumerate(data_list):
             arrays = ut.ReadFile(log_path+"{}/{}.root".format(chan, data), selections = selections + ["(H_mass<122) | (H_mass>128)", "gamma_relpt<=0.4"])
@@ -66,8 +66,8 @@ for chan in channels:
         data_hist.Write(name)
         
         name = "bkg_{}_cat{}".format(chan, cat)
-        fake_bkg_hist = ROOT.TH1D(name,name, 80, 100, 180)
-        true_bkg_hist = ROOT.TH1D(name,name, 80, 100, 180)
+        fake_bkg_hist = ROOT.TH1D(name,name, 320, 100, 180)
+        true_bkg_hist = ROOT.TH1D(name,name, 320, 100, 180)
         fake_bkg_hist.Sumw2()
         true_bkg_hist.Sumw2()
         
@@ -110,7 +110,7 @@ for chan in channels:
         fake_bkg_hist.Write("fake_"+name)
         
         name = "fake_bkg_zg_enriched_{}_cat{}".format(chan, cat)
-        fake_bkg_hist = ROOT.TH1D(name,name, 80, 100, 180)
+        fake_bkg_hist = ROOT.TH1D(name,name, 320, 100, 180)
         fake_bkg_hist.Sumw2()
         for i, bkg in enumerate(data_driven_bkg_list):
             arrays = ut.ReadFile(data_driven_path+"{}/{}_fake.root".format(chan, bkg), tree=chan, selections = selections + ["gamma_relpt>0.4"])
@@ -121,7 +121,7 @@ for chan in channels:
         fake_bkg_hist.Write(name)
         
         name = "fake_bkg_dy_enriched_{}_cat{}".format(chan, cat)
-        fake_bkg_hist = ROOT.TH1D(name,name, 80, 100, 180)
+        fake_bkg_hist = ROOT.TH1D(name,name, 320, 100, 180)
         fake_bkg_hist.Sumw2()
         for i, bkg in enumerate(data_driven_bkg_list):
             arrays = ut.ReadFile(data_driven_path+"{}/{}_fake.root".format(chan, bkg), tree=chan, selections = selections + ["gamma_relpt<=0.4"])
@@ -132,7 +132,7 @@ for chan in channels:
         fake_bkg_hist.Write(name)
         
         name = "true_bkg_zg_enriched_{}_cat{}".format(chan, cat)
-        true_bkg_hist = ROOT.TH1D(name,name, 80, 100, 180)
+        true_bkg_hist = ROOT.TH1D(name,name, 320, 100, 180)
         true_bkg_hist.Sumw2()
         for i, bkg in enumerate(true_bkg_list):
             arrays = ut.ReadFile(log_path+"{}/{}.root".format(chan, bkg), selections = selections + ["gamma_relpt>0.4"])
@@ -141,7 +141,7 @@ for chan in channels:
         true_bkg_hist.Write(name)
         
         name = "true_bkg_dy_enriched_{}_cat{}".format(chan, cat)
-        true_bkg_hist = ROOT.TH1D(name,name, 80, 100, 180)
+        true_bkg_hist = ROOT.TH1D(name,name, 320, 100, 180)
         true_bkg_hist.Sumw2()
         for i, bkg in enumerate(true_bkg_list):
             arrays = ut.ReadFile(log_path+"{}/{}.root".format(chan, bkg), selections = selections + ["gamma_relpt<=0.4"])

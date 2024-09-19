@@ -89,7 +89,7 @@ def compute_l_costheta(x):
     #cosTheta = a/k1
 
     ## photon and lepton
-    cosTheta = - (gamma_BZ.Vect().Unit()).Dot(l1_BZ.Vect().Unit())
+    cosTheta = - (gamma_BZ.Vect()/gamma_BZ.Vect().R()).Dot(l1_BZ.Vect()/l1_BZ.Vect().R())
 
     return cosTheta
 
@@ -107,17 +107,32 @@ def compute_l_phi(x):
     l1_BH = Math.VectorUtil.boost(l1, -H_beta)
     l2_BH = Math.VectorUtil.boost(l2, -H_beta)
     Z_BH = Math.VectorUtil.boost(Z, -H_beta)
-    N1_BH = (l1_BH.Vect().Cross(l2_BH.Vect())).Unit()
-    beamAxis = TVector3 (0, 0, 1)
-    Z3_BH = Z_BH.Vect().Unit()
-    NSC_BH = - (Z3_BH.Cross(beamAxis)).Unit()
-    # Z_beta = TLorentzVector(Z_BH.Px(), Z_BH.Py(), Z_BH.Pz(), Z_BH.E()).BoostVector()
-
-    tmpSgnPhi1 = Z3_BH.Dot(N1_BH.Cross(NSC_BH))
+    N1_BH = l1_BH.Vect().Cross(l2_BH.Vect())
+    N1_BH = N1_BH/N1_BH.R()
+    
+    # beamAxis = TVector3 (0, 0, 1)
+    Z3_BH = Z_BH.Vect()/Z_BH.Vect().R()
+    # NSC_BH = (Z3_BH.Cross(beamAxis)).Unit()
+    # tmpSgnPhi1 = Z3_BH.Dot(N1_BH.Cross(NSC_BH))
+    
+    H_transverse_beta = TLorentzVector(H.Px(), H.Py(), H.Pz(), H.E()).BoostVector()
+    H_transverse_beta.SetZ(0)
+    hH = Math.VectorUtil.boost(H, -H_transverse_beta)
+    hPz, hE = hH.Pz(), hH.E()
+    q = Math.LorentzVector("ROOT::Math::PxPyPzE4D<float>")(0, 0, (hPz + hE) / 2, (hE + hPz) / 2)
+    q = Math.VectorUtil.boost(q, H_transverse_beta)
+    q = Math.VectorUtil.boost(q, -H_beta)
+    
+    NSC_BH = (Z_BH.Vect().Cross(q.Vect()))
+    NSC_BH = NSC_BH/NSC_BH.R()
+    tmpSgnPhi1 = - Z3_BH.Dot(N1_BH.Cross(NSC_BH))
+    
     sgnPhi1 = 0.
     if (abs(tmpSgnPhi1)>0.): sgnPhi1 = tmpSgnPhi1/abs(tmpSgnPhi1)
-    dot_BH1SC = N1_BH.Dot(NSC_BH)
-    if (abs(dot_BH1SC)>=1.): dot_BH1SC *= 1./abs(dot_BH1SC)
+    dot_BH1SC = - N1_BH.Dot(NSC_BH)
+    if (abs(dot_BH1SC)>=1.): 
+      print(dot_BH1SC)
+      dot_BH1SC *= 1./abs(dot_BH1SC)
     Phi1 = sgnPhi1 * math.acos(dot_BH1SC)
 
     return Phi1

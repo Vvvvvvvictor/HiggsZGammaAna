@@ -29,9 +29,9 @@ def apply_sf_to_weights(data, sf, bin_edges):
 # Load data
 branches = ["H_mass", "Z_pt", "weight", "bdt_score", "gamma_relpt"]
 
-data_cr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output/zero_to_one_jet/Data_fake.root")["zero_to_one_jet"].arrays(library="pd")
-zg_cr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output/zero_to_one_jet/ZGToLLG_fake.root")["zero_to_one_jet"].arrays(library="pd")
-ewkzg_cr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output/zero_to_one_jet/ZG2JToG2L2J_fake.root")["zero_to_one_jet"].arrays(library="pd")
+data_cr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output_WP80/zero_to_one_jet/Data_fake.root")["zero_to_one_jet"].arrays(library="pd")
+zg_cr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output_WP80/zero_to_one_jet/ZGToLLG_fake.root")["zero_to_one_jet"].arrays(library="pd")
+ewkzg_cr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output_WP80/zero_to_one_jet/ZG2JToG2L2J_fake.root")["zero_to_one_jet"].arrays(library="pd")
     
 # boundaries = [float(i) for i in open("/eos/home-j/jiehan/root/outputs/significances/bin_binaries_1D_zero_to_one_jet.txt", "r").readlines()[2].split()[1:]]
 boundaries = [0.28379330039024353, 0.4557725191116333, 0.5796570777893066, 0.7069960236549377, 1.]
@@ -133,21 +133,29 @@ def apply(in_data_cr, in_zg_cr, in_ewkzg_cr, bkg_list, bounds):
     # bkg_hist_sum = [bkg_hist_sum[i] * linear(bin_edges[:-1]+np.diff(bin_edges)/2-100, *popt) for i in range(len(bkg_hist_sum))]
     # bkg_hist_sum = bkg_hists + [cr_hist*sf*linear(bin_edges[:-1]+np.diff(bin_edges)/2-100, *popt)]
 
-    data_cr['weight'] = data_cr['weight'] * sf * linear(data_cr["H_mass"]-100, *popt)
+    data_cr['weight_cor'] = data_cr['weight'] * sf * linear(data_cr["H_mass"]-100, *popt)
+    data_cr['weight_sf'] = sf
     data_cr['tag'] = np.zeros(len(data_cr))
-    zg_cr['weight'] = zg_cr['weight'] * sf * linear(zg_cr["H_mass"]-100, *popt) * -1
+    zg_cr['weight_cor'] = zg_cr['weight'] * sf * linear(zg_cr["H_mass"]-100, *popt) * -1
+    zg_cr['weight_sf'] = sf * -1
     zg_cr['tag'] = np.ones(len(zg_cr))
-    ewkzg_cr['weight'] = ewkzg_cr['weight'] * sf * linear(ewkzg_cr["H_mass"]-100, *popt) * -1
+    ewkzg_cr['weight_cor'] = ewkzg_cr['weight'] * sf * linear(ewkzg_cr["H_mass"]-100, *popt) * -1
+    ewkzg_cr['weight_sf'] = sf * -1
     ewkzg_cr['tag'] = np.ones(len(ewkzg_cr)) * 2
+    
+    for i, bkg_sample in enumerate(bkg_samples):
+        bkg_sample['weight_cor'] = bkg_sample['weight']
+        bkg_sample['weight_sf'] = 1
+        bkg_sample['tag'] = np.ones(len(bkg_sample)) * (3 + i)
 
-    output = pd.concat([data_cr, zg_cr, ewkzg_cr])
+    output = pd.concat([data_cr, zg_cr, ewkzg_cr]+bkg_samples)
 
     return output
 
 # Apply
-with uproot.recreate("/eos/home-j/jiehan/root/outputs/zero_to_one_jet/data_driven_bkg.root") as output_file:
+with uproot.recreate("/eos/home-j/jiehan/root/outputs/zero_to_one_jet/data_driven_bkg_v3.root") as output_file:
     output_dataframe = pd.DataFrame()
     for i in range(0, len(boundaries)-1):
         partial_output = apply(data_cr, zg_cr, ewkzg_cr, bkg_list, [boundaries[i], boundaries[i+1]])
         output_dataframe = pd.concat([output_dataframe, partial_output])
-    output_file['test'] = output_dataframe
+    output_file['zero_to_one_jet'] = output_dataframe

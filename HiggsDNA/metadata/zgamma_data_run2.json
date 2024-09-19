@@ -25,10 +25,10 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "Data"
+            "Data_SingleElectron"
         ],
         "years": [
-            "2018"
+            "2017"
         ]
     },
     "variables_of_interest": [
@@ -165,7 +165,9 @@
         "weight_central",
         "run",
         "event",
-        "luminosityBlock"
+        "luminosityBlock",
+        "z_mumu",
+        "z_ee"
     ],
     "branches": [
         "L1PreFiringWeight_Nom",
@@ -173,6 +175,19 @@
         "btagWeight_CSVV2",
         "genWeight",
         "Generator_weight",
+        "Flag_goodVertices",
+        "Flag_globalSuperTightHalo2016Filter",
+        "Flag_HBHENoiseFilter",
+        "Flag_HBHENoiseIsoFilter",
+        "Flag_EcalDeadCellTriggerPrimitiveFilter",
+        "Flag_BadPFMuonFilter",
+        "Flag_BadPFMuonDzFilter",
+        "Flag_hfNoisyHitsFilter",
+        "Flag_eeBadScFilter",
+        "Flag_ecalBadCalibFilterV2",
+        "Flag_ecalBadCalibFilter",
+        "Flag_BadChargedCandidateFilter",
+        "Flag_muonBadTrackFilter",
         "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL",
         "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ",
         "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL",
@@ -273,6 +288,8 @@
         "GenPart_pt",
         "GenPart_status",
         "GenPart_statusFlags",
+        "TrigObj_id",
+        "TrigObj_filterBits",
         "genWeight",
         "run",
         "event",

@@ -164,8 +164,8 @@ def photon_CSEV_sf(events, year, central_only, input_collection, working_point =
 from higgs_dna.systematics.data.electron_veto_sf import PHOTON_ELECTRON_VETO_SF_2016, PHOTON_ELECTRON_VETO_SF_2017, PHOTON_ELECTRON_VETO_SF_2018
 photon_electron_veto_sf_bins = {
     "2016" : PHOTON_ELECTRON_VETO_SF_2016,
-    "2016UL_preVFP" : PHOTON_ELECTRON_VETO_SF_2016,
-    "2016UL_postVFP" : PHOTON_ELECTRON_VETO_SF_2016,
+    "2016preVFP" : PHOTON_ELECTRON_VETO_SF_2016,
+    "2016postVFP" : PHOTON_ELECTRON_VETO_SF_2016,
     "2017" : PHOTON_ELECTRON_VETO_SF_2017,
     "2018" : PHOTON_ELECTRON_VETO_SF_2018
 }
@@ -190,7 +190,7 @@ def photon_electron_veto_sf(events, central_only, year):
         },
         central_only = central_only
     )
-
+    print(variations)
     return variations
 
 ##################

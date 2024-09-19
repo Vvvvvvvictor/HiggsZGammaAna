@@ -21,7 +21,7 @@ def getArgs():
     parser.add_argument('-c', '--config', action='store', nargs=2, default=['/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/data/training_config_BDT.json', '/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/data/apply_config_BDT.json'], help='Region to process')
     parser.add_argument('-i', '--inputFolder', action='store', default='/eos/home-j/jiehan/data_for_norm_float_v1', help='directory of training inputs')
     parser.add_argument('-m', '--modelFolder', action='store', default='/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/models', help='directory of BDT models')
-    parser.add_argument('-o', '--outputFolder', action='store', default='/eos/home-j/jiehan/data_for_norm_float_v1/output', help='directory for outputs')
+    parser.add_argument('-o', '--outputFolder', action='store', default='/eos/home-j/jiehan/data_for_norm_float_v1/output_WP80', help='directory for outputs')
     parser.add_argument('-r', '--region', action='store', choices=['two_jet', 'one_jet', 'zero_jet', 'zero_to_one_jet', 'VH_ttH', 'all_jet'], default='zero_to_one_jet', help='Region to process')
     parser.add_argument('-cat', '--category', action='store', nargs='+', help='apply only for specific categories')
     parser.add_argument('-s', '--sample', action='store', nargs='+', help='apply only for specific samples')
@@ -58,7 +58,7 @@ class ApplyXGBHandler(object):
         self.preselections = "H_mass > 100 & H_mass < 180 & H_mass + Z_mass > 185"
         
         # select control region or signal region
-        self.postselctions = "Z_mass > 80 & Z_mass < 100 & regions == 2"
+        self.postselctions = "Z_mass > 80 & Z_mass < 100 & ((regions == 2) | (regions == 1))"
         # self.postselctions = "Z_mass > 80 & Z_mass < 100 & regions == 0"
         
     def readApplyConfig(self, path):
@@ -99,6 +99,7 @@ class ApplyXGBHandler(object):
                     
                     # only control region need to change mvaID
                     sample_data = self.changeMvaID(sample_data)
+                    # sample_data["gamma_mvaID"] = sample_data["gamma_mvaID"].apply(lambda x: 1)
                     
                     sample_data = sample_data.query(self.postselctions)
                     sample_data["bdt_score"] = self.model.predict_proba(sample_data[self.trainVariables].to_numpy())[:, 1]
@@ -123,19 +124,17 @@ class ApplyXGBHandler(object):
         """
         # 核密度估计并重新采样函数
         def kde_resample(data, condition, gamma_eta_selection):
-            gamma_mvaID_values = data[condition]['gamma_mvaID'].values
+            # gamma_mvaID_values = data[condition]['gamma_mvaID'].values
+            gamma_mvaID_values = pd.read_pickle(f"/eos/user/j/jiehan/data_for_norm_float_v1/gamma_mvaID_01J_{condition}.pkl")['gamma_mvaID'].values
+            
             kde = gaussian_kde(gamma_mvaID_values)
             gamma_mvaID_range = np.linspace(min(gamma_mvaID_values), max(gamma_mvaID_values), 1000)
             prob_dist = kde(gamma_mvaID_range)
             return np.random.choice(gamma_mvaID_range, size=data.query(gamma_eta_selection).shape[0], p=prob_dist/prob_dist.sum())
 
-        # 条件
-        condition_B = (data['regions'] == 0) & (data['gamma_eta'] < 1.5)
-        condition_E = (data['regions'] == 0) & (data['gamma_eta'] > 1.5)
-
         # 重新采样并应用
-        data.loc[data['gamma_eta'] < 1.5, 'gamma_mvaID'] = kde_resample(data, condition_B, "gamma_eta < 1.5")
-        data.loc[data['gamma_eta'] > 1.5, 'gamma_mvaID'] = kde_resample(data, condition_E, "gamma_eta > 1.5")
+        data.loc[(data['gamma_eta'] < 1.5) & (data['gamma_eta'] > -1.5), 'gamma_mvaID'] = kde_resample(data, "B", "(gamma_eta < 1.5) & (gamma_eta > -1.5)")
+        data.loc[(data['gamma_eta'] > 1.5) | (data['gamma_eta'] < -1.5), 'gamma_mvaID'] = kde_resample(data, "E", "(gamma_eta > 1.5) | (gamma_eta < -1.5)")
         
         return data
         
