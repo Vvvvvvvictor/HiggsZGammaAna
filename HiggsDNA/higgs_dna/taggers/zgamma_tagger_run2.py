@@ -83,8 +83,8 @@ DEFAULT_OPTIONS = {
         "2016": 30,
         "2017": 35,
         "2018": 35,
-        "2022": 30,
-        "2023": 30
+        "2022": 35,
+        "2023": 35
     },
     "lead_mu_pt":{
         "2016": 25,
@@ -95,7 +95,7 @@ DEFAULT_OPTIONS = {
     },
     "jets" : {
         "pt" : 30.0,
-        "eta" : 4.7,
+        "eta" : 2.5,
         "dr_photons" : 0.4,
         "dr_electrons" : 0.4,
         "dr_muons" : 0.4,
@@ -222,7 +222,8 @@ class ZGammaTaggerRun2(Tagger):
             clean = {
             },
             name = "SelectedElectron",
-            tagger = self
+            tagger = self,
+            year = self.year[:4]
         )
         
         electrons = awkward_utils.add_field(
@@ -519,11 +520,13 @@ class ZGammaTaggerRun2(Tagger):
                 awkward.fill_none(getattr(gamma_cand, field), DUMMY_VALUE)
             )
         awkward_utils.add_field(events, "gamma_mvaID_WPL",  gamma_mvaID_WPL)
-        awkward_utils.add_field(events, "gamma_chiso",  gamma_cand.pfRelIso03_chg) #run2
-        awkward_utils.add_field(events, "gamma_alliso",  gamma_cand.pfRelIso03_all) #run2
         awkward_utils.add_field(events, "gamma_e_veto",  gamma_e_veto)
-        # awkward_utils.add_field(events, "gamma_chiso",  gamma_cand.pfRelIso03_chg_quadratic) #run3
-        # awkward_utils.add_field(events, "gamma_alliso",  gamma_cand.pfRelIso03_all_quadratic) #run3
+        if int(self.year[:4]) < 2020:
+            awkward_utils.add_field(events, "gamma_chiso",  gamma_cand.pfRelIso03_chg) #run2
+            awkward_utils.add_field(events, "gamma_alliso",  gamma_cand.pfRelIso03_all) #run2
+        elif int(self.year[:4]) > 2020:
+            awkward_utils.add_field(events, "gamma_chiso",  gamma_cand.pfRelIso03_chg_quadratic) #run3
+            awkward_utils.add_field(events, "gamma_alliso",  gamma_cand.pfRelIso03_all_quadratic) #run3
         #awkward_utils.add_field(events, "gamma_mvaID_17",  gamma_cand.mvaID_Fall17V2) #run3
 
         # Make Higgs candidate-level cuts
@@ -621,34 +624,6 @@ class ZGammaTaggerRun2(Tagger):
             # for cut, cut_name in zip([cut1, cut2, cut3, cut4, cut5, cut6, cut7, cut8, cut9], cut_names):
             #     awkward_utils.add_field(events, f"{cut_type}_{cut_name}", cut)
 
-        # all_cuts = cut0
-
-        # checked_cut = (z_ee_cut | z_mumu_cut) & pair_cut
-        # checked_events = events[checked_cut]
-        # print("!!!start check events tag(inclusive)!!!")
-        # for event in checked_events:
-        #     print(event.run, event.luminosityBlock, event.event, sep=" ")
-        # print("!!!end check events tag(inclusive)!!!")
-
-        # checked_cut = z_ee_cut & ee_trigger_pt_cut
-        # checked_events = events[checked_cut]
-        # print("!!!start check events tag(electron)!!!")
-        # for event in checked_events:
-        #     print(event.run, event.luminosityBlock, event.event, sep=" ")
-        # print("!!!end check events tag(electron)!!!")
-
-        # checked_cut = z_mumu_cut & mm_trigger_pt_cut
-        # checked_events = events[checked_cut]
-        # print("!!!start check events tag(muon)!!!")
-        # for event in checked_events:
-        #     print(event.run, event.luminosityBlock, event.event, sep=" ")
-        # print("!!!end check events tag(muon)!!!")
-
-        # self.register_cuts(
-        #     names = ["has_z_cand", "has_gamma_cand", "sel_h_1", "sel_h_2", "sel_h_3", "all cuts"],
-        #     results = [has_z_cand, has_gamma_cand, sel_h_1, sel_h_2, sel_h_3, all_cuts],
-        #     cut_type = "zgammas_unweighted"
-        # )
         ################## fsr recovery
         #clean_FSRphoton_mask = object_selections.delta_R_fsrlep(FSRphotons, z_cand.LeadLepton, 0.001) & object_selections.delta_R_fsrlep(FSRphotons, z_cand.SubleadLepton, 0.001) & object_selections.delta_R_fsrGamma(FSRphotons, gamma_cand, 0.001)
         #FSRphotons = FSRphotons[clean_FSRphoton_mask]

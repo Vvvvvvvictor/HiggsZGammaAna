@@ -25,10 +25,10 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "ggH_M125"
+            "ZG2JToG2L2J"
         ],
         "years": [
-            "2017"
+            "2022preEE", "2022postEE"
         ]
     },
     "variables_of_interest": [
