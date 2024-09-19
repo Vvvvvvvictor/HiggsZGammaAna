@@ -66,6 +66,9 @@ def run_analysis(config):
         if branch_map:
             for x in branch_map:
                 logger.debug("[run_analysis] Replacing %s with %s." % (str(x[0]), str(x[1])))
+                print("[DEBUG]: ", str(x[0]), list, tuple(x[0]), tuple(x[1]))
+                print("[DEBUG]: ", awkward.fields(events))
+                print("[DEBUG]: ", awkward.fields(events["Jet"]))
                 if isinstance(x[0], list):
                     events[tuple(x[0])] = events[tuple(x[1])]
                 else:
