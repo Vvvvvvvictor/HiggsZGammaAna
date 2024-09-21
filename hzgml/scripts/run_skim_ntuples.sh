@@ -86,7 +86,7 @@ done
 # 处理 bkgmc 样本
 
 # samples=(ZGToLLG DYJetsToLL WGToLNuG ZG2JToG2L2J EWKZ2J TT TTGJets TGJets ttWJets ttZJets WW WZ ZZ DYGto2LG_10to50 DYGto2LG_50to100)
-samples=(DYGto2LG_50to100 DYJetsToLL)
+samples=(ZGToLLG DYJetsToLL WGToLNuG ZG2JToG2L2J EWKZ2J TT TTGJets TGJets ttWJets ttZJets WW WZ ZZ)
 type="bkgmc"
 for sample in "${samples[@]}"; do
     mkdir -p "$target$sample"

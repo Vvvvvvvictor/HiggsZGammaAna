@@ -67,9 +67,9 @@ def gettingsig(input_path, region, variable, boundaries, transform, estimate):
 
     for category in ['sig', 'VBF', 'ggH', "data_sid", "bkgmc_sid", "bkgmc_cen", "sig_tot"]:
 
-        # for data in tqdm(read_root(f'{input_path}/{region}/{"bkgmc" if "bkgmc" in category else "data" if "data" in category else "sig" if "sig" in category else category}.root', key='test', columns=[f"{variable}_score{'_t' if transform else ''}", 'H_mass', 'weight', 'event'], chunksize=500000), desc=f'Loading {category}', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
+        # for data in tqdm(read_root(f'{input_path}/{region}/{"bkgmc" if "bkgmc" in category else "data" if "data" in category else "sig" if "sig" in category else category}.root', key=region, columns=[f"{variable}_score{'_t' if transform else ''}", 'H_mass', 'weight', 'event'], chunksize=500000), desc=f'Loading {category}', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
         # Define the file path
-        file_path = f'{input_path}/{region}/{"bkgmc" if "bkgmc" in category else "data" if "data" in category else "sig" if "sig" in category else category}.root'
+        file_path = f'{input_path}/{region}/{"bkgmc" if "bkgmc" in category else "Data" if "data" in category else "sig" if "sig" in category else category}.root'
 
         # Open the file
         file = uproot.open(file_path)
@@ -78,7 +78,7 @@ def gettingsig(input_path, region, variable, boundaries, transform, estimate):
         columns = [f"{variable}_score{'_t' if transform else ''}", 'H_mass', 'weight', 'event']
 
         # Iterate over the data in chunks
-        for data in tqdm(file['test'].iterate(columns, library='pd', step_size=500000), desc=f'Loading {category}', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
+        for data in tqdm(file[region].iterate(columns, library='pd', step_size=500000), desc=f'Loading {category}', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
     
             if 'sid' in category:
                 data = data[(data.H_mass >= 100) & (data.H_mass <= 180) & ((data.H_mass < 120) | (data.H_mass > 130))]
@@ -131,14 +131,14 @@ def gettingsig(input_path, region, variable, boundaries, transform, estimate):
 def categorizing(input_path, region, variable, sigs, bkgs, nscan, minN, transform, nbin, floatB, n_fold, fold, earlystop, estimate):
 
     f_sig = TFile('%s/%s/sig.root' % (input_path, region))
-    t_sig = f_sig.Get('test')
+    t_sig = f_sig.Get(region)
  
     if estimate in ["fullSim", "fullSimrw"]:
         f_bkgmc = TFile('%s/%s/bkgmc.root' % (input_path, region))
-        t_bkgmc = f_bkgmc.Get('test')
+        t_bkgmc = f_bkgmc.Get(region)
     if estimate in ["fullSimrw", "data_sid"]:
-        f_data_sid = TFile('%s/%s/data.root' % (input_path, region))
-        t_data_sid = f_data_sid.Get('test')
+        f_data_sid = TFile('%s/%s/Data.root' % (input_path, region))
+        t_data_sid = f_data_sid.Get(region)
 
 
 #################################################################################################
@@ -203,7 +203,7 @@ def categorizing(input_path, region, variable, sigs, bkgs, nscan, minN, transfor
     elif estimate == "fullSim":
         cgz = categorizer(h_sig, h_bkgmc_cen)
     
-    # cgz.smooth(50, nscan, SorB='B', function='Epoly2')
+    cgz.smooth(50, nscan, SorB='B', function='Epoly2')
     '''
     uncomment upper line to fit a function to the BDT distribution. Usage: categorizer.smooth(left_bin_to_fit, right_bin_to_fit, SorB='S' (for signal) or 'B' (for bkg), function='Epoly2', printMessage=False (switch to "True" to print message))
     TODO: first parameter must >= 1, 0 is banned.

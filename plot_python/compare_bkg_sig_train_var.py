@@ -97,7 +97,9 @@ x_titles = [
     r"$\Delta y(ll,ll\gamma)$"
 ]
 
-BINS = 40
+TREE = "two_jet"
+
+BINS = 50
 WEIGHT = "weight"
 PATH = "/eos/user/j/jiehan/root/skimmed_ntuples/"
 
@@ -111,15 +113,15 @@ def convert_root_to_hist(file, target=None):
     if target is not None:
         for f in file:
             for year in ["2016preVFP", "2016postVFP", "2017", "2018"]:
-                print("Reading", PATH+f+"/"+year+".root:two_jet", "...")
+                print("Reading", PATH+f+"/"+year+f".root:{TREE}", "...")
                 if "H_mass" not in VAR:
                     try:
-                        samples = uproot.open(PATH+f+"/"+year+".root:two_jet").arrays([VAR, "weight", "H_mass"], library="pd")
+                        samples = uproot.open(PATH+f+"/"+year+f".root:{TREE}").arrays([VAR, "weight", "H_mass"], library="pd")
                     except:
                         continue
                 else:
                     try:
-                        samples = uproot.open(PATH+f+"/"+year+".root:two_jet").arrays([VAR, "weight"], library="pd")
+                        samples = uproot.open(PATH+f+"/"+year+f".root:{TREE}").arrays([VAR, "weight"], library="pd")
                     except:
                         continue
                 hist, _ = np.histogram(samples["H_mass"], bins=100, range=[100, 180], weights=samples[WEIGHT])
@@ -129,15 +131,15 @@ def convert_root_to_hist(file, target=None):
 
     for f in file:
         for year in ["2016preVFP", "2016postVFP", "2017", "2018"]:
-            print("Reading", PATH+f+"/"+year+".root:two_jet", "...")
+            print("Reading", PATH+f+"/"+year+f".root:{TREE}", "...")
             if "H_mass" not in VAR:
                 try:
-                    samples = uproot.open(PATH+f+"/"+year+".root:two_jet").arrays([VAR, WEIGHT, "H_mass"], library="pd")
+                    samples = uproot.open(PATH+f+"/"+year+f".root:{TREE}").arrays([VAR, WEIGHT, "H_mass"], library="pd")
                 except:
                     continue
             else:
                 try:
-                    samples = uproot.open(PATH+f+"/"+year+".root:two_jet").arrays([VAR, WEIGHT], library="pd")
+                    samples = uproot.open(PATH+f+"/"+year+f".root:{TREE}").arrays([VAR, WEIGHT], library="pd")
                 except:
                     continue
             hist, _ = np.histogram(samples["H_mass"], bins=100, range=[100, 180], weights=samples[WEIGHT])
@@ -160,13 +162,13 @@ for i in range(len(var_names)):
     print("\n\n", VAR, RMIN, RMAX, "\n\n")
 
     hist2, bins, mass_hist = convert_root_to_hist(bkg)
-    hist1, bins, _ = convert_root_to_hist(sig, mass_hist)
+    # hist1, bins, _ = convert_root_to_hist(sig, mass_hist)
     # hist1, bins, _ = convert_root_to_hist(sig)
     hist1_1, bins, _ = convert_root_to_hist(sig_st)
 
     bins = (bins[:-1] + bins[1:]) / 2
 
-    plt.plot(bins, hist1/sum(hist1), "o-", label="Signal")
+    # plt.plot(bins, hist1/sum(hist1), "o-", label="Signal")
     plt.plot(bins, hist1_1/sum(hist1_1), "*-", label="Signal std")
     plt.plot(bins, hist2/sum(hist2), "x-", label="Background")
 

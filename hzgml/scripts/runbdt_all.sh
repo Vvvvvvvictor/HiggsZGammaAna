@@ -23,13 +23,18 @@ echo "Shielded parameter is: $S . Added variables is: $A ."
 # for fold in {0..3};do
 # python scripts/train_bdt.py -r two_jet --optuna --n-calls 80 --fold $fold --continue-optuna 1 
 # done
-python scripts/train_bdt.py -r two_jet --save  --hyperparams_path "models/optuna_new_better"
-python scripts/apply_bdt.py -r two_jet
+# python scripts/train_bdt.py -r zero_to_one_jet --save # --hyperparams_path "models/optuna_new_better"
+# python scripts/apply_bdt.py -r zero_to_one_jet
+python scripts/categorization_1D.py -r zero_to_one_jet -b 4 --minN 10 --floatB
+
+# python scripts/train_bdt.py -r two_jet --save # --hyperparams_path "models/optuna_new_better"
+# python scripts/apply_bdt.py -r two_jet
 python scripts/categorization_1D.py -r two_jet -b 4 --minN 10 --floatB
+# python ../SSTest/Generate_template.py
 # python scripts/Generate_fake_photon_template.py -r two_jet
 # python ../plot_python/make_data_driven_two_jet.py 
 # python ../plot_python/compare_sig_bkg_bdt_sosb.py
-python ../SSTest/Generate_fake_photon_template_2J.py
+# python ../SSTest/Generate_fake_photon_template_2J.py
 # rm ../plot_python/pic/2J/*
 # python ../plot_python/compare_data_driven_hmass_two_jet.py
 

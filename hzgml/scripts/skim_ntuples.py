@@ -117,6 +117,8 @@ def compute_l_phi(x):
     qbar = Math.VectorUtil.boost(qbar, H_transverse_beta)
 
     cosTheta = (qbar - q).Dot(Z)/(M * lZ)
+    if (cosTheta >= 1): cosTheta = 1 / cosTheta
+    if (cosTheta <= -1): cosTheta = -1 / cosTheta
     sinTheta = math.sqrt(1 - cosTheta ** 2)
     
     H_beta = TLorentzVector(H.Px(), H.Py(), H.Pz(), H.E()).BoostVector()

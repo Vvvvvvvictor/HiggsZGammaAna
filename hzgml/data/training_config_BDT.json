@@ -66,7 +66,7 @@
                          {"silent": 1, "eval_metric": ["logloss", "auc"], "grow_policy": "lossguide", "nthread": 4, "objective": "binary:logistic", "tree_method": "hist", "booster": "gbtree"}
                          ]
               },
- "zero_to_one_jet": {"#+preselections": ["n_jets <= 1"],
+ "zero_to_one_jet": {"+preselections": ["H_mass >= 120", "H_mass <= 130"],
               "inputTree": "zero_to_one_jet",
               "params": [{"silent": 1, "eval_metric": ["logloss", "auc"], "grow_policy": "lossguide", "nthread": 4, "objective": "binary:logistic", "tree_method": "hist", "booster": "gbtree"},
                          {"silent": 1, "eval_metric": ["logloss", "auc"], "grow_policy": "lossguide", "nthread": 4, "objective": "binary:logistic", "tree_method": "hist", "booster": "gbtree"},
