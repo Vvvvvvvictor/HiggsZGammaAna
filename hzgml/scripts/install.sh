@@ -17,7 +17,9 @@ pip install scikit-optimize==0.9
 pip install xgboost==2.0.3
 pip install optuna==3.6.1
 pip install optuna_dashboard==0.15.1
-pip install plotly==5.22.0 --ignore-installed
+pip install plotly==5.22.0 --ignore-installed 
+pip install pyarrow==14.0.0 
+pip install fastparquet==0.8.2
 
 # pip install -U --ignore-installed scikit-learn tensorboardx servicex numba httpstan coffea
 

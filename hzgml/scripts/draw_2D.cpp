@@ -16,7 +16,7 @@
 
 using namespace std;
 
-void draw_2D(TString mode = "inclusive", TString dataset = "bkgmc")
+void draw_2D(TString mode = "zero_to_one_jet", TString dataset = "Data")
 {
 
     cout << "\tNOW!!! We will draw the most beautiful PICTURE in the world" << endl;
@@ -24,15 +24,17 @@ void draw_2D(TString mode = "inclusive", TString dataset = "bkgmc")
     cout << "\tLET'S GO!!!!!!" << endl;
     cout << "-------------------------------------------------------------------------------" << endl;
 
-    double X_axis[3] = {100, -1e-4, 1e-4};
-    double Y_axis[3] = {6, 0, 6};
+    double X_axis[3] = {100, 0, 1};
+    double Y_axis[3] = {100, -3.1416, 3.1416};
     // double X_axis[3] = {120, 0.000000000001, 0.03};
 
-    TString y_name = "n_jets";
-    Float_t Y;
-    TString x_name = "weight";
+    TString y_name = "lep_phi";  // "lep_phi"; "Z_lead_lepton_eta", "Z_sublead_lepton_eta", "gamma_eta", "lep_cos_theta"
+    Double_t Y;
+    TString x_name = "bdt_score_t"; //"lep_cos_theta"
     Float_t X;
-    TString file_dir = "/eos/home-j/jiehan/root/skimmed_ntuples_run3";
+    // TString file_dir = "/eos/home-j/jiehan/root/outputs/zero_to_one_jet"; 
+    TString file_dir = Form("/eos/home-j/jiehan/root/outputs/zero_to_one_jet/%s.root", dataset.Data());
+    // "/eos/home-j/jiehan/root/skimmed_ntuples_run3"
     TString str_dir = "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml";
 
     int isbarrel = 1;
@@ -58,19 +60,22 @@ void draw_2D(TString mode = "inclusive", TString dataset = "bkgmc")
     cout << "\n\tFinish Set Style and Canvas" << endl;
 
     Double_t w, pt, eta, bit, match, isb, isp, sieie, chiso, subl, mva;
+    Float_t bdt;
     Long64_t n;
     double max = 0.0;
 
     TH2D *h2;
 
-    // h2 = new TH2D("h2", Form("%s; %s:%s; %s", mode.Data(), mode.Data(), x_name.Data(), y_name.Data()), X_axis[0], X_axis[1], X_axis[2], Y_axis[0], Y_axis[1], Y_axis[2]);
-    h2 = new TH2D("h2", Form("%s; VBF BDT score; Dijet BDT score", mode.Data()), X_axis[0], X_axis[1], X_axis[2], Y_axis[0], Y_axis[1], Y_axis[2]);
+    h2 = new TH2D("h2", Form("%s; %s:%s; %s", mode.Data(), mode.Data(), x_name.Data(), y_name.Data()), X_axis[0], X_axis[1], X_axis[2], Y_axis[0], Y_axis[1], Y_axis[2]);
+    // h2 = new TH2D("h2", Form("%s; VBF BDT score; Dijet BDT score", mode.Data()), X_axis[0], X_axis[1], X_axis[2], Y_axis[0], Y_axis[1], Y_axis[2]);
     // h2->SetLineStyle(1);
     // h2->SetLineWidth(3);
-    cout << "\n\tLoading file" << Form("%s/%s.root", file_dir.Data(), dataset.Data()) << "!......" << endl;
+    // cout << "\n\tLoading file" << Form("%s/%s.root", file_dir.Data(), dataset.Data()) << "!......" << endl;
+    cout << "\n\tLoading file" << file_dir.Data() << "!......" << endl;
 
     // TFile *f = new TFile(Form("%s/%s.root", file_dir.Data(), dataset.Data()));
-    TFile *f = new TFile(Form("%s/ZH_M125/2022postEE.root", file_dir.Data()));
+    TFile *f = new TFile(file_dir.Data());
+    // TFile *f = new TFile(Form("%s/ZH_M125/2022postEE.root", file_dir.Data()));
 
     TTree *t = (TTree *)f->Get(mode.Data());
     Long64_t nentries = t->GetEntries();
@@ -83,6 +88,7 @@ void draw_2D(TString mode = "inclusive", TString dataset = "bkgmc")
     // t->SetBranchAddress("photon_is_barrel", &isb);
     // t->SetBranchAddress("gamma_genPartFlav", &isp);
     // t->SetBranchAddress("gamma_chiso", &chiso);
+    // t->SetBranchAddress("bdt_score_t", &bdt);
     t->SetBranchAddress("weight", &w);
     // t->SetBranchAddress("gamma_mvaID", &mva);
     // t->SetBranchAddress("n_jets", &n);
@@ -105,18 +111,20 @@ void draw_2D(TString mode = "inclusive", TString dataset = "bkgmc")
         // if (abs(eta)<1.5) if (chiso*pt<1.141) continue;
         // if (abs(eta)>1.5) if (chiso*pt<1.051) continue;
         // if (subl<15) continue;
+        // if (bdt>0.26) continue;
         // if (n!=0) continue;
         // if ((match==1) & ((int(bit/(1<<5))%2==1) | (int(bit/(1<<5))%2==1)) & (isb==isbarrel))
         // if (isb==isbarrel)
         {
-            // h2->Fill(X, Y, w);
-            // sum+=w;
-            h2->Fill(X, Y);
+            h2->Fill(X, Y, w);
+            sum+=w;
+            // h2->Fill(X, Y);
             // h2->Fill(X, Y*pt);
             // h2->Fill(X*pt, Y);
             // h2->Fill(X*pt, Y/pt);
         }
     }
+    h2->Scale(1./sum);
 
     // f = new TFile(Form("%s/overlap/zg.root", str_dir.Data()));
 
@@ -164,9 +172,11 @@ void draw_2D(TString mode = "inclusive", TString dataset = "bkgmc")
     cout << "\tFinished loading File: " << sum << " events in plot." << endl;
     // h2->SetAxisRange(X_axis[1], X_axis[2], "X");
     // h2->SetAxisRange(Y_axis[1], Y_axis[2], "Y");
+    // h2->SetMaximum(0.1);
+    // h2->SetMinimum(0.0001);
     h2->Draw("COLZ");
 
-    double vb = 0.41;
+    // double vb = 0.41;
 
     // TLine *l0 = new TLine(vb,Y_axis[1],vb,Y_axis[2]);
     // // TLine *l0 = new TLine(-0.97,5,X_axis[2],5);

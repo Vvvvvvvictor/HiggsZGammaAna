@@ -70,13 +70,13 @@ def compute_l_costheta(x):
         l1 = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.Z_sublead_lepton_pt, x.Z_sublead_lepton_eta, x.Z_sublead_lepton_phi, x.Z_sublead_lepton_mass)
     else: print('leptons have same sign')
     Z = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.Z_pt, x.Z_eta, x.Z_phi, x.Z_mass)
-    H = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.H_pt, x.H_eta, x.H_phi, x.H_mass)
+    # H = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.H_pt, x.H_eta, x.H_phi, x.H_mass)
     gamma = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.gamma_pt, x.gamma_eta, x.gamma_phi, x.gamma_mass)
     Z_beta = TLorentzVector(Z.Px(), Z.Py(), Z.Pz(), Z.E()).BoostVector()
-    H_beta = TLorentzVector(H.Px(), H.Py(), H.Pz(), H.E()).BoostVector()
-    Z_BH = Math.VectorUtil.boost(Z, -H_beta)
+    # H_beta = TLorentzVector(H.Px(), H.Py(), H.Pz(), H.E()).BoostVector()
+    # Z_BH = Math.VectorUtil.boost(Z, -H_beta)
     l1_BZ = Math.VectorUtil.boost(l1, -Z_beta)
-    l2_BZ = Math.VectorUtil.boost(l2, -Z_beta)
+    # l2_BZ = Math.VectorUtil.boost(l2, -Z_beta)
     gamma_BZ = Math.VectorUtil.boost(gamma, -Z_beta)
     
     ## Z and lepton
@@ -130,7 +130,7 @@ def compute_l_phi(x):
     q = Math.VectorUtil.boost(q, -H_beta)
     
     # beamAxis = TVector3 (0, 0, 1)
-    Z3_BH = Z_BH.Vect()
+    # Z3_BH = Z_BH.Vect()
     # NSC_BH = (Z3_BH.Cross(beamAxis)).Unit()
     # tmpSgnPhi1 = Z3_BH.Dot(N1_BH.Cross(NSC_BH))
     

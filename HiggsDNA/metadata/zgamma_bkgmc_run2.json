@@ -25,10 +25,10 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "DYJets_overlap"
+            "ZGToLLG"
         ],
         "years": [
-            "2017"
+            "2016preVFP", "2016postVFP", "2017", "2018"
         ]
     },
     "variables_of_interest": [

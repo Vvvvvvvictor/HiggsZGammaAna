@@ -43,7 +43,8 @@ def select_electrons(electrons, options, clean, name = "none", tagger = None, ye
             id_cut = electrons.mvaFall17V2Iso_WP80 == True # run2 nanoaodv9
     elif options["id"] == "WPL":
         if int(year) > 2020:
-            id_cut = ((electrons.pt > 10) & ((abs(electrons.eta) < 0.8) & (electrons.mvaHZZIso > 0.3685)) | ((abs(electrons.eta) < 1.479) & (abs(electrons.eta) > 0.8) & (electrons.mvaHZZIso > 0.2662)) | ((abs(electrons.eta) > 1.479) & (electrons.mvaHZZIso > -0.5444))) | ((electrons.pt < 10) & ((abs(electrons.eta) < 0.8) & (electrons.mvaHZZIso > 1.6339)) | ((abs(electrons.eta) < 1.479) & (abs(electrons.eta) > 0.8) & (electrons.mvaHZZIso > 1.5499)) | ((abs(electrons.eta) > 1.479) & (electrons.mvaHZZIso > 2.0629)))
+            points = 2.0 / (1.0 + numpy.exp(-2.0 * numpy.arrays([0.3685, 0.2662, -0.5444, 1.6339, 1.5499, 2.0629]))) - 1.0
+            id_cut = ((electrons.pt > 10) & ((abs(electrons.eta) < 0.8) & (electrons.mvaHZZIso > points[0])) | ((abs(electrons.eta) < 1.479) & (abs(electrons.eta) > 0.8) & (electrons.mvaHZZIso > points[1])) | ((abs(electrons.eta) > 1.479) & (electrons.mvaHZZIso > points[2]))) | ((electrons.pt < 10) & ((abs(electrons.eta) < 0.8) & (electrons.mvaHZZIso > points[3])) | ((abs(electrons.eta) < 1.479) & (abs(electrons.eta) > 0.8) & (electrons.mvaHZZIso > points[4])) | ((abs(electrons.eta) > 1.479) & (electrons.mvaHZZIso > points[5])))
         elif int(year) < 2020:
             id_cut = electrons.mvaFall17V2Iso_WPL == True # run2 nanoaodv9
     elif not options["id"] or options["id"].lower() == "none":

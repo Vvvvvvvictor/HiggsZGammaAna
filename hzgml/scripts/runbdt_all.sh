@@ -10,7 +10,7 @@
 echo $#
 if [ $# == 1 ]
 then
-    A=$1; S=-1;
+    A=-1; S=$1;
 else 
     S=-1; A=-1;
 fi
@@ -20,16 +20,21 @@ echo "==================================================="
 echo "Shielded parameter is: $S . Added variables is: $A ."
 
 # python scripts/train_bdt.py -r two_jet --optuna --n-calls 20 --continue-optuna 0
-# for fold in {0..3};do
-# python scripts/train_bdt.py -r two_jet --optuna --n-calls 80 --fold $fold --continue-optuna 1 
+# for fold in {3..3};do
+# python scripts/train_bdt.py -r two_jet --optuna --n-calls 20 --fold $fold --continue-optuna 1 
 # done
-# python scripts/train_bdt.py -r zero_to_one_jet --save # --hyperparams_path "models/optuna_new_better"
-# python scripts/apply_bdt.py -r zero_to_one_jet
-python scripts/categorization_1D.py -r zero_to_one_jet -b 4 --minN 10 --floatB
+# python scripts/train_bdt.py -r two_jet -s $S --save  #--hyperparams_path "models/optuna_new_better"
+# python scripts/apply_bdt.py -r two_jet -s $S
+# python scripts/categorization_1D.py -r two_jet -b 4 --minN 10 --floatB
 
-# python scripts/train_bdt.py -r two_jet --save # --hyperparams_path "models/optuna_new_better"
-# python scripts/apply_bdt.py -r two_jet
-python scripts/categorization_1D.py -r two_jet -b 4 --minN 10 --floatB
+# python scripts/train_bdt.py -r zero_to_one_jet --optuna --n-calls 20 --continue-optuna 0
+python scripts/train_bdt.py -r zero_to_one_jet --save  #--hyperparams_path "models/optuna"
+python scripts/apply_bdt.py -r zero_to_one_jet
+python scripts/categorization_1D.py -r zero_to_one_jet -b 4 --minN 10 --floatB
+# python scripts/categorization_1D.py -r two_jet -b 4 --minN 10 --floatB -s $S
+python ../SSTest/Generate_template.py
+
+
 # python ../SSTest/Generate_template.py
 # python scripts/Generate_fake_photon_template.py -r two_jet
 # python ../plot_python/make_data_driven_two_jet.py 

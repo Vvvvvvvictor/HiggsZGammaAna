@@ -265,7 +265,10 @@ class ApplyXGBHandler(object):
                             data_o[xgb_basename] = scores
                             data_o[xgb_basename+'_t'] = scores_t
 
-                        out_data = pd.concat([out_data, data_o], ignore_index=True, sort=False)
+                        if out_data.shape[0] != 0 and data_o.shape[0] != 0:
+                            out_data = pd.concat([out_data, data_o], ignore_index=True, sort=False)
+                        else:
+                            out_data = data_o if data_o.shape[0] != 0 else out_data
 
                 # out_data.to_root(output_path, key='test', mode='a', index=False)
                 

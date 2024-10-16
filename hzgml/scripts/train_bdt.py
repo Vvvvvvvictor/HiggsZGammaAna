@@ -337,6 +337,7 @@ class XGBoostHandler(object):
         print(columns)
 
         data = data.corr() * 100
+        # data = data.dropna(axis=0, how='all').dropna(axis=1, how='all')
 
         # 将相关性矩阵转换为按相关性值排序的数据框
         sorted_corr = data.unstack().sort_values(ascending=False)

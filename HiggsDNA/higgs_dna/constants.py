@@ -7,8 +7,8 @@ NOMINAL_TAG = "nominal" # name of the nominal events (relevant when we have mult
 
 LUMI = {
     "2016" : 36.31,
-    "2016preVFP" : 19.5, 
-    "2016postVFP" : 16.8, 
+    "2016preVFP" : 19.51, 
+    "2016postVFP" : 16.80, 
     "2017" : 41.48,
     "2018" : 59.83,
     "2022" : 35.18,

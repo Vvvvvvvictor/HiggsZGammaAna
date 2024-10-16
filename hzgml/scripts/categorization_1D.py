@@ -69,7 +69,7 @@ def gettingsig(input_path, region, variable, boundaries, transform, estimate):
 
         # for data in tqdm(read_root(f'{input_path}/{region}/{"bkgmc" if "bkgmc" in category else "data" if "data" in category else "sig" if "sig" in category else category}.root', key=region, columns=[f"{variable}_score{'_t' if transform else ''}", 'H_mass', 'weight', 'event'], chunksize=500000), desc=f'Loading {category}', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
         # Define the file path
-        file_path = f'{input_path}/{region}/{"bkgmc" if "bkgmc" in category else "Data" if "data" in category else "sig" if "sig" in category else category}.root'
+        file_path = f'{input_path}/{region}/{"bkgmc" if "bkgmc" in category else "Data" if "data" in category else "sig" if "sig" in category else "VBF_M125" if "VBF" in category else "ggH_M125" if "ggH" in category else category}.root'
 
         # Open the file
         file = uproot.open(file_path)
@@ -203,7 +203,7 @@ def categorizing(input_path, region, variable, sigs, bkgs, nscan, minN, transfor
     elif estimate == "fullSim":
         cgz = categorizer(h_sig, h_bkgmc_cen)
     
-    cgz.smooth(50, nscan, SorB='B', function='Epoly2')
+    # cgz.smooth(50, nscan, SorB='B', function='Epoly2')
     '''
     uncomment upper line to fit a function to the BDT distribution. Usage: categorizer.smooth(left_bin_to_fit, right_bin_to_fit, SorB='S' (for signal) or 'B' (for bkg), function='Epoly2', printMessage=False (switch to "True" to print message))
     TODO: first parameter must >= 1, 0 is banned.
@@ -236,7 +236,8 @@ def main():
 
     input_path = args.input
 
-    sigs = ['ggH','VBF','WminusH','WplusH','ZH','ttH']
+    sigs = ['ggH_M125','VBF_M125','WminusH_M125','WplusH_M125','ZH_M125','ttH_M125']
+    # sigs = ['ggH','VBF','WminusH','WplusH','ZH','ttH']
 
     # bkgs = ['data_fake', 'mc_med', 'mc_true']
     bkgs = ["ZGToLLG", "DYJetsToLL", "EWKZ2J", "ZG2JToG2L2J", "WGToLNuG", "TT", "TTGJets", "TGJets", "WW", "WZ", "ZZ", "ttZJets", "ttWJets"]

@@ -72,7 +72,7 @@ class SampleManager():
                     bf = None
 
                 if xs is not None:
-                    logger.debug("[SampleManager : get_samples] For sample '%s', year '%s', found xs of %.6f pb and bf of %.6f" % (sample, year, xs, bf))
+                    logger.debug("[SampleManager : get_samples] For sample '%s', year '%s', found xs of %.6f pb and bf of %.10f" % (sample, year, xs, bf))
                     is_data = False
                 else:
                     logger.debug("[SampleManager : get_samples] For sample '%s', year '%s' no 'xs' info was found, treating this as data." % (sample, year))
