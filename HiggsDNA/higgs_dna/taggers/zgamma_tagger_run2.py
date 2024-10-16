@@ -95,7 +95,7 @@ DEFAULT_OPTIONS = {
     },
     "jets" : {
         "pt" : 30.0,
-        "eta" : 2.5,
+        "eta" : 4.7,
         "dr_photons" : 0.4,
         "dr_electrons" : 0.4,
         "dr_muons" : 0.4,
@@ -586,7 +586,7 @@ class ZGammaTaggerRun2(Tagger):
                         ((awkward.num(events.Photon) >= 0) if "2016" in self.year else events.Flag_ecalBadCalibFilter) # 2016 dummy cut, all True
                         )
         
-        all_cuts = trigger_pt_cut & has_z_cand & has_gamma_cand & sel_h_1 & sel_h_2 & sel_h_3 & event_filter
+        all_cuts = trigger_pt_cut & has_z_cand & has_gamma_cand & sel_h_1 & sel_h_2 & event_filter & awkward.fill_none((h_cand.mass > 80) & (h_cand.mass < 180), False)
 
         for cut_type in ["zgammas", "zgammas_ele", "zgammas_mu", "zgammas_w", "zgammas_ele_w", "zgammas_mu_w"]:
             if "_w" in cut_type:
