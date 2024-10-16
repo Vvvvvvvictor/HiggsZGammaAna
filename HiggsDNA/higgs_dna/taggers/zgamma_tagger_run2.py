@@ -486,7 +486,7 @@ class ZGammaTaggerRun2(Tagger):
         awkward_utils.add_field(events, "z_ee", z_ee, overwrite=True)
 
         mass_cut = (z_cands.ZCand.mass > 80.) & (z_cands.ZCand.mass < 100.)
-        # mass_cut = z_cands.ZCand.mass > 50.
+        #mass_cut = z_cands.ZCand.mass > 50.
         z_cands = z_cands[mass_cut] # OSSF lepton pairs with m_ll > 50.
 
         # # Construct di-electron/di-muon pairs
