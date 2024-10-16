@@ -25,10 +25,10 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "Data_SingleElectron"
+            "Data"
         ],
         "years": [
-            "2016postVFP"
+            "2018"
         ]
     },
     "variables_of_interest": [

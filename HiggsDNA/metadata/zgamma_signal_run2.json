@@ -214,10 +214,18 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "ggH_M125"
+            "ggH_M125",
+            "VBF_M125",
+            "WplusH_M125",
+            "WminusH_M125",
+            "ZH_M125",
+            "ttH_M125"
         ],
         "years": [
-            "2016preVFP"
+            "2016preVFP",
+            "2016postVFP",
+            "2017",
+            "2018"
         ]
     },
     "variables_of_interest": [
