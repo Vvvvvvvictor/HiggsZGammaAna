@@ -160,11 +160,11 @@ def run_analysis(config):
     output_name = output_dir + config["output_name"]
     # Dump json summary
     if condor:
-      with open(config["summary_file"].split("/")[-1], "w") as f_out:
-        json.dump(job_summary, f_out, sort_keys = True, indent = 4)
+        with open(config["summary_file"].split("/")[-1], "w") as f_out:
+            json.dump(job_summary, f_out, sort_keys = True, indent = 4)
     else:
-      with open(config["summary_file"], "w") as f_out:
-        json.dump(job_summary, f_out, sort_keys = True, indent = 4)
+        with open(config["summary_file"], "w") as f_out:
+            json.dump(job_summary, f_out, sort_keys = True, indent = 4)
     return job_summary
 
 class AnalysisManager():

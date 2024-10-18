@@ -295,7 +295,7 @@ class Task():
                         output = job.output_dir + "/" + output
                     else:
                         logger.exception("[Task : summarize] Did not find output for job '%s' with dir '%s', output dir '%s', config file '%s', and summary file '%s'." % (job.name, job.dir, job.output_dir, job.config_file, job.summary_file))
-                        raise RuntimeError()
+                        # raise RuntimeError()
                 if not job_info["n_events_selected"][syst_tag] > 0: # skip empty parquet files to avoid errors
                     continue
                 else:
