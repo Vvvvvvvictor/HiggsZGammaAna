@@ -123,10 +123,11 @@ class TagSequence():
                 self.selections[tagger.name] = {}
             self.selections[tagger.name][syst_tag], events = tagger.run(events, syst_tag)
             self.summary[tagger.name] = { "priority" : idx }
-            if isinstance(self.selections[tagger.name][syst_tag], dict):
-                self.summary[tagger.name][syst_tag] = int(awkward.sum(self.selections[tagger.name][syst_tag][list(self.selections[tagger.name][syst_tag].keys())[0]]))
-            else:
-                self.summary[tagger.name][syst_tag] = int(awkward.sum(self.selections[tagger.name][syst_tag]))
+            try:
+                n_events_pre_overlap_removal = int(awkward.sum(self.selections[tagger.name][syst_tag][list(self.selections[tagger.name][syst_tag].keys())[0]]) if isinstance(self.selections[tagger.name][syst_tag], dict) else awkward.sum(self.selections[tagger.name][syst_tag]))
+            except:
+                n_events_pre_overlap_removal = 0
+            self.summary[tagger.name][syst_tag] = n_events_pre_overlap_removal
         return events
 
 
