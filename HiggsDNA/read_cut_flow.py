@@ -11,13 +11,13 @@ eos_path = '/eos/home-j/jiehan/parquet/cutflow/'
 # log_path = '/eos/user/j/jiehan/eos_logs/'
 log_path = '/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/HiggsDNA/eos_logs/'
 
-# dataset_type = 'data'
-# dataset_names = ["Data"]
-# dataset_years = ["2018"] #"2016preVFP", "2016postVFP", "2017", "2018"
+dataset_type = 'data'
+dataset_names = ["Data"]
+dataset_years = ["2016postVFP"] #"2016preVFP", "2016postVFP", "2017", "2018"
 
-dataset_type = 'signal'
-dataset_names = ["ggH_M125"] #, "VBFH_M125", "ZH_M125", "ttH_M125"] # "WplusH_M125", "WminusH_M125",
-dataset_years = ["2018"]#, "2017", "2018"]
+# dataset_type = 'signal'
+# dataset_names = ["ggH_M125"] #, "VBFH_M125", "ZH_M125", "ttH_M125"] # "WplusH_M125", "WminusH_M125",
+# dataset_years = ["2018"]#, "2017", "2018"]
 
 # dataset_type = 'bkgmc'
 # dataset_names = ["DYJetsToLL"] # "Data_SingleMuon", "Data_DoubleMuon", "Data_SingleElectron", "Data_DoubleEG"

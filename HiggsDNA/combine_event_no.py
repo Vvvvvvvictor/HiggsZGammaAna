@@ -1,12 +1,12 @@
 import os
 import re
 
-for dataset in ["Data_DoubleMuon_2017"]: #"Data_SingleElectron_2017", "Data_SingleMuon_2017", "Data_DoubleEG_2017", "Data_DoubleMuon_2017"
+for dataset in ["Data_2016postVFP"]: #"Data_SingleElectron_2017", "Data_SingleMuon_2017", "Data_DoubleEG_2017", "Data_DoubleMuon_2017"
     # Define folder path
     # folder_path = f"/eos/user/j/jiehan/eos_logs/data/{dataset}"
     folder_path = f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/HiggsDNA/eos_logs/data/{dataset}"
 
-    for event_type in ["inclusive", "muon", "electron"]:
+    for event_type in ["zgammas_mu"]:
         # Define output file path
         output_file = f"/eos/user/j/jiehan/run_lumi_eve_no/{dataset}_{event_type}.txt"
 

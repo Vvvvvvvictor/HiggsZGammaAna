@@ -1,8 +1,8 @@
 #!/bin/bash                                                                                                                                                                       
 echo "==============STARTED=============="
 
-input="/eos/home-j/jiehan/parquet/nanov9/"
-target="/eos/home-j/jiehan/root/skimmed_ntuples_run2/"
+input="/eos/user/j/jiehan/parquet/nanov9/data_for_norm_v2/"
+target="/eos/home-j/jiehan/root/data_for_norm_v2/"
 # target="./"
 
 # years=(2016preVFP 2016postVFP 2017 2018 2022preEE 2022postEE 2023preBPix 2023postBPix)
@@ -34,9 +34,11 @@ process_sample() {
     for year in "${years[@]}"; do
         command="python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py "
         if [ "$type" = "signal" ]; then
-            command+="-i ${input}${type}/${sample}_${year}/merged_nominal.parquet "
+            # command+="-i ${input}${type}/${sample}_${year}/merged_nominal.parquet "
+            command+="-i ${input}${sample}_${year}/merged_nominal.parquet "
         else
-            command+="-i ${input}${type}/${sample}_${year}/merged_nominal.parquet "
+            # command+="-i ${input}${type}/${sample}_${year}/merged_nominal.parquet "
+            command+="-i ${input}${sample}_${year}/merged_nominal.parquet "
         fi
         if [ "$type" = "Data" ]; then
             command+="-o ${target}data/${year}.root"
@@ -57,24 +59,10 @@ process_sample() {
     echo "Sample $sample completed successfully."
 }
 
-# # 处理 signal 样本
+# 处理 signal 样本
 
-# samples=(ZH_M125) #ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125 ggH_M120 VBFH_M120 WplusH_M120 WminusH_M120 ZH_M120 ttH_M120 ggH_M130 VBFH_M130 WplusH_M130 WminusH_M130 ZH_M130 ttH_M130 ggH_mix VBF_mix)
-# type="signal"
-# for sample in "${samples[@]}"; do
-#     mkdir -p "$target$sample"
-#     # 存储后台任务的进程ID列表
-#     pid_list=()
-
-#     # 调用函数处理样本数据
-#     process_sample "$sample" "$type"
-# done
-
-# 处理 bkgmc 样本
-
-# samples=(ZGToLLG DYJetsToLL WGToLNuG ZG2JToG2L2J EWKZ2J TT TTGJets TGJets ttWJets ttZJets WW WZ ZZ DYGto2LG_10to50 DYGto2LG_50to100)
-samples=(ZGToLLG)
-type="bkgmc"
+samples=(WplusH_M125 WminusH_M125 ZH_M125 ttH_M125) #ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125 ggH_M120 VBFH_M120 WplusH_M120 WminusH_M120 ZH_M120 ttH_M120 ggH_M130 VBFH_M130 WplusH_M130 WminusH_M130 ZH_M130 ttH_M130 ggH_mix VBF_mix)
+type="signal"
 for sample in "${samples[@]}"; do
     mkdir -p "$target$sample"
     # 存储后台任务的进程ID列表
@@ -83,6 +71,20 @@ for sample in "${samples[@]}"; do
     # 调用函数处理样本数据
     process_sample "$sample" "$type"
 done
+
+# # 处理 bkgmc 样本
+
+# # samples=(ZGToLLG DYJetsToLL WGToLNuG ZG2JToG2L2J EWKZ2J TT TTGJets TGJets ttWJets ttZJets WW WZ ZZ DYGto2LG_10to50 DYGto2LG_50to100)
+# samples=(DYJetsToLL ZG2JToG2L2J)
+# type="bkgmc"
+# for sample in "${samples[@]}"; do
+#     mkdir -p "$target$sample"
+#     # 存储后台任务的进程ID列表
+#     pid_list=()
+
+#     # 调用函数处理样本数据
+#     process_sample "$sample" "$type"
+# done
 
 # # 处理 data 样本
 
