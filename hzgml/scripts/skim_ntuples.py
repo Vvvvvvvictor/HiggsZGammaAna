@@ -117,6 +117,9 @@ def compute_l_phi(x):
     qbar = Math.VectorUtil.boost(qbar, H_transverse_beta)
 
     cosTheta = (qbar - q).Dot(Z)/(M * lZ)
+    if (abs(cosTheta) > 1): 
+        print("cosTheta = ", cosTheta)
+        cosTheta = 1./cosTheta
     sinTheta = math.sqrt(1 - cosTheta ** 2)
     
     H_beta = TLorentzVector(H.Px(), H.Py(), H.Pz(), H.E()).BoostVector()
@@ -140,7 +143,7 @@ def compute_l_phi(x):
     if (abs(tmpSgnPhi1)>0.): sgnPhi1 = tmpSgnPhi1/abs(tmpSgnPhi1)
     dot_BH1SC = - N1_BH.Dot(NSC_BH)/NSC_BH.R()/N1_BH.R()
     if (abs(dot_BH1SC)>=1.): 
-      print(dot_BH1SC)
+      print("dot_BH1SC = ", dot_BH1SC)
       dot_BH1SC *= 1./abs(dot_BH1SC)
     Phi1 = sgnPhi1 * math.acos(dot_BH1SC)
 
