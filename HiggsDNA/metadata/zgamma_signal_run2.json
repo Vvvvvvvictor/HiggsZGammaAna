@@ -214,10 +214,11 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_skimmed.json",
         "sample_list": [
-            "ggH_M125"
+            "ggH",
+            "VBF"
         ],
         "years": [
-            "2016preVFP"
+            "2016preVFP", "2016postVFP", "2017", "2018"
         ]
     },
     "variables_of_interest": [

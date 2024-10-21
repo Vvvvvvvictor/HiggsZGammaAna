@@ -1,4 +1,4 @@
-{"GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8":
+{"ggH":
 {"xs":48.58,
 "bf":0.000154793142,
 "fpo":2,
@@ -62,7 +62,7 @@
 ]
 }
 },
-"VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8":
+"VBF":
 {"xs":3.782,
 "bf":0.000154793142,
 "fpo":2,
@@ -104,7 +104,7 @@
 "/eos/project/h/htozg-dy-privatemc/zewang/NanoSkim/Run2016preHZG/RunIISummer20UL16NanoAODAPVv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/240924_050336/D6660D32-FEDE-4D4E-8EE7-0964E7B987BBskimmed.root"]
 }
 },
-"DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8":
+"DYJetsToLL":
 {"xs":6077.22,
 "fpo":2,
 "files":{
@@ -575,7 +575,7 @@
 "/eos/project/h/htozg-dy-privatemc/zewang/NanoSkim/Run2016preHZG/RunIISummer20UL16NanoAODAPVv9/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/240924_050336/F888DFEC-A070-744F-ADC1-5C5061EC1443skimmed.root"]
 }
 },
-"ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8":
+"ZGToLLG":
 {"xs":172.4,
 "fpo":2,
 "files":{
@@ -739,7 +739,7 @@
 "/eos/project/h/htozg-dy-privatemc/zewang/NanoSkim/Run2016preHZG/RunIISummer20UL16NanoAODAPVv9/ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8/240924_050336/FA4ABBF4-D49C-604A-9ACF-EA5C6E7F9433skimmed.root"]
 }
 },
-"EWKZ2Jets_ZToLL_M-50_TuneCP5_withDipoleRecoil_13TeV-madgraph-pythia8":
+"EWKZ2Jets":
 {"xs":6.214,
 "fpo":2,
 "files":{
