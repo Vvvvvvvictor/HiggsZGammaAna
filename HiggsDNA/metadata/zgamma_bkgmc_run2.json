@@ -19,8 +19,197 @@
         }
     ],
     "systematics": {
-        "weights": {},
-        "independent_collections": {}
+        "weights": {
+            "electron_veto_sf": {
+                "type": "object",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.photon_systematics",
+                    "name": "photon_electron_veto_sf"
+                },
+                "modify_central_weight": true,
+                "input_collection": "Photon",
+                "target_collections": [
+                    [
+                        "Photon"
+                    ]
+                ]
+            },
+            "pu_reweight_sf": {
+                "type": "event",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.pileup_systematics",
+                    "name": "pu_reweight_sf"
+                },
+                "modify_central_weight": true,
+                "requires_branches": [
+                    "Pileup_nTrueInt"
+                ]
+            },
+            "L1_prefiring_sf": {
+                "type": "event",
+                "method": "from_branch",
+                "branches": {
+                    "central": "L1PreFiringWeight_Nom",
+                    "up": "L1PreFiringWeight_Up",
+                    "down": "L1PreFiringWeight_Dn"
+                },
+                "modify_central_weight": true
+            },
+            "electron_wplid_sf": {
+                "type": "object",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.lepton_systematics",
+                    "name": "electron_WPL_sf"
+                },
+                "modify_central_weight": true,
+                "input_collection": "Electron",
+                "target_collections": [
+                    "SelectedElectron"
+                ]
+            },
+            "muon_looseid_sf": {
+                "type": "object",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.lepton_systematics",
+                    "name": "muon_LooseID_sf"
+                },
+                "modify_central_weight": true,
+                "input_collection": "Muon",
+                "target_collections": [
+                    "SelectedMuon"
+                ]
+            }
+        },
+        "independent_collections": {
+            "fnuf": {
+                "method": "from_function",
+                "branch_modified": [
+                    "Photon",
+                    "pt"
+                ],
+                "function": {
+                    "module_name": "higgs_dna.systematics.photon_systematics",
+                    "name": "fnuf_unc"
+                }
+            },
+            "material": {
+                "method": "from_function",
+                "branch_modified": [
+                    "Photon",
+                    "pt"
+                ],
+                "function": {
+                    "module_name": "higgs_dna.systematics.photon_systematics",
+                    "name": "material_unc"
+                }
+            },
+            "scale": {
+                "method": "from_branch",
+                "branch_modified": [
+                    "Photon",
+                    "pt"
+                ],
+                "branches": {
+                    "up": [
+                        "Photon",
+                        "pt_ScaleUp"
+                    ],
+                    "down": [
+                        "Photon",
+                        "pt_ScaleDown"
+                    ]
+                }
+            },
+            "smear": {
+                "method": "from_branch",
+                "branch_modified": [
+                    "Photon",
+                    "pt"
+                ],
+                "branches": {
+                    "up": [
+                        "Photon",
+                        "dEsigmaUp"
+                    ],
+                    "down": [
+                        "Photon",
+                        "dEsigmaDown"
+                    ]
+                },
+                "additive": true
+            },
+            "JER": {
+                "method": "from_branch",
+                "branch_modified": [
+                    "Jet",
+                    "pt"
+                ],
+                "branches": {
+                    "up": [
+                        "Jet",
+                        "pt_jerUp"
+                    ],
+                    "down": [
+                        "Jet",
+                        "pt_jerDown"
+                    ]
+                }
+            },
+            "JES": {
+                "method": "from_branch",
+                "branch_modified": [
+                    "Jet",
+                    "pt"
+                ],
+                "branches": {
+                    "up": [
+                        "Jet",
+                        "pt_jesTotalUp"
+                    ],
+                    "down": [
+                        "Jet",
+                        "pt_jesTotalDown"
+                    ]
+                }
+            },
+            "MET_JES": {
+                "method": "from_branch",
+                "branch_modified": "MET_pt",
+                "branches": {
+                    "up": "MET_T1_pt_jesTotalUp",
+                    "down": "MET_T1_pt_jesTotalDown"
+                }
+            },
+            "MET_Unclustered": {
+                "method": "from_branch",
+                "branch_modified": "MET_pt",
+                "branches": {
+                    "up": "MET_T1_pt_unclustEnUp",
+                    "down": "MET_T1_pt_unclustEnDown"
+                }
+            },
+            "Muon_pt": {
+                "method": "from_branch",
+                "branch_modified": [
+                    "Muon",
+                    "pt"
+                ],
+                "branches": {
+                    "up": [
+                        "Muon",
+                        "correctedUp_pt"
+                    ],
+                    "down": [
+                        "Muon",
+                        "correctedDown_pt"
+                    ]
+                }
+            }
+        }
     },
     "samples": {
         "catalog": "metadata/samples/zgamma_skimmed.json",
@@ -220,6 +409,8 @@
         "Photon_energyErr",
         "Photon_r9",
         "Photon_hoe",
+        "Photon_pfRelIso03_chg_quadratic",
+        "Photon_pfRelIso03_all_quadratic",
         "Photon_pfRelIso03_chg",
         "Photon_pfRelIso03_all",
         "Photon_isScEtaEB",
@@ -266,8 +457,10 @@
         "Electron_pfRelIso03_all",
         "Electron_dxy",
         "Electron_dz",
+        "Electron_mvaHZZIso",
+        "Electron_mvaIso_WP90",
+        "Electron_mvaIso_WP80",
         "Electron_mvaFall17V2Iso_WP90",
-        "Electron_mvaFall17V2noIso_WP90",
         "Electron_mvaFall17V2Iso_WP80",
         "Electron_mvaFall17V2Iso_WPL",
         "Electron_energyErr",
@@ -294,6 +487,75 @@
         "run",
         "event",
         "luminosityBlock",
-        "fixedGridRhoAll"
-    ]
+        "fixedGridRhoAll",
+        "Pileup_nTrueInt",
+        "L1PreFiringWeight_Up",
+        "L1PreFiringWeight_Dn",
+        "L1PreFiringWeight_Nom",
+        "Muon_corrected_pt",
+        "Muon_correctedUp_pt",
+        "Muon_correctedDown_pt",
+        "LHEScaleWeight_Zero",
+        "Photon_dEsigmaDown",
+        "Photon_dEsigmaUp",
+        "Photon_pt_ScaleUp",
+        "Photon_pt_ScaleDown",
+        "Jet_pt_nom",
+        "Jet_pt_jerUp",
+        "Jet_pt_jerDown",
+        "Jet_pt_jesTotalUp",
+        "Jet_pt_jesTotalDown",
+        "MET_T1_pt",
+        "MET_T1_pt_jerUp",
+        "MET_T1_pt_jerDown",
+        "MET_T1_pt_jesTotalUp",
+        "MET_T1_pt_jesTotalDown",
+        "MET_T1_pt_unclustEnUp",
+        "MET_T1_pt_unclustEnDown",
+        "Muon_corrected_pt",
+        "Muon_correctedUp_pt",
+        "Muon_correctedDown_pt",
+        "Flag_goodVertices",
+        "Flag_globalSuperTightHalo2016Filter",
+        "Flag_HBHENoiseFilter",
+        "Flag_HBHENoiseIsoFilter",
+        "Flag_EcalDeadCellTriggerPrimitiveFilter",
+        "Flag_BadPFMuonFilter",
+        "Flag_BadChargedCandidateFilter",
+        "Flag_eeBadScFilter",
+        "Flag_hfNoisyHitsFilter",
+        "Flag_ecalBadCalibFilter",
+        "Flag_BadPFMuonDzFilter",
+        "TrigObj_id",
+        "TrigObj_filterBits"
+    ],
+    "branch_map": {
+        "mc": [
+            [
+                [
+                    "Jet",
+                    "pt"
+                ],
+                [
+                    "Jet",
+                    "pt_nom"
+                ]
+            ],
+            [
+                [
+                    "Muon",
+                    "pt"
+                ],
+                [
+                    "Muon",
+                    "corrected_pt"
+                ]
+            ],
+            [
+                "MET_pt",
+                "MET_T1_pt"
+            ]
+        ],
+        "data": []
+    }
 }
