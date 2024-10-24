@@ -4,20 +4,20 @@ import numpy
 from correctionlib import _core
 
 import logging
-# logger = logging.getLogger(__name__)
-from higgs_dna.utils.logger_utils import simple_logger
-logger = simple_logger(__name__)
+logger = logging.getLogger(__name__)
 
 from higgs_dna.utils import awkward_utils, misc_utils
 
 PU_REWEIGHTING_FILE = {
-    "2016" : "jsonpog-integration/POG/LUM/2016postVFP_UL/puWeights.json",
+    "2016preVFP" : "jsonpog-integration/POG/LUM/2016preVFP_UL/puWeights.json",
+    "2016postVFP" : "jsonpog-integration/POG/LUM/2016postVFP_UL/puWeights.json",
     "2017" : "jsonpog-integration/POG/LUM/2017_UL/puWeights.json",
     "2018" : "jsonpog-integration/POG/LUM/2018_UL/puWeights.json"
 }
 
 PU_CAMPAIGN = {
-    "2016" : "Collisions16_UltraLegacy_goldenJSON",
+    "2016preVFP" : "Collisions16_UltraLegacy_goldenJSON",
+    "2016postVFP" : "Collisions16_UltraLegacy_goldenJSON",
     "2017" : "Collisions17_UltraLegacy_goldenJSON",
     "2018" : "Collisions18_UltraLegacy_goldenJSON"
 }

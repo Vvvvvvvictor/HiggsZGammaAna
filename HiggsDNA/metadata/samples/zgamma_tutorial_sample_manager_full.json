@@ -40,8 +40,27 @@
         "bf": 0.000154793142,
         "files": {
             "2016preVFP": [
-                "/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM",
-                "/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11_ext1-v1/NANOAODSIM"
+                "/eos/project/h/htozg-dy-privatemc/zewang/NANOSkim/Run2016preHZG/RunIISummer20UL16NanoAODAPVv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/240911_182000/07044671-8E53-E54B-8FA0-8E0F8FB08CBC_Skim.root",
+                "/eos/project/h/htozg-dy-privatemc/zewang/NANOSkim/Run2016preHZG/RunIISummer20UL16NanoAODAPVv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/240911_182000/2948F584-1149-B14C-BCC7-ADFFAADCA068_Skim.root",
+                "/eos/project/h/htozg-dy-privatemc/zewang/NANOSkim/Run2016preHZG/RunIISummer20UL16NanoAODAPVv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/240911_182000/32534867-B8FF-4D40-8898-574B79158859_Skim.root",
+                "/eos/project/h/htozg-dy-privatemc/zewang/NANOSkim/Run2016preHZG/RunIISummer20UL16NanoAODAPVv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/240911_182000/46715DFD-6F7C-7847-AF1F-23D8D5513528_Skim.root",
+                "/eos/project/h/htozg-dy-privatemc/zewang/NANOSkim/Run2016preHZG/RunIISummer20UL16NanoAODAPVv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/240911_182000/5511CBAD-07A4-C141-B9DE-B2BCE199E2A3_Skim.root",
+                "/eos/project/h/htozg-dy-privatemc/zewang/NANOSkim/Run2016preHZG/RunIISummer20UL16NanoAODAPVv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/240911_182000/62CA355E-3DCB-E147-949F-DEE4B9E9F860_Skim.root",
+                "/eos/project/h/htozg-dy-privatemc/zewang/NANOSkim/Run2016preHZG/RunIISummer20UL16NanoAODAPVv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/240911_182000/7A0D78EE-AA7A-8C4C-9770-F7A37FFE9DC1_Skim.root",
+                "/eos/project/h/htozg-dy-privatemc/zewang/NANOSkim/Run2016preHZG/RunIISummer20UL16NanoAODAPVv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/240911_182000/7D235712-3FEE-474C-BFD7-A4B302A8BBFD_Skim.root",
+                "/eos/project/h/htozg-dy-privatemc/zewang/NANOSkim/Run2016preHZG/RunIISummer20UL16NanoAODAPVv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/240911_182000/8A5E423B-996C-504B-B1C5-E23C28AFC43A_Skim.root",
+                "/eos/project/h/htozg-dy-privatemc/zewang/NANOSkim/Run2016preHZG/RunIISummer20UL16NanoAODAPVv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/240911_182000/9307CBF1-9069-4347-A234-FBEB966778D3_Skim.root",
+                "/eos/project/h/htozg-dy-privatemc/zewang/NANOSkim/Run2016preHZG/RunIISummer20UL16NanoAODAPVv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/240911_182000/9B5130AE-E281-394A-BBC5-F50C88E118DD_Skim.root",
+                "/eos/project/h/htozg-dy-privatemc/zewang/NANOSkim/Run2016preHZG/RunIISummer20UL16NanoAODAPVv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/240911_182000/A2476263-A430-C84C-8017-44E69712512C_Skim.root",
+                "/eos/project/h/htozg-dy-privatemc/zewang/NANOSkim/Run2016preHZG/RunIISummer20UL16NanoAODAPVv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/240911_182000/A2C8B5B6-BD40-EE44-A884-F0AC23224867_Skim.root",
+                "/eos/project/h/htozg-dy-privatemc/zewang/NANOSkim/Run2016preHZG/RunIISummer20UL16NanoAODAPVv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/240911_182000/BFBE9FA7-E583-094F-8854-C21318251176_Skim.root",
+                "/eos/project/h/htozg-dy-privatemc/zewang/NANOSkim/Run2016preHZG/RunIISummer20UL16NanoAODAPVv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/240911_182000/C0B60270-E45B-0847-B9D8-979B6A42F53E_Skim.root",
+                "/eos/project/h/htozg-dy-privatemc/zewang/NANOSkim/Run2016preHZG/RunIISummer20UL16NanoAODAPVv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/240911_182000/CF796FE8-CA52-5849-9BB5-73A240840092_Skim.root",
+                "/eos/project/h/htozg-dy-privatemc/zewang/NANOSkim/Run2016preHZG/RunIISummer20UL16NanoAODAPVv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/240911_182000/D4727864-4080-5541-866A-8EBCA7EA735D_Skim.root",
+                "/eos/project/h/htozg-dy-privatemc/zewang/NANOSkim/Run2016preHZG/RunIISummer20UL16NanoAODAPVv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/240911_182000/DF978508-0120-094F-88EF-DAD60AC13F89_Skim.root",
+                "/eos/project/h/htozg-dy-privatemc/zewang/NANOSkim/Run2016preHZG/RunIISummer20UL16NanoAODAPVv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/240911_182000/EC671E1D-6E15-BB4B-A954-90DAFD8D69FE_Skim.root",
+                "/eos/project/h/htozg-dy-privatemc/zewang/NANOSkim/Run2016preHZG/RunIISummer20UL16NanoAODAPVv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/240911_182000/F5A06DE2-EBC9-C841-8546-9A0E9A803271_Skim.root",
+                "/eos/project/h/htozg-dy-privatemc/zewang/NANOSkim/Run2016preHZG/RunIISummer20UL16NanoAODAPVv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/240911_182000/FF1A0E0D-369B-FD43-87A0-5E058074F250_Skim.root"
             ],
             "2016postVFP": [
                 "/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM",
@@ -60,6 +79,15 @@
             ],
             "2022postEE": [
                 "/GluGluHtoZG_Zto2L_M-125_TuneCP5_13p6TeV_powheg-pythia8/Run3Summer22EENanoAODv12-130X_mcRun3_2022_realistic_postEE_v6-v2/NANOAODSIM"
+            ]
+        }
+    },
+    "ggH_test_local": {
+        "xs": 48.58,
+        "bf": 0.000154793142,
+        "files": {
+            "2017": [
+                "/afs/cern.ch/user/s/shsong/CMSSW_10_6_20/src/PhysicsTools/NanoAODTools/python/postprocessing/analysis/nanoAOD_skim/07044671-8E53-E54B-8FA0-8E0F8FB08CBC_Skim.root"
             ]
         }
     },

@@ -168,8 +168,8 @@ def delta_R_fsrlep(objects1, objects2, min_dr):
     """
     if awkward.count(objects1.pt) == 0: # if no objects1 are present, return all False ## bing
         return objects1.pt < 0.
-    if awkward.count(objects2.pt) == 0: # if no objects2 are present, every object in objects1 failed by default ## bing
-        return objects1.pt < 0. 
+    if awkward.count(objects2.pt) == 0: # if no objects2 are present, every object in objects1 passed by default. ## bing
+        return objects1.pt >= 0. 
 
     if not isinstance(objects1, vector.Vector4D):
         objects1 = awkward.Array(objects1, with_name = "Momentum4D")
