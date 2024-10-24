@@ -168,16 +168,16 @@ for year in years:
         
         data_hist = np.histogram(data["gamma_pt"], bins=100, range=(15, 95), weights=data["weight_central"])
         data_error_hist = np.sqrt(data_hist[0])
-        bkgmc_stack = [np.histogram(bkgmc[i]["gamma_pt"], bins=100, range=(15, 95), weights=bkgmc[i]["weight_central"]) for i in range(len(bkgmc_samples))]
+        bkgmc_stack = [np.histogram(bkgmc[i]["gamma_pt"], bins=100, range=(15, 95), weights=bkgmc[i]["weight_central"])[0] for i in range(len(bkgmc_samples))]
         bkgmc_hist = np.sum([bkgmc_stack[i][0] for i in range(len(bkgmc_samples))], axis=0)
         up_hist = np.histogram(up_bkgmc["gamma_pt"], bins=100, range=(15, 95), weights=up_bkgmc["weight_central"])  
         down_hist = np.histogram(down_bkgmc["gamma_pt"], bins=100, range=(15, 95), weights=down_bkgmc["weight_central"])
         
         bin_pos = (data_hist[1][:-1] + data_hist[1][1:])/2
         ax[0].errorbar(bin_pos, data_hist[0], yerr=data_error_hist, fmt="o", label="Data", color="black")
-        hep.histplot(bkgmc_hist, bins=bin_pos, yerr=np.sqrt(bkgmc_hist[0]), label=bkgmc_samples, stack=True)
+        hep.histplot(bkgmc_stack, histtype='fill',  bins=data_hist[1], label=bkgmc_samples, stack=True, ax=ax[0], color=["blue", "green", "red"])
         
-        ax[0].fill_between(up_hist[1][:-1], up_hist[0], down_hist[0], alpha=0.5, color="gray", label="up/down")
+        ax[0].fill_between(bin_pos, up_hist[0], down_hist[0], alpha=0.5, color="gray", label="up/down")
         
         ax[0].set_title(f"{year} photon pt {correction_name}")
         ax[0].set_xlabel("")
@@ -190,9 +190,8 @@ for year in years:
         ratio_up = up_hist[0]/data_hist[0]
         ratio_down = down_hist[0]/data_hist[0]
         
-        # ax[1].errorbar(bin_pos, np.zeros_like(data_hist[0]), yerr=data_error_hist/data_hist[0], fmt="o", color="black")
-        ax[1].fill_between(up_hist[1][:-1], ratio_up, np.ones_like(data_hist[0]), alpha=0.5, color="red", label="up")
-        ax[1].fill_between(down_hist[1][:-1], ratio_down, np.ones_like(data_hist[0]), alpha=0.5, color="blue", label="down")
+        ax[1].errorbar(bin_pos, np.ones_like(data_hist[0]), yerr=data_error_hist/data_hist[0], fmt="o", color="black", markersize=1)
+        ax[1].fill_between(bin_pos, ratio_up, ratio_down, alpha=0.5, color="gray", label="up/down")
         
         ax[1].set_xlim(15, 95)
         ax[1].set_xlabel("photon pt")
@@ -212,31 +211,30 @@ for year in years:
         
         data_hist = np.histogram(data["jet_1_pt"], bins=100, range=(30, 100), weights=data["weight_central"])
         data_error_hist = np.sqrt(data_hist[0])
-        bkgmc_stack = [np.histogram(bkgmc[i]["jet_1_pt"], bins=100, range=(30, 100), weights=bkgmc[i]["weight_central"]) for i in range(len(bkgmc_samples))]
+        bkgmc_stack = [np.histogram(bkgmc[i]["jet_1_pt"], bins=100, range=(30, 100), weights=bkgmc[i]["weight_central"])[0] for i in range(len(bkgmc_samples))]
         bkgmc_hist = np.sum([bkgmc_stack[i][0] for i in range(len(bkgmc_samples))], axis=0)
         up_hist = np.histogram(up_bkgmc["jet_1_pt"], bins=100, range=(30, 100), weights=up_bkgmc["weight_central"])  
         down_hist = np.histogram(down_bkgmc["jet_1_pt"], bins=100, range=(30, 100), weights=down_bkgmc["weight_central"])
         
         bin_pos = (data_hist[1][:-1] + data_hist[1][1:])/2
         ax[0].errorbar(bin_pos, data_hist[0], yerr=data_error_hist, fmt="o", label="Data", color="black")
-        hep.histplot(bkgmc_hist, bins=bin_pos, yerr=np.sqrt(bkgmc_hist[0]), label=bkgmc_samples, stack=True)
+        hep.histplot(bkgmc_stack, histtype='fill', bins=data_hist[1], label=bkgmc_samples, stack=True, ax=ax[0], color=["blue", "green", "red"])
         
-        ax[0].fill_between(up_hist[1][:-1], up_hist[0], down_hist[0], alpha=0.5, color="gray", label="up/down")
+        ax[0].fill_between(bin_pos, up_hist[0], down_hist[0], alpha=0.5, color="gray", label="up/down")
         
         ax[0].set_title(f"{year} leading jet pt {correction_name}")
         ax[0].set_xlabel("")
         ax[0].set_ylabel("Events")
         ax[0].legend()
-        ax[0].set_ylim(0, 1.05)
+        ax[0].set_ylim(0, 1.1*np.max(data_hist[0]))
         ax[0].set_xlim(30, 100)
         
         # ratio plot
         ratio_up = up_hist[0]/data_hist[0]
         ratio_down = down_hist[0]/data_hist[0]
 
-        # ax[1].errorbar(bin_pos, np.zeros_like(data_hist[0]), yerr=data_error_hist/data_hist[0], fmt="o", color="black")
-        ax[1].fill_between(up_hist[1][:-1], ratio_up, np.ones_like(data_hist[0]), alpha=0.5, color="red", label="up")
-        ax[1].fill_between(down_hist[1][:-1], ratio_down, np.ones_like(data_hist[0]), alpha=0.5, color="blue", label="down")
+        ax[1].errorbar(bin_pos, np.ones_like(data_hist[0]), yerr=data_error_hist/data_hist[0], fmt="o", color="black", markersize=1)
+        ax[1].fill_between(bin_pos, ratio_up, ratio_down, alpha=0.5, color="gray", label="up/down")
         
         ax[1].set_xlim(30, 100)
         ax[1].set_xlabel("leading jet pt")
@@ -252,31 +250,30 @@ for year in years:
         
         data_hist = np.histogram(data["jet_2_pt"], bins=100, range=(30, 100), weights=data["weight_central"])
         data_error_hist = np.sqrt(data_hist[0])
-        bkgmc_stack = [np.histogram(bkgmc[i]["jet_2_pt"], bins=100, range=(30, 100), weights=bkgmc[i]["weight_central"]) for i in range(len(bkgmc_samples))]
+        bkgmc_stack = [np.histogram(bkgmc[i]["jet_2_pt"], bins=100, range=(30, 100), weights=bkgmc[i]["weight_central"])[0] for i in range(len(bkgmc_samples))]
         bkgmc_hist = np.sum([bkgmc_stack[i][0] for i in range(len(bkgmc_samples))], axis=0)
         up_hist = np.histogram(up_bkgmc["jet_2_pt"], bins=100, range=(30, 100), weights=up_bkgmc["weight_central"])
         down_hist = np.histogram(down_bkgmc["jet_2_pt"], bins=100, range=(30, 100), weights=down_bkgmc["weight_central"])
         
         bin_pos = (data_hist[1][:-1] + data_hist[1][1:])/2
         ax[0].errorbar(bin_pos, data_hist[0], yerr=data_error_hist, fmt="o", label="Data", color="black")
-        hep.histplot(bkgmc_hist, bins=bin_pos, yerr=np.sqrt(bkgmc_hist[0]), label=bkgmc_samples, stack=True)
+        hep.histplot(bkgmc_stack, histtype='fill', bins=data_hist[1], label=bkgmc_samples, stack=True, ax=ax[0], color=["blue", "green", "red"])
         
-        ax[0].fill_between(up_hist[1][:-1], up_hist[0], down_hist[0], alpha=0.5, color="gray", label="up/down")
+        ax[0].fill_between(bin_pos, up_hist[0], down_hist[0], alpha=0.5, color="gray", label="up/down")
         
         ax[0].set_title(f"{year} subleading jet pt {correction_name}")
         ax[0].set_xlabel("")
         ax[0].set_ylabel("Events")
         ax[0].legend()
-        ax[0].set_ylim(0, 1.05)
+        ax[0].set_ylim(0, 1.1*np.max(data_hist[0]))
         ax[0].set_xlim(30, 100)
         
         # ratio plot
         ratio_up = up_hist[0]/data_hist[0]
         ratio_down = down_hist[0]/data_hist[0]
         
-        # ax[1].errorbar(bin_pos, np.zeros_like(data_hist[0]), yerr=data_error_hist/data_hist[0], fmt="o", color="black")
-        ax[1].fill_between(up_hist[1][:-1], ratio_up, np.ones_like(data_hist[0]), alpha=0.5, color="red", label="up")
-        ax[1].fill_between(down_hist[1][:-1], ratio_down, np.ones_like(data_hist[0]), alpha=0.5, color="blue", label="down")
+        ax[1].errorbar(bin_pos, np.ones_like(data_hist[0]), yerr=data_error_hist/data_hist[0], fmt="o", color="black", markersize=1)
+        ax[1].fill_between(bin_pos, ratio_up, ratio_down, alpha=0.5, color="gray", label="up/down")
         
         ax[1].set_xlim(30, 100)
         ax[1].set_xlabel("subleading jet pt")

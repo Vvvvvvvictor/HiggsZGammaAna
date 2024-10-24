@@ -326,6 +326,9 @@ class ZGammaTaggerRun2(Tagger):
                 n_objects = 4,
                 dummy_value = DUMMY_VALUE
             )
+            
+        dZ = events.GenVtx_z - events.PV_z
+        awkward_utils.add_field(events, "dZ", dZ, overwrite=True)
 
         n_electrons = awkward.fill_none(awkward.num(electrons), 0)
         # N_e_cut = n_electrons>=2

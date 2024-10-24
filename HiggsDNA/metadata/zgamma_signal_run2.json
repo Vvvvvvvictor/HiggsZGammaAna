@@ -32,6 +32,7 @@
         ]
     },
     "variables_of_interest": [
+        "dZ",
         "H_pt",
         "H_eta",
         "H_phi",
@@ -162,6 +163,8 @@
         "z_ee"
     ],
     "branches": [
+        "GenVtx_z",
+        "PV_z",
         "L1PreFiringWeight_Nom",
         "btagWeight_DeepCSVB",
         "btagWeight_CSVV2",
