@@ -68,7 +68,7 @@ class XGBoostHandler(object):
 
         self._region = region
 
-        self._inputFolder = '/eos/home-j/jiehan/root/skimmed_ntuples_two_jet_reindex'
+        self._inputFolder = '/eos/home-j/jiehan/root/skimmed_ntuples_run2'
         self._outputFolder = 'models'
         self._chunksize = 500000
         self._branches = []
@@ -337,6 +337,7 @@ class XGBoostHandler(object):
         print(columns)
 
         data = data.corr() * 100
+        # data = data.dropna(axis=0, how='all').dropna(axis=1, how='all')
 
         # 将相关性矩阵转换为按相关性值排序的数据框
         sorted_corr = data.unstack().sort_values(ascending=False)
@@ -615,7 +616,7 @@ class XGBoostHandler(object):
             
             return eval_auc**2/((eval_auc + train_auc)/2)
         
-        exp_dir = 'models/optuna/'
+        exp_dir = f'models/optuna_{self._region}/'
         if not os.path.exists(exp_dir):
             os.makedirs(exp_dir)
 

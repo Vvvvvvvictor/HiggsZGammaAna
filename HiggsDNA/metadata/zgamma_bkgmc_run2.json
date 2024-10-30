@@ -214,15 +214,14 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_skimmed.json",
         "sample_list": [
-            "ZGToLLG",
-            "DYJetsToLL",
-            "EWKZ2Jets"
+            "ZGToLLG"
         ],
         "years": [
             "2016preVFP", "2016postVFP", "2017", "2018"
         ]
     },
     "variables_of_interest": [
+        "dZ",
         "H_pt",
         "H_eta",
         "H_phi",
@@ -359,6 +358,8 @@
         "luminosityBlock"
     ],
     "branches": [
+        "GenVtx_z",
+        "PV_z",
         "L1PreFiringWeight_Nom",
         "btagWeight_DeepCSVB",
         "btagWeight_CSVV2",

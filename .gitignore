@@ -10,6 +10,7 @@
 *.root
 *.dat
 */outputs/
+*/outdir*/
 */*ntuples*/
 */plots/
 */skimmed_ntuple

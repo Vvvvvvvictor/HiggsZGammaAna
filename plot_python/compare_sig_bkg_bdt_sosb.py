@@ -10,17 +10,17 @@ print("=====================================================================")
 
 # Basic set of picture's content
 ratio = 1
-mc_legend = ["SM ZG", "EWK ZG", "fake photon"]#"DYJets", "EWK Z+Jets", "EWK ZG", "TT", "TTG+Jets", "TTVJets", "Diboson"]
+mc_legend = ["SM ZG", "DYJets", "EWK Z+Jets", "EWK ZG", "TT", "TTG+Jets", "TTVJets", "Diboson"]#"DYJets", "EWK Z+Jets", "EWK ZG", "TT", "TTG+Jets", "TTVJets", "Diboson", "SM ZG", "EWK ZG", "fake photon"]
 sig_legend = ["sig", "ggH", "VBF"]
 # path = "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/final_fit/CMSSW_10_2_13/src/flashggFinalFit/InputData/outputs/"
 path = "/eos/home-j/jiehan/root/outputs/"
-channel = "two_jet"
-tree = "test"
+channel = "zero_to_one_jet"
+tree = "zero_to_one_jet"
 var = "bdt_score_t"
 bins = 100
 x_range = (0, 1)
 blind_range = (120, 130)
-x_title = "Dijet BDT score"
+x_title = "BDT score"
 y_title = "Events/{:.2f}".format((x_range[1]-x_range[0])/bins)
 sub_y_title = "S/#sqrt{B}"
 selections = ["H_mass>120", "H_mass<130"]
@@ -33,14 +33,14 @@ sig_file_list = [
 ]
 mc_file_list = [
     "ZGToLLG.root",
-    # "DYJetsToLL.root",
-    # "EWKZ2J.root",
+    "DYJetsToLL.root",
+    "EWKZ2J.root",
     "ZG2JToG2L2J.root",
-    # "TT.root",
-    # "TTGJets.root",
-    # ["ttWJets.root", "ttZJets.root"],
-    # ["WW.root", "WZ.root", "ZZ.root"]
-    "data_driven_bkg_v3.root"
+    "TT.root",
+    "TTGJets.root",
+    ["ttWJets.root", "ttZJets.root"],
+    ["WW.root", "WZ.root", "ZZ.root"]
+    # "data_driven_bkg_v3.root"
 ]
 data_file_list = [
     "data.root"
@@ -132,7 +132,7 @@ print("==============================")
 print("Finish reading skimmed ntuples")
 print("==============================")
 
-rp = pic.get_S_over_sqrtB(sig_hist_list[0], mc_hist, ratio, (0.,0.5005))
+rp = pic.get_S_over_sqrtB(sig_hist_list[0], mc_hist, ratio, (0.,1.0005))
 
 line = ROOT.TLine()
 plot.Set(line, LineStyle=2, LineWidth=2, LineColor=ROOT.kRed)
@@ -171,9 +171,9 @@ print("========================")
 
 pads[1].cd()
 rp.Draw("E")
-boundaries = [0.12, 0.49, 0.74, 0.86]
+boundaries = [0.26, 0.56, 0.72, 0.83]
 for i in range(4):
-    line.DrawLine(boundaries[i], 0, boundaries[i], 0.5)
+    line.DrawLine(boundaries[i], 0, boundaries[i], 1)
 # plot.Set(pads[1], Logy=1)
 # line.DrawLine(0.29, 0, 0.29, 0.26)
 # line.DrawLine(x1, 0, x1, 0.2)

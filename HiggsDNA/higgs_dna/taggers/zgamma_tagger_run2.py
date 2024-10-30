@@ -96,6 +96,7 @@ DEFAULT_OPTIONS = {
     "jets" : {
         "pt" : 30.0,
         "eta" : 4.7,
+        "eta" : 4.7,
         "dr_photons" : 0.4,
         "dr_electrons" : 0.4,
         "dr_muons" : 0.4,
@@ -264,7 +265,7 @@ class ZGammaTaggerRun2(Tagger):
         photons = events.Photon[photon_selection]
         
         # lepton-photon overlap removal 
-        clean_photon_mask = awkward.fill_none(object_selections.delta_R(photons, muons, 0.3), True) & awkward.fill_none(object_selections.delta_R(photons, electrons, 0.3), True)
+        clean_photon_mask = awkward.fill_none(object_selections.delta_R(photons, muons, 0.3), True) & awkward.fill_none(object_selections.delta_R(photons, electrons, 0.3), True) # FIXME: 0.4 -> 0.3(baseline)
         # object_selections.delta_R(photons, muons, 0.3) & object_selections.delta_R(photons, electrons, 0.3)
         photons = photons[clean_photon_mask]
         
@@ -330,6 +331,9 @@ class ZGammaTaggerRun2(Tagger):
                 n_objects = 4,
                 dummy_value = DUMMY_VALUE
             )
+            
+        dZ = events.GenVtx_z - events.PV_z
+        awkward_utils.add_field(events, "dZ", dZ, overwrite=True)
 
         n_electrons = awkward.fill_none(awkward.num(electrons), 0)
         # N_e_cut = n_electrons>=2
@@ -586,7 +590,7 @@ class ZGammaTaggerRun2(Tagger):
                         ((awkward.num(events.Photon) >= 0) if "2016" in self.year else events.Flag_ecalBadCalibFilter) # 2016 dummy cut, all True
                         )
         
-        all_cuts = trigger_pt_cut & has_z_cand & has_gamma_cand & sel_h_1 & sel_h_2 & event_filter & awkward.fill_none((h_cand.mass > 80) & (h_cand.mass < 180), False)
+        all_cuts = trigger_pt_cut & has_z_cand & has_gamma_cand & sel_h_1 & sel_h_2 & event_filter & sel_h_3 #& awkward.fill_none((h_cand.mass>80) & (h_cand.mass < options["mass_h"][1]), False)
 
         for cut_type in ["zgammas", "zgammas_ele", "zgammas_mu", "zgammas_w", "zgammas_ele_w", "zgammas_mu_w"]:
             if "_w" in cut_type:
@@ -619,7 +623,13 @@ class ZGammaTaggerRun2(Tagger):
             cut6 = cut5 & sel_h_1
             cut7 = cut6 & sel_h_2
             cut8 = cut7 & sel_h_3
-            cut9 = cut8 & event_filter      
+            cut9 = cut8 & event_filter
+            
+            # if cut_type == "zgammas_mu":
+            #     print(f"!!!start check events tag({cut_type})!!!")
+            #     for i in events[cut4]:
+            #         print(f"{i.run} {i.luminosityBlock} {i.event}")
+            #     print(f"!!!end check events tag({cut_type})!!!")
 
             self.register_event_cuts(
                 # names = ["all", "N_lep_sel", "trig_cut", "lead_lep_pt_cut", "sub_lep_pt_cut", "has_g_cand", "has_z_cand", "sel_h_1", "sel_h_2", "sel_h_3"],

@@ -7,7 +7,7 @@ import numpy as np
 import re
 from pdb import set_trace
 
-def read_file(file, var=None, tree="inclusive", selections=[]):
+def read_root_file(file, var=None, tree="inclusive", selections=[]):
     '''
     read file and apply selections
     selections: a list of selection(<str>). If there is '&' or '|' in one item, MUST use "()" to enclose each subitem.(exp. '(H_eta>1.5) & (H_pt>10)')
@@ -37,6 +37,34 @@ def read_file(file, var=None, tree="inclusive", selections=[]):
     # for i in decro_sel:
     #     print(i)
     #     arrays = arrays[eval(i)]
+    for i in selections:
+        arrays = arrays.query(i)
+    return arrays, var_not_exist
+
+def read_parquet_file(file, var=None, selections=[]):
+    '''
+    read file and apply selections
+    selections: a list of selection(<str>). If there is '&' or '|' in one item, MUST use "()" to enclose each subitem.(exp. '(H_eta>1.5) & (H_pt>10)')
+    '''
+    print("Reading {}...".format(file))
+    variables = ["weight_central"]
+    if isinstance(var, str):
+        variables.append(var)
+    else:
+        for i in var:
+            variables.append(i)
+    decro_sel, var_not_exist = [], []
+    for i in selections:
+        var_can = list(set([j for j in re.split('\W+', i) if not j.isdigit() and j]))
+        print(var_can)
+        variables += var_can
+    data = pd.read_parquet(file)
+    variables = list(set(variables))
+    for var in variables:
+        if var not in data:
+            var_not_exist.append(var)
+    variables = [x for x in variables if x not in var_not_exist]
+    arrays = data[variables]
     for i in selections:
         arrays = arrays.query(i)
     return arrays, var_not_exist
