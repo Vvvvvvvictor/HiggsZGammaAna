@@ -123,6 +123,7 @@ def process_files(applicators, output_folder, input_folder):
                                 outfile[f'{region_map[channel]}{i}_{syst}'] = split_data
                         else:
                             outfile[f'{region_map[channel]}_{syst}'] = data
+                            logging.info(f"Number of events in {region_map[channel]}_{syst}: {len(data)}")
 
 if __name__ == "__main__":
     args = get_args()
