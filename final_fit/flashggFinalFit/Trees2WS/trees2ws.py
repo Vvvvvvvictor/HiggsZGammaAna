@@ -14,6 +14,7 @@ def get_options():
   parser = OptionParser()
   parser.add_option('--inputConfig',dest='inputConfig', default="", help='Input config: specify list of variables/systematics/analysis categories')
   parser.add_option('--inputTreeFile',dest='inputTreeFile', default="./output_0.root", help='Input tree file')
+  parser.add_option('--outputWSDir',dest='outputWSDir', default="./", help='Output WS directory')
   parser.add_option('--inputMass',dest='inputMass', default="125", help='Input mass')
   parser.add_option('--productionMode',dest='productionMode', default="ggh", help='Production mode [ggh,vbf,wh,zh,tth,thq,ggzh,bbh]')
   parser.add_option('--year',dest='year', default="2016", help='Year')
@@ -37,9 +38,9 @@ from commonTools import *
 from commonObjects import *
 from tools.STXS_tools import *
 
-print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG TREES 2 WS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
+print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HZG TREES 2 WS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
 def leave():
-  print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG TREES 2 WS (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+  print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HZG TREES 2 WS (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
   exit(0)
 
 # Function to add vars to workspace
@@ -142,7 +143,7 @@ for cat in cats:
     treeName = "%s/%s_%s_%s_%s"%(inputTreeDir,opt.productionMode,opt.inputMass,sqrts__,cat) 
   print("    * tree: %s"%treeName)
   # Extract tree from uproot
-  t = f[treeName]
+  t = f[treeName+"_nominal"]
   if t.num_entries == 0: continue
   
   # Convert tree to pandas dataframe
@@ -191,13 +192,19 @@ for cat in cats:
     sdf = pandas.DataFrame()
     for s in systematics:
       print("    --> Systematic: %s"%re.sub("YEAR",opt.year,s))
-      for direction in ['Up','Down']:
-        streeName = "%s_%s%s01sigma"%(treeName,s,direction)
+      for direction in ['up','down']:
+        # streeName = "%s_%s%s01sigma"%(treeName,s,direction)
+        streeName = "%s_%s_%s"%(treeName,s,direction)
         # If year in streeName then replace by year being processed
         streeName = re.sub("YEAR",opt.year,streeName)
         st = f[streeName]
         if len(st)==0: continue
-        sdf = st.arrays(systematicsVars, library='pd')
+        if "CMS_hzg_mass" in systematicsVars:
+          inputVars = ["H_mass" if x == "CMS_hzg_mass" else x for x in systematicsVars]
+          sdf = st.arrays(inputVars, library='pd')
+          sdf = sdf.rename(columns={"H_mass": "CMS_hzg_mass"})
+        else:
+          sdf = st.arrays(systematicsVars, library='pd')
         sdf['type'] = "%s%s"%(s,direction)
         # Add STXS splitting var if splitting necessary
         if opt.doSTXSSplitting: sdf[stxsVar] = st.arrays(stxsVar, library='pd')
@@ -245,8 +252,8 @@ for stxsId in data[stxsVar].unique():
     if opt.doSystematics: sdf = sdata
 
     # Define output workspace file
-    outputWSDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/ws_%s"%dataToProc(opt.productionMode)
-    if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
+    outputWSDir = opt.outputWSDir + "/%s/%s"%(opt.productionMode,opt.year)
+    if not os.path.exists(outputWSDir): os.system("mkdir -p %s"%outputWSDir)
     # outputWSFile = outputWSDir+"/"+re.sub(".root","_%s.root"%dataToProc(opt.productionMode),opt.inputTreeFile.split("/")[-1])
     outputWSFile = outputWSDir+"/{}".format(opt.productionMode+"_M"+opt.inputMass+"_"+opt.year+".root")
     print(" --> Creating output workspace: (%s)"%outputWSFile)

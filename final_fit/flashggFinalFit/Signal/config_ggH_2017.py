@@ -6,7 +6,7 @@ signalScriptCfg = {
   
   # Setup
   # 'inputWSDir':'PATH_TO_INPUTS/workspaces/signal_%s'%_year,
-  'inputWSDir':'/eos/home-j/jiehan/root/mc_cor_syst/ggH_nominal/ws_ggH/',
+  'inputWSDir':'/eos/user/j/jiehan/root/ws_cor_syst/ggH/2017/',
   'procs':'auto', # if auto: inferred automatically from filenames
   'cats':'auto', # if auto: inferred automatically from (0) workspace
   'ext':'tutorial_%s'%_year,
@@ -15,10 +15,10 @@ signalScriptCfg = {
   'massPoints':'120,125,130',
 
   #Photon shape systematics  
-  'scales':'Scale', # separate nuisance per year
+  'scales':'scale', # separate nuisance per year
   'scalesCorr':'', # correlated across years
   'scalesGlobal':'', # affect all processes equally, correlated across years
-  'smears':'Smearing', # separate nuisance per year
+  'smears':'smear', # separate nuisance per year
 
   # Job submission options
   'batch':'local', # ['condor','SGE','IC','local']

@@ -106,18 +106,23 @@ def process_files(applicators, output_folder, input_folder):
     os.makedirs(output_folder, exist_ok=True)
 
     # Iterate over all process-year combinations and write output
-    for proc, year, syst in [(p, y, s) for p in procductions for y in years for s in syst_variations]:
-        logging.info(f'Processing {proc} {year} {syst}')
-        input_path = f'{input_folder}/{proc}_{syst}/{year}.root'
-        with uproot.open(input_path) as infile, uproot.recreate(f"{output_folder}/{proc}/{year}/output.root") as outfile:
-            for channel, applicator in applicators.items():
-                data = infile[channel].arrays(library='pd')
-                if channel in applicators:
-                    data_splits = applicator.apply_bdt(data)
-                    for i, split_data in enumerate(data_splits):
-                        outfile[f'{region_map[channel]}_{syst}_{i}'] = split_data
-                else:
-                    outfile[f'{region_map[channel]}_{syst}'] = data
+    for proc, year in [(p, y) for p in procductions for y in years]:
+        with uproot.recreate(f"{output_folder}/{proc}/{year}/output.root") as outfile:
+            logging.info(f"Output file: {output_folder}/{proc}/{year}/output.root")
+            for syst in syst_variations:
+                logging.info(f"Processing {proc} {year} {syst}")
+                input_path = f'{input_folder}/{proc}_{syst}/{year}.root'
+                with uproot.open(input_path) as infile:
+                    for channel in region_map.keys():
+                        data = infile[channel].arrays(library='pd')
+                        if channel in applicators:
+                            applicator = applicators[channel]
+                            data_splits = applicator.apply_bdt(data)
+                            for i, split_data in enumerate(data_splits):
+                                logging.info(f"Number of events in {region_map[channel]}_{i}_{syst}: {len(split_data)}")
+                                outfile[f'{region_map[channel]}{i}_{syst}'] = split_data
+                        else:
+                            outfile[f'{region_map[channel]}_{syst}'] = data
 
 if __name__ == "__main__":
     args = get_args()

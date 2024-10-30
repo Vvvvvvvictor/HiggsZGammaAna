@@ -40,7 +40,7 @@ def get_options():
 (opt,args) = get_options()
 
 # RooRealVar to fill histograms
-mgg = ROOT.RooRealVar(opt.xvar,opt.xvar,125)
+mzg = ROOT.RooRealVar(opt.xvar,opt.xvar,125)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function to extact histograms from WS
@@ -52,18 +52,18 @@ def getHistograms( _ws, _nominalDataName, _sname ):
     else: _hists[htype] = ROOT.TH1F("%s_%s"%(_sname,htype),"%s_%s"%(_sname,htype),opt.nBins,100,180)
   # Extract nominal RooDataSet and syst RooDataHists
   rds_nominal = _ws.data(_nominalDataName)
-  rdh_up = _ws.data("%s_%sUp01sigma"%(_nominalDataName,_sname))
-  rdh_down = _ws.data("%s_%sDown01sigma"%(_nominalDataName,_sname))
+  rdh_up = _ws.data("%s_%sup01sigma"%(_nominalDataName,_sname))
+  rdh_down = _ws.data("%s_%sdown01sigma"%(_nominalDataName,_sname))
   # Check if not NONE type and fill histograms
-  if rds_nominal: rds_nominal.fillHistogram(_hists['nominal'],ROOT.RooArgList(mgg))
+  if rds_nominal: rds_nominal.fillHistogram(_hists['nominal'],ROOT.RooArgList(mzg))
   else:
     print(" --> [ERROR] Could not extract nominal RooDataSet: %s. Leaving"%_nominalDataName)
     sys.exit(1)
-  if rdh_up: rdh_up.fillHistogram(_hists['up'],ROOT.RooArgList(mgg))
+  if rdh_up: rdh_up.fillHistogram(_hists['up'],ROOT.RooArgList(mzg))
   else:
     print(" --> [ERROR] Could not extract RooDataHist (%s,up) for %s. Leaving"%(_sname,_nominalDataName))
     sys.exit(1)
-  if rdh_down: rdh_down.fillHistogram(_hists['down'],ROOT.RooArgList(mgg))
+  if rdh_down: rdh_down.fillHistogram(_hists['down'],ROOT.RooArgList(mzg))
   else:
     print(" --> [ERROR] Could not extract RooDataHist (%s,down) for %s. Leaving"%(_sname,_nominalDataName))
     sys.exit(1) 
@@ -117,7 +117,7 @@ data = pd.DataFrame( columns=columns_data )
 for _proc in opt.procs.split(","):
   # Glob M125 filename
   # _WSFileName = glob.glob("%s/output*M125*%s.root"%(opt.inputWSDir,_proc))[0]
-  _WSFileName = glob.glob(f"{opt.inputWSDir}/{opt.procs}_{opt.year}.root")[0]
+  _WSFileName = glob.glob(f"{opt.inputWSDir}/{opt.procs}_M125_{opt.year}.root")[0]
   # _nominalDataName = "%s_125_%s_%s"%(procToData(_proc.split("_")[0]),sqrts__,opt.cat)
   _nominalDataName = "%s_125_%s_%s"%(_proc,sqrts__,opt.cat)
   data = pd.concat([data,pd.DataFrame([{'proc':_proc,'cat':opt.cat,'inputWSFile':_WSFileName,'nominalDataName':_nominalDataName}])], ignore_index=True, sort=False)

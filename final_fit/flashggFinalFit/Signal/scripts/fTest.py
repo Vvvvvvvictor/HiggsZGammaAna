@@ -81,7 +81,7 @@ procYields = od()
 for proc in opt.procs.split(","):
   print(f"Looking for files in: {opt.inputWSDir}")
   # WSFileName = glob.glob(f"{opt.inputWSDir}/ALP_sig_Am{opt.mass_ALP}_Hm{opt.mass}_{opt.year}_{opt.channel}.root")[0]
-  WSFileName = glob.glob(f"{opt.inputWSDir}/{opt.procs}_{opt.year}.root")[0]
+  WSFileName = glob.glob(f"{opt.inputWSDir}/{opt.procs}_M{opt.mass}_{opt.year}.root")[0]
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__) 
   # d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(proc.split("_")[0]),opt.mass,sqrts__,opt.cat)),aset)
@@ -110,7 +110,7 @@ for pidx, proc in enumerate(procsToFTest):
   # Split dataset to RV/WV: ssf requires input as dict (with mass point as key)
   datasets_RV, datasets_WV = od(), od()
   # WSFileName = glob.glob(f"{opt.inputWSDir}/ALP_sig_Am{opt.mass_ALP}_Hm{opt.mass}_{opt.year}_{opt.channel}.root")[0] # PZ
-  WSFileName = glob.glob(f"{opt.inputWSDir}/{opt.procs}_{opt.year}.root")[0]
+  WSFileName = glob.glob(f"{opt.inputWSDir}/{opt.procs}_M{opt.mass}_{opt.year}.root")[0]
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__)
   # d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(proc.split("_")[0]),opt.mass,sqrts__,opt.cat)),aset) # PZ

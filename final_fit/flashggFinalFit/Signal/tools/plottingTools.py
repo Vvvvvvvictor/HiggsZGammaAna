@@ -165,7 +165,7 @@ def plotFTest(ssfs,_opt=1,_outdir='./',_extension='',_proc='',_cat='',_mass='125
   lat.DrawLatex(0.245, 0.965, "Simulation Preliminary")
   lat.DrawLatex(0.74,0.97,("%s fb^{-1} (13 TeV)"%(_lumi)))
   canv.Update()
-  canv.SaveAs(f"{_outdir}/{_extension}_fTest_{_year}_{_channel}_Hm{_Hmass}.pdf")
+  canv.SaveAs(f"{_outdir}/{_extension}_fTest_{_year}_{_cat}_Hm{_Hmass}.pdf")
 
 # Plot reduced chi2 vs nGauss
 def plotFTestResults(ssfs,_opt,_outdir="./",_extension='',_proc='',_cat='',_mass='125',_year='16',_channel='ele',_Hmass='125', _lumi=137.65):
@@ -240,7 +240,7 @@ def plotFTestResults(ssfs,_opt,_outdir="./",_extension='',_proc='',_cat='',_mass
   lat.DrawLatex(0.20, 0.965, "Simulation Preliminary")
   lat.DrawLatex(0.74,0.97,("%s fb^{-1} (13 TeV)"%(_lumi)))
   canv.Update()
-  canv.SaveAs(f"{_outdir}/{_extension}_fTest_{_year}_{_channel}_Hm{_Hmass}_chi2_vs_nGauss.pdf")
+  canv.SaveAs(f"{_outdir}/{_extension}_fTest_{_year}_{_cat}_Hm{_Hmass}_chi2_vs_nGauss.pdf")
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Signal fit plots
