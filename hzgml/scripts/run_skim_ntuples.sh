@@ -62,9 +62,15 @@ process_sample() {
 
 # 处理 signal 样本
 
-samples=(ggH VBF) #ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125 ggH_M120 VBFH_M120 WplusH_M120 WminusH_M120 ZH_M120 ttH_M120 ggH_M130 VBFH_M130 WplusH_M130 WminusH_M130 ZH_M130 ttH_M130 ggH_mix VBF_mix)
+samples=(ggH VBF WplusH WminusH ZH ttH) #ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125 ggH_M120 VBFH_M120 WplusH_M120 WminusH_M120 ZH_M120 ttH_M120 ggH_M130 VBFH_M130 WplusH_M130 WminusH_M130 ZH_M130 ttH_M130 ggH_mix VBF_mix)
 type="signal"
 for sample in "${samples[@]}"; do
+    mkdir -p "$target${sample}_nominal"
+    # 存储后台任务的进程ID列表
+    pid_list=()
+
+    # 调用函数处理样本数据
+    process_sample "$sample" "$type" "nominal"
     for sf in "up" "down"; do
         for corr in "fnuf" "material" "scale" "smear" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt"; do
             mkdir -p "$target${sample}_${corr}_${sf}"

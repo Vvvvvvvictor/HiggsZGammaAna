@@ -22,7 +22,7 @@ def getArgs():
     """Get arguments from command line."""
     parser = ArgumentParser()
     parser.add_argument('-c', '--config', action='store', nargs=2, default=['data/training_config_BDT.json', 'data/apply_config_BDT.json'], help='Region to process')
-    parser.add_argument('-i', '--inputFolder', action='store', default='/eos/home-j/jiehan/root/skimmed_ntuples', help='directory of training inputs')
+    parser.add_argument('-i', '--inputFolder', action='store', default='/eos/home-j/jiehan/root/skimmed_ntuples_run2', help='directory of training inputs')
     parser.add_argument('-m', '--modelFolder', action='store', default='models', help='directory of BDT models')
     parser.add_argument('-o', '--outputFolder', action='store', default='/eos/home-j/jiehan/root/outputs', help='directory for outputs')
     parser.add_argument('-r', '--region', action='store', choices=['two_jet', 'one_jet', 'zero_jet', 'zero_to_one_jet', 'VH_ttH', 'all_jet'], default='zero_jet', help='Region to process')
@@ -235,8 +235,8 @@ class ApplyXGBHandler(object):
             out_data = pd.DataFrame()
             for filename in tqdm(sorted(f_list), desc='XGB INFO: Applying BDTs to %s samples' % category, bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
                 file = uproot.open(filename)
-                # for data in file[self._inputTree].iterate(branches, library='pd', step_size=self._chunksize):
-                for data in file[self._inputTree].iterate(library='pd', step_size=self._chunksize):
+                for data in file[self._inputTree].iterate(branches, library='pd', step_size=self._chunksize): 
+                # for data in file[self._inputTree].iterate(library='pd', step_size=self._chunksize):
                     data = self.preselect(data)
                     # data = data[data.Z_sublead_lepton_pt >= 15]
                     # if category == "DYJetsToLL":

@@ -8,6 +8,7 @@
 import os, sys
 import re
 from optparse import OptionParser
+from pdb import set_trace
 
 def get_options():
   parser = OptionParser()
@@ -51,7 +52,7 @@ def add_vars_to_workspace(_ws=None,_data=None,_stxsVar=None):
   _vars = od()
   for var in _data.columns:
     if var in ['type','cat',_stxsVar,'']: continue
-    if var == "CMS_hgg_mass": 
+    if var == "CMS_hgg_mass" or var == "H_mass": 
       _vars[var] = ROOT.RooRealVar(var,var,125.,100.,180.)
       _vars[var].setBins(160)
     elif var == "dZ": 
@@ -112,8 +113,10 @@ if opt.year == '2018': systematics.append("JetHEM")
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # UPROOT file
 f = uproot.open(opt.inputTreeFile)
-if inputTreeDir == '': listOfTreeNames == f.keys()
-else: listOfTreeNames = f[inputTreeDir].keys()
+if inputTreeDir == '': 
+  listOfTreeNames = f.keys()
+else: 
+  listOfTreeNames = f[inputTreeDir].keys()
 # If cats = 'auto' then determine from list of trees
 if cats == 'auto':
   cats = []
@@ -131,8 +134,11 @@ if opt.doSystematics: sdata = pandas.DataFrame()
 # Loop over categories: fill dataframe
 for cat in cats:
   print( " --> Extracting events from category: %s"%cat)
-  if inputTreeDir == '': treeName = "%s_%s_%s_%s"%(opt.productionMode,opt.inputMass,sqrts__,cat)
-  else: treeName = "%s/%s_%s_%s_%s"%(inputTreeDir,opt.productionMode,opt.inputMass,sqrts__,cat)
+  if inputTreeDir == '': 
+    # treeName = "%s_%s_%s_%s"%(opt.productionMode,opt.inputMass,sqrts__,cat) # standard type
+    treeName = cat
+  else: 
+    treeName = "%s/%s_%s_%s_%s"%(inputTreeDir,opt.productionMode,opt.inputMass,sqrts__,cat) 
   print("    * tree: %s"%treeName)
   # Extract tree from uproot
   t = f[treeName]
@@ -245,9 +251,11 @@ for stxsId in data[stxsVar].unique():
     
   # Open file and initiate workspace
   fout = ROOT.TFile(outputWSFile,"RECREATE")
-  foutdir = fout.mkdir(inputWSName__.split("/")[0])
-  foutdir.cd()
-  ws = ROOT.RooWorkspace(inputWSName__.split("/")[1],inputWSName__.split("/")[1])
+  set_trace()
+  # foutdir = fout.mkdir(inputWSName__.split("/")[0])
+  # foutdir.cd()
+  # ws = ROOT.RooWorkspace(inputWSName__.split("/")[1],inputWSName__.split("/")[1])
+  ws = ROOT.RooWorkspace(inputWSName__.split("/")[0],inputWSName__.split("/")[0])
   
   # Add variables to workspace
   varNames = add_vars_to_workspace(ws,df,stxsVar)

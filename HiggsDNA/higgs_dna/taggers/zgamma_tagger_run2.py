@@ -625,11 +625,11 @@ class ZGammaTaggerRun2(Tagger):
             cut8 = cut7 & sel_h_3
             cut9 = cut8 & event_filter
             
-            if cut_type == "zgammas_mu":
-                print(f"!!!start check events tag({cut_type})!!!")
-                for i in events[cut4]:
-                    print(f"{i.run} {i.luminosityBlock} {i.event}")
-                print(f"!!!end check events tag({cut_type})!!!")
+            # if cut_type == "zgammas_mu":
+            #     print(f"!!!start check events tag({cut_type})!!!")
+            #     for i in events[cut4]:
+            #         print(f"{i.run} {i.luminosityBlock} {i.event}")
+            #     print(f"!!!end check events tag({cut_type})!!!")
 
             self.register_event_cuts(
                 # names = ["all", "N_lep_sel", "trig_cut", "lead_lep_pt_cut", "sub_lep_pt_cut", "has_g_cand", "has_z_cand", "sel_h_1", "sel_h_2", "sel_h_3"],

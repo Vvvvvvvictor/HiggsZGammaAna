@@ -304,10 +304,9 @@ def main():
         print(f'INFO: Creating output folder: "{input_path}/significances/{region}"')
         os.makedirs("%s/significances/%s"%(input_path,region))
 
-    with open('%s/significances/bin_binaries_1D_%s.txt'%(input_path,region), 'w') as json_file:
-        json_file.write('1\n1\n')
+    with open('%s/significances/bin_boundaries_1D_%s.txt'%(input_path,region), 'w') as json_file:
         for i in boundaries_values:
-            json_file.write('{:d} '.format(len(i)))
+            # json_file.write('{:d} '.format(len(i)))
             for j in i:
                 json_file.write('{:.2f} '.format(j))
         json_file.write('1.00\n')

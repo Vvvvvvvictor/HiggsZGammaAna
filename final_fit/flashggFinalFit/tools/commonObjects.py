@@ -55,7 +55,7 @@ years_to_process = ['2016','2017','2018','2022preEE','2022postEE']
 
 # flashgg input WS objects
 # inputWSName__ = "tagsDumper/cms_hgg_13TeV"
-inputWSName__ = "CMS_hza_workspace"
+inputWSName__ = "CMS_hzg_workspace"
 inputNuisanceExtMap = {'scales':'','scalesCorr':'','smears':''}
 # Signal output WS objects
 outputWSName__ = "wsig"

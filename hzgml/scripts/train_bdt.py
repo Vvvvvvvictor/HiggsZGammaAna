@@ -68,7 +68,7 @@ class XGBoostHandler(object):
 
         self._region = region
 
-        self._inputFolder = '/eos/home-j/jiehan/root/skimmed_ntuples'
+        self._inputFolder = '/eos/home-j/jiehan/root/skimmed_ntuples_run2'
         self._outputFolder = 'models'
         self._chunksize = 500000
         self._branches = []
@@ -616,7 +616,7 @@ class XGBoostHandler(object):
             
             return eval_auc**2/((eval_auc + train_auc)/2)
         
-        exp_dir = 'models/optuna/'
+        exp_dir = f'models/optuna_{self._region}/'
         if not os.path.exists(exp_dir):
             os.makedirs(exp_dir)
 
