@@ -22,16 +22,17 @@ def leave():
 
 def get_options():
   parser = OptionParser()
-  parser.add_option("--xvar", dest='xvar', default='CMS_hgg_mass', help="Observable")
+  parser.add_option("--xvar", dest='xvar', default='CMS_hzg_mass', help="Observable")
   parser.add_option("--cat", dest='cat', default='', help="RECO category")
   parser.add_option("--procs", dest='procs', default='', help="Signal processes")
   parser.add_option("--ext", dest='ext', default='', help="Extension")
+  parser.add_option("--year", dest='year', default='2017', help="Year")
   parser.add_option("--inputWSDir", dest='inputWSDir', default='', help="Input flashgg WS directory")
   parser.add_option("--scales", dest='scales', default='', help="Photon shape systematics: scales")
   parser.add_option("--scalesCorr", dest='scalesCorr', default='', help='Photon shape systematics: scalesCorr')
   parser.add_option("--scalesGlobal", dest='scalesGlobal', default='', help='Photon shape systematics: scalesGlobal')
   parser.add_option("--smears", dest='smears', default='', help='Photon shape systematics: smears')
-  parser.add_option("--nBins", dest='nBins', default=80, type='int', help='Number of bins in histograms')
+  parser.add_option("--nBins", dest='nBins', default=320, type='int', help='Number of bins in histograms')
   parser.add_option("--thresholdMean", dest='thresholdMean', default=0.05, type='float', help='Reject mean variations if larger than thresholdMean')
   parser.add_option("--thresholdSigma", dest='thresholdSigma', default=0.5, type='float', help='Reject mean variations if larger than thresholdSigma')
   parser.add_option("--thresholdRate", dest='thresholdRate', default=0.05, type='float', help='Reject mean variations if larger than thresholdRate')
@@ -115,8 +116,10 @@ data = pd.DataFrame( columns=columns_data )
 # Loop over processes and add row to dataframe
 for _proc in opt.procs.split(","):
   # Glob M125 filename
-  _WSFileName = glob.glob("%s/output*M125*%s.root"%(opt.inputWSDir,_proc))[0]
-  _nominalDataName = "%s_125_%s_%s"%(procToData(_proc.split("_")[0]),sqrts__,opt.cat)
+  # _WSFileName = glob.glob("%s/output*M125*%s.root"%(opt.inputWSDir,_proc))[0]
+  _WSFileName = glob.glob(f"{opt.inputWSDir}/{opt.procs}_{opt.year}.root")[0]
+  # _nominalDataName = "%s_125_%s_%s"%(procToData(_proc.split("_")[0]),sqrts__,opt.cat)
+  _nominalDataName = "%s_125_%s_%s"%(_proc,sqrts__,opt.cat)
   data = pd.concat([data,pd.DataFrame([{'proc':_proc,'cat':opt.cat,'inputWSFile':_WSFileName,'nominalDataName':_nominalDataName}])], ignore_index=True, sort=False)
 
 # Loop over rows in dataFrame and open ws

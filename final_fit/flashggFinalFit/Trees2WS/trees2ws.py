@@ -48,13 +48,14 @@ def add_vars_to_workspace(_ws=None,_data=None,_stxsVar=None):
   intLumi = ROOT.RooRealVar("intLumi","intLumi",1000.,0.,999999999.)
   intLumi.setConstant(True)
   getattr(_ws,'import')(intLumi)
+    
   # Add vars specified by dataframe columns: skipping cat, stxsvar and type
   _vars = od()
   for var in _data.columns:
     if var in ['type','cat',_stxsVar,'']: continue
-    if var == "CMS_hgg_mass" or var == "H_mass": 
+    if var == "CMS_hzg_mass": # var == "CMS_hgg_mass"
       _vars[var] = ROOT.RooRealVar(var,var,125.,100.,180.)
-      _vars[var].setBins(160)
+      _vars[var].setBins(320)
     elif var == "dZ": 
       _vars[var] = ROOT.RooRealVar(var,var,0.,-20.,20.)
       _vars[var].setBins(40)
@@ -246,17 +247,19 @@ for stxsId in data[stxsVar].unique():
     # Define output workspace file
     outputWSDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/ws_%s"%dataToProc(opt.productionMode)
     if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
-    outputWSFile = outputWSDir+"/"+re.sub(".root","_%s.root"%dataToProc(opt.productionMode),opt.inputTreeFile.split("/")[-1])
+    # outputWSFile = outputWSDir+"/"+re.sub(".root","_%s.root"%dataToProc(opt.productionMode),opt.inputTreeFile.split("/")[-1])
+    outputWSFile = outputWSDir+"/{}".format(opt.productionMode+"_M"+opt.inputMass+"_"+opt.year+".root")
     print(" --> Creating output workspace: (%s)"%outputWSFile)
+    
+  df = df.rename(columns={"H_mass": "CMS_hzg_mass"}) # work for HiggsDNA(PKU) ntuples
     
   # Open file and initiate workspace
   fout = ROOT.TFile(outputWSFile,"RECREATE")
-  set_trace()
   # foutdir = fout.mkdir(inputWSName__.split("/")[0])
   # foutdir.cd()
   # ws = ROOT.RooWorkspace(inputWSName__.split("/")[1],inputWSName__.split("/")[1])
   ws = ROOT.RooWorkspace(inputWSName__.split("/")[0],inputWSName__.split("/")[0])
-  
+
   # Add variables to workspace
   varNames = add_vars_to_workspace(ws,df,stxsVar)
 
@@ -278,14 +281,14 @@ for stxsId in data[stxsVar].unique():
       for i, val in enumerate(row):
         aset[i].setVal(val)
       d.add(aset,aset.getRealValue("weight"))
-
+      
     # Add to workspace
     getattr(ws,'import')(d)
 
     if opt.doSystematics:
       # b) make RooDataHists for systematic variations
       for s in systematics:
-        for direction in ['Up','Down']:
+        for direction in ['up','down']:
           # Create mask for systematic variation
           mask = (sdf['type']=='%s%s'%(s,direction))&(sdf['cat']==cat)
           

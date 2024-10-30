@@ -67,7 +67,7 @@ def getEffSigma(_h):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Ftest: plots
 # Plot possible nGauss fits and chi2 values
-def plotFTest(ssfs,_opt=1,_outdir='./',_extension='',_proc='',_cat='',_mass='125',_Amass='1',_year='16',_channel='ele',_Hmass='125'):
+def plotFTest(ssfs,_opt=1,_outdir='./',_extension='',_proc='',_cat='',_mass='125',_year='16',_channel='ele',_Hmass='125', _lumi=137.65):
   canv = ROOT.TCanvas("c", "c", 800, 600)
   canv.SetMargin(0.16, 0.03, 0.14, 0.08) # //left//right//bottom//top
   canv.SetTickx(1)
@@ -85,7 +85,7 @@ def plotFTest(ssfs,_opt=1,_outdir='./',_extension='',_proc='',_cat='',_mass='125
     hists[k].SetLineColor(LineColorMap[k.split("_")[-1]])
     # hists[k].SetNDC(300)
     hists[k].SetTitle("")
-    hists[k].GetXaxis().SetTitle("m_{ ll#gamma#gamma} [GeV]")
+    hists[k].GetXaxis().SetTitle("m_{ ll#gamma} [GeV]")
     hists[k].SetMinimum(0)
     if hists[k].GetMaximum()>hmax: hmax = hists[k].GetMaximum()
     if hists[k].GetMinimum()<hmin: hmin = hists[k].GetMinimum()
@@ -111,7 +111,7 @@ def plotFTest(ssfs,_opt=1,_outdir='./',_extension='',_proc='',_cat='',_mass='125
   hists['data'].GetYaxis().SetTitleOffset(1.55)
   hists['data'].GetYaxis().SetLabelFont(42)
   hists['data'].GetYaxis().SetLabelSize(0.05)
-  hists['data'].GetXaxis().SetTitle("m_{ ll#gamma#gamma} [GeV]")
+  hists['data'].GetXaxis().SetTitle("m_{ ll#gamma} [GeV]")
   hists['data'].GetXaxis().SetTitleFont(42)
   hists['data'].GetXaxis().SetTitleSize(0.055)
   hists['data'].GetXaxis().SetTitleOffset(1.2)
@@ -155,20 +155,20 @@ def plotFTest(ssfs,_opt=1,_outdir='./',_extension='',_proc='',_cat='',_mass='125
   lat.SetTextAlign(13)
   lat.SetNDC()
   lat.SetTextSize(0.045)
-  # lat.DrawLatex(0.9,0.92,"( %s , %s , %s )"%(_extension,_proc,_cat))
-  lat.DrawLatex(0.20, 0.87, f"m_{{a}} = {_Amass} GeV")
+  lat.DrawLatex(0.595,0.92,"( %s , %s , %s )"%(_extension,_proc,_cat))
+  # lat.DrawLatex(0.20, 0.87, f"m_{{a}} = {_Amass} GeV")
   lat.SetTextSize(0.05)  # 字體大小
   lat.SetTextFont(61)  # 粗體字 CMS 標籤
   lat.DrawLatex(0.155, 0.969, "CMS")
   lat.SetTextSize(0.045)
   lat.SetTextFont(52)  # 斜體字 Preliminary 標籤
   lat.DrawLatex(0.245, 0.965, "Simulation Preliminary")
-  lat.DrawLatex(0.74,0.97,("138 fb^{-1} (13 TeV)"))
+  lat.DrawLatex(0.74,0.97,("%s fb^{-1} (13 TeV)"%(_lumi)))
   canv.Update()
-  canv.SaveAs(f"{_outdir}/{_Amass}_fTest_{_year}_{_channel}_Hm{_Hmass}.pdf")
+  canv.SaveAs(f"{_outdir}/{_extension}_fTest_{_year}_{_channel}_Hm{_Hmass}.pdf")
 
 # Plot reduced chi2 vs nGauss
-def plotFTestResults(ssfs,_opt,_outdir="./",_extension='',_proc='',_cat='',_mass='125',_Amass='1',_year='16',_channel='ele',_Hmass='125'):
+def plotFTestResults(ssfs,_opt,_outdir="./",_extension='',_proc='',_cat='',_mass='125',_year='16',_channel='ele',_Hmass='125', _lumi=137.65):
   canv = ROOT.TCanvas("c", "c", 800, 600)
   canv.SetMargin(0.11, 0.03, 0.14, 0.08) # //left//right//bottom//top
   canv.SetTickx(1)
@@ -229,18 +229,18 @@ def plotFTestResults(ssfs,_opt,_outdir="./",_extension='',_proc='',_cat='',_mass
   lat.SetTextAlign(13)
   lat.SetNDC()
   lat.SetTextSize(0.045)
-  # lat.DrawLatex(0.9,0.92,"( %s , %s , %s )"%(_extension,_proc,_cat))
-  lat.DrawLatex(0.66,0.85, f"m_{{a}} = {_Amass} GeV")
-  lat.DrawLatex(0.66,0.77,"Optimum N_{gauss} = %s"%_opt)
+  lat.DrawLatex(0.6,0.85,"( %s , %s , %s )"%(_extension,_proc,_cat))
+  # lat.DrawLatex(0.66,0.85, f"m_{{a}} = {_Amass} GeV")
+  lat.DrawLatex(0.6,0.77,"Optimum N_{gauss} = %s"%_opt)
   lat.SetTextSize(0.05)  # 字體大小
   lat.SetTextFont(61)  # 粗體字 CMS 標籤
   lat.DrawLatex(0.11, 0.969, "CMS")
   lat.SetTextSize(0.045)
   lat.SetTextFont(52)  # 斜體字 Preliminary 標籤
   lat.DrawLatex(0.20, 0.965, "Simulation Preliminary")
-  lat.DrawLatex(0.74,0.97,("138 fb^{-1} (13 TeV)"))
+  lat.DrawLatex(0.74,0.97,("%s fb^{-1} (13 TeV)"%(_lumi)))
   canv.Update()
-  canv.SaveAs(f"{_outdir}/{_Amass}_fTest_{_year}_{_channel}_Hm{_Hmass}_chi2_vs_nGauss.pdf")
+  canv.SaveAs(f"{_outdir}/{_extension}_fTest_{_year}_{_channel}_Hm{_Hmass}_chi2_vs_nGauss.pdf")
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Signal fit plots
@@ -281,7 +281,7 @@ def plotPdfComponents(ssf,_outdir='./',_extension='',_proc='',_cat='',_Amass='1'
   hists['data'].GetYaxis().SetTitleOffset(1.55)
   hists['data'].GetYaxis().SetLabelFont(42)
   hists['data'].GetYaxis().SetLabelSize(0.05)
-  hists['data'].GetXaxis().SetTitle("m_{ ll#gamma#gamma} [GeV]")
+  hists['data'].GetXaxis().SetTitle("m_{ ll#gamma} [GeV]")
   hists['data'].GetXaxis().SetTitleFont(42)
   hists['data'].GetXaxis().SetTitleSize(0.055)
   hists['data'].GetXaxis().SetTitleOffset(1.2)
@@ -401,8 +401,8 @@ def plotPdfComponents(ssf,_outdir='./',_extension='',_proc='',_cat='',_Amass='1'
   lat.SetTextAlign(13)
   lat.SetNDC()
   lat.SetTextSize(0.05)
-  # lat.DrawLatex(0.9,0.92,"( %s , %s , %s )"%(_extension,_proc,_cat))
-  lat.DrawLatex(0.22, 0.87, f"m_{{a}} = {_Amass} GeV")
+  lat.DrawLatex(0.9,0.92,"( %s , %s , %s )"%(_extension,_proc,_cat))
+  # lat.DrawLatex(0.22, 0.87, f"m_{{a}} = {_Amass} GeV")
   lat.SetTextSize(0.05)  # 字體大小
   lat.SetTextFont(61)  # 粗體字 CMS 標籤
   lat.DrawLatex(0.165, 0.969, "CMS")
@@ -477,7 +477,7 @@ def plotInterpolation(_finalModel,_outdir='./',_massPoints='120,121,122,123,124,
   haxes.GetYaxis().SetTitleOffset(1.35)
   haxes.GetYaxis().SetLabelFont(42)
   haxes.GetYaxis().SetLabelSize(0.05)
-  haxes.GetXaxis().SetTitle("m_{ ll#gamma#gamma} [GeV]")
+  haxes.GetXaxis().SetTitle("m_{ ll#gamma} [GeV]")
   haxes.GetXaxis().SetTitleFont(42)
   haxes.GetXaxis().SetTitleSize(0.055)
   haxes.GetXaxis().SetTitleOffset(1.2)
@@ -749,7 +749,7 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.07,_Amass='1',_year='16', _
   lat0.SetTextSize(0.05)
   lat0.DrawLatex(0.19,0.92,"#bf{CMS} #it{%s}"%_opt.label)
   lat0.DrawLatex(0.83,0.92,"%s TeV"%(sqrts__.split("TeV")[0]))
-  lat0.DrawLatex(0.16+offset,0.81,"H #rightarrow Za #rightarrow ll#gamma#gamma")
+  lat0.DrawLatex(0.16+offset,0.81,"H #rightarrow Z#gamma #rightarrow ll#gamma")
 
   # Load translations
   translateCats = {} if _opt.translateCats is None else LoadTranslations(_opt.translateCats)

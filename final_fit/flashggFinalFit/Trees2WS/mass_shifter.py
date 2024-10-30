@@ -9,7 +9,7 @@ from commonObjects import *
 parser = OptionParser()
 parser.add_option("--inputWSFile", dest="inputWSFile", default="output_GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8_GG2H.root", help="Input file")
 parser.add_option("--inputMass", dest="inputMass", default=125, type='int', help="Input mass")
-parser.add_option("--xvar", dest="xvar", default="CMS_hgg_mass:100:180", help="Input mass variable (name:xmin:xmax)")
+parser.add_option("--xvar", dest="xvar", default="CMS_hzg_mass:100:180", help="Input mass variable (name:xmin:xmax)")
 parser.add_option("--targetMass", dest="targetMass", default=130, type='int', help="Target mass")
 parser.add_option("--verbose", dest="verbose", default=0, type='int', help="Verbose output")
 (opt,args) = parser.parse_args()

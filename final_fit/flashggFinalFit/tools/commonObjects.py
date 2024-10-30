@@ -25,10 +25,10 @@ sqrts__ = "13TeV"
 # }
 
 lumiMap = {
-    '16':16.81,
-    '16APV':19.52, 
-    '17':41.48, 
-    '18':59.83, 
+    '2016':16.80,
+    '2016APV':19.51, 
+    '2017':41.48, 
+    '2018':59.83, 
     'combined':137.65, 
     'merged':137.65,
     '2022preEE':8.00,
@@ -59,8 +59,8 @@ inputWSName__ = "CMS_hzg_workspace"
 inputNuisanceExtMap = {'scales':'','scalesCorr':'','smears':''}
 # Signal output WS objects
 outputWSName__ = "wsig"
-outputWSObjectTitle__ = "hggpdfsmrel"
-outputWSNuisanceTitle__ = "CMS_hgg_nuisance"
+outputWSObjectTitle__ = "hzgpdfsmrel"
+outputWSNuisanceTitle__ = "CMS_hzg_nuisance"
 #outputNuisanceExtMap = {'scales':'%sscale'%sqrts__,'scalesCorr':'%sscaleCorr'%sqrts__,'smears':'%ssmear'%sqrts__,'scalesGlobal':'%sscale'%sqrts__}
 outputNuisanceExtMap = {'scales':'','scalesCorr':'','smears':'','scalesGlobal':''}
 # Bkg output WS objects

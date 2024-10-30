@@ -10,6 +10,8 @@ from commonTools import *
 from commonObjects import *
 from tools.submissionTools import *
 
+from pdb import set_trace
+
 def get_options():
   parser = OptionParser()
   # Take inputs from config file
@@ -81,7 +83,9 @@ if options['mode'] not in ['fTest','getDiagProc','calcPhotonSyst','signalFit']:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Extract list of filenames
 WSFileNames = extractWSFileNames(options['inputWSDir'])
-if not WSFileNames: leave()
+if not WSFileNames: 
+  print(" --> [ERROR] No workspaces found in %s. Leaving..."%options['inputWSDir'])
+  leave()
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # If proc/cat == auto. Extract processes and categories

@@ -1,7 +1,7 @@
 # Python script to perform signal modelling fTest: extract number of gaussians for final fit
 # * run per category over single mass point
 
-print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG SIGNAL FTEST ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
+print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HZG SIGNAL FTEST ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
 import ROOT
 import pandas as pd
 import pickle
@@ -19,6 +19,8 @@ from signalTools import *
 from simultaneousFit import *
 from plottingTools import *
 
+from pdb import set_trace
+
 MHLow, MHHigh = '95', '180'
 
 def leave():
@@ -32,7 +34,7 @@ def get_options():
   parser.add_option('--year', dest='year', default='16', help="year") # PZ
   parser.add_option("--channel", dest='channel', default='', help="ele, mu, or leptons") # PZ
 
-  parser.add_option("--xvar", dest='xvar', default='CMS_hza_mass', help="Observable to fit")
+  parser.add_option("--xvar", dest='xvar', default='CMS_hzg_mass', help="Observable to fit")
   parser.add_option("--inputWSDir", dest='inputWSDir', default='', help="Input flashgg WS directory")
   parser.add_option("--ext", dest='ext', default='', help="Extension")
   parser.add_option("--procs", dest='procs', default='GG2H', help="Signal processes") # PZ
@@ -40,10 +42,10 @@ def get_options():
   parser.add_option("--cat", dest='cat', default='cat0', help="RECO category") # PZ
   parser.add_option('--mass', dest='mass', default='125', help="Mass point to fit") # PZ
   parser.add_option('--doPlots', dest='doPlots', default=True, action="store_true", help="Produce Signal fTest plots") # PZ
-  parser.add_option('--nBins', dest='nBins', default=80, type='int', help="Number of bins for fit")
+  parser.add_option('--nBins', dest='nBins', default=320, type='int', help="Number of bins for fit")
   parser.add_option('--threshold', dest='threshold', default=1, type='int', help="Threshold number of events")
   parser.add_option('--nGaussMax', dest='nGaussMax', default=5, type='int', help="Max number of gaussians to test")
-  parser.add_option('--skipWV', dest='skipWV', default=True, action="store_true", help="Skip processing of WV case") # PZ
+  parser.add_option('--skipWV', dest='skipWV', default=False, action="store_true", help="Skip processing of WV case") # PZ
   # Minimizer options CMS_hza_workspace
   parser.add_option('--minimizerMethod', dest='minimizerMethod', default='TNC', help="(Scipy) Minimizer method")
   parser.add_option('--minimizerTolerance', dest='minimizerTolerance', default=1e-8, type='float', help="(Scipy) Minimizer toleranve")
@@ -58,13 +60,13 @@ if opt.doPlots:
 
 # Load xvar to fit
 print(f"Looking for files in: {opt.inputWSDir}")
-nominalWSFileName = glob.glob("%s/ALP_sig_*"%(opt.inputWSDir))[0]
+nominalWSFileName = glob.glob("%s/*"%(opt.inputWSDir))[0]
 f0 = ROOT.TFile(nominalWSFileName,"read")
 inputWS0 = f0.Get(inputWSName__)
 xvar = inputWS0.var(opt.xvar)
 xvarFit = xvar.Clone()
-dZ = ROOT.RooRealVar("dZ", "dZ", 0)  # PZ
-# dZ = inputWS0.var("dZ")
+# dZ = ROOT.RooRealVar("dZ", "dZ", 0)  # PZ
+dZ = inputWS0.var("dZ")
 aset = ROOT.RooArgSet(xvar,dZ)
 f0.Close()
 
@@ -78,10 +80,12 @@ df = pd.DataFrame(columns=['proc','sumEntries','nRV','nWV'])
 procYields = od()
 for proc in opt.procs.split(","):
   print(f"Looking for files in: {opt.inputWSDir}")
-  WSFileName = glob.glob(f"{opt.inputWSDir}/ALP_sig_Am{opt.mass_ALP}_Hm{opt.mass}_{opt.year}_{opt.channel}.root")[0]
+  # WSFileName = glob.glob(f"{opt.inputWSDir}/ALP_sig_Am{opt.mass_ALP}_Hm{opt.mass}_{opt.year}_{opt.channel}.root")[0]
+  WSFileName = glob.glob(f"{opt.inputWSDir}/{opt.procs}_{opt.year}.root")[0]
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__) 
-  d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(proc.split("_")[0]),opt.mass,sqrts__,opt.cat)),aset)
+  # d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(proc.split("_")[0]),opt.mass,sqrts__,opt.cat)),aset)
+  d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(proc,opt.mass,sqrts__,opt.cat)),aset)
   # d = d.reduce(aset, "abs(dZ) <= 1.")  # PZ
   df.loc[len(df)] = [proc,d.sumEntries(),1,1]
   inputWS.Delete()
@@ -105,18 +109,22 @@ for pidx, proc in enumerate(procsToFTest):
 
   # Split dataset to RV/WV: ssf requires input as dict (with mass point as key)
   datasets_RV, datasets_WV = od(), od()
-  WSFileName = glob.glob(f"{opt.inputWSDir}/ALP_sig_Am{opt.mass_ALP}_Hm{opt.mass}_{opt.year}_{opt.channel}.root")[0] # PZ
+  # WSFileName = glob.glob(f"{opt.inputWSDir}/ALP_sig_Am{opt.mass_ALP}_Hm{opt.mass}_{opt.year}_{opt.channel}.root")[0] # PZ
+  WSFileName = glob.glob(f"{opt.inputWSDir}/{opt.procs}_{opt.year}.root")[0]
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__)
-  d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(proc.split("_")[0]),opt.mass,sqrts__,opt.cat)),aset) # PZ
-  # datasets_RV[opt.mass] = splitRVWV(d,aset,mode="RV")
-  # datasets_WV[opt.mass] = splitRVWV(d,aset,mode="WV")
-  datasets_RV[opt.mass] = d #PZ
-  datasets_WV[opt.mass] = d #PZ
+  # d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(proc.split("_")[0]),opt.mass,sqrts__,opt.cat)),aset) # PZ
+  d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(proc,opt.mass,sqrts__,opt.cat)),aset)
+  datasets_RV[opt.mass] = splitRVWV(d,aset,mode="RV")
+  datasets_WV[opt.mass] = splitRVWV(d,aset,mode="WV")
+  # datasets_RV[opt.mass] = d #PZ
+  # datasets_WV[opt.mass] = d #PZ
 
   # Run fTest: RV
   # If numEntries below threshold then keep as n = 1
-  if datasets_RV[opt.mass].numEntries() < opt.threshold: continue  
+  if datasets_RV[opt.mass].numEntries() < opt.threshold: 
+    print("--> (RV) Number of entries below threshold: %g < %g"%(datasets_RV[opt.mass].numEntries(),opt.threshold))
+    continue  
   else:
     ssfs = od()
     min_reduced_chi2, nGauss_opt = 999, 1
@@ -136,12 +144,14 @@ for pidx, proc in enumerate(procsToFTest):
     df.loc[df['proc']==proc,'nRV'] = nGauss_opt
     # Make plots
     if( opt.doPlots )&( len(ssfs.keys())!=0 ):
-      plotFTest(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(swd__,opt.channel),_extension="RV",_proc=proc,_cat=opt.cat,_mass=opt.mass, _Amass=opt.mass_ALP,_year=opt.year,_channel=opt.channel,_Hmass=opt.mass)
-      plotFTestResults(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(swd__,opt.channel),_extension="RV",_proc=proc,_cat=opt.cat,_mass=opt.mass, _Amass=opt.mass_ALP,_year=opt.year,_channel=opt.channel,_Hmass=opt.mass)
+      plotFTest(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(swd__,opt.channel),_extension="RV",_proc=proc,_cat=opt.cat,_mass=opt.mass,_year=opt.year,_channel=opt.channel,_Hmass=opt.mass, _lumi=lumiMap[opt.year])
+      plotFTestResults(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(swd__,opt.channel),_extension="RV",_proc=proc,_cat=opt.cat,_mass=opt.mass,_year=opt.year,_channel=opt.channel,_Hmass=opt.mass, _lumi=lumiMap[opt.year])
 
   # Run fTest: WV
   # If numEntries below threshold then keep as n = 1
-  if( datasets_WV[opt.mass].numEntries() < opt.threshold )|( opt.skipWV ): continue
+  if( datasets_WV[opt.mass].numEntries() < opt.threshold )|( opt.skipWV ): 
+    print("--> (WV) Number of entries below threshold: %g < %g"%(datasets_WV[opt.mass].numEntries(),opt.threshold))
+    continue
   else:
     ssfs = od()
     min_reduced_chi2, nGauss_opt = 999, 1
@@ -161,8 +171,8 @@ for pidx, proc in enumerate(procsToFTest):
     df.loc[df['proc']==proc,'nWV'] = nGauss_opt
     # Make plots
     if( opt.doPlots )&( len(ssfs.keys())!=0 ):
-      plotFTest(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(swd__,opt.channel),_extension="WV",_proc=proc,_cat=opt.cat,_mass=opt.mass)
-      plotFTestResults(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(swd__,opt.channel),_extension="WV",_proc=proc,_cat=opt.cat,_mass=opt.mass)
+      plotFTest(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(swd__,opt.channel),_extension="WV",_proc=proc,_cat=opt.cat,_mass=opt.mass, _year=opt.year,_channel=opt.channel,_Hmass=opt.mass, _lumi=lumiMap[opt.year])
+      plotFTestResults(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(swd__,opt.channel),_extension="WV",_proc=proc,_cat=opt.cat,_mass=opt.mass, _year=opt.year,_channel=opt.channel,_Hmass=opt.mass, _lumi=lumiMap[opt.year])
 
   # Close ROOT file
   inputWS.Delete()
