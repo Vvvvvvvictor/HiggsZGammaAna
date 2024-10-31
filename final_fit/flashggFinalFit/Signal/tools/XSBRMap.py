@@ -12,7 +12,7 @@ globalXSBRMap = od()
 
 # For case of inclusive production mode then have no additional factor beyond V branching ratios
 globalXSBRMap['example'] = od()
-globalXSBRMap['example']['decay'] = {'mode':'hgg'}
+globalXSBRMap['example']['decay'] = {'mode':'hzg'}
 globalXSBRMap['example']['GG2H'] = {'mode':'ggH'}
 globalXSBRMap['example']['VBF'] = {'mode':'qqH'}
 globalXSBRMap['example']['WH2HQQ'] = {'mode':'WH','factor':BR_W_qq}
@@ -32,9 +32,13 @@ globalXSBRMap['example']['THW'] = {'mode':'tHW'}
 # These are not yet stored in Combine, so we will use the constant-factor approach 
 # Setting the values at MH=125.38 GeV
 globalXSBRMap['tutorial'] = od()
-globalXSBRMap['tutorial']['decay'] = {'mode':'hgg'}
-globalXSBRMap['tutorial']['GG2H'] = {'mode':'constant', 'factor':51.96}
-globalXSBRMap['tutorial']['VBF'] = {'mode':'constant', 'factor':4.067}
+globalXSBRMap['tutorial']['decay'] = {'mode':'hzg'}
+globalXSBRMap['tutorial']['ggH'] = {'mode':'constant', 'factor':48.58}
+globalXSBRMap['tutorial']['VBF'] = {'mode':'constant', 'factor':3.782}
+globalXSBRMap['tutorial']['WplusH'] = {'mode':'constant', 'factor':0.8399}
+globalXSBRMap['tutorial']['WminusH'] = {'mode':'constant', 'factor':0.5331}
+globalXSBRMap['tutorial']['ZH'] = {'mode':'constant', 'factor':0.8839}
+globalXSBRMap['tutorial']['ttH'] = {'mode':'constant', 'factor':0.5071}
 
 # ~~~~~~~~~ PZ ~~~~~~~~~ 
 # globalXSBRMap['GG2H'] = od()

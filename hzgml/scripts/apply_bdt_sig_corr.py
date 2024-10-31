@@ -77,7 +77,7 @@ class BDTApplicator:
         scores = self.models[i].predict(xgb.DMatrix(subset[self.train_variables]))
         # Use .loc to safely assign new columns
         subset.loc[:, 'bdt_score'] = scores
-        subset.loc[:, 'bdt_score_t'] = self.transformers[i].inverse_transform(scores.reshape(-1, 1)).flatten()
+        subset.loc[:, 'bdt_score_t'] = self.transformers[i].transform(scores.reshape(-1, 1)).flatten()
         return subset
 
     def _split_by_categories(self, data):

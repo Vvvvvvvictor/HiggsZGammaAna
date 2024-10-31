@@ -48,7 +48,7 @@ BR_W_qq = 67.41*0.01
 
 # Production modes and decay channel: for extract XS from combine
 productionModes = ['ggH','qqH','ttH','tHq','tHW','ggZH','WH','ZH','bbH']
-decayMode = 'hgg'
+decayMode = 'hzg'
 
 # List of years
 years_to_process = ['2016','2017','2018','2022preEE','2022postEE']
