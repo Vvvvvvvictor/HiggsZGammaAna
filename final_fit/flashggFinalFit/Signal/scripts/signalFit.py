@@ -22,9 +22,9 @@ from plottingTools import *
 MHLow, MHHigh = '120', '130'
 MHNominal = '125'
 
-print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG SIGNAL FITTER ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
+print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HZG SIGNAL FITTER ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
 def leave():
-  print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG SIGNAL FITTER (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
+  print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HZG SIGNAL FITTER (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
   exit()
 
 def get_options():
@@ -32,7 +32,7 @@ def get_options():
   parser.add_option('--mass_ALP', dest='mass_ALP', default=1, type='int', help="ALP mass") # PZ
   parser.add_option("--channel", dest='channel', default='', help="ele, mu, or leptons") # PZ
 
-  parser.add_option("--xvar", dest='xvar', default='CMS_hza_mass', help="Observable to fit")
+  parser.add_option("--xvar", dest='xvar', default='CMS_hzg_mass', help="Observable to fit")
   parser.add_option("--inputWSDir", dest='inputWSDir', default='', help="Input flashgg WS directory")
   parser.add_option("--ext", dest='ext', default='', help="Extension")
   parser.add_option("--proc", dest='proc', default='GG2H', help="Signal process") # PZ
@@ -91,13 +91,13 @@ if opt.analysis not in globalXSBRMap:
 else: xsbrMap = globalXSBRMap[opt.analysis]
 
 # Load RooRealVars
-nominalWSFileName = glob.glob(f"{opt.inputWSDir}/ALP_sig_Am{opt.mass_ALP}_Hm125_{opt.year}_{opt.channel}.root")[0] # PZ
+nominalWSFileName = glob.glob("%s/*"%(opt.inputWSDir))[0]
 f0 = ROOT.TFile(nominalWSFileName,"read")
 inputWS0 = f0.Get(inputWSName__)
 xvar = inputWS0.var(opt.xvar)
 xvarFit = xvar.Clone()
-dZ = ROOT.RooRealVar("dZ", "dZ", 0)  # PZ
-# dZ = inputWS0.var("dZ")
+# dZ = ROOT.RooRealVar("dZ", "dZ", 0)  # PZ
+dZ = inputWS0.var("dZ")
 aset = ROOT.RooArgSet(xvar,dZ)
 f0.Close()
 # official sample structure
@@ -163,11 +163,11 @@ nominalDatasets = od()
 # For RV (or if skipping vertex scenario split)
 datasetRVForFit = od()
 for mp in opt.massPoints.split(","):
-  WSFileName = glob.glob(f"{opt.inputWSDir}/ALP_sig_Am{opt.mass_ALP}_Hm{mp}_{opt.year}_{opt.channel}.root")[0] # PZ
+  WSFileName = glob.glob(f"{opt.inputWSDir}/{procNorm}_M{mp}_{opt.year}.root")[0]
   # WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,mp,procRVFit))[0]
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__)
-  d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procRVFit.split("_")[0]),mp,sqrts__,opt.cat)),aset) # PZ
+  d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procNorm,mp,sqrts__,catNorm)),aset)
   # d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(procRVFit.split("_")[0]),mp,sqrts__,catRVFit)),aset)
   nominalDatasets[mp] = d.Clone()
   if opt.skipVertexScenarioSplit: datasetRVForFit[mp] = d
@@ -283,8 +283,8 @@ if not opt.skipBeamspotReweigh:
 # If using nGaussian fit then extract nGaussians from fTest json file
 if not opt.useDCB:
   # with open("%s/outdir_%s/fTest/json/nGauss_%s.json"%(swd__,opt.ext,catRVFit)) as jf: ngauss = json.load(jf)
-  with open(f"{swd__}/outdir_{opt.channel}/fTest/json/{opt.mass_ALP}_nGauss_{opt.year}_{opt.channel}_Hm125.json") as jf: ngauss = json.load(jf)
-  nRV = int(ngauss["%s__%s"%(procRVFit,catRVFit)]['nRV'])
+  with open(f"{swd__}/outdir_{opt.ext}/fTest/json/nGauss_{opt.year}_{opt.channel}_M125.json") as jf: ngauss = json.load(jf)
+  nRV = int(ngauss["%s_%s"%(procRVFit,catRVFit)]['nRV'])
   if opt.skipVertexScenarioSplit: print(" --> Fitting function: convolution of nGaussians (%g)"%nRV)
   else: 
     with open(f"{swd__}/outdir_{opt.channel}/fTest/json/{opt.mass_ALP}_nGauss_{opt.year}_{opt.channel}_Hm125.json") as jf: ngauss = json.load(jf)
@@ -323,10 +323,10 @@ fm = FinalModel(ssfMap,opt.proc,opt.cat,opt.ext,opt.year,sqrts__,nominalDatasets
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # SAVE: to output workspace
-foutDir = "%s/outdir_%s/signalFit/output"%(swd__,opt.channel)
-foutName = f"{swd__}/outdir_{opt.channel}/signalFit/output/{opt.mass_ALP}_CMS-HGG_sigfit_{opt.year}_{opt.channel}_Hm125.root"
+foutDir = f"{swd__}/outdir_{opt.ext}/signalFit/output/"
+foutName = f"{foutDir}CMS-HZG_sigfit_{opt.year}_{opt.cat}_{opt.channel}_Hm125.root"
 print("\n --> Saving output workspace to file: %s"%foutName)
-if not os.path.isdir(foutDir): os.system("mkdir %s"%foutDir)
+if not os.path.isdir(foutDir): os.system("mkdir -p %s"%foutDir)
 fout = ROOT.TFile(foutName,"RECREATE")
 outWS = ROOT.RooWorkspace("%s_%s"%(outputWSName__,sqrts__),"%s_%s"%(outputWSName__,sqrts__))
 fm.save(outWS)
@@ -337,12 +337,13 @@ fout.Close()
 # PLOTTING
 if opt.doPlots:
   print("\n --> Making plots...")
-  if not os.path.isdir("%s/outdir_%s/signalFit/Plots"%(swd__,opt.channel)): os.system("mkdir %s/outdir_%s/signalFit/Plots"%(swd__,opt.channel))
+  foutDir = f"{swd__}/outdir_{opt.ext}/signalFit/Plots"
+  if not os.path.isdir(foutDir): os.system(f"mkdir -p {foutDir}")
   if opt.skipVertexScenarioSplit:
-    plotPdfComponents(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(swd__,opt.channel),_extension="total_",_proc=procRVFit,_cat=catRVFit, _Amass=opt.mass_ALP,_year=opt.year,_channel=opt.channel) 
+    plotPdfComponents(ssfRV,_outdir=foutDir,_extension="total_",_proc=procRVFit,_cat=catRVFit, _Amass=opt.mass_ALP,_year=opt.year,_channel=opt.channel) 
   if not opt.skipVertexScenarioSplit:
-    plotPdfComponents(ssfRV,_outdir="%s/outdir_%s/signalFit/Plots"%(swd__,opt.channel),_extension="RV_",_proc=procRVFit,_cat=catRVFit, _Amass=opt.mass_ALP,_year=opt.year,_channel=opt.channel) 
-    plotPdfComponents(ssfWV,_outdir="%s/outdir_%s/signalFit/Plots"%(swd__,opt.channel),_extension="WV_",_proc=procWVFit,_cat=catRVFit, _Amass=opt.mass_ALP,_year=opt.year,_channel=opt.channel) 
+    plotPdfComponents(ssfRV,_outdir=foutDir,_extension="RV_",_proc=procRVFit,_cat=catRVFit, _Amass=opt.mass_ALP,_year=opt.year,_channel=opt.channel) 
+    plotPdfComponents(ssfWV,_outdir=foutDir,_extension="WV_",_proc=procWVFit,_cat=catRVFit, _Amass=opt.mass_ALP,_year=opt.year,_channel=opt.channel) 
   # Plot interpolation
-  plotInterpolation(fm,_outdir="%s/outdir_%s/signalFit/Plots"%(swd__,opt.channel), _Amass=opt.mass_ALP,_year=opt.year,_channel=opt.channel) 
-  plotSplines(fm,_outdir="%s/outdir_%s/signalFit/Plots"%(swd__,opt.channel),_nominalMass=MHNominal, _Amass=opt.mass_ALP,_year=opt.year,_channel=opt.channel) 
+  plotInterpolation(fm,_outdir=foutDir, _Amass=opt.mass_ALP,_year=opt.year,_channel=opt.channel,_cat=catNorm) 
+  plotSplines(fm,_outdir=foutDir,_nominalMass=MHNominal, _Amass=opt.mass_ALP,_year=opt.year,_channel=opt.channel,_cat=catNorm) 

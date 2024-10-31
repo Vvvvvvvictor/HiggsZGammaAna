@@ -38,7 +38,7 @@ def get_options():
   parser.add_option("--inputWSDir", dest='inputWSDir', default='', help="Input flashgg WS directory")
   parser.add_option("--ext", dest='ext', default='', help="Extension")
   parser.add_option("--procs", dest='procs', default='GG2H', help="Signal processes") # PZ
-  parser.add_option("--nProcsToFTest", dest='nProcsToFTest', default=1, type='int',help="Number of signal processes to fTest (ordered by sum entries), others are set to nRV=1,nWV=1. Set to -1 to run over all")
+  parser.add_option("--nProcsToFTest", dest='nProcsToFTest', default=-1, type='int',help="Number of signal processes to fTest (ordered by sum entries), others are set to nRV=1,nWV=1. Set to -1 to run over all")
   parser.add_option("--cat", dest='cat', default='cat0', help="RECO category") # PZ
   parser.add_option('--mass', dest='mass', default='125', help="Mass point to fit") # PZ
   parser.add_option('--doPlots', dest='doPlots', default=True, action="store_true", help="Produce Signal fTest plots") # PZ
@@ -55,8 +55,8 @@ def get_options():
 ROOT.gStyle.SetOptStat(0)
 ROOT.gROOT.SetBatch(True)
 if opt.doPlots: 
-  # if not os.path.isdir("%s/outdir_%s/fTest/Plots"%(swd__,opt.ext)): os.system("mkdir -p %s/outdir_%s/fTest/Plots"%(swd__,opt.ext))
-  if not os.path.isdir("%s/outdir_%s/fTest/Plots"%(swd__,opt.channel)): os.system("mkdir -p %s/outdir_%s/fTest/Plots"%(swd__,opt.channel))
+  if not os.path.isdir("%s/outdir_%s/fTest/Plots"%(swd__,opt.ext)): os.system("mkdir -p %s/outdir_%s/fTest/Plots"%(swd__,opt.ext))
+  # if not os.path.isdir("%s/outdir_%s/fTest/Plots"%(swd__,opt.channel)): os.system("mkdir -p %s/outdir_%s/fTest/Plots"%(swd__,opt.channel))
 
 # Load xvar to fit
 print(f"Looking for files in: {opt.inputWSDir}")
@@ -72,6 +72,7 @@ f0.Close()
 
 # Create MH var
 MH = ROOT.RooRealVar("MH","m_{H}", int(MHLow), int(MHHigh))
+print("MH range: %g - %g"%(int(MHLow), int(MHHigh)))
 MH.setUnit("GeV")
 MH.setConstant(True)
 
@@ -81,7 +82,7 @@ procYields = od()
 for proc in opt.procs.split(","):
   print(f"Looking for files in: {opt.inputWSDir}")
   # WSFileName = glob.glob(f"{opt.inputWSDir}/ALP_sig_Am{opt.mass_ALP}_Hm{opt.mass}_{opt.year}_{opt.channel}.root")[0]
-  WSFileName = glob.glob(f"{opt.inputWSDir}/{opt.procs}_M{opt.mass}_{opt.year}.root")[0]
+  WSFileName = glob.glob(f"{opt.inputWSDir}/{proc}_M{opt.mass}_{opt.year}.root")[0]
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__) 
   # d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(proc.split("_")[0]),opt.mass,sqrts__,opt.cat)),aset)
@@ -110,7 +111,7 @@ for pidx, proc in enumerate(procsToFTest):
   # Split dataset to RV/WV: ssf requires input as dict (with mass point as key)
   datasets_RV, datasets_WV = od(), od()
   # WSFileName = glob.glob(f"{opt.inputWSDir}/ALP_sig_Am{opt.mass_ALP}_Hm{opt.mass}_{opt.year}_{opt.channel}.root")[0] # PZ
-  WSFileName = glob.glob(f"{opt.inputWSDir}/{opt.procs}_M{opt.mass}_{opt.year}.root")[0]
+  WSFileName = glob.glob(f"{opt.inputWSDir}/{proc}_M{opt.mass}_{opt.year}.root")[0]
   f = ROOT.TFile(WSFileName,"read")
   inputWS = f.Get(inputWSName__)
   # d = reduceDataset(inputWS.data("%s_%s_%s_%s"%(procToData(proc.split("_")[0]),opt.mass,sqrts__,opt.cat)),aset) # PZ
@@ -144,8 +145,8 @@ for pidx, proc in enumerate(procsToFTest):
     df.loc[df['proc']==proc,'nRV'] = nGauss_opt
     # Make plots
     if( opt.doPlots )&( len(ssfs.keys())!=0 ):
-      plotFTest(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(swd__,opt.channel),_extension="RV",_proc=proc,_cat=opt.cat,_mass=opt.mass,_year=opt.year,_channel=opt.channel,_Hmass=opt.mass, _lumi=lumiMap[opt.year])
-      plotFTestResults(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(swd__,opt.channel),_extension="RV",_proc=proc,_cat=opt.cat,_mass=opt.mass,_year=opt.year,_channel=opt.channel,_Hmass=opt.mass, _lumi=lumiMap[opt.year])
+      plotFTest(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(swd__,opt.ext),_extension="RV",_proc=proc,_cat=opt.cat,_mass=opt.mass,_year=opt.year,_channel=opt.channel,_Hmass=opt.mass, _lumi=lumiMap[opt.year])
+      plotFTestResults(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(swd__,opt.ext),_extension="RV",_proc=proc,_cat=opt.cat,_mass=opt.mass,_year=opt.year,_channel=opt.channel,_Hmass=opt.mass, _lumi=lumiMap[opt.year])
 
   # Run fTest: WV
   # If numEntries below threshold then keep as n = 1
@@ -171,25 +172,51 @@ for pidx, proc in enumerate(procsToFTest):
     df.loc[df['proc']==proc,'nWV'] = nGauss_opt
     # Make plots
     if( opt.doPlots )&( len(ssfs.keys())!=0 ):
-      plotFTest(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(swd__,opt.channel),_extension="WV",_proc=proc,_cat=opt.cat,_mass=opt.mass, _year=opt.year,_channel=opt.channel,_Hmass=opt.mass, _lumi=lumiMap[opt.year])
-      plotFTestResults(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(swd__,opt.channel),_extension="WV",_proc=proc,_cat=opt.cat,_mass=opt.mass, _year=opt.year,_channel=opt.channel,_Hmass=opt.mass, _lumi=lumiMap[opt.year])
+      plotFTest(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(swd__,opt.ext),_extension="WV",_proc=proc,_cat=opt.cat,_mass=opt.mass, _year=opt.year,_channel=opt.channel,_Hmass=opt.mass, _lumi=lumiMap[opt.year])
+      plotFTestResults(ssfs,_opt=nGauss_opt,_outdir="%s/outdir_%s/fTest/Plots"%(swd__,opt.ext),_extension="WV",_proc=proc,_cat=opt.cat,_mass=opt.mass, _year=opt.year,_channel=opt.channel,_Hmass=opt.mass, _lumi=lumiMap[opt.year])
 
   # Close ROOT file
   inputWS.Delete()
   f.Close()
 
-# Make output
-if not os.path.isdir("%s/outdir_%s/fTest/json"%(swd__,opt.channel)): os.system("mkdir %s/outdir_%s/fTest/json"%(swd__,opt.channel))
-ff = open(f"{swd__}/outdir_{opt.channel}/fTest/json/{opt.mass_ALP}_nGauss_{opt.year}_{opt.channel}_Hm{opt.mass}.json","w")
-ff.write("{\n")
-# Iterate over rows in dataframe: sorted by sumEntries
-pitr = 1
-for ir,r in df.sort_values('sumEntries',ascending=False).iterrows():
-  k = "\"%s__%s\""%(r['proc'],opt.cat)
-  ff.write("    %-90s : {\"nRV\":%s,\"nWV\":%s}"%(k,r['nRV'],r['nWV']))
-  # Drop comma for last proc
-  if pitr == len(df): ff.write("\n")
-  else: ff.write(",\n")
-  pitr += 1
-ff.write("}")
-ff.close()
+# # Make output
+# if not os.path.isdir("%s/outdir_%s/fTest/json"%(swd__,opt.channel)): os.system("mkdir %s/outdir_%s/fTest/json"%(swd__,opt.channel))
+# ff = open(f"{swd__}/outdir_{opt.channel}/fTest/json/nGauss_{opt.year}_{opt.channel}_M{opt.mass}.json","w")
+# ff.write("{\n")
+# # Iterate over rows in dataframe: sorted by sumEntries
+# pitr = 1
+# for ir,r in df.sort_values('sumEntries',ascending=False).iterrows():
+#   k = "\"%s_%s_%s\""%(r['proc'],opt.cat)
+#   ff.write("    %-90s : {\"nRV\":%s,\"nWV\":%s}"%(k,r['nRV'],r['nWV']))
+#   # Drop comma for last proc
+#   if pitr == len(df): ff.write("\n")
+#   else: ff.write(",\n")
+#   pitr += 1
+# ff.write("}")
+# ff.close()
+
+# Set file path
+json_path = f"{swd__}/outdir_{opt.ext}/fTest/json/nGauss_{opt.year}_{opt.channel}_M{opt.mass}.json"
+
+# Ensure output directory exists
+os.makedirs(os.path.dirname(json_path), exist_ok=True)
+
+# Initialize data dictionary
+data = {}
+
+# Load existing data if the file already exists
+if os.path.isfile(json_path):
+    with open(json_path, "r") as f:
+        try:
+            data = json.load(f)
+        except json.JSONDecodeError:
+            print("Warning: Existing file is not a valid JSON. Starting with empty data.")
+
+# Update data with new entries
+for ir, r in df.iterrows():
+    key = f"{r['proc']}_{opt.cat}"
+    data[key] = {"nRV": r['nRV'], "nWV": r['nWV']}
+
+# Write updated data back to the file in JSON format
+with open(json_path, "w") as ff:
+    json.dump(data, ff, indent=4)

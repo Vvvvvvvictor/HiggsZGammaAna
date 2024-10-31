@@ -1,6 +1,6 @@
 # Script to determine diagonal process for each category and write to json file
 
-print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG GET DIAG PROC RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
+print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HZG GET DIAG PROC RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
 import os, sys
 import re
 from optparse import OptionParser
@@ -15,7 +15,7 @@ from commonTools import *
 from commonObjects import *
 
 def leave():
-  print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG GET DIAG PROC RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
+  print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HZG GET DIAG PROC RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
   sys.exit(1)
 
 def get_options():
@@ -44,14 +44,14 @@ for cat in allCats.split(","):
 for proc in allProcs.split(","):
   print(" --> Processing: %s"%proc)
   # Open workspace
-  _WSFileName = glob.glob("%s/output*M%s*%s.root"%(opt.inputWSDir,opt.MH,proc))[0]
+  _WSFileName = glob.glob("%s/%s_M%s*.root"%(opt.inputWSDir,proc,opt.MH))[0]
   f = ROOT.TFile(_WSFileName,'read')
   inputWS = f.Get(inputWSName__)
 
   # Loop over cats: up
   for cat in allCats.split(","):
     # Extract sum of weights
-    nominalDataName = "%s_%s_%s_%s"%(procToData(proc.split("_")[0]),opt.MH,sqrts__,cat)
+    nominalDataName = "%s_%s_%s_%s"%(proc,opt.MH,sqrts__,cat)
     nominalData = inputWS.data(nominalDataName)
     sumw = nominalData.sumEntries()
     # Update dict if largest

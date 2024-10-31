@@ -165,7 +165,7 @@ def plotFTest(ssfs,_opt=1,_outdir='./',_extension='',_proc='',_cat='',_mass='125
   lat.DrawLatex(0.245, 0.965, "Simulation Preliminary")
   lat.DrawLatex(0.74,0.97,("%s fb^{-1} (13 TeV)"%(_lumi)))
   canv.Update()
-  canv.SaveAs(f"{_outdir}/{_extension}_fTest_{_year}_{_cat}_Hm{_Hmass}.pdf")
+  canv.SaveAs(f"{_outdir}/{_extension}_fTest_{_proc}_{_year}_{_cat}_Hm{_Hmass}.pdf")
 
 # Plot reduced chi2 vs nGauss
 def plotFTestResults(ssfs,_opt,_outdir="./",_extension='',_proc='',_cat='',_mass='125',_year='16',_channel='ele',_Hmass='125', _lumi=137.65):
@@ -240,7 +240,7 @@ def plotFTestResults(ssfs,_opt,_outdir="./",_extension='',_proc='',_cat='',_mass
   lat.DrawLatex(0.20, 0.965, "Simulation Preliminary")
   lat.DrawLatex(0.74,0.97,("%s fb^{-1} (13 TeV)"%(_lumi)))
   canv.Update()
-  canv.SaveAs(f"{_outdir}/{_extension}_fTest_{_year}_{_cat}_Hm{_Hmass}_chi2_vs_nGauss.pdf")
+  canv.SaveAs(f"{_outdir}/{_extension}_fTest_{_proc}_{_year}_{_cat}_Hm{_Hmass}_chi2_vs_nGauss.pdf")
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Signal fit plots
@@ -419,10 +419,10 @@ def plotPdfComponents(ssf,_outdir='./',_extension='',_proc='',_cat='',_Amass='1'
   lat1.DrawLatex(0.22,0.79,"#chi^{2}/dof = %.2f"%(ssf.getChi2()/ssf.Ndof))
 
   canv.Update()
-  canv.SaveAs(f"{_outdir}/shape_pdf_components_{_Amass}_{_year}_{_channel}.pdf")
+  canv.SaveAs(f"{_outdir}/shape_pdf_components_{_proc}_{_year}_{_cat}.pdf")
 
 # Plot final pdf for each mass point
-def plotInterpolation(_finalModel,_outdir='./',_massPoints='120,121,122,123,124,125,126,127,128,129,130',_Amass='1',_year='16',_channel='ele'):
+def plotInterpolation(_finalModel,_outdir='./',_massPoints='120,121,122,123,124,125,126,127,128,129,130',_Amass='1',_proc='ggH',_year='16',_channel='ele', _cat="ggH"):
 
   canv = ROOT.TCanvas("c", "c", 800, 600)
   canv.SetMargin(0.15, 0.03, 0.14, 0.08) # //left//right//bottom//top
@@ -502,7 +502,7 @@ def plotInterpolation(_finalModel,_outdir='./',_massPoints='120,121,122,123,124,
   lat.SetTextAlign(13)
   lat.SetNDC()
   lat.SetTextSize(0.045)
-  lat.DrawLatex(0.20, 0.87, f"m_{{a}} = {_Amass} GeV")
+  # lat.DrawLatex(0.20, 0.87, f"m_{{a}} = {_Amass} GeV")
   lat.SetTextSize(0.05)  # 字體大小
   lat.SetTextFont(61)  # 粗體字 CMS 標籤
   lat.DrawLatex(0.15, 0.969, "CMS")
@@ -512,12 +512,12 @@ def plotInterpolation(_finalModel,_outdir='./',_massPoints='120,121,122,123,124,
   lat.DrawLatex(0.74,0.97,("138 fb^{-1} (13 TeV)"))
 
   canv.Update()
-  canv.SaveAs(f"{_outdir}/model_vs_mH_{_Amass}_{_year}_{_channel}.pdf")
+  canv.SaveAs(f"{_outdir}/model_vs_mH_{_proc}_{_year}_{_cat}.pdf")
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Plot splines
-def plotSplines(_finalModel,_outdir="./",_nominalMass='125',splinesToPlot=['xs','br','ea'],_Amass='1',_year='16',_channel='ele'):
+def plotSplines(_finalModel,_outdir="./",_nominalMass='125',splinesToPlot=['xs','br','ea'],_Amass='1',_proc='ggH',_year='16',_channel='ele',_cat='ggH'):
 # def plotSplines(_finalModel,_outdir="./",_nominalMass='125',splinesToPlot=['xs','br','ea','fracRV'],_Amass='1',_year='16',_channel='ele'):
   canv = ROOT.TCanvas("c", "c", 800, 600)
   canv.SetMargin(0.16, 0.035, 0.14, 0.08) # //left//right//bottom//top
@@ -608,8 +608,8 @@ def plotSplines(_finalModel,_outdir="./",_nominalMass='125',splinesToPlot=['xs',
   lat.SetTextAlign(13)
   lat.SetNDC()
   lat.SetTextSize(0.050)
-  # lat.DrawLatex(0.9,0.92,"( %s , %s , %s )"%(_extension,_proc,_cat))
-  lat.DrawLatex(0.22, 0.87, f"m_{{a}} = {_Amass} GeV")
+  lat.DrawLatex(0.6,0.92,"( %s , %s )"%(_proc,_cat))
+  # lat.DrawLatex(0.22, 0.87, f"m_{{a}} = {_Amass} GeV")
   lat.SetTextSize(0.05)  # 字體大小
   lat.SetTextFont(61)  # 粗體字 CMS 標籤
   lat.DrawLatex(0.16, 0.969, "CMS")
@@ -618,7 +618,7 @@ def plotSplines(_finalModel,_outdir="./",_nominalMass='125',splinesToPlot=['xs',
   lat.DrawLatex(0.25, 0.965, "Simulation Preliminary")
   lat.DrawLatex(0.74,0.97,("138 fb^{-1} (13 TeV)"))
   canv.Update()
-  canv.SaveAs(f"{_outdir}/{_finalModel.name}_splines_{_Amass}_{_year}_{_channel}.pdf")
+  canv.SaveAs(f"{_outdir}/splines_{_proc}_{_year}_{_cat}.pdf")
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function for plotting final signal model: neat

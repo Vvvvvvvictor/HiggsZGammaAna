@@ -252,7 +252,7 @@ for stxsId in data[stxsVar].unique():
     if opt.doSystematics: sdf = sdata
 
     # Define output workspace file
-    outputWSDir = opt.outputWSDir + "/%s/%s"%(opt.productionMode,opt.year)
+    outputWSDir = opt.outputWSDir + "/signal_%s"%(opt.year)
     if not os.path.exists(outputWSDir): os.system("mkdir -p %s"%outputWSDir)
     # outputWSFile = outputWSDir+"/"+re.sub(".root","_%s.root"%dataToProc(opt.productionMode),opt.inputTreeFile.split("/")[-1])
     outputWSFile = outputWSDir+"/{}".format(opt.productionMode+"_M"+opt.inputMass+"_"+opt.year+".root")
