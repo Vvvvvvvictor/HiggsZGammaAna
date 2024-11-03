@@ -27,7 +27,8 @@ class BDTApplicator:
         self.args = args
         self.models = self._load_models()
         self.transformers = self._load_transformers()
-        self.train_variables, self.preselection = self._load_config()
+        # self.train_variables, self.preselection = self._load_config()
+        # logging.info(f"preselection: {self.preselection}")
         self.cat_boundaries = self._load_category_boundaries()
         self.random_index = 'event'
 
@@ -65,7 +66,7 @@ class BDTApplicator:
 
     def apply_bdt(self, data):
         """Apply BDT models and return split data by categories."""
-        data = self.preselect(data)
+        # data = self.preselect(data)
         out_data = pd.concat(
             [self._process_subset(data, i) for i in range(4)], ignore_index=True
         )

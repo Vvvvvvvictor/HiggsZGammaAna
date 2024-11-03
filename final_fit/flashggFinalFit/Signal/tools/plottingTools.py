@@ -4,6 +4,8 @@ import json
 from collections import OrderedDict as od
 from commonObjects import *
 
+from pdb import set_trace
+
 def LoadTranslations(jsonfilename):
     with open(jsonfilename) as jsonfile:
         return json.load(jsonfile)
@@ -331,17 +333,26 @@ def plotPdfComponents(ssf,_outdir='./',_extension='',_proc='',_cat='',_Amass='1'
   leg.AddEntry(hists['final'],"Parametric Model","L")
   leg.Draw("Same")
   if len(pdfs.keys())!=1:
-    if(len(pdfs)==2): 
+    if(len(pdfs)==2):
       leg1 = ROOT.TLegend(0.595,0.57,0.94,0.72)
       leg1.SetFillStyle(0)
       leg1.SetLineColor(0)
       leg1.SetBorderSize(0)
       leg1.SetTextSize(0.05)
+      
+      flag = False
       for k,v in pdfs.items():
-        if( int(k[-1])+1 == 1):
-          leg1.AddEntry(hists[k],f"{int(k[-1])+1}st Gau","L")
-        elif( int(k[-1])+1 == 2):
-          leg1.AddEntry(hists[k],f"{int(k[-1])+1}nd Gau","L")
+        if 'gaus' in k:
+          if flag:
+            leg1.AddEntry(hists[k],f"Gaussian","L")
+          else:
+            if( int(k[-1])+1 == 1):
+              leg1.AddEntry(hists[k],f"{int(k[-1])+1}st Gau","L")
+            elif( int(k[-1])+1 == 2):
+              leg1.AddEntry(hists[k],f"{int(k[-1])+1}nd Gau","L")
+        else:
+          leg1.AddEntry(hists[k],f"DSCB","L")
+          flag = True
       leg1.Draw("Same")
 
     elif(len(pdfs)==3): 
@@ -401,7 +412,7 @@ def plotPdfComponents(ssf,_outdir='./',_extension='',_proc='',_cat='',_Amass='1'
   lat.SetTextAlign(13)
   lat.SetNDC()
   lat.SetTextSize(0.05)
-  lat.DrawLatex(0.9,0.92,"( %s , %s , %s )"%(_extension,_proc,_cat))
+  lat.DrawLatex(0.6,0.92,"( %s , %s , %s )"%(_extension,_proc,_cat))
   # lat.DrawLatex(0.22, 0.87, f"m_{{a}} = {_Amass} GeV")
   lat.SetTextSize(0.05)  # 字體大小
   lat.SetTextFont(61)  # 粗體字 CMS 標籤
@@ -622,8 +633,9 @@ def plotSplines(_finalModel,_outdir="./",_nominalMass='125',splinesToPlot=['xs',
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Function for plotting final signal model: neat
-def plotSignalModel(_hists,_opt,_outdir=".",offset=0.07,_Amass='1',_year='16', _channel='ele'):
+def plotSignalModel(_hists,_opt,_outdir=".",offset=0.07,_Amass='1',_year='16', _channel='ele', _cat='ggH'):
   colorMap = {'16':38,'16APV':31, '17':30,'18':46,'2022preEE':38,'2022postEE':30}
+  colorMap_proc = {'ggH':ROOT.kRed-4,'VBF':ROOT.kAzure+1,'WplusH':ROOT.kGreen+1,'WminusH':ROOT.kGreen+1,'ZH':ROOT.kMagenta-7,'ttH':ROOT.kOrange-3}
   canv = ROOT.TCanvas("c","c",650,600)
   canv.SetMargin(0.19, 0.035, 0.14, 0.09) # //left//right//bottom//top
   canv.SetTickx()
@@ -734,6 +746,13 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.07,_Amass='1',_year='16', _
       _hists['pdf_%s'%year].SetLineStyle(2)
       _hists['pdf_%s'%year].SetLineWidth(3)
       _hists['pdf_%s'%year].Draw("Same Hist C")
+  else:
+    for proc in _opt.procs.split(","):
+      if f"pdf_{proc}" not in _hists.keys(): continue
+      _hists['pdf_%s'%proc].SetLineColor(colorMap_proc[proc])
+      _hists['pdf_%s'%proc].SetLineStyle(2)
+      _hists['pdf_%s'%proc].SetLineWidth(3)
+      _hists['pdf_%s'%proc].Draw("Same Hist C")
   # Set style: data
   _hists['data'].SetMarkerStyle(25)
   _hists['data'].SetMarkerColor(1)
@@ -787,4 +806,4 @@ def plotSignalModel(_hists,_opt,_outdir=".",offset=0.07,_Amass='1',_year='16', _
   # Save canvas
   # canv.SaveAs("%s/smodel_%s%s%s.pdf"%(_outdir,catExt,procExt,yearExt))
   # canv.SaveAs("%s/smodel_%s%s%s.png"%(_outdir,catExt,procExt,yearExt))
-  canv.SaveAs(f"{_outdir}/smodel_{_Amass}_{_year}_{_channel}.pdf")
+  canv.SaveAs(f"{_outdir}/smodel_{_cat}.pdf")
