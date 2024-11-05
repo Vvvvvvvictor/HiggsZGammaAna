@@ -6,7 +6,7 @@ target="/eos/home-j/jiehan/root/mc_cor_syst/test/"
 # target="./"
 
 # years=(2016preVFP 2016postVFP 2017 2018 2022preEE 2022postEE 2023preBPix 2023postBPix)
-years=(2016preVFP)
+years=(2018)
 
 # 函数定义：执行命令并处理错误
 execute_command() {
@@ -56,7 +56,7 @@ process_sample() {
 
 # 处理 signal 样本
 
-samples=(WplusH_M130) #ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125 ggH_M120 VBFH_M120 WplusH_M120 WminusH_M120 ZH_M120 ttH_M120 ggH_M130 VBFH_M130 WplusH_M130 WminusH_M130 ZH_M130 ttH_M130 ggH_mix VBF_mix ggH VBF WplusH WminusH ZH ttH)
+samples=(WplusH) #ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125 ggH_M120 VBFH_M120 WplusH_M120 WminusH_M120 ZH_M120 ttH_M120 ggH_M130 VBFH_M130 WplusH_M130 WminusH_M130 ZH_M130 ttH_M130 ggH_mix VBF_mix ggH VBF WplusH WminusH ZH ttH)
 type="test"
 for sample in "${samples[@]}"; do
     mkdir -p "$target${sample}_nominal"

@@ -14,9 +14,9 @@ def get_args():
     """Parse command-line arguments."""
     parser = ArgumentParser(description='Apply BDT signal correction to data')
     parser.add_argument('-c', '--config', default='data/training_config_BDT.json', help='Path to the training config file')
-    parser.add_argument('-i', '--inputFolder', default='/eos/home-j/jiehan/root/mc_cor_syst', help='Path to the input folder')
+    parser.add_argument('-i', '--inputFolder', default='/eos/home-j/jiehan/root/skimmed_ntuples_run2/', help='Path to the input folder')
     parser.add_argument('-m', '--modelFolder', default='models', help='Path to the model folder')
-    parser.add_argument('-o', '--outputFolder', default='/eos/home-j/jiehan/root/output_cor_syst', help='Path to the output folder')
+    parser.add_argument('-o', '--outputFolder', default='/eos/home-j/jiehan/root/output_bkg', help='Path to the output folder')
     parser.add_argument('-s', '--catSplitFolder', default='/eos/home-j/jiehan/root/outputs/significances', help='Path to the category split folder')
     return parser.parse_args()
 
@@ -28,7 +28,7 @@ class BDTApplicator:
         self.models = self._load_models()
         self.transformers = self._load_transformers()
         self.train_variables, self.preselection = self._load_config()
-        # logging.info(f"preselection: {self.preselection}")
+        logging.info(f"preselection: {self.preselection}")
         self.cat_boundaries = self._load_category_boundaries()
         self.random_index = 'event'
 
@@ -100,7 +100,7 @@ def process_files(applicators, output_folder, input_folder):
         "JER_down", "JES_up", "JES_down", "MET_JES_up", "MET_JES_down",
         "MET_Unclustered_up", "MET_Unclustered_down", "Muon_pt_up", "Muon_pt_down"
     ]
-    procductions = ['ggH', 'VBF', 'WplusH', 'WminusH', 'ZH', 'ttH']
+    procductions = ['Data', 'DYJetsToLL', 'ZGToLLG', 'ZG2JToG2L2J', 'EWKZ2J', 'TT', "TTGJets", "TGJets", "ttWJets", "ttZJets", "WW", "WZ", "ZZ", "WGToLNuG"]
     years = ['2016preVFP', '2016postVFP', '2017', '2018']
 
     # Create all necessary directories in one go
@@ -108,25 +108,25 @@ def process_files(applicators, output_folder, input_folder):
 
     # Iterate over all process-year combinations and write output
     for proc, year in [(p, y) for p in procductions for y in years]:
+        if not os.path.exists(f"{output_folder}/{proc}/{year}/output.root"): os.makedirs(f"{output_folder}/{proc}/{year}", exist_ok=True)
         with uproot.recreate(f"{output_folder}/{proc}/{year}/output.root") as outfile:
             logging.info(f"Output file: {output_folder}/{proc}/{year}/output.root")
-            for syst in syst_variations:
-                logging.info(f"Processing {proc} {year} {syst}")
-                input_path = f'{input_folder}/{proc}_{syst}/{year}.root'
-                with uproot.open(input_path) as infile:
-                    for channel in region_map.keys():
-                        data = infile[channel].arrays(library='pd')
-                        if channel in applicators:
-                            applicator = applicators[channel]
-                            data_splits = applicator.apply_bdt(data)
-                            for i, split_data in enumerate(data_splits):
-                                logging.info(f"Number of events in {region_map[channel]}_{i}_{syst}: {len(split_data)}")
-                                split_data = split_data.rename(columns={"H_mass": "CMS_hzg_mass"})
-                                outfile[f'{region_map[channel]}{i}_{syst}'] = split_data
-                        else:
-                            logging.info(f"Number of events in {region_map[channel]}_{syst}: {len(data)}")
-                            data = data.rename(columns={"H_mass": "CMS_hzg_mass"})
-                            outfile[f'{region_map[channel]}_{syst}'] = data
+            logging.info(f"Processing {proc} {year}")
+            input_path = f'{input_folder}/{proc}/{year}.root'
+            with uproot.open(input_path) as infile:
+                for channel in region_map.keys():
+                    data = infile[channel].arrays(library='pd')
+                    if channel in applicators:
+                        applicator = applicators[channel]
+                        data_splits = applicator.apply_bdt(data)
+                        for i, split_data in enumerate(data_splits):
+                            logging.info(f"Number of events in {region_map[channel]}_{i}: {len(split_data)}")
+                            split_data = split_data.rename(columns={"H_mass": "CMS_hzg_mass"})
+                            outfile[f'{region_map[channel]}{i}'] = split_data
+                    else:
+                        logging.info(f"Number of events in {region_map[channel]}: {len(data)}")
+                        data = data.rename(columns={"H_mass": "CMS_hzg_mass"})
+                        outfile[f'{region_map[channel]}'] = data
 
 if __name__ == "__main__":
     args = get_args()
