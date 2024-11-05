@@ -7,17 +7,17 @@ import time
 
 start_time = time.time()
 
-eos_path = '/eos/home-j/jiehan/parquet/cutflow/'
+eos_path = '/eos/home-j/jiehan/parquet/nanov9/mc_cor/'
 # log_path = '/eos/user/j/jiehan/eos_logs/'
 log_path = '/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/HiggsDNA/eos_logs/'
 
-dataset_type = 'data'
-dataset_names = ["Data"]
-dataset_years = ["2016postVFP"] #"2016preVFP", "2016postVFP", "2017", "2018"
+# dataset_type = 'data'
+# dataset_names = ["Data"]
+# dataset_years = ["2016postVFP"] #"2016preVFP", "2016postVFP", "2017", "2018"
 
-# dataset_type = 'signal'
-# dataset_names = ["ggH_M125"] #, "VBFH_M125", "ZH_M125", "ttH_M125"] # "WplusH_M125", "WminusH_M125",
-# dataset_years = ["2018"]#, "2017", "2018"]
+dataset_type = 'test'
+dataset_names = ["WplusH"] #, "VBFH_M125", "ZH_M125", "ttH_M125"] # "WplusH_M125", "WminusH_M125",
+dataset_years = ["2017"]#, "2017", "2018"]
 
 # dataset_type = 'bkgmc'
 # dataset_names = ["DYJetsToLL"] # "Data_SingleMuon", "Data_DoubleMuon", "Data_SingleElectron", "Data_DoubleEG"
@@ -42,6 +42,7 @@ for dataset in dataset_names:
     for year in dataset_years:
         weight = 1
         try:
+            print("reading: {}{}/{}_{}/merged_nominal.parquet".format(eos_path, dataset_type, dataset, year))
             data = pd.read_parquet("{}{}/{}_{}/merged_nominal.parquet".format(eos_path, dataset_type, dataset, year))
             print(data["weight_central"].to_numpy().astype('float64'), data["weight_central_no_lumi"].to_numpy().astype('float64'))
             print("{}{}/{}_{}/merged_nominal.parquet".format(eos_path, dataset_type, dataset, year))
