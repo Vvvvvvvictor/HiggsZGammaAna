@@ -275,6 +275,27 @@ class SimultaneousFit:
     _coeffs.add(self.Coeffs['frac_constrained'])
     self.Pdfs['final'] = ROOT.RooAddPdf("%s_%s"%(self.proc,self.cat),"%s_%s"%(self.proc,self.cat),_pdfs,_coeffs,_recursive)
     
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
+  def buildDCB(self,_recursive=True):
+
+    # DCB
+    # Define polynominal functions (in dMH)
+    for f in ['dm','sigma','n1','n2','a1','a2']: 
+      k = "%s_dcb"%f
+      self.Varlists[k] = ROOT.RooArgList("%s_coeffs"%k)
+      # Create coeff for polynominal of order MHPolyOrder: y = a+bx+cx^2+...
+      for po in range(0,self.MHPolyOrder+1):
+        self.Vars['%s_p%g'%(k,po)] = ROOT.RooRealVar("%s_p%g"%(k,po),"%s_p%g"%(k,po),pLUT['DCB']["%s_p%s"%(f,po)][0],pLUT['DCB']["%s_p%s"%(f,po)][1],pLUT['DCB']["%s_p%s"%(f,po)][2])
+        self.Varlists[k].add( self.Vars['%s_p%g'%(k,po)] ) 
+      # Define polynominal
+      self.Polynomials[k] = ROOT.RooPolyVar(k,k,self.dMH,self.Varlists[k])
+    # Mean function
+    self.Polynomials['mean_dcb'] = ROOT.RooFormulaVar("mean_dcb","mean_dcb","(@0+@1)",ROOT.RooArgList(self.MH,self.Polynomials['dm_dcb']))
+    # Build DCB
+    self.Pdfs['dcb'] = ROOT.RooDoubleCBFast("dcb","dcb",self.xvar,self.Polynomials['mean_dcb'],self.Polynomials['sigma_dcb'],self.Polynomials['a1_dcb'],self.Polynomials['n1_dcb'],self.Polynomials['a2_dcb'],self.Polynomials['n2_dcb'])
+
+    self.Pdfs['final'] = self.Pdfs['dcb']
+    
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
   def buildNGaussians(self,nGaussians,_recursive=True):
 

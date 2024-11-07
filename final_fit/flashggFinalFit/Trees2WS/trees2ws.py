@@ -195,12 +195,12 @@ for cat in cats:
         streeName = re.sub("YEAR",opt.year,streeName)
         st = f[streeName]
         if len(st)==0: continue
-        if "CMS_hzg_mass" in systematicsVars:
-          inputVars = ["H_mass" if x == "CMS_hzg_mass" else x for x in systematicsVars]
-          sdf = st.arrays(inputVars, library='pd')
-          sdf = sdf.rename(columns={"H_mass": "CMS_hzg_mass"})
-        else:
-          sdf = st.arrays(systematicsVars, library='pd')
+        # if "CMS_hzg_mass" in systematicsVars:
+        #   inputVars = ["H_mass" if x == "CMS_hzg_mass" else x for x in systematicsVars]
+        #   sdf = st.arrays(inputVars, library='pd')
+        #   sdf = sdf.rename(columns={"H_mass": "CMS_hzg_mass"})
+        # else:
+        sdf = st.arrays(systematicsVars, library='pd')
         sdf['type'] = "%s%s"%(s,direction)
         # Add STXS splitting var if splitting necessary
         if opt.doSTXSSplitting: sdf[stxsVar] = st.arrays(stxsVar, library='pd')
@@ -254,7 +254,7 @@ for stxsId in data[stxsVar].unique():
     outputWSFile = outputWSDir+"/{}".format(opt.productionMode+"_M"+opt.inputMass+"_"+opt.year+".root")
     print(" --> Creating output workspace: (%s)"%outputWSFile)
     
-  df = df.rename(columns={"H_mass": "CMS_hzg_mass"}) # work for HiggsDNA(PKU) ntuples
+  # df = df.rename(columns={"H_mass": "CMS_hzg_mass"}) # work for HiggsDNA(PKU) ntuples
     
   # Open file and initiate workspace
   fout = ROOT.TFile(outputWSFile,"RECREATE")

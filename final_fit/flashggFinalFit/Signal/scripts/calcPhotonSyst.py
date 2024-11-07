@@ -2,7 +2,7 @@
 # * Run script once per category, loops over signal processes
 # * Output is pandas dataframe 
 
-print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG PHOTON SYST CALCULATOR ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
+print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HZG PHOTON SYST CALCULATOR ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
 import ROOT
 import pandas as pd
 import pickle
@@ -17,7 +17,7 @@ from commonTools import *
 from commonObjects import *
 
 def leave():
-  print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG PHOTON SYST CALCULATOR (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
+  print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HZG PHOTON SYST CALCULATOR (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
   exit(0)
 
 def get_options():

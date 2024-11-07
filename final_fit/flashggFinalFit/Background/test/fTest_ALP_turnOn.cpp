@@ -7,6 +7,9 @@
 #include "boost/program_options.hpp"
 #include "boost/lexical_cast.hpp"
 
+#include "RooNLLVar.h"
+#include "RooChi2Var.h"
+
 #include "TFile.h"
 #include "TMath.h"
 #include "TLegend.h"
@@ -52,7 +55,7 @@ using namespace boost;
 
 namespace po = program_options;
 
-bool BLIND = false;
+bool BLIND = true;
 bool runFtestCheckWithToys=false;
 float mgglow_ =2.;//FIXME
 float mgghigh_ =40;//FIXME
@@ -69,7 +72,7 @@ RooRealVar *intLumi_ = new RooRealVar("IntLumi","hacked int lumi", 1000.);
 
 TRandom3 *RandomGen = new TRandom3();
 
-RooAbsPdf* getPdf(PdfModelBuilder &pdfsModel, string type, int order, const char* ext="", int mass_ALP=1)
+RooAbsPdf* getPdf(PdfModelBuilder &pdfsModel, string type, int order, const char* ext="", int mass_ALP=0)
 {
   if (type=="Bernstein") return pdfsModel.getBernsteinStepxGau(Form("%s_bern%d",ext,order),order, mass_ALP);//PZ
   // if (type=="Bernstein") return pdfsModel.getBernstein(Form("%s_bern%d",ext,order),order);
@@ -97,14 +100,31 @@ void runFit(RooAbsPdf *pdf, RooDataSet *data, double *NLL, int *stat_t, int MaxT
 	double minnll=10e8;
 	while (stat!=0){
 	  if (ntries>=MaxTries) break;
-	  RooFitResult *fitTest = pdf->fitTo(*data,RooFit::Save(1)
-    ,RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kFALSE), RooFit::Hesse(kFALSE)); //FIXME
+	  // RooFitResult *fitTest = pdf->fitTo(*data,RooFit::Save(1),RooFit::Minimizer("Minuit2","migrad"),RooFit::SumW2Error(kTRUE), RooFit::EvalErrorWall(false)); //FIXME
     // ,RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE)); //FIXME
     
     // RooFit::Hesse(kFALSE) to remove
     // Warning in <ROOT::Math::Fitter::CalculateHessErrors>: Error when calculating Hessian
+
+    RooChi2Var *chi2_test = new RooChi2Var("chi2_test", "chi2_test", *pdf, *data->binnedClone(), RooFit::DataError(RooAbsData::Poisson));
+    RooMinimizer minimizer(*chi2_test);
+
+    // RooNLLVar *nll_test = new RooNLLVar("nll_test", "nll_test", *pdf, *data);
+    // RooMinimizer minimizer(*nll_test);
+    
+    minimizer.setEps(100);
+    minimizer.setStrategy(0);
+    minimizer.minimize("Minuit2","migrad");
+
+    minimizer.setEps(1);
+    minimizer.setOffsetting(true);
+    minimizer.setStrategy(0);
+    minimizer.minimize("Minuit2","migrad");
+
+    // minimizer.hesse();
+    RooFitResult *fitTest = minimizer.save();
  
-          stat = fitTest->status();
+    stat = fitTest->status();
 	  minnll = fitTest->minNll();
 	  if (stat!=0) params_test->assignValueOnly(fitTest->randomizePars());
 	  ntries++;
@@ -112,6 +132,7 @@ void runFit(RooAbsPdf *pdf, RooDataSet *data, double *NLL, int *stat_t, int MaxT
 	*stat_t = stat;
 	*NLL = minnll;
 }
+
 double getProbabilityFtest(double chi2, int ndof,RooAbsPdf *pdfNull, RooAbsPdf *pdfTest, RooRealVar *mass, RooDataSet *data, std::string name){
 
   double prob_asym = TMath::Prob(chi2,ndof);
@@ -326,7 +347,7 @@ double getGoodnessOfFit(RooRealVar *mass, RooAbsPdf *mpdf, RooDataSet *data, std
 
 }
 
-void plot(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string name,vector<string> flashggCats_, int status, double *prob){
+void plot(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string name,vector<string> Cats_, int status, double *prob){
 
   // Chi2 taken from full range fit
   RooPlot *plot_chi2 = mass->frame();
@@ -366,7 +387,7 @@ void plot(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string name,vector
   delete canv;
   delete lat;
 }
-void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet *data, string name, vector<string> flashggCats_, int cat, int bestFitPdf=-1){
+void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet *data, string name, vector<string> Cats_, int cat, int bestFitPdf=-1){
 
   int color[7] = {kBlue,kRed,kMagenta,kGreen+1,kOrange+7,kAzure+10,kBlack};
   TLegend *leg = new TLegend(0.5,0.55,0.92,0.88);
@@ -398,7 +419,7 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
 
   int currentIndex = catIndex->getIndex();
   TObject *datLeg = plot->getObject(int(plot->numItems()-1));
-  leg->AddEntry(datLeg,Form("Data - %s",flashggCats_[cat].c_str()),"LEP");
+  leg->AddEntry(datLeg,Form("Data - %s",Cats_[cat].c_str()),"LEP");
   int style=1;
   RooAbsPdf *pdf;
   RooCurve *nomBkgCurve;
@@ -420,7 +441,7 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
     }
     leg->AddEntry(pdfLeg,Form("%s%s",pdfs->getCurrentPdf()->GetName(),ext.c_str()),"L");
   }
-  plot->SetTitle(Form("Category %s",flashggCats_[cat].c_str()));
+  plot->SetTitle(Form("Category %s",Cats_[cat].c_str()));
   if (BLIND) plot->SetMinimum(0.0001);
   plot->Draw();
   leg->Draw("same");
@@ -460,7 +481,7 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
   hdummy->GetYaxis()->SetTitle("data - best fit PDF");
   hdummy->GetYaxis()->SetTitleSize(0.12);
   //hdummy->GetXaxis()->SetTitle("m_{a} (GeV)");
-  hdummy->GetXaxis()->SetTitle("m_{ll#gamma#gamma} (GeV)");
+  hdummy->GetXaxis()->SetTitle("m_{ll#gamma} (GeV)");
   hdummy->GetXaxis()->SetTitleSize(0.12);
   hdummy->Draw("HIST");
   hdummy->GetYaxis()->SetNdivisions(808);
@@ -478,7 +499,7 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
   delete canv;
 }
 
-void plot(RooRealVar *mass, map<string,RooAbsPdf*> pdfs, RooDataSet *data, string name, vector<string> flashggCats_, int cat, int bestFitPdf=-1){
+void plot(RooRealVar *mass, map<string,RooAbsPdf*> pdfs, RooDataSet *data, string name, vector<string> Cats_, int cat, int bestFitPdf=-1){
 
   int color[7] = {kBlue,kRed,kMagenta,kGreen+1,kOrange+7,kAzure+10,kBlack};
   TCanvas *canv = new TCanvas();
@@ -497,8 +518,8 @@ void plot(RooRealVar *mass, map<string,RooAbsPdf*> pdfs, RooDataSet *data, strin
   else data->plotOn(plot,Binning(mgg_high-mgg_low));
 
   TObject *datLeg = plot->getObject(int(plot->numItems()-1));
-	if(flashggCats_.size() >0){
-  leg->AddEntry(datLeg,Form("Data - %s",flashggCats_[cat].c_str()),"LEP");
+	if(Cats_.size() >0){
+  leg->AddEntry(datLeg,Form("Data - %s",Cats_[cat].c_str()),"LEP");
 	} else {
   leg->AddEntry(datLeg,Form("Data - %d",cat),"LEP");
 	}
@@ -515,7 +536,7 @@ void plot(RooRealVar *mass, map<string,RooAbsPdf*> pdfs, RooDataSet *data, strin
     leg->AddEntry(pdfLeg,Form("%s%s",it->first.c_str(),ext.c_str()),"L");
     i++;
   }
-  plot->SetTitle(Form(" %s",flashggCats_[cat].c_str()));
+  plot->SetTitle(Form(" %s",Cats_[cat].c_str()));
   if (BLIND) plot->SetMinimum(0.0001);
   plot->Draw();
   leg->Draw("same");
@@ -634,8 +655,9 @@ int main(int argc, char* argv[]){
   bool verbose=false;
   bool saveMultiPdf=false;
 	int isFlashgg_ =1;
-  string flashggCatsStr_;
-  vector<string> flashggCats_;
+  string year_;
+  string CatsStr_;
+  vector<string> Cats_;
   bool isData_ =0;
 
   po::options_description desc("Allowed options");
@@ -643,24 +665,25 @@ int main(int argc, char* argv[]){
     ("help,h",                                                                                  "Show help")
     ("infilename,i", po::value<string>(&fileName),                                              "In file name")
     ("channel", po::value<string>(&channelName),                                                "channel name")
-    ("ncats,c", po::value<int>(&ncats)->default_value(5),                                       "Number of categories")
+    ("ncats,c", po::value<int>(&ncats)->default_value(1),                                       "Number of categories")
     ("mass_ALP", po::value<int>(&mass_ALP)->default_value(1),                                   "Mass of ALP")
     ("singleCat", po::value<int>(&singleCategory)->default_value(-1),                           "Run A single Category")
     ("datfile,d", po::value<string>(&datfile)->default_value("dat/fTest.dat"),                  "Right results to datfile for BiasStudy")
     ("outDir,D", po::value<string>(&outDir)->default_value("plots/fTest"),                      "Out directory for plots")
-    ("saveMultiPdf", po::value<string>(&outfilename),         					"Save a MultiPdf model with the appropriate pdfs")
-    ("runFtestCheckWithToys", 									"When running the F-test, use toys to calculate pvals (and make plots) ")
+    ("saveMultiPdf", po::value<string>(&outfilename),                                           "Save a MultiPdf model with the appropriate pdfs")
+    ("runFtestCheckWithToys",                                                                   "When running the F-test, use toys to calculate pvals (and make plots) ")
     ("is2011",                                                                                  "Run 2011 config")
     ("is2012",                                                                                  "Run 2012 config")
-    ("unblind",  									                                                              "Dont blind plots")
-    ("isFlashgg",  po::value<int>(&isFlashgg_)->default_value(1),  								    	        "Use Flashgg output ")
-    ("isData",  po::value<bool>(&isData_)->default_value(0),  								    	            "Use Data not MC ")
-		("flashggCats,f", po::value<string>(&flashggCatsStr_)->default_value("UntaggedTag_0,UntaggedTag_1,UntaggedTag_2,UntaggedTag_3,UntaggedTag_4,VBFTag_0,VBFTag_1,VBFTag_2,TTHHadronicTag,TTHLeptonicTag,VHHadronicTag,VHTightTag,VHLooseTag,VHEtTag"),       "Flashgg category names to consider")
+    ("unblind",                                                                                 "Dont blind plots")
+    ("isFlashgg", po::value<int>(&isFlashgg_)->default_value(0),                                "Use Flashgg output ")
+    ("isData", po::value<bool>(&isData_)->default_value(0),                                     "Use Data not MC ")
+    ("year", po::value<string>(&year_)->default_value("2016"),                                  "Dataset year")
+    ("Cats,f", po::value<string>(&CatsStr_)->default_value("ggH0,ggH1,ggH2,ggH3,VBF0,VBF1,VBF2,VBF3,lep,VH,ZH,ttHh,ttHl"), "Flashgg category names to consider")
     ("verbose,v",                                                                               "Run with more output")
-    ("mhLow,L", po::value<float>(&mgglow_)->default_value(95.),                                 "Low ALP mass point")
+    ("mhLow,L", po::value<float>(&mgglow_)->default_value(90.),                                 "Low ALP mass point")
     ("mhHigh,H", po::value<float>(&mgghigh_)->default_value(180.),                              "High ALP mass point")
-    ("mhLowBlind,LB", po::value<float>(&mggblindlow_)->default_value(115.),                     "Low ALP blind mass point")
-    ("mhHighBlind,HB", po::value<float>(&mggblindhigh_)->default_value(135.),                   "High ALP blind mass point")
+    ("mhLowBlind,LB", po::value<float>(&mggblindlow_)->default_value(120.),                     "Low ALP blind mass point")
+    ("mhHighBlind,HB", po::value<float>(&mggblindhigh_)->default_value(130.),                   "High ALP blind mass point")
   ;
   po::variables_map vm;
   po::store(po::parse_command_line(argc,argv,desc),vm);
@@ -685,7 +708,7 @@ int main(int argc, char* argv[]){
     RooMsgService::instance().setSilentMode(true);
     gErrorIgnoreLevel=kWarning;
   }
-	split(flashggCats_,flashggCatsStr_,boost::is_any_of(","));
+	split(Cats_,CatsStr_,boost::is_any_of(","));
 
 	int startingCategory=0;
   if (singleCategory >-1){
@@ -694,7 +717,7 @@ int main(int argc, char* argv[]){
   }
 	if (isFlashgg_==1){
 
-	ncats= flashggCats_.size();
+	ncats= Cats_.size();
 
 	}
 
@@ -708,6 +731,7 @@ int main(int argc, char* argv[]){
   }
 
   system(Form("mkdir -p %s",outDir.c_str()));
+  if (verbose) std::cout << "[INFO]  Input file " << fileName << std::endl; 
   TFile *inFile = TFile::Open(fileName.c_str());
   RooWorkspace *inWS;
 	if(isFlashgg_){
@@ -717,7 +741,8 @@ int main(int argc, char* argv[]){
 			inWS = (RooWorkspace*)inFile->Get("cms_hgg_workspace");
 		}
 	} else {
-		inWS = (RooWorkspace*)inFile->Get("CMS_hza_workspace");//FIXME
+    std::cout << "[INFO]  I am here " << std::endl;
+		inWS = (RooWorkspace*)inFile->Get("CMS_hzg_workspace");//FIXME
 	}
 	if (verbose) std::cout << "[INFO]  inWS open " << inWS << std::endl;
 	if (saveMultiPdf){
@@ -735,13 +760,14 @@ int main(int argc, char* argv[]){
 
 
 		} else {
-			//intL  = (RooRealVar*)inWS->var("IntLumi");
+			// intL  = (RooRealVar*)inWS->var("IntLumi");
 			intL  = intLumi_;
-			sqrts = (RooRealVar*)inWS->var("Sqrts");
+			sqrts = (RooRealVar*)inWS->var("SqrtS");
+      if (!sqrts){ sqrts = new RooRealVar("SqrtS","SqrtS",13); }
 		}
 		outputws->import(*intL);
 		outputws->import(*sqrts);
-		std::cout << "[INFO] got intL and sqrts " << intL << ", " << sqrts << std::endl;
+		std::cout << "[INFO] got intL and sqrts " << intL->getVal() << ", " << sqrts->getVal() << std::endl;
 	}
 
 	vector<string> functionClasses;
@@ -758,15 +784,15 @@ int main(int argc, char* argv[]){
 	// store results here
 
 	FILE *resFile ;
-	if  (singleCategory >-1) resFile = fopen(Form("%s/fTestResults_%s.txt",outDir.c_str(),flashggCats_[singleCategory].c_str()),"w");
-	else resFile = fopen(Form("%s/fTestResults.txt",outDir.c_str()),"w");
+	if  (singleCategory >-1) resFile = fopen(Form("%s/fTestResults_%s.txt",outDir.c_str(),Cats_[singleCategory].c_str()),"w");
+	else resFile = fopen(Form("%s/fTestResults_%s.txt",outDir.c_str(),Cats_[0].c_str()),"w");
 	vector<map<string,int> > choices_vec;
 	vector<map<string,std::vector<int> > > choices_envelope_vec;
 	vector<map<string,RooAbsPdf*> > pdfs_vec;
 
 	PdfModelBuilder pdfsModel;
-	RooRealVar *mass = (RooRealVar*)inWS->var("CMS_hza_mass");
-	std:: cout << "[INFO] Got mass from ws " << mass << std::endl;
+	RooRealVar *mass = (RooRealVar*)inWS->var("CMS_hzg_mass");
+	std:: cout << "[INFO] Got mass from ws " << mass->getVal() << std::endl;
 	pdfsModel.setObsVar(mass);
 	double upperEnvThreshold = 0.1; // upper threshold on delta(chi2) to include function in envelope (looser than truth function)
 
@@ -783,9 +809,9 @@ int main(int argc, char* argv[]){
 		map<string,RooAbsPdf*> allPdfs;
 		string catname;
 		if (isFlashgg_){
-			catname = Form("%s",flashggCats_[cat].c_str());
+			catname = Form("%s",Cats_[cat].c_str());
 		} else {
-			catname = Form("cat%d",cat);
+			catname = Form("%s",Cats_[cat].c_str());
 		}
 		RooDataSet *dataFull;
 		RooDataSet *dataFull0;
@@ -802,45 +828,54 @@ int main(int argc, char* argv[]){
     }
     dataFull->add(*dataFull0->get(),1.0);
     }*/
-		if (verbose) std::cout << "[INFO] opened data for  "  << Form("Data_%s",catname.c_str()) <<" - " << dataFull <<std::endl;
+		if (verbose) std::cout << "[INFO] opened data for  "  << Form("Data_13TeV_%s",catname.c_str()) <<" - " << dataFull <<std::endl;
     }
 		else
     {dataFull = (RooDataSet*)inWS->data(Form("data_mass_%s",catname.c_str()));
 		if (verbose) std::cout << "[INFO] opened data for  "  << Form("data_mass_%s",catname.c_str()) <<" - " << dataFull <<std::endl;
     }
 
-
 		mass->setBins(nBinsForMass);
+    if (verbose) std::cout << "[INFO]  mass bins: " << mass->getBins() << ", mass value: " << mass->getVal() << std::endl;
 		RooDataSet *data;
 		//	RooDataHist thisdataBinned(Form("roohist_data_mass_cat%d",cat),"data",*mass,*dataFull);
 		//	RooDataSet *data = (RooDataSet*)&thisdataBinned;
 		string thisdataBinned_name;
 
 		if ( isFlashgg_){
-			thisdataBinned_name =Form("roohist_data_mass_%s",flashggCats_[cat].c_str());
+			thisdataBinned_name = Form("roohist_data_mass_%s",Cats_[cat].c_str());
 			//	RooDataHist thisdataBinned(Form("roohist_data_mass_cat%d",cat),"data",*mass,*dataFull);
 			//	data = (RooDataSet*)&thisdataBinned;
 			//		std::cout << "debug " << thisdataBinned.GetName() << std::endl;
 
 			//RooDataSet *data = (RooDataSet*)dataFull;
 		} else {
-			thisdataBinned_name= Form("roohist_data_mass_cat%d",cat);
+			thisdataBinned_name = Form("roohist_data_mass_cat%s",Cats_[cat].c_str());
 			//RooDataSet *data = (RooDataSet*)dataFull;
 		}
 		RooDataHist thisdataBinned(thisdataBinned_name.c_str(),"data",*mass,*dataFull);
 		data = (RooDataSet*)&thisdataBinned;
+
+    // for (int i=0; i<data->numEntries(); i++){
+    //   std::cout << "[INFO]  data[" << i << "] = " << data->get(i)->getRealValue("CMS_hzg_mass") << "weight = " << data->get(i)->getRealValue("weight") << std::endl;
+    // }
+    // return 0;
 
 		RooArgList storedPdfs("store");
 
 		fprintf(resFile,"\\multicolumn{4}{|c|}{\\textbf{Category %d}} \\\\\n",cat);
 		fprintf(resFile,"\\hline\n");
 
+    if (verbose) std::cout << "[INFO]  data " << data << std::endl;
+
 		double MinimimNLLSoFar=1e10;
 		int simplebestFitPdfIndex = 0;
+    double bestGofProb=0;
+    string bestFuncType="";
+    int bestFuncOrder=0;
 
 		// Standard F-Test to find the truth functions
-		for (vector<string>::iterator funcType=functionClasses.begin();
-				funcType!=functionClasses.end(); funcType++){
+		for (vector<string>::iterator funcType=functionClasses.begin();funcType!=functionClasses.end(); funcType++){
 
 			double thisNll=0.; double prevNll=0.; double chi2=0.; double prob=0.;
 			int order=1; int prev_order=0; int cache_order=0;
@@ -879,7 +914,7 @@ int main(int argc, char* argv[]){
 					}
 					double gofProb=0;
 					// otherwise we get it later ...          
-					if (!saveMultiPdf && fitStatus != 5) plot(mass,bkgPdf,data,Form("%s/%s%d_cat%d.pdf",outDir.c_str(),funcType->c_str(),order,cat),flashggCats_,fitStatus,&gofProb);
+					if (!saveMultiPdf && fitStatus != 5) plot(mass,bkgPdf,data,Form("%s/%s%d_%s.pdf",outDir.c_str(),funcType->c_str(),order,Cats_[cat].c_str()),Cats_,fitStatus,&gofProb);
           cout << "[INFO]\t funcType: " << *funcType << " order: " << order << " prevNll: " << prevNll << " thisNll: " << thisNll << " chi2: " << chi2 << " prob: " << prob << endl;
 					// fprintf(resFile,"%15s && %d && %10.2f && %10.2f && %10.2f \\\\\n",funcType->c_str(),order,thisNll,chi2,prob);
           prevNll=thisNll;
@@ -938,12 +973,20 @@ int main(int argc, char* argv[]){
 
             if(fitStatus != 5)
             {
-						  plot(mass,bkgPdf,data,Form("%s/%s%d_cat%d.pdf",outDir.c_str(),funcType->c_str(),order,cat),flashggCats_,fitStatus,&gofProb);
+						  plot(mass,bkgPdf,data,Form("%s/%s%d_%s.pdf",outDir.c_str(),funcType->c_str(),order,Cats_[cat].c_str()),Cats_,fitStatus,&gofProb);
+            }
+
+            cout << "[INFO] \t funcType: " << *funcType << " order: " << order << " gofProb: " << gofProb << endl;
+
+            if (gofProb > bestGofProb){
+              bestGofProb = gofProb;
+              bestFuncType = *funcType;
+              bestFuncOrder = order;
             }
             
 						if ((prob < upperEnvThreshold) ) { // Looser requirements for the envelope
 
-							if (gofProb > 0.01 || order == truthOrder ) {  // Good looking fit or one of our regular truth functions
+							if (gofProb > 0.011 ) { // || order == truthOrder ) {  // Good looking fit or one of our regular truth functions
 
 								std::cout << "[INFO] Adding to Envelope " << bkgPdf->GetName() << " "<< gofProb
 									<< " 2xNLL + c is " << myNll + bkgPdf->getVariables()->getSize() <<  std::endl;
@@ -969,12 +1012,35 @@ int main(int argc, char* argv[]){
 			}
 		}
 
+    if (bestGofProb < 0.011){
+      if (saveMultiPdf){
+        std::cout << "[INFO] Best fit function is not in envelope, adding it anyway " << bestFuncType << " " << bestFuncOrder << std::endl;
+        RooAbsPdf *bkgPdf = getPdf(pdfsModel,bestFuncType,bestFuncOrder,Form("env_pdf_cat%s_%s",Cats_[cat].c_str(),ext.c_str()), mass_ALP);
+        int fitStatus=0;
+        double thisNll=0;
+        runFit(bkgPdf,data,&thisNll,&fitStatus,/*max iterations*/3);
+        double myNll = 2.*thisNll;
+        double prob = 1;
+        std::cout << "[INFO] Adding to Envelope " << bkgPdf->GetName() << " " << bestGofProb << " 2xNLL + c is " << myNll + bkgPdf->getVariables()->getSize() <<  std::endl;
+        allPdfs.insert(pair<string,RooAbsPdf*>(Form("%s%d",bestFuncType,bestFuncOrder),bkgPdf));
+        storedPdfs.add(*bkgPdf);
+        std::vector<int> pdforders;
+        pdforders.push_back(bestFuncOrder);
+        // Keep track but we shall redo this later
+        if ((myNll + bkgPdf->getVariables()->getSize()) < MinimimNLLSoFar) {
+          simplebestFitPdfIndex = storedPdfs.getSize()-1;
+          MinimimNLLSoFar = myNll + bkgPdf->getVariables()->getSize();
+        choices_envelope.insert(pair<string,std::vector<int> >(bestFuncType,pdforders));
+        }
+      }
+    }
+
 		fprintf(resFile,"\\hline\n");
 		choices_vec.push_back(choices);
 		choices_envelope_vec.push_back(choices_envelope);
 		pdfs_vec.push_back(pdfs);
 
-		plot(mass,pdfs,data,Form("%s/truths_cat%d",outDir.c_str(),cat),flashggCats_,cat);
+		plot(mass,pdfs,data,Form("%s/truths_%s",outDir.c_str(),Cats_[cat].c_str()),Cats_,cat);
 
 		if (saveMultiPdf){
 
@@ -983,19 +1049,19 @@ int main(int argc, char* argv[]){
 			string catindexname;
 			string catname;
 			if (isFlashgg_){
-        catindexname = Form("pdfindex_%s_%s",flashggCats_[cat].c_str(),ext.c_str());
-				//catindexname = Form("pdfindex_%s_%s_%s",flashggCats_[cat].c_str(),ext.c_str(),channelName.c_str());//bing
-				catname = Form("%s",flashggCats_[cat].c_str());
+        catindexname = Form("pdfindex_%s_%s",Cats_[cat].c_str(),ext.c_str());
+				//catindexname = Form("pdfindex_%s_%s_%s",Cats_[cat].c_str(),ext.c_str(),channelName.c_str());//bing
+				catname = Form("%s",Cats_[cat].c_str());
 			} else {
         // catindexname = Form("pdfindex_%d_%s",cat,ext.c_str());
-        catindexname = Form("pdfindex_cat%d_%s",cat,ext.c_str()); // PZ
+        catindexname = Form("pdfindex_cat%s_%s",Cats_[cat].c_str(),ext.c_str()); // PZ
 				//catindexname = Form("pdfindex_%d_%s_%s",cat,ext.c_str(),channelName.c_str());//bing
-				catname = Form("cat%d",cat);
+				catname = Form("Data_13TeV_%s",Cats_[cat].c_str());
 			}
 			RooCategory catIndex(catindexname.c_str(),"c");
-			RooMultiPdf *pdf = new RooMultiPdf(Form("CMS_hgg_%s_%s_bkgshape",catname.c_str(),ext.c_str()),"all pdfs",catIndex,storedPdfs);
+			RooMultiPdf *pdf = new RooMultiPdf(Form("CMS_hzg_%s_%s_bkgshape",catname.c_str(),ext.c_str()),"all pdfs",catIndex,storedPdfs);
 			//RooRealVar nBackground(Form("CMS_hgg_%s_%s_bkgshape_norm",catname.c_str(),ext.c_str()),"nbkg",data->sumEntries(),0,10E8);
-			RooRealVar nBackground(Form("CMS_hgg_%s_%s_bkgshape_norm",catname.c_str(),ext.c_str()),"nbkg",data->sumEntries(),0,3*data->sumEntries());
+			RooRealVar nBackground(Form("CMS_hzg_%s_%s_bkgshape_norm",catname.c_str(),ext.c_str()),"nbkg",data->sumEntries(),0,3*data->sumEntries());
 			//nBackground.removeRange(); // bug in roofit will break combine until dev branch brought in
 			//double check the best pdf!
 			int bestFitPdfIndex = getBestFitFunction(pdf,data,&catIndex,!verbose);
@@ -1016,7 +1082,7 @@ int main(int argc, char* argv[]){
 			outputws->import(catIndex);
 			outputws->import(dataBinned);
 			outputws->import(*data);
-			plot(mass,pdf,&catIndex,data,Form("%s/multipdf_%s",outDir.c_str(),catname.c_str()),flashggCats_,cat,bestFitPdfIndex);
+			plot(mass,pdf,&catIndex,data,Form("%s/multipdf_%s",outDir.c_str(),catname.c_str()),Cats_,cat,bestFitPdfIndex);
 
 		}
 

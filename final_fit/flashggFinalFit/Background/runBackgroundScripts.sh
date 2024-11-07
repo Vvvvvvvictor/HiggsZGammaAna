@@ -159,8 +159,8 @@ if [ $ISDATA == 1 ]; then
 OPT=" --isData 1"
 fi
 
-echo " ./bin/fTest -i $FILE --saveMultiPdf $OUTDIR/CMS-HGG_multipdf_$EXT_$CATS.root  -D $OUTDIR/bkgfTest$DATAEXT -f $CATS $OPT --year $YEAR --catOffset $CATOFFSET"
-./bin/fTest -i $FILE --saveMultiPdf $OUTDIR/CMS-HGG_multipdf_$EXT_$CATS.root  -D $OUTDIR/bkgfTest$DATAEXT -f $CATS $OPT --year $YEAR --catOffset $CATOFFSET
+echo " ./bin/fTest_ALP_turnOn -i $FILE --saveMultiPdf $OUTDIR/CMS-HZG_multipdf_$EXT_$CATS.root  -D $OUTDIR/bkgfTest$DATAEXT -f $CATS $OPT --year $YEAR --verbose"
+./bin/fTest_ALP_turnOn -i $FILE --saveMultiPdf $OUTDIR/CMS-HZG_multipdf_$EXT_$CATS.root  -D $OUTDIR/bkgfTest$DATAEXT -f $CATS $OPT --year $YEAR  --verbose
 
 OPT=""
 fi
