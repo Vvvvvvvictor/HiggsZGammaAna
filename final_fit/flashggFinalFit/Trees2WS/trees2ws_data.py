@@ -11,8 +11,9 @@ def get_options():
   parser.add_option('--inputConfig',dest='inputConfig', default="", help='Input config: specify list of variables/analysis categories')
   parser.add_option('--inputTreeFile',dest='inputTreeFile', default=None, help='Input tree file')
   parser.add_option('--outputWSDir',dest='outputWSDir', default=None, help='Output dir (default is same as input dir)')
+  parser.add_option('--year',dest='year', default='2016', help='Year of data taking')
   parser.add_option('--applyMassCut',dest='applyMassCut', default=False, action="store_true", help='Apply cut on CMS_hgg_mass')
-  parser.add_option('--massCutRange',dest='massCutRange', default='100,180', help='CMS_hgg_mass cut range')
+  parser.add_option('--massCutRange',dest='massCutRange', default='90,180', help='CMS_hgg_mass cut range')
   return parser.parse_args()
 (opt,args) = get_options()
 
@@ -27,10 +28,11 @@ import uproot
 from commonTools import *
 from commonObjects import *
 
+from pdb import set_trace
 
-print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG TREES 2 WS (DATA) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
+print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HZG TREES 2 WS (DATA) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
 def leave():
-  print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG TREES 2 WS (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+  print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HZG TREES 2 WS (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
   exit(0)
 
 # Function to add vars to workspace
@@ -41,8 +43,8 @@ def add_vars_to_workspace(_ws=None,_dataVars=None):
   getattr(_ws,'import')(intLumi)
   _vars = od()
   for var in _dataVars:
-    if var == "CMS_hgg_mass":
-      _vars[var] = ROOT.RooRealVar(var,var,125.,100.,180.)
+    if var == "CMS_hzg_mass":
+      _vars[var] = ROOT.RooRealVar(var,var,125.,90.,180.)
       _vars[var].setBins(160)
     elif var == "dZ":
       _vars[var] = ROOT.RooRealVar(var,var,0.,-20.,20.)
@@ -58,7 +60,9 @@ def add_vars_to_workspace(_ws=None,_dataVars=None):
 # Function to make RooArgSet
 def make_argset(_ws=None,_varNames=None):
   _aset = ROOT.RooArgSet()
-  for v in _varNames: _aset.add(_ws.var(v))
+  for v in _varNames: 
+    if "weight" in v: continue
+    _aset.add(_ws.var(v))
   return _aset
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -85,7 +89,7 @@ else:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # UPROOT file
 f = uproot.open(opt.inputTreeFile)
-if inputTreeDir == '': listOfTreeNames == f.keys()
+if inputTreeDir == '': listOfTreeNames = f.keys()
 else: listOfTreeNames = f[inputTreeDir].keys()
 # If cats = 'auto' then determine from list of trees
 if cats == 'auto':
@@ -100,15 +104,17 @@ if cats == 'auto':
 f = ROOT.TFile(opt.inputTreeFile)
 
 # Open output ROOT file and initiate workspace to store RooDataSets
-if opt.outputWSDir is not None: outputWSDir = opt.outputWSDir+"/ws"
+if opt.outputWSDir is not None:
+  # set_trace()
+  outputWSDir = opt.outputWSDir + "/Data_%s"%opt.inputTreeFile.split("/")[-2]
 else: outputWSDir = "/".join(opt.inputTreeFile.split("/")[:-1])+"/ws"
-if not os.path.exists(outputWSDir): os.system("mkdir %s"%outputWSDir)
-outputWSFile = outputWSDir+"/"+opt.inputTreeFile.split("/")[-1]
+if not os.path.exists(outputWSDir): os.system("mkdir -p %s"%outputWSDir)
+outputWSFile = outputWSDir+f"/Data_{opt.inputTreeFile.split('/')[-2]}.root"
 print(" --> Creating output workspace: (%s)"%outputWSFile)
 fout = ROOT.TFile(outputWSFile,"RECREATE")
-foutdir = fout.mkdir(inputWSName__.split("/")[0])
-foutdir.cd()
-ws = ROOT.RooWorkspace(inputWSName__.split("/")[1],inputWSName__.split("/")[1])
+# foutdir = fout.mkdir(inputWSName__.split("/")[0])
+# foutdir.cd()
+ws = ROOT.RooWorkspace(inputWSName__.split("/")[0],inputWSName__.split("/")[0])
 
 # Add variables to workspace
 varNames = add_vars_to_workspace(ws,dataVars)
@@ -119,7 +125,7 @@ aset = make_argset(ws,varNames)
 # Loop over categories and 
 for cat in cats:
   print(" --> Extracting events from category: %s"%cat)
-  if inputTreeDir == '': treeName = "Data_%s_%s"%(sqrts__,cat)
+  if inputTreeDir == '': treeName = cat
   else: treeName = "%s/Data_%s_%s"%(inputTreeDir,sqrts__,cat)
   print("    * tree: %s"%treeName)
   t = f.Get(treeName)
@@ -131,7 +137,7 @@ for cat in cats:
   # Loop over events in tree and add to dataset with weight 1
   for ev in t:
     if opt.applyMassCut:
-      if(getattr(ev,"CMS_hgg_mass") < float(opt.massCutRange.split(",")[0])) | (getattr(ev,"CMS_hgg_mass") > float(opt.massCutRange.split(",")[1])): continue
+      if(getattr(ev,"CMS_hzg_mass") < float(opt.massCutRange.split(",")[0])) | (getattr(ev,"CMS_hzg_mass") > float(opt.massCutRange.split(",")[1])): continue
     for var in dataVars: 
       if var == "weight": continue
       ws.var(var).setVal(getattr(ev,var))

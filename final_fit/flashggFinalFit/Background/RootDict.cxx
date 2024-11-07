@@ -35,12 +35,12 @@
 #include "TDataMember.h"
 
 // Header files passed as explicit arguments
-#include "/publicfs/cms/user/laipeizhu/CMSSW_14_1_0_pre4/src/flashggFinalFit/Background/interface/PdfModelBuilder.h"
-#include "/publicfs/cms/user/laipeizhu/CMSSW_14_1_0_pre4/src/flashggFinalFit/Background/interface/ProfileMultiplePdfs.h"
-#include "/publicfs/cms/user/laipeizhu/CMSSW_14_1_0_pre4/src/flashggFinalFit/Background/interface/RooExponentialSum.h"
-#include "/publicfs/cms/user/laipeizhu/CMSSW_14_1_0_pre4/src/flashggFinalFit/Background/interface/RooPowerLaw.h"
-#include "/publicfs/cms/user/laipeizhu/CMSSW_14_1_0_pre4/src/flashggFinalFit/Background/interface/RooPowerLawSum.h"
-#include "/publicfs/cms/user/laipeizhu/CMSSW_14_1_0_pre4/src/flashggFinalFit/Background/interface/WSTFileWrapper.h"
+#include "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/final_fit/CMSSW_14_1_0_pre4/src/flashggFinalFit/Background/interface/PdfModelBuilder.h"
+#include "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/final_fit/CMSSW_14_1_0_pre4/src/flashggFinalFit/Background/interface/ProfileMultiplePdfs.h"
+#include "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/final_fit/CMSSW_14_1_0_pre4/src/flashggFinalFit/Background/interface/RooExponentialSum.h"
+#include "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/final_fit/CMSSW_14_1_0_pre4/src/flashggFinalFit/Background/interface/RooPowerLaw.h"
+#include "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/final_fit/CMSSW_14_1_0_pre4/src/flashggFinalFit/Background/interface/RooPowerLawSum.h"
+#include "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/final_fit/CMSSW_14_1_0_pre4/src/flashggFinalFit/Background/interface/WSTFileWrapper.h"
 
 // Header files passed via #pragma extra_include
 
@@ -446,7 +446,7 @@ nullptr
     static const char* includePaths[] = {
 "/cvmfs/cms.cern.ch/el9_amd64_gcc12/lcg/root/6.30.07-8b1a11e1ef0e074fdfd44e162b27e71c//include",
 "/cvmfs/cms.cern.ch/el9_amd64_gcc12/lcg/root/6.30.07-8b1a11e1ef0e074fdfd44e162b27e71c/include/",
-"/publicfs/cms/user/laipeizhu/CMSSW_14_1_0_pre4/src/flashggFinalFit/Background/",
+"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/final_fit/CMSSW_14_1_0_pre4/src/flashggFinalFit/Background/",
 nullptr
     };
     static const char* fwdDeclCode = R"DICTFWDDCLS(

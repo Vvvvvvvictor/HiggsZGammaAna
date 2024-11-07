@@ -261,6 +261,36 @@ class FinalModel:
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # For double CB + Gaussian
     if useDCB:
+      # # Extract splines
+      # for f in ['dm','sigma','n1','n2','a1','a2']:
+      #   k = "%s_dcb"%f
+      #   self.Splines["%s_%s"%(k,extStr)] = ssf.Splines[k].Clone()
+      #   self.Splines["%s_%s"%(k,extStr)].SetName("%s_%s"%(re.sub("sigma","sigma_fit",k),extStr))
+      # # Build mean and sigma functions: including systematics
+      # self.buildMean('dm_dcb_%s'%extStr,skipSystematics=self.skipSystematics)
+      # self.buildSigma('sigma_dcb_%s'%extStr,skipSystematics=self.skipSystematics)
+      # # Build DCB pdf
+      # self.Pdfs['dcb_%s'%extStr] = ROOT.RooDoubleCBFast("dcb_%s"%extStr,"dcb_%s"%extStr,self.xvar,self.Functions["mean_dcb_%s"%extStr],self.Functions["sigma_dcb_%s"%extStr],self.Splines['a1_dcb_%s'%extStr],self.Splines['n1_dcb_%s'%extStr],self.Splines['a2_dcb_%s'%extStr],self.Splines['n2_dcb_%s'%extStr])
+      
+      # # + Gaussian: shares mean with DCB
+      # self.Splines['sigma_gaus_%s'%extStr] = ssf.Splines['sigma_gaus'].Clone()
+      # self.Splines['sigma_gaus_%s'%extStr].SetName("sigma_fit_gaus_%s"%extStr)
+      # self.buildSigma('sigma_gaus_%s'%extStr,skipSystematics=self.skipSystematics)
+      # if self.doVoigtian:
+      #   self.Pdfs['gaus_%s'%extStr] = ROOT.RooVoigtian("gaus_%s"%extStr,"gaus_%s"%extStr,self.xvar,self.Functions["mean_dcb_%s"%extStr],self.GammaH,self.Functions["sigma_gaus_%s"%extStr])
+      # else:
+      #   self.Pdfs['gaus_%s'%extStr] = ROOT.RooGaussian("gaus_%s"%extStr,"gaus_%s"%extStr,self.xvar,self.Functions["mean_dcb_%s"%extStr],self.Functions["sigma_gaus_%s"%extStr])
+
+      # # Fraction
+      # self.Splines['frac_%s'%extStr] = ssf.Splines['frac_constrained'].Clone()
+      # self.Splines['frac_%s'%extStr].SetName("frac_%s"%extStr)
+
+      # # Define total pdf
+      # _pdfs, _coeffs = ROOT.RooArgList(), ROOT.RooArgList()
+      # for pdf in ['dcb','gaus']: _pdfs.add(self.Pdfs['%s_%s'%(pdf,extStr)])
+      # _coeffs.add(self.Splines['frac_%s'%extStr])
+      # self.Pdfs[ext] = ROOT.RooAddPdf("%s_%s"%(outputWSObjectTitle__,extStr),"%s_%s"%(outputWSObjectTitle__,extStr),_pdfs,_coeffs,_recursive)
+      
       # Extract splines
       for f in ['dm','sigma','n1','n2','a1','a2']:
         k = "%s_dcb"%f
@@ -271,25 +301,8 @@ class FinalModel:
       self.buildSigma('sigma_dcb_%s'%extStr,skipSystematics=self.skipSystematics)
       # Build DCB pdf
       self.Pdfs['dcb_%s'%extStr] = ROOT.RooDoubleCBFast("dcb_%s"%extStr,"dcb_%s"%extStr,self.xvar,self.Functions["mean_dcb_%s"%extStr],self.Functions["sigma_dcb_%s"%extStr],self.Splines['a1_dcb_%s'%extStr],self.Splines['n1_dcb_%s'%extStr],self.Splines['a2_dcb_%s'%extStr],self.Splines['n2_dcb_%s'%extStr])
-      
-      # + Gaussian: shares mean with DCB
-      self.Splines['sigma_gaus_%s'%extStr] = ssf.Splines['sigma_gaus'].Clone()
-      self.Splines['sigma_gaus_%s'%extStr].SetName("sigma_fit_gaus_%s"%extStr)
-      self.buildSigma('sigma_gaus_%s'%extStr,skipSystematics=self.skipSystematics)
-      if self.doVoigtian:
-        self.Pdfs['gaus_%s'%extStr] = ROOT.RooVoigtian("gaus_%s"%extStr,"gaus_%s"%extStr,self.xvar,self.Functions["mean_dcb_%s"%extStr],self.GammaH,self.Functions["sigma_gaus_%s"%extStr])
-      else:
-        self.Pdfs['gaus_%s'%extStr] = ROOT.RooGaussian("gaus_%s"%extStr,"gaus_%s"%extStr,self.xvar,self.Functions["mean_dcb_%s"%extStr],self.Functions["sigma_gaus_%s"%extStr])
 
-      # Fraction
-      self.Splines['frac_%s'%extStr] = ssf.Splines['frac_constrained'].Clone()
-      self.Splines['frac_%s'%extStr].SetName("frac_%s"%extStr)
-
-      # Define total pdf
-      _pdfs, _coeffs = ROOT.RooArgList(), ROOT.RooArgList()
-      for pdf in ['dcb','gaus']: _pdfs.add(self.Pdfs['%s_%s'%(pdf,extStr)])
-      _coeffs.add(self.Splines['frac_%s'%extStr])
-      self.Pdfs[ext] = ROOT.RooAddPdf("%s_%s"%(outputWSObjectTitle__,extStr),"%s_%s"%(outputWSObjectTitle__,extStr),_pdfs,_coeffs,_recursive)
+      self.Pdfs[ext] = ROOT.RooAddPdf("%s_%s"%(outputWSObjectTitle__,extStr),"%s_%s"%(outputWSObjectTitle__,extStr),self.Pdfs['dcb_%s'%extStr],ROOT.RooArgList(),_recursive)
 
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # For nGaussians:

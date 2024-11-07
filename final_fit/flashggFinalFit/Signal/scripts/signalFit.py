@@ -306,7 +306,8 @@ if not opt.useDCB:
     nWV = int(ngauss["%s__%s"%(procWVFit,catWVFit)]['nWV'])
     print(" --> Fitting function: convolution of nGaussians (RV=%g,WV=%g)"%(nRV,nWV))
 else:
-  print(" --> Fitting function: DCB + 1 Gaussian")
+  # print(" --> Fitting function: DCB + 1 Gaussian")
+  print(" --> Fitting function: DCB")
 
 if opt.doVoigtian:
   print(" --> Will add natural Higgs width as parameter in Pdf (Gaussians -> Voigtians)")
@@ -316,7 +317,7 @@ if opt.doVoigtian:
 ssfMap = od()
 name = "Total" if opt.skipVertexScenarioSplit else "RV"
 ssfRV = SimultaneousFit(name,opt.proc,opt.cat,datasetRVForFit,xvar.Clone(),MH,MHLow,MHHigh,opt.massPoints,opt.nBins,opt.MHPolyOrder,opt.minimizerMethod,opt.minimizerTolerance)
-if opt.useDCB: ssfRV.buildDCBplusGaussian()
+if opt.useDCB: ssfRV.buildDCB() #ssfRV.buildDCBplusGaussian()
 else: ssfRV.buildNGaussians(nRV)
 ssfRV.runFit()
 ssfRV.buildSplines()
