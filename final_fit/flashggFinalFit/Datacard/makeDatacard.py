@@ -38,7 +38,7 @@ def get_options():
 (opt,args) = get_options()
 
 def leave():
-  print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG DATACARD MAKER RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
+  print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HZG DATACARD MAKER RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
   exit(0)
 
 STXSMergingScheme, STXSScaleCorrelationScheme = None, None
@@ -50,9 +50,8 @@ if opt.doSTXSScaleCorrelationScheme: from tools.STXS_tools import STXSScaleCorre
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Concatenate dataframes
 print(" --> Loading per category dataframes into single dataframe")
-extStr = "_%s"%opt.channel if opt.channel != '' else ''
 # pkl_files = glob.glob("./yields%s/*.pkl"%extStr)
-pkl_files = glob.glob("./yields%s/%s_datacard_%s_%s.pkl"%(extStr,opt.mass_ALP,opt.years,opt.channel))
+pkl_files = glob.glob("./yields/datacard_%s_%s.pkl"%(opt.years,opt.channel))
 pkl_files.sort() # Categories in alphabetical order
 data = pd.DataFrame()
 for f_pkl_name in pkl_files:
@@ -156,15 +155,14 @@ if opt.prune:
 if opt.saveDataFrame:
   print(" ..........................................................................................")
   print(" --> Saving dataFrame: %s.pkl"%opt.output)
-  with open("./yields%s/%s_pruned_Datacard_%s_%s.pkl"%(extStr,opt.mass_ALP,opt.years,opt.channel),"wb") as fD: pickle.dump(data,fD)
+  with open("./yields/pruned_Datacard_%s_%s.pkl"%(opt.years,opt.channel),"wb") as fD: pickle.dump(data,fD)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # WRITE TO .TXT FILE
 print(" ..........................................................................................")
-extStr = "_%s"%opt.channel if opt.channel != '' else ''
-if not os.path.isdir("./output_Datacard%s"%extStr): os.system("mkdir ./output_Datacard%s"%extStr)
+if not os.path.isdir("./output_Datacard"): os.system("mkdir ./output_Datacard")
 # fdataName = "%s.txt"%opt.output
-fdataName = "./output_Datacard%s/%s_pruned_datacard_%s_%s.txt"%(extStr,opt.mass_ALP,opt.years,opt.channel)
+fdataName = "./output_Datacard/pruned_datacard_%s_%s.txt"%(opt.years,opt.channel)
 print(" --> Writing to datacard file: %s"%fdataName)
 from tools.writeToDatacard import writePreamble, writeProcesses, writeSystematic, writeMCStatUncertainty, writePdfIndex, writeBreak
 fdata = open(fdataName,"w")

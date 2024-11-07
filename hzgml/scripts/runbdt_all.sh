@@ -26,16 +26,17 @@ echo "Shielded parameter is: $S . Added variables is: $A ."
 # python scripts/train_bdt.py -r two_jet --optuna --n-calls 40 --fold $fold --continue-optuna 1 
 # done
 
-# python scripts/train_bdt.py -r two_jet --save  --hyperparams_path "models/optuna_two_jet"
-# python scripts/apply_bdt.py -r two_jet
+python scripts/train_bdt.py -r two_jet --save  --hyperparams_path "models/optuna_two_jet"
+python scripts/apply_bdt.py -r two_jet
 
 # python scripts/train_bdt.py -r zero_to_one_jet --save  --hyperparams_path "models/optuna_zero_to_one_jet"
 # python scripts/apply_bdt.py -r zero_to_one_jet
 
 # python scripts/categorization_1D.py -r zero_to_one_jet -b 4 --minN 10 --floatB
-# python scripts/categorization_1D.py -r two_jet -b 4 --minN 10 --floatB
+python scripts/categorization_1D.py -r two_jet -b 4 --minN 10 --floatB
 
 python scripts/apply_bdt_sig_corr.py
+python scripts/apply_bdt_bkg.py
 # python ../SSTest/Generate_template.py
 
 

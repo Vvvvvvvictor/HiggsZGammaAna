@@ -55,25 +55,45 @@ cd $baseDir/Signal/
 # python3 RunSignalScripts.py --inputConfig config_2017.py --mode fTest
 # python3 RunSignalScripts.py --inputConfig config_2017.py --mode calcPhotonSyst
 # python3 RunSignalScripts.py --inputConfig config_2017.py --mode getDiagProc
-# python3 RunSignalScripts.py --inputConfig config_2017.py --mode signalFit --groupSignalFitJobsByCat
+# # python3 RunSignalScripts.py --inputConfig config_2017.py --mode signalFit --groupSignalFitJobsByCat # using n gaussian functions
 # python3 RunSignalScripts.py --inputConfig config_2017.py --mode signalFit --groupSignalFitJobsByCat --modeOpts "--useDCB"
 # for cat in ggH0 ggH1 ggH2 ggH3 VBF0 VBF1 VBF2 VBF3 lep VH ZH ttHh ttHl;do
 #     python3 RunPlotter.py --years 2017 --ext 2017 --cats $cat --groupSignalFitByProc
 # done
-# python3 RunPlotter.py --years 2017 --ext 2017
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Split Line~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 cd $baseDir/Background/
 
-cmsenv
+# cmsenv
 # # ~~~~One Time Setup~~~~
-make clean
-make -j 16
+# make clean
+# make -j 16
 # # ~~~~~~~~~End~~~~~~~~~~
 
 # sleep 1
 # clear
 
-python3 RunBackgroundScripts.py --inputConfig config_test.py --mode fTestParallel
-# bash /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/final_fit/CMSSW_14_1_0_pre4/src/flashggFinalFit/Background/outdir_test/fTestParallel/jobs/sub_fTestParallel_test_ggH1.sh
+# python3 RunBackgroundScripts.py --inputConfig config_test.py --mode fTestParallel
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Split Line~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+cd $baseDir/Datacard/
+# python3 makeYields.py --inputWSDirMap 2017=/eos/user/j/jiehan/root/ws_cor_syst/signal_2017/  --inputBkgWSDirMap 2017=/eos/user/j/jiehan/root/ws_data/Data_2017/ --sigModelWSDir /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/final_fit/CMSSW_14_1_0_pre4/src/flashggFinalFit/Signal/outdir_2017/signalFit/output --bkgModelWSDir /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/final_fit/CMSSW_14_1_0_pre4/src/flashggFinalFit/Background/outdir_2017 --year 2017
+# python3 makeDatacard.py --years 2017
+# Combine the datacards
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Split Line~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+cd $baseDir/Combine/
+if [ ! -d $baseDir/Combine/Datacard ]; then
+    mkdir $baseDir/Combine/Datacard
+fi
+cp $baseDir/Datacard/output_Datacard/* $baseDir/Combine/Datacard/
+if [ ! -d $baseDir/Combine/WS ]; then
+    mkdir $baseDir/Combine/WS
+fi
+# text2workspace.py Datacard/pruned_datacard_2017_.txt -m 125 -o WS/Datacard_2017.root
+# combine WS/Datacard_2017.root -M Significance -t -1 --expectSignal=1 -m 125.0 -n allCats
+
+combine Datacard/pruned_datacard_2017_.txt -M AsymptoticLimits --run=blind -m 125.0 --rAbsAcc 0.00000001 -n allCats
