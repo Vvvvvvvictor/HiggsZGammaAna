@@ -23,10 +23,10 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "ggH", "WplusH"
+            "WplusH"
         ],
         "years": [
-            "2017"
+            "2016preVFP"
         ]
     },
     "variables_of_interest": [
