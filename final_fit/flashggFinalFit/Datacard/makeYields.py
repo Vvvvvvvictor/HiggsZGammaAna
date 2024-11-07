@@ -29,12 +29,13 @@ def get_options():
   parser.add_option('--year', dest='year', default='16', help="year") # PZ
   parser.add_option("--channel", dest='channel', default='', help="ele, mu, or leptons") # PZ
 
-  parser.add_option('--inputWSDirMap', dest='inputWSDirMap', default='2016:/vols/cms/jl2117/hgg/ws/UL/Sept20/MC_final/signal_2016', help="Map. Format: year=inputWSDir (separate years by comma)")
-  parser.add_option('--cat', dest='cat', default='cat0', help='Analysis category')
-  parser.add_option('--procs', dest='procs', default='GG2H', help='Comma separated list of signal processes. auto = automatically inferred from input workspaces')
+  parser.add_option('--inputWSDirMap', dest='inputWSDirMap', default='2016=/vols/cms/jl2117/hgg/ws/UL/Sept20/MC_final/signal_2016', help="Map. Format: year=inputWSDir (separate years by comma)")
+  parser.add_option('--inputBkgWSDirMap', dest='inputBkgWSDirMap', default='2016=/vols/cms/jl2117/hgg/ws/UL/Sept20/MC_final/signal_2016', help="Map. Format: year=inputWSDir (separate years by comma)")
+  parser.add_option('--cat', dest='cat', default='ggH0,ggH1,ggH2,ggH3,VBF0,VBF1,VBF2,VBF3,lep,VH,ZH,ttHh,ttHl', help='Analysis category')
+  parser.add_option('--procs', dest='procs', default='ggH,VBF,WminusH,WplusH,ZH,ttH', help='Comma separated list of signal processes. auto = automatically inferred from input workspaces')
   parser.add_option('--ext', dest='ext', default='', help='Extension for saving') 
   parser.add_option('--mass', dest='mass', default='125', help='Input workspace mass')
-  parser.add_option('--mergeYears', dest='mergeYears', default=True, action="store_true", help="Merge category across years")
+  parser.add_option('--mergeYears', dest='mergeYears', default=False, action="store_true", help="Merge category across years")
   parser.add_option('--skipBkg', dest='skipBkg', default=False, action="store_true", help="Only add signal processes to datacard")
   parser.add_option('--bkgScaler', dest='bkgScaler', default=1., type="float", help="Add overall scale factor for background")
   parser.add_option('--sigModelWSDir', dest='sigModelWSDir', default='/publicfs/cms/user/laipeizhu/CMSSW_14_1_0_pre4/src/flashggFinalFit/Signal/', help='Input signal model WS directory') 
@@ -59,7 +60,14 @@ for i in opt.inputWSDirMap.split(","):
     leave()
   inputWSDirMap[i.split("=")[0]] = i.split("=")[1]
 years = list(inputWSDirMap.keys())
-# whether change years Pei-Zhu
+
+inputBkgWSDirMap = od()
+for i in opt.inputBkgWSDirMap.split(","): 
+  print(" --> Taking %s input background workspaces from: %s"%(i.split("=")[0],i.split("=")[1]) )
+  if not os.path.isdir( i.split("=")[1] ):
+    print(" --> [ERROR] Directory %s does not exist. Leaving..."%i.split("=")[1])
+    leave()
+  inputBkgWSDirMap[i.split("=")[0]] = i.split("=")[1]
 
 procsMap = od()
 if opt.procs == 'auto':
@@ -89,7 +97,6 @@ print(" ........................................................................
 # Signal processes
 for year in years:
   for proc in procs:
-
     # Identifier
     _id = "%s_%s_%s_%s"%(proc,year,opt.cat,sqrts__)
 
@@ -100,41 +107,37 @@ for year in years:
 
     # Define category: add year tag if not merging
     if opt.mergeYears: _cat = opt.cat
-    else: _cat = "%s_%s"%(opt.cat,year)
+    else: 
+      for _cat in opt.cat.split(","):
+        # Identifier
+        _id = "%s_%s_%s_%s"%(proc,year,_cat,sqrts__)
+        # Input Signal model ws 
+        if _cat == "NOTAG": _modelWSFile, _model = '-', '-'
+        else:
+          # foutName = f"{swd__}/outdir_{opt.channel}/signalFit/output/{opt.mass_ALP}_CMS-HGG_sigfit_{opt.year}_{opt.channel}_Hm125.root"
+          _inputWSFile = f"{inputWSDirMap[year]}/{proc}_M{opt.mass}_{opt.year}.root"
+          _nominalDataName = "%s_%s_%s_%s"%(proc,opt.mass,sqrts__,_cat)
+          _modelWSFile = f"{opt.sigModelWSDir}/CMS-HZG_sigfit_{proc}_{opt.year}_{_cat}_{opt.channel}_Hm{opt.mass}.root"
+          # _modelWSFile = "%s/CMS-HGG_sigfit_%s_%s.root"%(opt.sigModelWSDir,opt.sigModelExt,_cat)
+          _model = "%s_%s:%s_%s"%(outputWSName__,sqrts__,outputWSObjectTitle__,_id)
+        
+        # If opt.skipZeroes check nominal yield if 0 then do not add
+        skipProc = False
+        if opt.skipZeroes:
+          f = ROOT.TFile(_inputWSFile)
+          w = f.Get(inputWSName__)
+          sumw = w.data(_nominalDataName).sumEntries()
+          if sumw == 0.: skipProc = True
+          w.Delete()
+          f.Close()
+        if skipProc: continue
 
-    # Input Signal flashgg ws 
-    # _inputWSFile = glob.glob("%s/*M%s*_%s.root"%(inputWSDirMap[year],opt.mass,proc))[0]
-    # _inputWSFile = glob.glob(f"{opt.inputWSDir}/ALP_sig_Am{opt.mass_ALP}_Hm{opt.mass}_{opt.year}_{opt.channel}.root")[0] # PZ
-    _inputWSFile = glob.glob(f"{inputWSDirMap[year]}/sig/{opt.channel}/ALP_sig_Am{opt.mass_ALP}_Hm{opt.mass}_{opt.year}_{opt.channel}.root")[0] # PZ
-    
-    _nominalDataName = "%s_%s_%s_%s"%(_proc_s0,opt.mass,sqrts__,opt.cat)
+        # Extract rate from lumi
+        _rate = float(lumiMap[year])*1000
 
-    # If opt.skipZeroes check nominal yield if 0 then do not add
-    skipProc = False
-    if opt.skipZeroes:
-      f = ROOT.TFile(_inputWSFile)
-      w = f.Get(inputWSName__)
-      sumw = w.data(_nominalDataName).sumEntries()
-      if sumw == 0.: skipProc = True
-      w.Delete()
-      f.Close()
-    if skipProc: continue
-
-    # Input Signal model ws 
-    if opt.cat == "NOTAG": _modelWSFile, _model = '-', '-'
-    else:
-      # foutName = f"{swd__}/outdir_{opt.channel}/signalFit/output/{opt.mass_ALP}_CMS-HGG_sigfit_{opt.year}_{opt.channel}_Hm125.root"
-      _modelWSFile = f"{opt.sigModelWSDir}/outdir_{opt.channel}/signalFit/output/{opt.mass_ALP}_CMS-HGG_sigfit_{opt.year}_{opt.channel}_Hm125.root"
-      # _modelWSFile = "%s/CMS-HGG_sigfit_%s_%s.root"%(opt.sigModelWSDir,opt.sigModelExt,_cat)
-
-      _model = "%s_%s:%s_%s"%(outputWSName__,sqrts__,outputWSObjectTitle__,_id)
-
-    # Extract rate from lumi
-    _rate = float(lumiMap[year])*1000
-
-    # Add signal process to dataFrame:
-    print(" --> Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc,_cat))
-    data.loc[len(data)] = [year,'sig',_procOriginal,_proc,_proc_s0,_cat,_inputWSFile,_nominalDataName,_modelWSFile,_model,_rate]
+        # Add signal process to dataFrame:
+        print(" --> Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc,_cat))
+        data.loc[len(data)] = [year,'sig',_procOriginal,_proc,_proc_s0,_cat,_inputWSFile,_nominalDataName,_modelWSFile,_model,_rate]
 
 # Background and data processes
 if( not opt.skipBkg)&( opt.cat != "NOTAG" ):
@@ -157,20 +160,18 @@ if( not opt.skipBkg)&( opt.cat != "NOTAG" ):
   # Category separate per year
   else:
     for year in years:
-      _cat = "%s_%s"%(opt.cat,year)
-      _catStripYear = opt.cat
-      # _modelWSFile = "%s/CMS-HGG_%s_%s.root"%(opt.bkgModelWSDir,opt.bkgModelExt,_cat)
-      _modelWSFile = "%s/%s/CMS-HGG_mva_13TeV_multipdf.root"%(opt.bkgModelWSDir,opt.mass_ALP) #Pei-Zhu
-      _model_bkg = "%s:CMS_%s_%s_%s_bkgshape"%(bkgWSName__,decayMode,_cat,sqrts__)
-      # _model_data = "%s:roohist_data_mass_%s"%(bkgWSName__,_catStripYear)
-      _model_data = "%s:roohist_data_mass_%s"%(bkgWSName__,_cat) # Pei-Zhu 
-      _proc_s0 = 'ggH' #not needed for data/bkg
-      _inputWSFile = "%s/data/ALP_data_bkg_Am%s_workspace.root"%(inputWSDirMap[year],opt.mass_ALP) #not needed for data/bkg # Pei-Zhu 
-      _nominalDataName = 'ggh_125_13TeV_cat0' #not needed for data/bkg  # Pei-Zhu
-      print(" --> Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc_bkg,_cat))
-      print(" --> Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc_data,_cat))
-      data.loc[len(data)] = ["year",'bkg',_proc_bkg,_proc_bkg,'-',_cat,_inputWSFile,_nominalDataName,_modelWSFile,_model_bkg,opt.bkgScaler]
-      data.loc[len(data)] = ["year",'data',_proc_data,_proc_data,'-',_cat,_inputWSFile,_nominalDataName,_modelWSFile,_model_data,-1]
+      for _cat in opt.cat.split(","):
+        _modelWSFile = "%s/CMS-HZG_multipdf_%s.root"%(opt.bkgModelWSDir,_cat) #Pei-Zhu
+        _model_bkg = "%s:CMS_%s_Data_13TeV_%s_%s_bkgshape"%(bkgWSName__,decayMode,_cat,sqrts__)
+        # _model_data = "%s:roohist_data_mass_%s"%(bkgWSName__,_catStripYear)
+        _model_data = "%s:roohist_data_mass_cat%s"%(bkgWSName__,_cat) # Pei-Zhu 
+        _proc_s0 = '-' #not needed for data/bkg
+        _inputWSFile = "%s/Data_%s.root"%(inputBkgWSDirMap[year],year) #not needed for data/bkg # Pei-Zhu
+        _nominalDataName = f'Data_{sqrts__}_{_cat}' #not needed for data/bkg  # Pei-Zhu
+        print(" --> Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc_bkg,_cat))
+        print(" --> Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc_data,_cat))
+        data.loc[len(data)] = ["year",'bkg',_proc_bkg,_proc_bkg,'-',_cat,_inputWSFile,_nominalDataName,_modelWSFile,_model_bkg,opt.bkgScaler]
+        data.loc[len(data)] = ["year",'data',_proc_data,_proc_data,'-',_cat,_inputWSFile,_nominalDataName,_modelWSFile,_model_data,-1]
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -281,7 +282,7 @@ for ir,r in data[data['type']=='sig'].iterrows():
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # SAVE YIELDS DATAFRAME
 print(" ..........................................................................................")
-extStr = "_%s"%opt.channel if opt.channel != '' else ''
-print(" --> Saving yields dataframe: ./yields%s/%s_datacard_%s_%s.pkl"%(extStr,opt.mass_ALP,opt.year,opt.channel))
-if not os.path.isdir("./yields%s"%extStr): os.system("mkdir ./yields%s"%extStr)
-with open("./yields%s/%s_datacard_%s_%s.pkl"%(extStr,opt.mass_ALP,opt.year,opt.channel),"wb") as fD: pickle.dump(data,fD)
+# extStr = "_%s"%opt.channel if opt.channel != '' else ''
+print(" --> Saving yields dataframe: ./yields/datacard_%s_%s.pkl"%(opt.year,opt.channel))
+if not os.path.isdir("./yields"): os.system("mkdir ./yields")
+with open("./yields/datacard_%s_%s.pkl"%(opt.year,opt.channel),"wb") as fD: pickle.dump(data,fD)

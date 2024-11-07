@@ -100,7 +100,7 @@ def process_files(applicators, output_folder, input_folder):
         "JER_down", "JES_up", "JES_down", "MET_JES_up", "MET_JES_down",
         "MET_Unclustered_up", "MET_Unclustered_down", "Muon_pt_up", "Muon_pt_down"
     ]
-    procductions = ['ggH', 'VBF', 'WplusH', 'WminusH', 'ZH', 'ttH']
+    procductions = ['WplusH', 'WminusH'] #'ggH', 'VBF', 'WplusH', 'WminusH', 'ZH', 'ttH'
     years = ['2016preVFP', '2016postVFP', '2017', '2018']
 
     # Create all necessary directories in one go
