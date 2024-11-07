@@ -17,7 +17,7 @@ log_path = '/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/HiggsDNA/eos_logs/
 
 dataset_type = 'test'
 dataset_names = ["WplusH"] #, "VBFH_M125", "ZH_M125", "ttH_M125"] # "WplusH_M125", "WminusH_M125",
-dataset_years = ["2017"]#, "2017", "2018"]
+dataset_years = ["2016preVFP"]#, "2017", "2018"]
 
 # dataset_type = 'bkgmc'
 # dataset_names = ["DYJetsToLL"] # "Data_SingleMuon", "Data_DoubleMuon", "Data_SingleElectron", "Data_DoubleEG"
