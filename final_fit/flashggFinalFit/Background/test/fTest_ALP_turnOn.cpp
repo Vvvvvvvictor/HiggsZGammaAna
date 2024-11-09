@@ -358,6 +358,7 @@ void plot(RooRealVar *mass, RooAbsPdf *pdf, RooDataSet *data, string name,vector
   double chi2 = plot_chi2->chiSquare(np);
 
   *prob = getGoodnessOfFit(mass,pdf,data,name);
+
   RooPlot *plot = mass->frame();
   mass->setRange("unblindReg_1",mgg_low,mgg_blind_low);
   mass->setRange("unblindReg_2",mgg_blind_high,mgg_high);
@@ -680,7 +681,7 @@ int main(int argc, char* argv[]){
     ("year", po::value<string>(&year_)->default_value("2016"),                                  "Dataset year")
     ("Cats,f", po::value<string>(&CatsStr_)->default_value("ggH0,ggH1,ggH2,ggH3,VBF0,VBF1,VBF2,VBF3,lep,VH,ZH,ttHh,ttHl"), "Flashgg category names to consider")
     ("verbose,v",                                                                               "Run with more output")
-    ("mhLow,L", po::value<float>(&mgglow_)->default_value(90.),                                 "Low ALP mass point")
+    ("mhLow,L", po::value<float>(&mgglow_)->default_value(92.),                                 "Low ALP mass point")
     ("mhHigh,H", po::value<float>(&mgghigh_)->default_value(180.),                              "High ALP mass point")
     ("mhLowBlind,LB", po::value<float>(&mggblindlow_)->default_value(120.),                     "Low ALP blind mass point")
     ("mhHighBlind,HB", po::value<float>(&mggblindhigh_)->default_value(130.),                   "High ALP blind mass point")
@@ -876,6 +877,7 @@ int main(int argc, char* argv[]){
 
 		// Standard F-Test to find the truth functions
 		for (vector<string>::iterator funcType=functionClasses.begin();funcType!=functionClasses.end(); funcType++){
+      RooArgList tempPdfs;
 
 			double thisNll=0.; double prevNll=0.; double chi2=0.; double prob=0.;
 			int order=1; int prev_order=0; int cache_order=0;
@@ -986,16 +988,16 @@ int main(int argc, char* argv[]){
             
 						if ((prob < upperEnvThreshold) ) { // Looser requirements for the envelope
 
-							if (gofProb > 0.011 ) { // || order == truthOrder ) {  // Good looking fit or one of our regular truth functions
+							if (gofProb > 0.10) { // || order == truthOrder ) {  // Good looking fit or one of our regular truth functions
 
 								std::cout << "[INFO] Adding to Envelope " << bkgPdf->GetName() << " "<< gofProb
 									<< " 2xNLL + c is " << myNll + bkgPdf->getVariables()->getSize() <<  std::endl;
 								allPdfs.insert(pair<string,RooAbsPdf*>(Form("%s%d",funcType->c_str(),order),bkgPdf));
-								storedPdfs.add(*bkgPdf);
+								tempPdfs.add(*bkgPdf);
 								pdforders.push_back(order);
 								// Keep track but we shall redo this later
 								if ((myNll + bkgPdf->getVariables()->getSize()) < MinimimNLLSoFar) {
-									simplebestFitPdfIndex = storedPdfs.getSize()-1;
+									simplebestFitPdfIndex = tempPdfs.getSize()-1;
 									MinimimNLLSoFar = myNll + bkgPdf->getVariables()->getSize();
 								}
 							}
@@ -1007,12 +1009,25 @@ int main(int argc, char* argv[]){
 					}
 				}
 
+        // Check if the number of items in pdforders is greater than two
+        if (pdforders.size() > 2) {
+          // Keep only the last two elements in pdforders
+          pdforders.erase(pdforders.begin(), pdforders.end() - 2);
+          
+          // Keep only the last two elements in tempPdfs
+          storedPdfs.add(*tempPdfs.at(tempPdfs.getSize() - 2));
+          storedPdfs.add(*tempPdfs.at(tempPdfs.getSize() - 1));
+        }
+        else {
+          storedPdfs.add(tempPdfs);
+        }
+
 				fprintf(resFile,"%15s & %d & %5.2f & %5.2f \\\\\n",funcType->c_str(),cache_order+1,chi2,prob);
 				choices_envelope.insert(pair<string,std::vector<int> >(*funcType,pdforders));
 			}
 		}
 
-    if (bestGofProb < 0.011){
+    if (bestGofProb < 0.10){
       if (saveMultiPdf){
         std::cout << "[INFO] Best fit function is not in envelope, adding it anyway " << bestFuncType << " " << bestFuncOrder << std::endl;
         RooAbsPdf *bkgPdf = getPdf(pdfsModel,bestFuncType,bestFuncOrder,Form("env_pdf_cat%s_%s",Cats_[cat].c_str(),ext.c_str()), mass_ALP);
@@ -1054,7 +1069,7 @@ int main(int argc, char* argv[]){
 				catname = Form("%s",Cats_[cat].c_str());
 			} else {
         // catindexname = Form("pdfindex_%d_%s",cat,ext.c_str());
-        catindexname = Form("pdfindex_cat%s_%s",Cats_[cat].c_str(),ext.c_str()); // PZ
+        catindexname = Form("pdfindex_%s_%s",Cats_[cat].c_str(),ext.c_str()); // PZ
 				//catindexname = Form("pdfindex_%d_%s_%s",cat,ext.c_str(),channelName.c_str());//bing
 				catname = Form("Data_13TeV_%s",Cats_[cat].c_str());
 			}

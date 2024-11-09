@@ -127,13 +127,23 @@ for year in years:
           f = ROOT.TFile(_inputWSFile)
           w = f.Get(inputWSName__)
           sumw = w.data(_nominalDataName).sumEntries()
+          print(sumw)
           if sumw == 0.: skipProc = True
           w.Delete()
           f.Close()
         if skipProc: continue
 
         # Extract rate from lumi
+        
         _rate = float(lumiMap[year])*1000
+        
+        f = ROOT.TFile(_inputWSFile)
+        w = f.Get(inputWSName__)
+        sumw = w.data(_nominalDataName).sumEntries()
+        print(sumw)
+        w.Delete()
+        f.Close()
+        _rate = sumw
 
         # Add signal process to dataFrame:
         print(" --> Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc,_cat))
@@ -164,14 +174,23 @@ if( not opt.skipBkg)&( opt.cat != "NOTAG" ):
         _modelWSFile = "%s/CMS-HZG_multipdf_%s.root"%(opt.bkgModelWSDir,_cat) #Pei-Zhu
         _model_bkg = "%s:CMS_%s_Data_13TeV_%s_%s_bkgshape"%(bkgWSName__,decayMode,_cat,sqrts__)
         # _model_data = "%s:roohist_data_mass_%s"%(bkgWSName__,_catStripYear)
-        _model_data = "%s:roohist_data_mass_cat%s"%(bkgWSName__,_cat) # Pei-Zhu 
+        _model_data = "%s:roohist_data_mass_Data_13TeV_%s"%(bkgWSName__,_cat) # Pei-Zhu 
         _proc_s0 = '-' #not needed for data/bkg
         _inputWSFile = "%s/Data_%s.root"%(inputBkgWSDirMap[year],year) #not needed for data/bkg # Pei-Zhu
         _nominalDataName = f'Data_{sqrts__}_{_cat}' #not needed for data/bkg  # Pei-Zhu
+        
+        # calcute rate of model
+        f = ROOT.TFile(_modelWSFile)
+        w = f.Get(bkgWSName__)
+        _rate = w.var(f"CMS_hzg_Data_{sqrts__}_{_cat}_{sqrts__}_bkgshape_norm").getVal()
+        w.Delete()
+        f.Close()
+        print(f" --> {_model_bkg} rate: {_rate}")
+        
         print(" --> Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc_bkg,_cat))
         print(" --> Adding to dataFrame: (proc,cat) = (%s,%s)"%(_proc_data,_cat))
-        data.loc[len(data)] = ["year",'bkg',_proc_bkg,_proc_bkg,'-',_cat,_inputWSFile,_nominalDataName,_modelWSFile,_model_bkg,opt.bkgScaler]
-        data.loc[len(data)] = ["year",'data',_proc_data,_proc_data,'-',_cat,_inputWSFile,_nominalDataName,_modelWSFile,_model_data,-1]
+        data.loc[len(data)] = ["year",'bkg',_proc_bkg,_proc_bkg,'-',_cat,_inputWSFile,_nominalDataName,_modelWSFile,_model_bkg,opt.bkgScaler]#_rate]
+        data.loc[len(data)] = ["year",'data',_proc_data,_proc_data,'-',_cat,_inputWSFile,_nominalDataName,_modelWSFile,_model_data,-1]#_rate]
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -282,7 +301,8 @@ for ir,r in data[data['type']=='sig'].iterrows():
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # SAVE YIELDS DATAFRAME
 print(" ..........................................................................................")
-# extStr = "_%s"%opt.channel if opt.channel != '' else ''
-print(" --> Saving yields dataframe: ./yields/datacard_%s_%s.pkl"%(opt.year,opt.channel))
+extStr = "_%s"%opt.cat if opt.cat != '' else ''
+print(" --> Saving yields dataframe: ./yields/datacard_%s%s_%s.pkl"%(opt.year,extStr,opt.channel))
 if not os.path.isdir("./yields"): os.system("mkdir ./yields")
-with open("./yields/datacard_%s_%s.pkl"%(opt.year,opt.channel),"wb") as fD: pickle.dump(data,fD)
+with open("./yields/datacard_%s%s_%s.pkl"%(opt.year,extStr,opt.channel), 'wb') as f:
+  pickle.dump(data, f)
