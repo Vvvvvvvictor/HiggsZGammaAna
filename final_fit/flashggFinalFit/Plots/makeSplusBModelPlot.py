@@ -46,7 +46,7 @@ def get_options():
   parser.add_option("--parameterMap", dest="parameterMap", default=None, help="Comma separated pairs of model parameters:values,...")
   parser.add_option("--ext", dest="ext", default='', help="Extension for saving")
   parser.add_option("--mass", dest="mass", default=None, help="Higgs mass")
-  parser.add_option("--xvar", dest="xvar", default="CMS_hgg_mass,m_{#gamma#gamma},GeV", help="X-variable: name,title,units")
+  parser.add_option("--xvar", dest="xvar", default="CMS_hzg_mass,m_{ll#gamma},GeV", help="X-variable: name,title,units")
   parser.add_option("--nBins", dest="nBins", default=80, type='int', help="Number of bins")
   parser.add_option("--pdfNBins", dest="pdfNBins", default=3200, type='int', help="Number of bins")
   parser.add_option("--translateCats", dest="translateCats", default=None, help="JSON to store cat translations")
@@ -167,7 +167,8 @@ else:
       # Calculate S/B yields in +-1sigma of peak
       rangeName = "effSigma_%s"%c
       xvar.setRange(rangeName,w.var("MH").getVal()-effSigma,w.var("MH").getVal()+effSigma)
-      Beff = bpdf.createIntegral(_xvar_argset,_xvar_argset,rangeName).getVal()*B
+      # Beff = bpdf.createIntegral(_xvar_argset,_xvar_argset,rangeName).getVal()*B
+      Beff = B # FIXME: Bug for hzg analysis
       Seff = math.erf(1./math.sqrt(2))*S
       # Caclualte weight for cat
       wcat = Seff/(Seff+Beff)
@@ -331,6 +332,7 @@ for cidx in range(len(cats)):
   # Calculate yields
   SB, B = sbpdf.expectedEvents(_xvar_argset), bpdf.expectedEvents(_xvar_argset)
   S = SB-B
+  B = B**0.5 #FIXME: temporary fix for hzg analysis, multiply normalisation of bkg twice
   # If option doBkfRenormalization: renormalize B pdf to be S+B-S
   if opt.doBkgRenormalization:
     print("    * fixing B normalization")

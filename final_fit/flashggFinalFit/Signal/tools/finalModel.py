@@ -140,12 +140,14 @@ class FinalModel:
     # print(f"self.proc: {self.proc}") # PZ
     fp = self.xsbrMap[self.proc]['factor'] if 'factor' in self.xsbrMap[self.proc] else 1.
     mp = self.xsbrMap[self.proc]['mode']
-    xs = fp*self.XSBR[mp]
+    # xs = fp*self.XSBR[mp]
+    xs = np.ones(len(mh)) #FIXME: special case for HZG because XS has been included in weights
     self.Splines['xs'] = ROOT.RooSpline1D("fxs_%s_%s"%(self.proc,self.sqrts),"fxs_%s_%s"%(self.proc,self.sqrts),self.MH,len(mh),mh,xs)
     # BR
     fd = self.xsbrMap['decay']['factor'] if 'factor' in self.xsbrMap['decay'] else 1.
     md = self.xsbrMap['decay']['mode']
-    br = fd*self.XSBR[md]
+    # br = fd*self.XSBR[md]
+    br = np.ones(len(mh)) #FIXME: special case for HZG because BR has been included in weights
     self.Splines['br'] = ROOT.RooSpline1D("fbr_%s"%self.sqrts,"fbr_%s"%self.sqrts,self.MH,len(mh),mh,br)
 
   def buildEffAccSpline(self):
@@ -160,6 +162,7 @@ class FinalModel:
     if len(ea) == 1: ea, mh = [ea[0],ea[0],ea[0]], [float(self.MHLow),mh[0],float(self.MHHigh)]
     # Convert to numpy arrays and make spline
     ea, mh = np.asarray(ea), np.asarray(mh)
+    ea = np.ones(len(mh)) #FIXME: special case for HZG because eff x acc has been included in weights
     self.Splines['ea'] = ROOT.RooSpline1D("fea_%s"%(self.name),"fea_%s"%(self.name),self.MH,len(mh),mh,ea)
 
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

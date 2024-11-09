@@ -17,6 +17,7 @@ def get_options():
   parser.add_option('--year', dest='year', default='2016', help="Separated list of years") # PZ
   parser.add_option("--channel", dest='channel', default='ele', help="ele or mu") # PZ
 
+  parser.add_option('--inputWS', dest='inputWS', default='', help="Full path to input workspace")
   parser.add_option('--inputJson', dest='inputJson', default='inputs_HToZa.json', help="Input json file to define fits")
   parser.add_option('--mode', dest='mode', default='mu_inclusive', help="Type of fit")
   parser.add_option('--ext', dest='ext', default='', help="Running over Datacard with extension")
@@ -103,7 +104,7 @@ for fidx in range(len(fits)):
   # If ALL in fit_opts: replace by list of constrained nuisances in workspace
   if "ALL" in _fit_opts: 
     # fd = ROOT.TFile("Datacard%s_%s.root"%(opt.ext,opt.mode))
-    fd = ROOT.TFile("%s/src/flashggFinalFit/Combine/output_datacard_rootfile_%s/%s_Datacard_%s_%s_%s.root"%(os.environ['CMSSW_BASE'], opt.channel,opt.mass_ALP,opt.year,opt.channel,opt.mode))
+    fd = ROOT.TFile(f"{opt.inputWS}")
     ws = fd.Get("w")
     nuisances = ws.obj("ModelConfig").GetNuisanceParameters().contentsString()
     _fit_opts = re.sub("ALL",nuisances,_fit_opts)
@@ -125,7 +126,7 @@ for fidx in range(len(fits)):
   else:
     #d_opts = '-d ../Datacard%s_%s.root'%(opt.ext,opt.mode)
     # d_opts = '-d %s/src/flashggFinalFit/Combine/Datacard%s_%s.root'%(os.environ['CMSSW_BASE'],opt.ext,opt.mode)
-    d_opts = '-d %s/src/flashggFinalFit/Combine/output_datacard_rootfile_%s/%s_Datacard_%s_%s_%s.root'%(os.environ['CMSSW_BASE'], opt.channel,opt.mass_ALP,opt.year,opt.channel,opt.mode)
+    d_opts = f'-d {opt.inputWS}'
 
   # If setParameters already in _fit_opts then add to fit opts and set pdfOpts = ''
   if( "setParameters" in _fit_opts )&( pdf_opts != '' ):

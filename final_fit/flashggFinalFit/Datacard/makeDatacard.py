@@ -1,6 +1,6 @@
 # Datacard making script: uses output pkl file of makeYields.py script
 
-print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG DATACARD MAKER RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
+print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HZG DATACARD MAKER RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
 import os, sys
 import re
 from optparse import OptionParser
@@ -11,12 +11,15 @@ import pickle
 from collections import OrderedDict as od
 from systematics import theory_systematics, experimental_systematics, signal_shape_systematics
 
+from pdb import set_trace
+
 def get_options():
   parser = OptionParser()
 
   parser.add_option('--mass_ALP', dest='mass_ALP', default=1, type='int', help="ALP mass") # PZ
   parser.add_option('--years', dest='years', default='2022preEE,2022postEE', help="Comma separated list of years in makeYields output")
   parser.add_option("--channel", dest='channel', default='', help="ele, mu, or leptons") # PZ
+  parser.add_option('--cat', dest='cat', default='', help="Category to run over")
 
   parser.add_option('--ext', dest='ext', default='', help="Extension (used when running RunYields.py)")
   # For pruning processes
@@ -50,8 +53,8 @@ if opt.doSTXSScaleCorrelationScheme: from tools.STXS_tools import STXSScaleCorre
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Concatenate dataframes
 print(" --> Loading per category dataframes into single dataframe")
-# pkl_files = glob.glob("./yields%s/*.pkl"%extStr)
-pkl_files = glob.glob("./yields/datacard_%s_%s.pkl"%(opt.years,opt.channel))
+extStr = f"_{opt.cat}" if opt.cat != '' else ''
+pkl_files = glob.glob("./yields/datacard_%s%s_%s.pkl"%(opt.years,extStr,opt.channel))
 pkl_files.sort() # Categories in alphabetical order
 data = pd.DataFrame()
 for f_pkl_name in pkl_files:
@@ -153,16 +156,18 @@ if opt.prune:
 # with open("./yields%s/%s_datacard_%s_%s.pkl"%(extStr,opt.mass_ALP,opt.years,opt.channel),"wb") as fD: pickle.dump(data,fD)
 
 if opt.saveDataFrame:
+  extStr = "_%s"%opt.cat if opt.cat != '' else ''
+  outputFileName = "./yields/pruned_Datacard_%s%s_%s.pkl"%(opt.years,extStr,opt.channel)
   print(" ..........................................................................................")
-  print(" --> Saving dataFrame: %s.pkl"%opt.output)
-  with open("./yields/pruned_Datacard_%s_%s.pkl"%(opt.years,opt.channel),"wb") as fD: pickle.dump(data,fD)
+  print(" --> Saving dataFrame: %s"%outputFileName)
+  with open(outputFileName,"wb") as fD: pickle.dump(data,fD)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # WRITE TO .TXT FILE
 print(" ..........................................................................................")
 if not os.path.isdir("./output_Datacard"): os.system("mkdir ./output_Datacard")
-# fdataName = "%s.txt"%opt.output
-fdataName = "./output_Datacard/pruned_datacard_%s_%s.txt"%(opt.years,opt.channel)
+extStr = "_%s"%opt.cat if opt.cat != '' else ''
+fdataName = "./output_Datacard/pruned_datacard_%s%s_%s.txt"%(opt.years,extStr,opt.channel)
 print(" --> Writing to datacard file: %s"%fdataName)
 from tools.writeToDatacard import writePreamble, writeProcesses, writeSystematic, writeMCStatUncertainty, writePdfIndex, writeBreak
 fdata = open(fdataName,"w")

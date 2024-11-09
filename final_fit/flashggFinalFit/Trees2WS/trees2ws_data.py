@@ -13,7 +13,7 @@ def get_options():
   parser.add_option('--outputWSDir',dest='outputWSDir', default=None, help='Output dir (default is same as input dir)')
   parser.add_option('--year',dest='year', default='2016', help='Year of data taking')
   parser.add_option('--applyMassCut',dest='applyMassCut', default=False, action="store_true", help='Apply cut on CMS_hgg_mass')
-  parser.add_option('--massCutRange',dest='massCutRange', default='90,180', help='CMS_hgg_mass cut range')
+  parser.add_option('--massCutRange',dest='massCutRange', default='92,180', help='CMS_hgg_mass cut range')
   return parser.parse_args()
 (opt,args) = get_options()
 
@@ -44,7 +44,7 @@ def add_vars_to_workspace(_ws=None,_dataVars=None):
   _vars = od()
   for var in _dataVars:
     if var == "CMS_hzg_mass":
-      _vars[var] = ROOT.RooRealVar(var,var,125.,90.,180.)
+      _vars[var] = ROOT.RooRealVar(var,var,125.,92.,180.)
       _vars[var].setBins(160)
     elif var == "dZ":
       _vars[var] = ROOT.RooRealVar(var,var,0.,-20.,20.)

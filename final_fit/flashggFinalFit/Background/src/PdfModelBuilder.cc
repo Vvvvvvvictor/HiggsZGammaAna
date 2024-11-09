@@ -261,7 +261,7 @@ RooAbsPdf* PdfModelBuilder::getBernsteinStepxGau(string prefix, int order, int m
     coeffList->add(*params[name]);
   }
 
-  obs_var->setRange(90, 180);
+  obs_var->setRange(92, 180);
 
   //RooBernstein *bern = new RooBernstein(prefix.c_str(),prefix.c_str(),*obs_var,*coeffList);
   if (order==1) {
@@ -386,7 +386,7 @@ RooAbsPdf* PdfModelBuilder::getPowerLawStepxGau(string prefix, int order, int ca
   //   }
   // }
   
-  obs_var->setRange(90, 180);
+  obs_var->setRange(92, 180);
 
   RooRealVar *sigma = new RooRealVar(Form("%s_sigma_p%d",prefix.c_str(),order),Form("%s_sigma_p%d",prefix.c_str(),order),sigma_pow,sigma_lpow,sigma_hpow);
   RooRealVar *turnon = new RooRealVar(Form("%s_turnon_p%d",prefix.c_str(),order),Form("%s_turnon_p%d",prefix.c_str(),order),turnon_pow,turnon_lpow,turnon_hpow);
@@ -800,7 +800,7 @@ RooAbsPdf* PdfModelBuilder::getExponentialStepxGau(string prefix, int order, int
   //   }
   // }
 
-  obs_var->setRange(90, 180);
+  obs_var->setRange(92, 180);
 
   RooRealVar *sigma = new RooRealVar(Form("%s_sigma_p%d",prefix.c_str(),order),Form("%s_sigma_p%d",prefix.c_str(),order),sigma_exp,sigma_lexp,sigma_hexp);
   RooRealVar *turnon = new RooRealVar(Form("%s_turnon_p%d",prefix.c_str(),order),Form("%s_turnon_p%d",prefix.c_str(),order),turnon_exp,turnon_lexp,turnon_hexp);
@@ -1052,7 +1052,7 @@ RooAbsPdf* PdfModelBuilder::getLaurentStepxGau(string prefix, int order, int cat
   //   }
   // }
 
-  obs_var->setRange(90, 180);
+  obs_var->setRange(92, 180);
   
   RooRealVar *sigma = new RooRealVar(Form("%s_sigma_p%d",prefix.c_str(),order),Form("%s_sigma_p%d",prefix.c_str(),order),sigma_lau,sigma_llau,sigma_hlau);
   RooRealVar *turnon = new RooRealVar(Form("%s_turnon_p%d",prefix.c_str(),order),Form("%s_turnon_p%d",prefix.c_str(),order),turnon_lau,turnon_llau,turnon_hlau);
