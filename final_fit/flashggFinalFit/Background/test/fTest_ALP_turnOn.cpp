@@ -20,6 +20,7 @@
 #include "RooHist.h"
 #include "RooAbsData.h"
 #include "RooAbsPdf.h"
+#include "RooGenericPdf.h"
 #include "RooArgSet.h"
 #include "RooFitResult.h"
 #include "RooMinimizer.h"
@@ -49,6 +50,8 @@
 #include "../../tdrStyle/tdrstyle.C"
 #include "../../tdrStyle/CMS_lumi.C"
 
+#include "RooMsgService.h"
+
 using namespace std;
 using namespace RooFit;
 using namespace boost;
@@ -74,20 +77,29 @@ TRandom3 *RandomGen = new TRandom3();
 
 RooAbsPdf* getPdf(PdfModelBuilder &pdfsModel, string type, int order, const char* ext="", int mass_ALP=0)
 {
-  if (type=="Bernstein") return pdfsModel.getBernsteinStepxGau(Form("%s_bern%d",ext,order),order, mass_ALP);//PZ
+  RooAbsPdf *pdf;
+  if (type=="Bernstein") pdf = pdfsModel.getBernsteinStepxGau(Form("%s_bern%d",ext,order),order, mass_ALP);//PZ
   // if (type=="Bernstein") return pdfsModel.getBernstein(Form("%s_bern%d",ext,order),order);
-  else if (type=="Chebychev") return pdfsModel.getChebychev(Form("%s_cheb%d",ext,order),order);
-  else if (type=="Exponential") return pdfsModel.getExponentialStepxGau(Form("%s_exp%d",ext,order),order,2, mass_ALP);//PZ
+  else if (type=="Chebychev") pdf = pdfsModel.getChebychev(Form("%s_cheb%d",ext,order),order);
+  else if (type=="Exponential") pdf = pdfsModel.getExponentialStepxGau(Form("%s_exp%d",ext,order),order,2, mass_ALP);//PZ
     //return pdfsModel.getExponentialSingle(Form("%s_exp%d",ext,order),order);
-  else if (type=="PowerLaw") return pdfsModel.getPowerLawStepxGau(Form("%s_pow%d",ext,order),order,2, mass_ALP);//PZ
+  else if (type=="PowerLaw") pdf = pdfsModel.getPowerLawStepxGau(Form("%s_pow%d",ext,order),order,2, mass_ALP);//PZ
     // return pdfsModel.getPowerLawSingle(Form("%s_pow%d",ext,order),order);
-  else if (type=="Laurent") return pdfsModel.getLaurentStepxGau(Form("%s_lau%d",ext,order),order,2, mass_ALP);//PZ
+  else if (type=="Laurent") pdf = pdfsModel.getLaurentStepxGau(Form("%s_lau%d",ext,order),order,2, mass_ALP);//PZ
     // return pdfsModel.getLaurentSeries(Form("%s_lau%d",ext,order),order);
   else 
   {
     cerr << "[ERROR] -- getPdf() -- type " << type << " not recognised." << endl;
     return NULL;
   }
+  // if (BLIND){
+  //   RooArgSet *params = pdf->getParameters((const RooArgSet*)(0));
+  //   RooAbsArg *arg = pdf->getObservables(params)->first();
+  //   cout << "name of observable " << arg->GetName() << endl;
+  //   RooGenericPdf *sbpdf = new RooGenericPdf(pdf->GetName(), pdf->GetTitle(), "((@0 < 120)? 1:((@0 > 130)? 1:0)) * @1", RooArgList(*arg, *pdf));
+  //   return sbpdf;
+  // }
+  return pdf;
 }
 
 
@@ -95,7 +107,7 @@ void runFit(RooAbsPdf *pdf, RooDataSet *data, double *NLL, int *stat_t, int MaxT
 
 	int ntries=0;
   	RooArgSet *params_test = pdf->getParameters((const RooArgSet*)(0));
-	//params_test->Print("v");
+	params_test->Print("v");
 	int stat=1;
 	double minnll=10e8;
 	while (stat!=0){
@@ -111,7 +123,7 @@ void runFit(RooAbsPdf *pdf, RooDataSet *data, double *NLL, int *stat_t, int MaxT
 
     // RooNLLVar *nll_test = new RooNLLVar("nll_test", "nll_test", *pdf, *data);
     // RooMinimizer minimizer(*nll_test);
-    
+
     minimizer.setEps(100);
     minimizer.setStrategy(0);
     minimizer.minimize("Minuit2","migrad");
@@ -179,8 +191,8 @@ double getProbabilityFtest(double chi2, int ndof,RooAbsPdf *pdfNull, RooAbsPdf *
   mass->setBins(nBinsForMass);
   for (int itoy = 0 ; itoy < ntoys ; itoy++){
 
-        params_null->assignValueOnly(preParams_null);
-        params_test->assignValueOnly(preParams_test);
+      params_null->assignValueOnly(preParams_null);
+      params_test->assignValueOnly(preParams_test);
   	RooDataHist *binnedtoy = pdfNull->generateBinned(RooArgSet(*mass),ndata,0,1);
 
 	int stat_n=1;
@@ -637,7 +649,7 @@ int getBestFitFunction(RooMultiPdf *bkg, RooDataSet *data, RooCategory *cat, boo
 }
 
 int main(int argc, char* argv[]){
-
+  RooMsgService::instance().setGlobalKillBelow(RooFit::WARNING);
   setTDRStyle();
   writeExtraText = true;       // if extra text
   extraText  = "Preliminary";  // default extra text is "Preliminary"
@@ -681,7 +693,7 @@ int main(int argc, char* argv[]){
     ("year", po::value<string>(&year_)->default_value("2016"),                                  "Dataset year")
     ("Cats,f", po::value<string>(&CatsStr_)->default_value("ggH0,ggH1,ggH2,ggH3,VBF0,VBF1,VBF2,VBF3,lep,VH,ZH,ttHh,ttHl"), "Flashgg category names to consider")
     ("verbose,v",                                                                               "Run with more output")
-    ("mhLow,L", po::value<float>(&mgglow_)->default_value(92.),                                 "Low ALP mass point")
+    ("mhLow,L", po::value<float>(&mgglow_)->default_value(100.),                                 "Low ALP mass point")
     ("mhHigh,H", po::value<float>(&mgghigh_)->default_value(180.),                              "High ALP mass point")
     ("mhLowBlind,LB", po::value<float>(&mggblindlow_)->default_value(120.),                     "Low ALP blind mass point")
     ("mhHighBlind,HB", po::value<float>(&mggblindhigh_)->default_value(130.),                   "High ALP blind mass point")
@@ -854,6 +866,9 @@ int main(int argc, char* argv[]){
 			thisdataBinned_name = Form("roohist_data_mass_cat%s",Cats_[cat].c_str());
 			//RooDataSet *data = (RooDataSet*)dataFull;
 		}
+    // if (BLIND) {
+    //   dataFull = (RooDataSet*)dataFull->reduce(Form("CMS_hzg_mass < %f || CMS_hzg_mass > %f",mgg_blind_low,mgg_blind_high));
+    // }
 		RooDataHist thisdataBinned(thisdataBinned_name.c_str(),"data",*mass,*dataFull);
 		data = (RooDataSet*)&thisdataBinned;
 
@@ -948,7 +963,7 @@ int main(int argc, char* argv[]){
 				std::cout << "[INFO] Upper end Threshold for highest order function " << upperEnvThreshold <<std::endl;
 
 				while (prob<upperEnvThreshold){
-					RooAbsPdf *bkgPdf = getPdf(pdfsModel,*funcType,order,Form("env_pdf_cat%d_%s",cat,ext.c_str()), mass_ALP); //PZ
+					RooAbsPdf *bkgPdf = getPdf(pdfsModel,*funcType,order,Form("env_pdf_cat%s_%s",Cats_[cat].c_str(),ext.c_str()), mass_ALP);
 					if (!bkgPdf ){
 						// assume this order is not allowed
 						if (order >6) { std::cout << " [WARNING] could not add ] " << std::endl; break ;}
@@ -988,7 +1003,7 @@ int main(int argc, char* argv[]){
             
 						if ((prob < upperEnvThreshold) ) { // Looser requirements for the envelope
 
-							if (gofProb > 0.10) { // || order == truthOrder ) {  // Good looking fit or one of our regular truth functions
+							if (gofProb > 0.01 ) { // || order == truthOrder ) {  // Good looking fit or one of our regular truth functions
 
 								std::cout << "[INFO] Adding to Envelope " << bkgPdf->GetName() << " "<< gofProb
 									<< " 2xNLL + c is " << myNll + bkgPdf->getVariables()->getSize() <<  std::endl;
@@ -1009,25 +1024,27 @@ int main(int argc, char* argv[]){
 					}
 				}
 
-        // Check if the number of items in pdforders is greater than two
-        if (pdforders.size() > 2) {
-          // Keep only the last two elements in pdforders
-          pdforders.erase(pdforders.begin(), pdforders.end() - 2);
+        // // Check if the number of items in pdforders is greater than two
+        // if (pdforders.size() > 2) {
+        //   // Keep only the last two elements in pdforders
+        //   pdforders.erase(pdforders.begin(), pdforders.end() - 2);
           
-          // Keep only the last two elements in tempPdfs
-          storedPdfs.add(*tempPdfs.at(tempPdfs.getSize() - 2));
-          storedPdfs.add(*tempPdfs.at(tempPdfs.getSize() - 1));
-        }
-        else {
-          storedPdfs.add(tempPdfs);
-        }
+        //   // Only drop the first elements in tempPdfs
+        //   for (int i = tempPdfs.getSize()-1; i > 0; i--) {
+        //     storedPdfs.add(*tempPdfs.at(i));
+        //   }
+        // }
+        // else {
+        //   storedPdfs.add(tempPdfs);
+        // }
+        storedPdfs.add(tempPdfs);
 
 				fprintf(resFile,"%15s & %d & %5.2f & %5.2f \\\\\n",funcType->c_str(),cache_order+1,chi2,prob);
 				choices_envelope.insert(pair<string,std::vector<int> >(*funcType,pdforders));
 			}
 		}
 
-    if (bestGofProb < 0.10){
+    if (bestGofProb < 0.01){
       if (saveMultiPdf){
         std::cout << "[INFO] Best fit function is not in envelope, adding it anyway " << bestFuncType << " " << bestFuncOrder << std::endl;
         RooAbsPdf *bkgPdf = getPdf(pdfsModel,bestFuncType,bestFuncOrder,Form("env_pdf_cat%s_%s",Cats_[cat].c_str(),ext.c_str()), mass_ALP);

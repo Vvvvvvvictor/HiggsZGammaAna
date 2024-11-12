@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 import uproot
 import mplhep as hep
 import matplotlib.pyplot as plt
@@ -101,10 +102,10 @@ TREE = "two_jet"
 
 BINS = 50
 WEIGHT = "weight"
-PATH = "/eos/user/j/jiehan/root/skimmed_ntuples/"
+PATH = "/eos/user/j/jiehan/root/skimmed_ntuples_run2/"
 
 sig = ["ggH_mix", "VBF_mix"]
-sig_st = ["ggH", "VBF", "WminusH", "WplusH", "ZH", "ttH"]
+sig_st = ["ggH_M125", "VBF_M125", "WminusH_M125", "WplusH_M125", "ZH_M125", "ttH_M125"]
 bkg= ["ZGToLLG", "DYJetsToLL", "EWKZ2J", "ZG2JToG2L2J", "TT", "TTGJets", "TGJets", "WW", "WZ", "ZZ", "ttZJets", "ttWJets"]
 
 def convert_root_to_hist(file, target=None):
@@ -164,7 +165,7 @@ for i in range(len(var_names)):
     hist2, bins, mass_hist = convert_root_to_hist(bkg)
     # hist1, bins, _ = convert_root_to_hist(sig, mass_hist)
     # hist1, bins, _ = convert_root_to_hist(sig)
-    hist1_1, bins, _ = convert_root_to_hist(sig_st)
+    hist1_1, _, _ = convert_root_to_hist(sig_st)
 
     bins = (bins[:-1] + bins[1:]) / 2
 
@@ -178,5 +179,7 @@ for i in range(len(var_names)):
     plt.grid()
     plt.tight_layout()
     plt.title(f"Signal Background comparison")
-    plt.savefig(f"pic/compare_{VAR}.png")
+    if os.path.exists("pic/train_var") == False:
+        os.makedirs("pic/train_var")
+    plt.savefig(f"pic/train_var/compare_{VAR}.png")
     plt.clf()

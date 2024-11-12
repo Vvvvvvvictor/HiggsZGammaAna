@@ -66,17 +66,17 @@ cd $baseDir/Signal/
 
 cd $baseDir/Background/
 
-# cmsenv
+cmsenv
 # # ~~~~One Time Setup~~~~
-# make clean
-# make -j 16
+make clean
+make -j 16
 # # ~~~~~~~~~End~~~~~~~~~~
 
 # # sleep 1
 # # clear
 
-# rm -rf outdir_2017
-# python3 RunBackgroundScripts.py --inputConfig config_2017.py --mode fTestParallel
+rm -rf outdir_2017
+python3 RunBackgroundScripts.py --inputConfig config_2017.py --mode fTestParallel
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Split Line~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -94,27 +94,27 @@ cd $baseDir/Datacard/
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Split Line~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 cd $baseDir/Combine/
-rm -rf output_Datacard
-cp -r $baseDir/Datacard/output_Datacard/ ./
-rm -rf output_plots
-if [ ! -d "output_plots" ]; then
-    mkdir output_plots
-fi
+# rm -rf output_Datacard
+# cp -r $baseDir/Datacard/output_Datacard/ ./
+# rm -rf output_plots
+# if [ ! -d "output_plots" ]; then
+#     mkdir output_plots
+# fi
 
 # for cat in ggH0 ggH1 ggH2 ggH3 VBF0 VBF1 VBF2 VBF3 lep VH ZH ttHh ttHl;do
 #     python3 RunText2Workspace.py --year 2017 --cat $cat
 # done
 
-for cat in ggH0 ggH1 ggH2 ggH3 VBF0 VBF1 VBF2 VBF3 lep VH ZH ttHh ttHl;do
-    cd output_plots
-    combine --floatOtherPOIs 0 --expectSignal 1 -t -1 -P r --algo grid --alignEdges 1 --saveSpecifiedNuis all --cminDefaultMinimizerStrategy 0 --X-rtd MINIMIZER_freezeDisassociatedParams --X-rtd MINIMIZER_multiMin_hideConstants --X-rtd MINIMIZER_multiMin_maskConstraints --X-rtd MINIMIZER_multiMin_maskChannels=2 -M MultiDimFit -m 125.0 -d ../output_datacard_rootfile_/Datacard_2017_${cat}__mu_inclusive.root --setParameterRanges r=-4,6 --points 51 --firstPoint 0 --lastPoint 50 -n _scan1D_syst_r_${cat}
-    cd ../
-    plot1DScan.py output_plots/higgsCombine_scan1D_syst_r_${cat}.MultiDimFit.mH125.root --y-cut 20 --y-max 20 --output output_plots/r_statsyst_${cat} --POI r --translate ../Plots/pois_mu.json --main-label "Expected" --main-color 1 --others output_plots/higgsCombine_scan1D_syst_r_${cat}.MultiDimFit.mH125.root:"Stat only":2 --logo-sub "Preliminary"
-done
+# for cat in ggH0 ggH1 ggH2 ggH3 VBF0 VBF1 VBF2 VBF3 lep VH ZH ttHh ttHl;do
+#     cd output_plots
+#     combine --floatOtherPOIs 0 --expectSignal 1 -t -1 -P r --algo grid --alignEdges 1 --saveSpecifiedNuis all --cminDefaultMinimizerStrategy 0 --X-rtd MINIMIZER_freezeDisassociatedParams --X-rtd MINIMIZER_multiMin_hideConstants --X-rtd MINIMIZER_multiMin_maskConstraints --X-rtd MINIMIZER_multiMin_maskChannels=2 -M MultiDimFit -m 125.0 -d ../output_datacard_rootfile_/Datacard_2017_${cat}__mu_inclusive.root --setParameterRanges r=-4,6 --points 101 --firstPoint 0 --lastPoint 100 -n _scan1D_syst_r_${cat}
+#     cd ../
+#     plot1DScan.py output_plots/higgsCombine_scan1D_syst_r_${cat}.MultiDimFit.mH125.root --y-cut 8 --y-max 8 --output output_plots/r_statsyst_${cat} --POI r --translate ../Plots/pois_mu.json --main-label "Expected" --main-color 1 --logo-sub "Preliminary" #--others output_plots/higgsCombine_scan1D_syst_r_${cat}.MultiDimFit.mH125.root:"Stat only":2
+# done
 
 
 # for cat in ggH0 ggH1 ggH2 ggH3 VBF0 VBF1 VBF2 VBF3 lep VH ZH ttHh ttHl;do
-    # combine output_datacard_rootfile_/Datacard_2017_${cat}__mu_inclusive.root -M Significance --toysFrequentist -t -1 --expectSignal=1 -m 125.0 -n $cat 
+#     combine output_datacard_rootfile_/Datacard_2017_${cat}__mu_inclusive.root -M Significance --toysFrequentist -t -1 --expectSignal=1 -m 125.0 -n $cat 
 #     # combine output_Datacard/Datacard_2017_mu_inclusive.root -M AsymptoticLimits --run=blind -m 125.0 --rAbsAcc 0.00000001 -n $cat
 #     # python3 RunFits.py --year 2017 --inputWS output_datacard_rootfile_/Datacard_2017_${cat}__mu_inclusive.root --inputJson inputs.json --mode mu_inclusive
 # done
