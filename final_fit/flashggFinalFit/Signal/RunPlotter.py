@@ -18,7 +18,7 @@ def get_options():
 
   parser.add_option('--procs', dest='procs', default="ggH,VBF,WminusH,WplusH,ZH,ttH", help="Comma separated list of processes to include. all = sum all signal procs")  
   parser.add_option('--years', dest='years', default='2016preVFP,2016postVFP,2017,2018', help="Comma separated list of years to include")  
-  parser.add_option('--cats', dest='cats', default='ggH0,ggH1,ggH2,ggH3,VBF0,VBF1,VBF2,VBF3,lep,VH,ZH,ttHh,ttHl', help="Comma separated list of analysis categories to include. all = sum of all categories, wall = weighted sum of categories (requires S/S+B from ./Plots/getCatInfo.py)")
+  parser.add_option('--cats', dest='cats', default='ggH0,ggH1,ggH2,ggH3,VBF0,VBF1,VBF2,VBF3,VH,ZH,ttHh,ttHl', help="Comma separated list of analysis categories to include. all = sum of all categories, wall = weighted sum of categories (requires S/S+B from ./Plots/getCatInfo.py)")
   parser.add_option('--loadCatWeights', dest='loadCatWeights', default='', help="Load S/S+B weights for analysis categories (path to weights json file)")
   parser.add_option('--ext', dest='ext', default='test', help="Extension: defines output dir where signal models are saved")
   parser.add_option("--xvar", dest="xvar", default='CMS_hzg_mass:m_{ ll#gamma}:GeV', help="x-var (name:title:units)")
@@ -93,7 +93,8 @@ for catID,f in inputFiles.items():
   
   # Calc norm factor
   if d.sumEntries() == 0: nf = 0
-  else: nf = norms[k].getVal()/d.sumEntries()
+  # else: nf = norms[k].getVal()/d.sumEntries()
+  else: nf = 1
   # Fill dataset with correct normalisation + reweight if using cat weights
   for i in range(d.numEntries()):
     p = d.get(i)
@@ -104,10 +105,10 @@ for catID,f in inputFiles.items():
   
   # Extract pdf and create histogram
   pdf = w.pdf("extend%s_%sThisLumi"%(outputWSObjectTitle__,_id))
-  # set_trace()
   hpdfs[_id] = pdf.createHistogram("h_pdf_%s"%_id,xvar,ROOT.RooFit.Binning(opt.pdf_nBins)).Clone("h_pdf_%s"%_id)
   hpdfs[_id].SetDirectory(0)  # Detach from the file
-  hpdfs[_id].Scale(wcat*float(opt.nBins)/320) # FIXME: hardcoded 320
+  # hpdfs[_id].Scale(wcat*float(opt.nBins)/320) # FIXME: hardcoded 320
+  hpdfs[_id].Scale(wcat*d.sumEntries()*opt.pdf_nBins/opt.nBins/hpdfs[_id].Integral()) # FIXME: hardcoded 320
   
   fin.Close()
     
@@ -203,8 +204,6 @@ for catID in opt.cats.split(","):
           hists['pdf_%s'%(proc)].Reset()
         # Fill
         hists['pdf_%s'%(proc)] += p
-
-      # set_trace()    
 
 # Make plot
 if len(opt.years.split(",")) > 1:

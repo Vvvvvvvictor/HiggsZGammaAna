@@ -20,7 +20,6 @@
 #include "RooHist.h"
 #include "RooAbsData.h"
 #include "RooAbsPdf.h"
-#include "RooGenericPdf.h"
 #include "RooArgSet.h"
 #include "RooFitResult.h"
 #include "RooMinimizer.h"
@@ -34,6 +33,11 @@
 #include "TH1I.h"
 #include "TArrow.h"
 #include "TKey.h"
+
+#include "RooGenericPdf.h"
+#include "RooRealIntegral.h"
+#include "RooNumIntConfig.h"  // Include the full definition of RooNumIntConfig
+#include "RooAddition.h"
 
 #include "RooCategory.h"
 #include "HiggsAnalysis/CombinedLimit/interface/RooMultiPdf.h"
@@ -92,11 +96,12 @@ RooAbsPdf* getPdf(PdfModelBuilder &pdfsModel, string type, int order, const char
     cerr << "[ERROR] -- getPdf() -- type " << type << " not recognised." << endl;
     return NULL;
   }
-  // if (BLIND){
+  // if (BLIND) {
   //   RooArgSet *params = pdf->getParameters((const RooArgSet*)(0));
   //   RooAbsArg *arg = pdf->getObservables(params)->first();
   //   cout << "name of observable " << arg->GetName() << endl;
-  //   RooGenericPdf *sbpdf = new RooGenericPdf(pdf->GetName(), pdf->GetTitle(), "((@0 < 120)? 1:((@0 > 130)? 1:0)) * @1", RooArgList(*arg, *pdf));
+
+  //   RooGenericPdf *sbpdf = new RooGenericPdf(pdf->GetName(), pdf->GetTitle(), "((@0 < 120 || @0 > 130)? 1:0) * @1", RooArgList(*arg, *pdf));
   //   return sbpdf;
   // }
   return pdf;
@@ -106,19 +111,80 @@ RooAbsPdf* getPdf(PdfModelBuilder &pdfsModel, string type, int order, const char
 void runFit(RooAbsPdf *pdf, RooDataSet *data, double *NLL, int *stat_t, int MaxTries){
 
 	int ntries=0;
-  	RooArgSet *params_test = pdf->getParameters((const RooArgSet*)(0));
-	params_test->Print("v");
+  RooArgSet *params_test = pdf->getParameters((const RooArgSet *)(0));
+  params_test->Print("v");
+
+  // Get observables and ensure the first one is a RooRealVar
+  RooAbsArg *arg = pdf->getObservables(params_test)->first();
+  RooRealVar *var = dynamic_cast<RooRealVar *>(arg);
+
+  var->setBins(nBinsForMass);
+  RooDataHist *dataHist = new RooDataHist("dataHist", "dataHist", RooArgSet(*var), *data);
+
+  // if (BLIND) {
+  //   RooDataHist *dataHistBlind = new RooDataHist("dataHistBlind", "dataHistBlind", RooArgSet(*var));
+  //   cout << "blind low: " << mgg_blind_low << ", blind high: " << mgg_blind_high << endl;
+  //   for (int i = 0; i < dataHist->numEntries(); i++) {
+  //       const RooArgSet *argSet = dataHist->get(i); // Keep const type
+  //       const RooRealVar *var = (const RooRealVar *)argSet->find("CMS_hzg_mass"); // Keep const type
+
+  //       if (var->getVal() < mgg_blind_low || var->getVal() > mgg_blind_high) {
+  //           // Print bin value and var value
+  //           // std::cout << "Bin value: " << dataHist->weight(*argSet) << ", var value: " << var->getVal() << std::endl;
+  //           dataHistBlind->add(*argSet, dataHist->weight(*argSet));
+  //       }
+  //   }
+  //   cout << "address of dataHistBlind: " << dataHistBlind << ", address of dataHist: " << dataHist << endl;
+  //   dataHist = dataHistBlind;
+  //   cout <<  "address of dataHist: " << dataHist << endl;
+  // }
+
+  // TCanvas *canv = new TCanvas();
+  // RooPlot *plot = var->frame();
+  // pdf->plotOn(plot);
+  // dataHist->plotOn(plot);
+  // plot->Draw();
+  // canv->SaveAs("dataHist.png");
+
+  // var->setRange("fitRange_left", mgg_low, mgg_blind_low);
+  // var->setRange("fitRange_right", mgg_blind_high, mgg_high);
+
 	int stat=1;
 	double minnll=10e8;
 	while (stat!=0){
 	  if (ntries>=MaxTries) break;
-	  // RooFitResult *fitTest = pdf->fitTo(*data,RooFit::Save(1),RooFit::Minimizer("Minuit2","migrad"),RooFit::SumW2Error(kTRUE), RooFit::EvalErrorWall(false)); //FIXME
+    // RooFitResult *fitTest;
+    // if (BLIND){
+    //   fitTest = pdf->fitTo(*dataHist,RooFit::Save(1),RooFit::Minimizer("Minuit2","migrad"),RooFit::SumW2Error(kTRUE), RooFit::EvalErrorWall(false), RooFit::CutRange("fitRange"), RooFit::SplitRange(true)); //FIXME
+    // }
+    // else {
+    //   fitTest = pdf->fitTo(*dataHist,RooFit::Save(1),RooFit::Minimizer("Minuit2","migrad"),RooFit::SumW2Error(kTRUE), RooFit::EvalErrorWall(false)); //FIXME
+    // }
+	  
     // ,RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE)); //FIXME
     
     // RooFit::Hesse(kFALSE) to remove
     // Warning in <ROOT::Math::Fitter::CalculateHessErrors>: Error when calculating Hessian
-
-    RooChi2Var *chi2_test = new RooChi2Var("chi2_test", "chi2_test", *pdf, *data->binnedClone(), RooFit::DataError(RooAbsData::Poisson));
+    RooChi2Var *chi2_test = new RooChi2Var("chi2_test", "chi2_test", *pdf, *dataHist, RooFit::DataError(RooAbsData::Poisson));
+    // if (BLIND) {
+    //   var->setRange("fitRange_left", mgg_low, mgg_blind_low);
+    //   var->setRange("fitRange_right", mgg_blind_high, mgg_high);
+    //   RooDataHist *dataHistLow = (RooDataHist *)dataHist->reduce(Form("CMS_hzg_mass < %f", mgg_blind_low));
+    //   RooDataHist *dataHistHigh = (RooDataHist *)dataHist->reduce(Form("CMS_hzg_mass > %f", mgg_blind_high));
+    //   RooDataHist *dataHistBlind = (RooDataHist *)dataHist->reduce(Form("CMS_hzg_mass > %f && CMS_hzg_mass < %f", mgg_blind_low, mgg_blind_high));
+    //   RooAbsPdf *pdf_low = (RooAbsPdf *)new RooGenericPdf(pdf->GetName(), pdf->GetTitle(), "(@0 < 120 ? 1:0) * @1", RooArgList(*arg, *pdf));
+    //   RooChi2Var *chi2_low = new RooChi2Var("chi2_low", "chi2_low", *pdf_low, *dataHistLow, RooFit::DataError(RooAbsData::Poisson));
+    //   RooAbsPdf *pdf_high = (RooAbsPdf *)new RooGenericPdf(pdf->GetName(), pdf->GetTitle(), "(@0 > 130 ? 1:0) * @1", RooArgList(*arg, *pdf));
+    //   RooChi2Var *chi2_high = new RooChi2Var("chi2_high", "chi2_high", *pdf_high, *dataHistHigh, RooFit::DataError(RooAbsData::Poisson));
+    //   RooChi2Var *chi2_blind = new RooChi2Var("chi2_blind", "chi2_blind", *pdf, *dataHistBlind, RooFit::DataError(RooAbsData::Poisson));
+    //   chi2_test = (RooChi2Var *)new RooAddition("chi2_test", "chi2_test", RooArgList(*chi2_low, *chi2_high));
+    //   RooChi2Var *chi2_full = new RooChi2Var("chi2_full", "chi2_full", *pdf, *dataHist, RooFit::DataError(RooAbsData::Poisson));
+    //   cout << "chi2_low: " << chi2_low->getVal() << ", chi2_high: " << chi2_high->getVal() << ", chi2_blind: " << chi2_blind->getVal() << ", full chi2: " << chi2_full->getVal() << endl;
+    //   cout << "chi2_test: " << chi2_test->getVal() << endl;
+    // }
+    // else {
+    //   chi2_test = new RooChi2Var("chi2_test", "chi2_test", *pdf, *dataHist, RooFit::DataError(RooAbsData::Poisson));
+    // }
     RooMinimizer minimizer(*chi2_test);
 
     // RooNLLVar *nll_test = new RooNLLVar("nll_test", "nll_test", *pdf, *data);
@@ -442,7 +508,7 @@ void plot(RooRealVar *mass, RooMultiPdf *pdfs, RooCategory *catIndex, RooDataSet
     if (icat<=6) col=color[icat];
     else {col=kBlack; style++;}
     catIndex->setIndex(icat);
-    pdfs->getCurrentPdf()->fitTo(*data,RooFit::Minos(0),RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE));	 //FIXME
+    // pdfs->getCurrentPdf()->fitTo(*data,RooFit::Minos(0),RooFit::Minimizer("Minuit2","minimize"),RooFit::SumW2Error(kTRUE));	 //FIXME
     pdfs->getCurrentPdf()->plotOn(plot,Binning(nBinsForMass), LineColor(col),LineStyle(style));//,RooFit::NormRange("fitdata_1,fitdata_2"));
     TObject *pdfLeg = plot->getObject(int(plot->numItems()-1));
     std::string ext = "";
@@ -649,7 +715,7 @@ int getBestFitFunction(RooMultiPdf *bkg, RooDataSet *data, RooCategory *cat, boo
 }
 
 int main(int argc, char* argv[]){
-  RooMsgService::instance().setGlobalKillBelow(RooFit::WARNING);
+  // RooMsgService::instance().setGlobalKillBelow(RooFit::WARNING);
   setTDRStyle();
   writeExtraText = true;       // if extra text
   extraText  = "Preliminary";  // default extra text is "Preliminary"
@@ -693,7 +759,7 @@ int main(int argc, char* argv[]){
     ("year", po::value<string>(&year_)->default_value("2016"),                                  "Dataset year")
     ("Cats,f", po::value<string>(&CatsStr_)->default_value("ggH0,ggH1,ggH2,ggH3,VBF0,VBF1,VBF2,VBF3,lep,VH,ZH,ttHh,ttHl"), "Flashgg category names to consider")
     ("verbose,v",                                                                               "Run with more output")
-    ("mhLow,L", po::value<float>(&mgglow_)->default_value(100.),                                 "Low ALP mass point")
+    ("mhLow,L", po::value<float>(&mgglow_)->default_value(97.),                                 "Low ALP mass point")
     ("mhHigh,H", po::value<float>(&mgghigh_)->default_value(180.),                              "High ALP mass point")
     ("mhLowBlind,LB", po::value<float>(&mggblindlow_)->default_value(120.),                     "Low ALP blind mass point")
     ("mhHighBlind,HB", po::value<float>(&mggblindhigh_)->default_value(130.),                   "High ALP blind mass point")
@@ -754,7 +820,6 @@ int main(int argc, char* argv[]){
 			inWS = (RooWorkspace*)inFile->Get("cms_hgg_workspace");
 		}
 	} else {
-    std::cout << "[INFO]  I am here " << std::endl;
 		inWS = (RooWorkspace*)inFile->Get("CMS_hzg_workspace");//FIXME
 	}
 	if (verbose) std::cout << "[INFO]  inWS open " << inWS << std::endl;
@@ -866,11 +931,10 @@ int main(int argc, char* argv[]){
 			thisdataBinned_name = Form("roohist_data_mass_cat%s",Cats_[cat].c_str());
 			//RooDataSet *data = (RooDataSet*)dataFull;
 		}
-    // if (BLIND) {
-    //   dataFull = (RooDataSet*)dataFull->reduce(Form("CMS_hzg_mass < %f || CMS_hzg_mass > %f",mgg_blind_low,mgg_blind_high));
-    // }
 		RooDataHist thisdataBinned(thisdataBinned_name.c_str(),"data",*mass,*dataFull);
-		data = (RooDataSet*)&thisdataBinned;
+    // data = (RooDataSet*)&thisdataBinned;
+
+    data = dataFull;
 
     // for (int i=0; i<data->numEntries(); i++){
     //   std::cout << "[INFO]  data[" << i << "] = " << data->get(i)->getRealValue("CMS_hzg_mass") << "weight = " << data->get(i)->getRealValue("weight") << std::endl;
@@ -931,7 +995,10 @@ int main(int argc, char* argv[]){
 					}
 					double gofProb=0;
 					// otherwise we get it later ...          
-					if (!saveMultiPdf && fitStatus != 5) plot(mass,bkgPdf,data,Form("%s/%s%d_%s.pdf",outDir.c_str(),funcType->c_str(),order,Cats_[cat].c_str()),Cats_,fitStatus,&gofProb);
+					if (!saveMultiPdf && fitStatus != 5) {
+            mass->setBins(nBinsForMass);
+            plot(mass,bkgPdf,data,Form("%s/%s%d_%s.pdf",outDir.c_str(),funcType->c_str(),order,Cats_[cat].c_str()),Cats_,fitStatus,&gofProb);
+          }
           cout << "[INFO]\t funcType: " << *funcType << " order: " << order << " prevNll: " << prevNll << " thisNll: " << thisNll << " chi2: " << chi2 << " prob: " << prob << endl;
 					// fprintf(resFile,"%15s && %d && %10.2f && %10.2f && %10.2f \\\\\n",funcType->c_str(),order,thisNll,chi2,prob);
           prevNll=thisNll;
@@ -990,6 +1057,7 @@ int main(int argc, char* argv[]){
 
             if(fitStatus != 5)
             {
+              mass->setBins(nBinsForMass);
 						  plot(mass,bkgPdf,data,Form("%s/%s%d_%s.pdf",outDir.c_str(),funcType->c_str(),order,Cats_[cat].c_str()),Cats_,fitStatus,&gofProb);
             }
 
@@ -1003,7 +1071,7 @@ int main(int argc, char* argv[]){
             
 						if ((prob < upperEnvThreshold) ) { // Looser requirements for the envelope
 
-							if (gofProb > 0.01 ) { // || order == truthOrder ) {  // Good looking fit or one of our regular truth functions
+							if (gofProb > 0.01) { // || order == truthOrder ) {  // Good looking fit or one of our regular truth functions
 
 								std::cout << "[INFO] Adding to Envelope " << bkgPdf->GetName() << " "<< gofProb
 									<< " 2xNLL + c is " << myNll + bkgPdf->getVariables()->getSize() <<  std::endl;
@@ -1072,6 +1140,7 @@ int main(int argc, char* argv[]){
 		choices_envelope_vec.push_back(choices_envelope);
 		pdfs_vec.push_back(pdfs);
 
+    mass->setBins(nBinsForMass);
 		plot(mass,pdfs,data,Form("%s/truths_%s",outDir.c_str(),Cats_[cat].c_str()),Cats_,cat);
 
 		if (saveMultiPdf){

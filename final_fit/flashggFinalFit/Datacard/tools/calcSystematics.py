@@ -4,6 +4,8 @@ import ROOT
 from commonTools import *
 from commonObjects import *
 
+from pdb import set_trace
+
 # sd = "systematics dataframe"
 
 # For constant systematics:
@@ -66,18 +68,18 @@ def factoryType(d,s):
   for ir, r in d[d['type']=='sig'].iterrows():
     f = ROOT.TFile(r.inputWSFile)
     ws = f.Get(inputWSName__)
-    dataHistUp = "%s_%sUp01sigma"%(r.nominalDataName,s['name'])
-    dataHistDown = "%s_%sDown01sigma"%(r.nominalDataName,s['name'])
+    dataHistUp = "%s_%sup01sigma"%(r.nominalDataName,s['name'])
+    dataHistDown = "%s_%sdown01sigma"%(r.nominalDataName,s['name'])
 
     # Check if syst is var (i.e. weight) in workspace
     if ws.allVars().selectByName("%s*"%(s['name'])).getSize():
       nWeights = ws.allVars().selectByName("%s*"%(s['name'])).getSize()
       ws.Delete()
       f.Close()
-      if nWeights == 2: return "a_w"
+      if nWeights == 2 or nWeights == 3: return "a_w"
       elif nWeights == 1: return "s_w"
       else:
-        print(" --> [ERROR] systematic %s: > 2 weights in workspace. Leaving..."%s['name'])
+        print(" --> [ERROR] systematic %s: > 3 weights in workspace. Leaving..."%s['name'])
         sys.exit(1)
 
     # Check if RooDataHist exists for syst
@@ -123,7 +125,8 @@ def calcSystYields(_nominalDataName,_nominalDataContents,_inputWS,_systFactoryTy
   for s,f in _systFactoryTypes.items():
     if f == "a_h": continue
     elif f == "a_w":
-      if( "%sUp"%s not in _nominalDataContents )|( "%sDown"%s not in _nominalDataContents ):
+      if( "%s_up"%s not in _nominalDataContents )|( "%s_down"%s not in _nominalDataContents ):
+        set_trace()
         systToSkip.append(s)
         print(" --> [%s] Weight in nominal RooDataSet for systematic (%s) does not exist for (%s,%s). %s"%(errMessage,s,proc,year,errString))
         if not ignoreWarnings: sys.exit(1) 
@@ -158,7 +161,7 @@ def calcSystYields(_nominalDataName,_nominalDataContents,_inputWS,_systFactoryTy
         else:
           centralWeightStr = "weight_central"
           f_central = p.getRealValue(centralWeightStr) if centralWeightStr in _nominalDataContents else 1.
-          f_up, f_down = p.getRealValue("%sUp"%s), p.getRealValue("%sDown"%s)
+          f_up, f_down = p.getRealValue("%s_up"%s), p.getRealValue("%s_down"%s)
           # Checks:
           # 1) if central weights are zero then skip event
           if f_central == 0: continue
@@ -209,7 +212,7 @@ def calcSystYields(_nominalDataName,_nominalDataContents,_inputWS,_systFactoryTy
   # For systematics stored as separate RooDataHists
   for s, f in _systFactoryTypes.items():
     if f == "a_h":
-      data_hist_up, data_hist_down = _inputWS.data("%s_%sUp01sigma"%(_nominalDataName,s)), _inputWS.data("%s_%sDown01sigma"%(_nominalDataName,s))
+      data_hist_up, data_hist_down = _inputWS.data("%s_%sup01sigma"%(_nominalDataName,s)), _inputWS.data("%s_%sdown01sigma"%(_nominalDataName,s))
       # Check if datasets exist: if not print warning message and set to nominal weight
       if( data_hist_up == None )|( data_hist_down == None ):
         print(" --> [%s] RooDataHist for systematic (%s) does not exist for (%s,%s). %s"%(errMessage,s,proc,year,errString))

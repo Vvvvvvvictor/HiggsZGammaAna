@@ -91,7 +91,7 @@ class BDTApplicator:
 def process_files(applicators, output_folder, input_folder):
     """Process input files and write the results to output ROOT files."""
     region_map = {
-        'zero_to_one_jet': 'ggH', 'two_jet': 'VBF', 'VH_ttH': 'lep',
+        'zero_to_one_jet': 'ggH', 'two_jet': 'VBF',
         'VH': 'VH', 'ZH': 'ZH', 'ttH_had': 'ttHh', 'ttH_lep': 'ttHl'
     }
     syst_variations = [

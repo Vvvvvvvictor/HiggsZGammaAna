@@ -8,7 +8,7 @@ bkg_list = ["ZGToLLG", "EWKZ2J", "ZG2JToG2L2J", "WGToLNuG", "TT", "TTGJets", "TG
 sig_list = ["ggH", "VBF", "WminusH", "WplusH", "ZH", "ttH"]
 data_list = ["Data"]
 # channels = ["zero_jet", "one_jet", "two_jet", "VH_ttH"]
-channels = ["zero_to_one_jet", "two_jet"]
+channels = ["two_jet"]
 com_sel = []
 target_path = "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/bkg_sig_template.root"
 
