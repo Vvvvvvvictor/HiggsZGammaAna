@@ -467,6 +467,8 @@ def decorate(data):
     for i in np.arange(1,5):
         data['jet_%d_deltaphi' %i] = data.apply(lambda x: compute_Delta_Phi(x, "jet", min_jet=i), axis=1)
         data['jet%dG_deltaR' %i] = data.apply(lambda x: compute_Delta_R(x, min_jet=i), axis=1)
+    data['max_jet_deltaR'] = data[['jet1G_deltaR', 'jet2G_deltaR']].max(axis=1)
+    data['min_jet_deltaR'] = data[['jet1G_deltaR', 'jet2G_deltaR']].min(axis=1)
     data['additional_lepton_1_deltaphi'] = data.apply(lambda x: compute_Delta_Phi(x, 'additional_lepton_1_phi', min_jet=0), axis=1)
     data['additional_lepton_2_deltaphi'] = data.apply(lambda x: compute_Delta_Phi(x, 'additional_lepton_2_phi', min_jet=0), axis=1) 
     data['MET_deltaphi'] = data.apply(lambda x: compute_Delta_Phi(x, 'MET_phi'), axis=1)

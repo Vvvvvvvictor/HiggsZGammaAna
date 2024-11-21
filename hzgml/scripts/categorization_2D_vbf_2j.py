@@ -94,7 +94,7 @@ def gettingsig(input_path, region, variable, vb, boundaries_VBF, boundaries, tra
             for data in tqdm(tree.iterate(columns, step_size=500000), desc=f"Loading {category}", bar_format="{desc}: {percentage:3.0f}%|{bar:20}{r_bar}"):
     
                 if 'sid' in category:
-                    data = data[(data.H_mass >= 100) & (data.H_mass <= 180) & ((data.H_mass < 122) | (data.H_mass > 128))]
+                    data = data[(data.H_mass >= 100) & (data.H_mass <= 180) & ((data.H_mass < 120) | (data.H_mass > 130))]
                     data['w'] = data.weight
 
                 elif 'tot' in category:
@@ -102,7 +102,7 @@ def gettingsig(input_path, region, variable, vb, boundaries_VBF, boundaries, tra
                     data['w'] = data.weight
 
                 else:
-                    data = data[(data.H_mass >= 122) & (data.H_mass <= 128)]
+                    data = data[(data.H_mass >= 120) & (data.H_mass <= 130)]
                     data['w'] = data.weight
         
                 for i in range(len(boundaries)):
@@ -187,30 +187,31 @@ def categorizing(input_path, region, variable, sigs, bkgs, nscan, nscanvbf, minN
     h_sig_raw = TH2F('h_sig_raw', 'h_sig_raw', nscanvbf, 0., 1., nscan, 0., 1.) 
     h_sig=TH1F('h_sig','h_sig',nscanvbf,0,1)
 
-    t_sig.Draw(f"{variable}_score{'_t' if transform else ''}:{variable}_score_VBF{'_t' if transform_vbf else ''}>>h_sig_raw", "weight*%f*((H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
-    t_sig.Draw(f"{variable}_score_VBF{'_t' if transform_vbf else ''}>>h_sig", "weight*%f*((H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1,n_fold,fold if n_fold != 1 else 1))
+    t_sig.Draw(f"{variable}_score{'_t' if transform else ''}:{variable}_score_VBF{'_t' if transform_vbf else ''}>>h_sig_raw", "weight*%f*((H_mass>=120&&H_mass<=130)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
+    t_sig.Draw(f"{variable}_score_VBF{'_t' if transform_vbf else ''}>>h_sig", "weight*%f*((H_mass>=120&&H_mass<=130)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1,n_fold,fold if n_fold != 1 else 1))
 
     # filling bkg histograms
     if estimate in ["fullSim", "fullSimrw"]:
         h_bkgmc_cen_raw = TH2F('h_bkgmc_cen_raw', 'h_bkgmc_cen_raw', nscanvbf, 0., 1., nscan, 0., 1.)
         h_bkgmc_cen = TH1F('h_bkgmc_cen', 'h_bkgmc_cen', nscanvbf, 0., 1.)
-        t_bkgmc.Draw(f"{variable}_score{'_t' if transform else ''}:{variable}_score_VBF{'_t' if transform_vbf else ''}>>h_bkgmc_cen_raw", "weight*%f*((H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
-        t_bkgmc.Draw(f"{variable}_score_VBF{'_t' if transform_vbf else ''}>>h_bkgmc_cen", "weight*%f*((H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
+        t_bkgmc.Draw(f"{variable}_score{'_t' if transform else ''}:{variable}_score_VBF{'_t' if transform_vbf else ''}>>h_bkgmc_cen_raw", "weight*%f*((H_mass>=120&&H_mass<=130)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
+        t_bkgmc.Draw(f"{variable}_score_VBF{'_t' if transform_vbf else ''}>>h_bkgmc_cen", "weight*%f*((H_mass>=120&&H_mass<=130)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
     if estimate in ["fullSimrw"]:
         h_bkgmc_sid_raw = TH2F('h_bkgmc_sid_raw', 'h_bkgmc_sid_raw', nscanvbf, 0., 1., nscan, 0., 1.)
         h_bkgmc_sid = TH1F('h_bkgmc_sid', 'h_bkgmc_sid', nscanvbf, 0., 1.)
-        t_bkgmc.Draw(f"{variable}_score{'_t' if transform else ''}:{variable}_score_VBF{'_t' if transform_vbf else ''}>>h_bkgmc_sid_raw", "weight*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
-        t_bkgmc.Draw(f"{variable}_score_VBF{'_t' if transform_vbf else ''}>>h_bkgmc_sid", "weight*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
+        t_bkgmc.Draw(f"{variable}_score{'_t' if transform else ''}:{variable}_score_VBF{'_t' if transform_vbf else ''}>>h_bkgmc_sid_raw", "weight*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=120&&H_mass<=130)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
+        t_bkgmc.Draw(f"{variable}_score_VBF{'_t' if transform_vbf else ''}>>h_bkgmc_sid", "weight*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=120&&H_mass<=130)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
     if estimate in ["fullSimrw", "data_sid"]:
         h_data_sid_raw = TH2F('h_data_sid_raw', 'h_data_sid_raw', nscanvbf, 0., 1., nscan, 0., 1.)
         h_data_sid = TH1F('h_data_sid', 'h_data_sid', nscanvbf, 0., 1.)
-        t_data_sid.Draw(f"{variable}_score{'_t' if transform else ''}:{variable}_score_VBF{'_t' if transform_vbf else ''}>>h_data_sid_raw", "weight*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
-        t_data_sid.Draw(f"{variable}_score_VBF{'_t' if transform_vbf else ''}>>h_data_sid", "weight*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
+        t_data_sid.Draw(f"{variable}_score{'_t' if transform else ''}:{variable}_score_VBF{'_t' if transform_vbf else ''}>>h_data_sid_raw", "weight*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=120&&H_mass<=130)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
+        t_data_sid.Draw(f"{variable}_score_VBF{'_t' if transform_vbf else ''}>>h_data_sid", "weight*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=120&&H_mass<=130)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
 
     fitboundary = 0.5
     fitboundary_g = 0.5
 
     zmax, boundaries_VBF, boundaries = 0, -1, -1
+    
     for vb in tqdm(range(10, 70), ncols=100):
 
         h_sig_v = projectionY(h_sig_raw, vb, nscanvbf+1, f"h_sig_v_{vb}", nscan, 0, 1)

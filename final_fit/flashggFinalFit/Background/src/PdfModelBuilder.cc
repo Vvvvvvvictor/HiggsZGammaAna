@@ -255,13 +255,13 @@ RooAbsPdf* PdfModelBuilder::getBernsteinStepxGau(string prefix, int order, int m
   
   for (int i=0; i<order; i++){
     string name = Form("%s_b%d",prefix.c_str(),i);
-    //params.insert(pair<string,RooRealVar*>(name, new RooRealVar(name.c_str(),name.c_str(),1.0,0.,5.)));
+    //params.insert(pair<string,RooRealVar*>(name, new RooRealVar(name.c_s∫tr(),name.c_str(),1.0,0.,5.)));
     RooRealVar *param = new RooRealVar(name.c_str(),name.c_str(), param_bern, param_lbern, param_hbern);
     params.insert(pair<string,RooRealVar*>(name,param));
     coeffList->add(*params[name]);
   }
 
-  obs_var->setRange(92, 180);
+  obs_var->setRange(97., 180.);
 
   //RooBernstein *bern = new RooBernstein(prefix.c_str(),prefix.c_str(),*obs_var,*coeffList);
   if (order==1) {
@@ -386,7 +386,7 @@ RooAbsPdf* PdfModelBuilder::getPowerLawStepxGau(string prefix, int order, int ca
   //   }
   // }
   
-  obs_var->setRange(92, 180);
+  obs_var->setRange(97., 180.);
 
   RooRealVar *sigma = new RooRealVar(Form("%s_sigma_p%d",prefix.c_str(),order),Form("%s_sigma_p%d",prefix.c_str(),order),sigma_pow,sigma_lpow,sigma_hpow);
   RooRealVar *turnon = new RooRealVar(Form("%s_turnon_p%d",prefix.c_str(),order),Form("%s_turnon_p%d",prefix.c_str(),order),turnon_pow,turnon_lpow,turnon_hpow);
@@ -395,7 +395,7 @@ RooAbsPdf* PdfModelBuilder::getPowerLawStepxGau(string prefix, int order, int ca
     if (order==1) {
       RooRealVar *p1          = new RooRealVar(Form("%s_p1_pow1",prefix.c_str()),Form("%s_p1_pow1",prefix.c_str()),par1_pow1,par1_lpow1,par1_hpow1);
       RooRealVar *cp1         = new RooRealVar(Form("%s_cp1_pow1",prefix.c_str()),Form("%s_cp1_pow1",prefix.c_str()),coeff1_pow1,coeff1_lpow1,coeff1_hpow1);
-    	RooGenericPdf *step     = new RooGenericPdf(Form("%s_step_pow1",prefix.c_str()),Form("%s_step_pow1",prefix.c_str()), "1e-20+(@0 > @1)*(@3*(@0)^(@2))", RooArgList(*obs_var,*turnon,*p1,*cp1));
+    	RooGenericPdf *step     = new RooGenericPdf(Form("%s_step_pow1",prefix.c_str()),Form("%s_step_pow1",prefix.c_str()), "(@0 > @1)*(@3*(@0)^(@2))", RooArgList(*obs_var,*turnon,*p1,*cp1)); // 1e-20+
       RooGaussModel *gau      = new RooGaussModel(Form("%s_gau_pow1",prefix.c_str()),Form("%s_gau_pow1",prefix.c_str()),*obs_var,*mean,*sigma);
       RooFFTConvPdf *gauxpow  = new RooFFTConvPdf(Form("%s_gauxpow1",prefix.c_str()),Form("%s_gauxpow1",prefix.c_str()),*obs_var,*step,*gau);
       return gauxpow;
@@ -404,7 +404,7 @@ RooAbsPdf* PdfModelBuilder::getPowerLawStepxGau(string prefix, int order, int ca
       RooRealVar *cp1         = new RooRealVar(Form("%s_cp1_pow3",prefix.c_str()),Form("%s_cp1_pow3",prefix.c_str()),coeff1_pow3,coeff1_lpow3,coeff1_hpow3);
       RooRealVar *p3          = new RooRealVar(Form("%s_p3_pow3",prefix.c_str()),Form("%s_p3_pow3",prefix.c_str()),par3_pow3,par3_lpow3,par3_hpow3);
       RooRealVar *cp3         = new RooRealVar(Form("%s_cp3_pow3",prefix.c_str()),Form("%s_cp3_pow3",prefix.c_str()),coeff3_pow3,coeff3_lpow3,coeff3_hpow3);
-    	RooGenericPdf *step     = new RooGenericPdf(Form("%s_step_pow3",prefix.c_str()),Form("%s_step_pow3",prefix.c_str()), "1e-20+(@0 > @1)*(@3*(@0)^(@2)+@5*(@0)^(@4))", RooArgList(*obs_var,*turnon,*p1,*cp1,*p3,*cp3));
+    	RooGenericPdf *step     = new RooGenericPdf(Form("%s_step_pow3",prefix.c_str()),Form("%s_step_pow3",prefix.c_str()), "(@0 > @1)*(@3*(@0)^(@2)+@5*(@0)^(@4))", RooArgList(*obs_var,*turnon,*p1,*cp1,*p3,*cp3)); // 1e-20+
       RooGaussModel *gau      = new RooGaussModel(Form("%s_gau_pow3",prefix.c_str()),Form("%s_gau_pow3",prefix.c_str()),*obs_var,*mean,*sigma);
       RooFFTConvPdf *gauxpow  = new RooFFTConvPdf(Form("%s_gauxpow3",prefix.c_str()),Form("%s_gauxpow3",prefix.c_str()),*obs_var,*step,*gau);
       return gauxpow;
@@ -415,7 +415,7 @@ RooAbsPdf* PdfModelBuilder::getPowerLawStepxGau(string prefix, int order, int ca
       RooRealVar *cp3         = new RooRealVar(Form("%s_cp3_pow5",prefix.c_str()),Form("%s_cp3_pow5",prefix.c_str()),coeff3_pow5,coeff3_lpow5,coeff3_hpow5);
       RooRealVar *p5          = new RooRealVar(Form("%s_p5_pow5",prefix.c_str()),Form("%s_p5_pow5",prefix.c_str()),par5_pow5,par5_lpow5,par5_hpow5);
       RooRealVar *cp5         = new RooRealVar(Form("%s_cp5_pow5",prefix.c_str()),Form("%s_cp5_pow5",prefix.c_str()),coeff5_pow5,coeff5_lpow5,coeff5_hpow5);
-    	RooGenericPdf *step     = new RooGenericPdf(Form("%s_step_pow5",prefix.c_str()),Form("%s_step_pow5",prefix.c_str()), "1e-20+(@0 > @1)*(@3*(@0)^(@2)+@5*(@0)^(@4)+@7*(@0)^(@6))", RooArgList(*obs_var,*turnon,*p1,*cp1,*p3,*cp3,*p5,*cp5));
+    	RooGenericPdf *step     = new RooGenericPdf(Form("%s_step_pow5",prefix.c_str()),Form("%s_step_pow5",prefix.c_str()), "(@0 > @1)*(@3*(@0)^(@2)+@5*(@0)^(@4)+@7*(@0)^(@6))", RooArgList(*obs_var,*turnon,*p1,*cp1,*p3,*cp3,*p5,*cp5)); // 1e-20+
       RooGaussModel *gau      = new RooGaussModel(Form("%s_gau_pow5",prefix.c_str()),Form("%s_gau_pow5",prefix.c_str()),*obs_var,*mean,*sigma);
       RooFFTConvPdf *gauxpow  = new RooFFTConvPdf(Form("%s_gauxpow5",prefix.c_str()),Form("%s_gauxpow5",prefix.c_str()),*obs_var,*step,*gau);
       return gauxpow;
@@ -528,14 +528,14 @@ RooAbsPdf* PdfModelBuilder::getExponentialStepxGau(string prefix, int order, int
   
   coeff1_exp1 = 0.5;      coeff1_lexp1 = 0.;    coeff1_hexp1 = 1.;
   par1_exp1 = -0.03;      par1_lexp1 = -0.03;   par1_hexp1 = 0.;
-  sigma_exp = 1;          sigma_lexp = 1;       sigma_hexp = 5.;
+  sigma_exp = 1;          sigma_lexp = 1.;       sigma_hexp = 10.;
   turnon_exp = 105.;      turnon_lexp = 90.;   turnon_hexp = 110.;
   
   coeff1_exp3 = 0.7;        coeff1_lexp3 = 0.;    coeff1_hexp3 = 1.;
   coeff3_exp3 = 0.8;        coeff3_lexp3 = 0.;    coeff3_hexp3 = 1.;
   par1_exp3 = -0.15;        par1_lexp3 = -0.2;    par1_hexp3 = 0.;
   par3_exp3 = -0.15;        par3_lexp3 = -0.2;    par3_hexp3 = 0.;
-  sigma_exp = 2.;           sigma_lexp = 1.;      sigma_hexp = 5.;
+  sigma_exp = 2.;           sigma_lexp = 1.;      sigma_hexp = 10.;
   turnon_exp = 100.;        turnon_lexp = 90.;   turnon_hexp = 110.;
   
   coeff1_exp5 = 0.05;       coeff1_lexp5 = 0.;    coeff1_hexp5 = 1.;
@@ -800,7 +800,7 @@ RooAbsPdf* PdfModelBuilder::getExponentialStepxGau(string prefix, int order, int
   //   }
   // }
 
-  obs_var->setRange(92, 180);
+  obs_var->setRange(97., 180.);
 
   RooRealVar *sigma = new RooRealVar(Form("%s_sigma_p%d",prefix.c_str(),order),Form("%s_sigma_p%d",prefix.c_str(),order),sigma_exp,sigma_lexp,sigma_hexp);
   RooRealVar *turnon = new RooRealVar(Form("%s_turnon_p%d",prefix.c_str(),order),Form("%s_turnon_p%d",prefix.c_str(),order),turnon_exp,turnon_lexp,turnon_hexp);
@@ -808,7 +808,7 @@ RooAbsPdf* PdfModelBuilder::getExponentialStepxGau(string prefix, int order, int
     if (order==1) {
       RooRealVar *p1 = new RooRealVar(Form("%s_p1_exp1",prefix.c_str()),Form("%s_p1_exp1",prefix.c_str()),par1_exp1,par1_lexp1,par1_hexp1);
       RooRealVar *cp1 = new RooRealVar(Form("%s_cp1_exp1",prefix.c_str()),Form("%s_cp1_exp1",prefix.c_str()),coeff1_exp1,coeff1_lexp1,coeff1_hexp1);
-    	RooGenericPdf *step = new RooGenericPdf(Form("%s_step_exp1",prefix.c_str()),Form("%s_step_exp1",prefix.c_str()), "1e-20+(@0 > @1)*(@3*TMath::Exp(@0*@2))", RooArgList(*obs_var,*turnon,*p1,*cp1));
+    	RooGenericPdf *step = new RooGenericPdf(Form("%s_step_exp1",prefix.c_str()),Form("%s_step_exp1",prefix.c_str()), "(@0 > @1)*(@3*TMath::Exp(@0*@2))", RooArgList(*obs_var,*turnon,*p1,*cp1)); // 1e-20+
       RooGaussModel *gau = new RooGaussModel(Form("%s_gau_exp1",prefix.c_str()),Form("%s_gau_exp1",prefix.c_str()),*obs_var,*mean,*sigma);
       RooFFTConvPdf *gauxexp = new RooFFTConvPdf(Form("%s_gauxexp1",prefix.c_str()),Form("%s_gauxexp1",prefix.c_str()),*obs_var,*step,*gau);
       return gauxexp;
@@ -817,7 +817,7 @@ RooAbsPdf* PdfModelBuilder::getExponentialStepxGau(string prefix, int order, int
       RooRealVar *cp1 = new RooRealVar(Form("%s_cp1_exp3",prefix.c_str()),Form("%s_cp1_exp3",prefix.c_str()),coeff1_exp3,coeff1_lexp3,coeff1_hexp3);
       RooRealVar *p3 = new RooRealVar(Form("%s_p3_exp3",prefix.c_str()),Form("%s_p3_exp3",prefix.c_str()),par3_exp3,par3_lexp3, par3_hexp3);
       RooRealVar *cp3 = new RooRealVar(Form("%s_cp3_exp3",prefix.c_str()),Form("%s_cp3_exp3",prefix.c_str()),coeff3_exp3,coeff3_lexp3,coeff3_hexp3);
-    	RooGenericPdf *step = new RooGenericPdf(Form("%s_step_exp3",prefix.c_str()),Form("%s_step_exp3",prefix.c_str()), "1e-20+(@0 > @1)*(@3*TMath::Exp(@0*@2)+@5*TMath::Exp(@0*@4))", RooArgList(*obs_var,*turnon,*p1,*cp1,*p3,*cp3));
+    	RooGenericPdf *step = new RooGenericPdf(Form("%s_step_exp3",prefix.c_str()),Form("%s_step_exp3",prefix.c_str()), "(@0 > @1)*(@3*TMath::Exp(@0*@2)+@5*TMath::Exp(@0*@4))", RooArgList(*obs_var,*turnon,*p1,*cp1,*p3,*cp3)); //1e-20+
       RooGaussModel *gau = new RooGaussModel(Form("%s_gau_exp3",prefix.c_str()),Form("%s_gau_exp3",prefix.c_str()),*obs_var,*mean,*sigma);
       RooFFTConvPdf *gauxexp = new RooFFTConvPdf(Form("%s_gauxexp3",prefix.c_str()),Form("%s_gauxexp3",prefix.c_str()),*obs_var,*step,*gau);
       return gauxexp;
@@ -828,7 +828,7 @@ RooAbsPdf* PdfModelBuilder::getExponentialStepxGau(string prefix, int order, int
       RooRealVar *cp3 = new RooRealVar(Form("%s_cp3_exp5",prefix.c_str()),Form("%s_cp3_exp5",prefix.c_str()),coeff3_exp5,coeff3_lexp5,coeff3_hexp5);
       RooRealVar *p5 = new RooRealVar(Form("%s_p5_exp5",prefix.c_str()),Form("%s_p5_exp5",prefix.c_str()),par5_exp5,par5_lexp5, par5_hexp5);
       RooRealVar *cp5 = new RooRealVar(Form("%s_cp5_exp5",prefix.c_str()),Form("%s_cp5_exp5",prefix.c_str()),coeff5_exp5,coeff5_lexp5,coeff5_hexp5);
-    	RooGenericPdf *step = new RooGenericPdf(Form("%s_step_exp5",prefix.c_str()),Form("%s_step_exp5",prefix.c_str()), "1e-20+(@0 > @1)*(@3*TMath::Exp(@0*@2)+@5*TMath::Exp(@0*@4)+@7*TMath::Exp(@0*@6))", RooArgList(*obs_var,*turnon,*p1,*cp1,*p3,*cp3,*p5,*cp5));
+    	RooGenericPdf *step = new RooGenericPdf(Form("%s_step_exp5",prefix.c_str()),Form("%s_step_exp5",prefix.c_str()), "(@0 > @1)*(@3*TMath::Exp(@0*@2)+@5*TMath::Exp(@0*@4)+@7*TMath::Exp(@0*@6))", RooArgList(*obs_var,*turnon,*p1,*cp1,*p3,*cp3,*p5,*cp5)); // 1e-20+
       RooGaussModel *gau = new RooGaussModel(Form("%s_gau_exp5",prefix.c_str()),Form("%s_gau_exp5",prefix.c_str()),*obs_var,*mean,*sigma);
       RooFFTConvPdf *gauxexp = new RooFFTConvPdf(Form("%s_gauxexp5",prefix.c_str()),Form("%s_gauxexp5",prefix.c_str()),*obs_var,*step,*gau);
       return gauxexp;
@@ -1052,7 +1052,7 @@ RooAbsPdf* PdfModelBuilder::getLaurentStepxGau(string prefix, int order, int cat
   //   }
   // }
 
-  obs_var->setRange(92, 180);
+  obs_var->setRange(97., 180.);
   
   RooRealVar *sigma = new RooRealVar(Form("%s_sigma_p%d",prefix.c_str(),order),Form("%s_sigma_p%d",prefix.c_str(),order),sigma_lau,sigma_llau,sigma_hlau);
   RooRealVar *turnon = new RooRealVar(Form("%s_turnon_p%d",prefix.c_str(),order),Form("%s_turnon_p%d",prefix.c_str(),order),turnon_lau,turnon_llau,turnon_hlau);
@@ -1060,14 +1060,14 @@ RooAbsPdf* PdfModelBuilder::getLaurentStepxGau(string prefix, int order, int cat
   
   if (order==1) {
       RooRealVar *cp1 = new RooRealVar(Form("%s_cp1_lau1",prefix.c_str()),Form("%s_cp1_lau1",prefix.c_str()),coeff1_lau1,coeff1_llau1,coeff1_hlau1);
-      RooGenericPdf *step= new RooGenericPdf(Form("%s_step_lau1",prefix.c_str()),Form("%s_step_lau1",prefix.c_str()), "1e-20+(@0 > @1)*(@2*(@0)^(-4))", RooArgList(*obs_var,*turnon,*cp1));//step*(ax^b)
+      RooGenericPdf *step= new RooGenericPdf(Form("%s_step_lau1",prefix.c_str()),Form("%s_step_lau1",prefix.c_str()), "(@0 > @1)*(@2*(@0)^(-4))", RooArgList(*obs_var,*turnon,*cp1)); // 1e-20+
       RooGaussModel *gau = new RooGaussModel(Form("%s_gau_lau1",prefix.c_str()),Form("%s_gau_lau1",prefix.c_str()),*obs_var,*mean,*sigma);
       RooFFTConvPdf *gauxlau = new RooFFTConvPdf(Form("%s_gauxlau1",prefix.c_str()),Form("%s_gauxlau1",prefix.c_str()),*obs_var,*step,*gau);
       return gauxlau;
   } else if (order==2) {
       RooRealVar *cp1 = new RooRealVar(Form("%s_cp1_lau2",prefix.c_str()),Form("%s_cp1_lau2",prefix.c_str()),coeff1_lau2,coeff1_llau2,coeff1_hlau2);
       RooRealVar *cp2 = new RooRealVar(Form("%s_cp2_lau2",prefix.c_str()),Form("%s_cp2_lau2",prefix.c_str()),coeff2_lau2,coeff2_llau2,coeff2_hlau2);
-      RooGenericPdf *step = new RooGenericPdf(Form("%s_step_lau2",prefix.c_str()), Form("%s_step_lau2",prefix.c_str()), "1e-20+(@0 > @1)*(@2*(@0)^(-4)+@3*(@0)^(-5))", RooArgList(*obs_var,*turnon,*cp1,*cp2));//step*(ax^b+cx^d+fx^g) 
+      RooGenericPdf *step = new RooGenericPdf(Form("%s_step_lau2",prefix.c_str()), Form("%s_step_lau2",prefix.c_str()), "(@0 > @1)*(@2*(@0)^(-4)+@3*(@0)^(-5))", RooArgList(*obs_var,*turnon,*cp1,*cp2));//1e-20+
       RooGaussModel *gau = new RooGaussModel(Form("%s_gau_lau2",prefix.c_str()),Form("%s_gau_lau2",prefix.c_str()),*obs_var,*mean,*sigma);
       RooFFTConvPdf *gauxlau = new RooFFTConvPdf(Form("%s_gauxlau2",prefix.c_str()),Form("%s_gauxlau2",prefix.c_str()),*obs_var,*step,*gau);
       return gauxlau;
@@ -1075,7 +1075,7 @@ RooAbsPdf* PdfModelBuilder::getLaurentStepxGau(string prefix, int order, int cat
       RooRealVar *cp1 = new RooRealVar(Form("%s_cp1_lau3",prefix.c_str()),Form("%s_cp1_lau3",prefix.c_str()),coeff1_lau3,coeff1_llau3,coeff1_hlau3);
       RooRealVar *cp2 = new RooRealVar(Form("%s_cp2_lau3",prefix.c_str()),Form("%s_cp2_lau3",prefix.c_str()),coeff2_lau3,coeff2_llau3,coeff2_hlau3);
       RooRealVar *cp3 = new RooRealVar(Form("%s_cp3_lau3",prefix.c_str()),Form("%s_cp3_lau3",prefix.c_str()),coeff3_lau3,coeff3_llau3,coeff3_hlau3);
-      RooGenericPdf *step = new RooGenericPdf(Form("%s_step_lau3",prefix.c_str()),Form("%s_step_lau3",prefix.c_str()), "1e-20+(@0 > @1)*(@2*(@0)^(-4)+@3*(@0)^(-5)+@4*(@0)^(-6))", RooArgList(*obs_var,*turnon,*cp1,*cp2,*cp3));//step*(ax^b+cx^d)
+      RooGenericPdf *step = new RooGenericPdf(Form("%s_step_lau3",prefix.c_str()),Form("%s_step_lau3",prefix.c_str()), "(@0 > @1)*(@2*(@0)^(-4)+@3*(@0)^(-5)+@4*(@0)^(-6))", RooArgList(*obs_var,*turnon,*cp1,*cp2,*cp3));//1e-20+
       RooGaussModel *gau = new RooGaussModel(Form("%s_gau_lau3",prefix.c_str()),Form("%s_gau_lau3",prefix.c_str()),*obs_var,*mean,*sigma);
       RooFFTConvPdf *gauxlau = new RooFFTConvPdf(Form("%s_gauxlau3",prefix.c_str()),Form("%s_gauxlau3",prefix.c_str()),*obs_var,*step,*gau);
       return gauxlau;
@@ -1085,7 +1085,7 @@ RooAbsPdf* PdfModelBuilder::getLaurentStepxGau(string prefix, int order, int cat
       RooRealVar *cp2 = new RooRealVar(Form("%s_cp2_lau4",prefix.c_str()),Form("%s_cp2_lau4",prefix.c_str()),coeff2_lau4,coeff2_llau4,coeff2_hlau4);
       RooRealVar *cp3 = new RooRealVar(Form("%s_cp3_lau4",prefix.c_str()),Form("%s_cp3_lau4",prefix.c_str()),coeff3_lau4,coeff3_llau4,coeff3_hlau4);
       RooRealVar *cp4 = new RooRealVar(Form("%s_cp4_lau4",prefix.c_str()),Form("%s_cp4_lau4",prefix.c_str()),coeff4_lau4,coeff4_llau4,coeff4_hlau4);
-      RooGenericPdf *step = new RooGenericPdf(Form("%s_step_lau4",prefix.c_str()),Form("%s_step_lau4",prefix.c_str()), "1e-20+(@0 > @1)*(@2*(@0)^(-4)+@3*(@0)^(-5)+@4*(@0)^(-6)+@5*(@0)^(-7))", RooArgList(*obs_var,*turnon,*cp1,*cp2,*cp3,*cp4));//step*(ax^b+cx^d)
+      RooGenericPdf *step = new RooGenericPdf(Form("%s_step_lau4",prefix.c_str()),Form("%s_step_lau4",prefix.c_str()), "(@0 > @1)*(@2*(@0)^(-4)+@3*(@0)^(-5)+@4*(@0)^(-6)+@5*(@0)^(-7))", RooArgList(*obs_var,*turnon,*cp1,*cp2,*cp3,*cp4));//1e-20+
       RooGaussModel *gau = new RooGaussModel(Form("%s_gau_lau4",prefix.c_str()),Form("%s_gau_lau4",prefix.c_str()),*obs_var,*mean,*sigma);
       RooFFTConvPdf *gauxlau = new RooFFTConvPdf(Form("%s_gauxlau4",prefix.c_str()),Form("%s_gauxlau4",prefix.c_str()),*obs_var,*step,*gau);
       return gauxlau;

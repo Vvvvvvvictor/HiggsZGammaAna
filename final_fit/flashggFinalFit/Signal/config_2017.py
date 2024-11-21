@@ -7,7 +7,7 @@ signalScriptCfg = {
   # Setup
   'inputWSDir':'/eos/user/j/jiehan/root/ws_cor_syst/signal_%s/'%_year, #i.e. 'PATH_TO_INPUTS/workspaces/signal_%s'%_year
   'procs':'auto', # if auto: inferred automatically from filenames
-  'cats':'auto', # if auto: inferred automatically from (0) workspace
+  'cats':'auto', # if auto: inferred automatically from (0) workspace "ggH0,ggH1,ggH2,ggH3,VBF0,VBF1,VBF2,VBF3,lep,VH,ZH,ttHh,ttHl"
   'ext':'%s'%_year,
   'analysis':'tutorial', # To specify which replacement dataset mapping (defined in ./python/replacementMap.py)
   'year':'%s'%_year, # Use 'combined' if merging all years: not recommended

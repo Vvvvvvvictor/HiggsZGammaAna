@@ -11,6 +11,8 @@ from commonObjects import *
 from commonTools import *
 from signalTools import *
 
+from pdb import set_trace
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   
 # Function to load XS/BR from Combine
 from HiggsAnalysis.CombinedLimit.DatacardParser import *
@@ -140,14 +142,14 @@ class FinalModel:
     # print(f"self.proc: {self.proc}") # PZ
     fp = self.xsbrMap[self.proc]['factor'] if 'factor' in self.xsbrMap[self.proc] else 1.
     mp = self.xsbrMap[self.proc]['mode']
-    # xs = fp*self.XSBR[mp]
-    xs = np.ones(len(mh)) #FIXME: special case for HZG because XS has been included in weights
+    xs = fp*self.XSBR[mp]
+    # xs = np.ones(len(mh)) #FIXME: special case for HZG because XS has been included in weights
     self.Splines['xs'] = ROOT.RooSpline1D("fxs_%s_%s"%(self.proc,self.sqrts),"fxs_%s_%s"%(self.proc,self.sqrts),self.MH,len(mh),mh,xs)
     # BR
     fd = self.xsbrMap['decay']['factor'] if 'factor' in self.xsbrMap['decay'] else 1.
     md = self.xsbrMap['decay']['mode']
-    # br = fd*self.XSBR[md]
-    br = np.ones(len(mh)) #FIXME: special case for HZG because BR has been included in weights
+    br = fd*self.XSBR[md]
+    # br = np.ones(len(mh)) #FIXME: special case for HZG because BR has been included in weights
     self.Splines['br'] = ROOT.RooSpline1D("fbr_%s"%self.sqrts,"fbr_%s"%self.sqrts,self.MH,len(mh),mh,br)
 
   def buildEffAccSpline(self):
@@ -162,7 +164,7 @@ class FinalModel:
     if len(ea) == 1: ea, mh = [ea[0],ea[0],ea[0]], [float(self.MHLow),mh[0],float(self.MHHigh)]
     # Convert to numpy arrays and make spline
     ea, mh = np.asarray(ea), np.asarray(mh)
-    ea = np.ones(len(mh)) #FIXME: special case for HZG because eff x acc has been included in weights
+    # ea = 1 #FIXME: special case for HZG because eff x acc has been included in weights
     self.Splines['ea'] = ROOT.RooSpline1D("fea_%s"%(self.name),"fea_%s"%(self.name),self.MH,len(mh),mh,ea)
 
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -171,7 +173,8 @@ class FinalModel:
     # Build rate function: encode affect of nuisances on signal rate
     self.buildRate("rate_%s"%self.name,skipSystematics=self.skipSystematics)
     finalPdfName = self.Pdfs['final'].GetName()
-    self.Functions['final_norm'] = ROOT.RooFormulaVar("%s_norm"%finalPdfName,"%s_norm"%finalPdfName,"@0*@1*@2*@3",ROOT.RooArgList(self.Splines['xs'],self.Splines['br'],self.Splines['ea'],self.Functions['rate_%s'%self.name]))
+    # self.Functions['final_norm'] = ROOT.RooFormulaVar("%s_norm"%finalPdfName,"%s_norm"%finalPdfName,"@0*@1*@2*@3",ROOT.RooArgList(self.Splines['xs'],self.Splines['br'],self.Splines['ea'],self.Functions['rate_%s'%self.name]))
+    self.Functions['final_norm'] = ROOT.RooFormulaVar("%s_norm"%finalPdfName,"%s_norm"%finalPdfName,"@0",ROOT.RooArgList(self.Functions['rate_%s'%self.name]))
 
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   # Function for making nuisance param w/ info to add to Nuisance dict
@@ -420,7 +423,8 @@ class FinalModel:
   # Function to build extended Pdfs and normalisation with luminosity
   def buildExtended(self):
     finalPdfName = self.Pdfs['final'].GetName()
-    self.Functions['final_normThisLumi'] = ROOT.RooFormulaVar("%s_normThisLumi"%finalPdfName,"%s_normThisLumi"%finalPdfName,"@0*@1*@2*@3*@4",ROOT.RooArgList(self.Splines['xs'],self.Splines['br'],self.Splines['ea'],self.Functions['rate_%s'%self.name],self.intLumi))
+    # self.Functions['final_normThisLumi'] = ROOT.RooFormulaVar("%s_normThisLumi"%finalPdfName,"%s_normThisLumi"%finalPdfName,"@0*@1*@2*@3*@4",ROOT.RooArgList(self.Splines['xs'],self.Splines['br'],self.Splines['ea'],self.Functions['rate_%s'%self.name],self.intLumi))
+    self.Functions['final_normThisLumi'] = ROOT.RooFormulaVar("%s_normThisLumi"%finalPdfName,"%s_normThisLumi"%finalPdfName,"@0",ROOT.RooArgList(self.Functions['rate_%s'%self.name]))
     self.Pdfs['final_extend'] = ROOT.RooExtendPdf("extend%s"%finalPdfName,"extend%s"%finalPdfName,self.Pdfs['final'],self.Functions['final_norm'])
     self.Pdfs['final_extendThisLumi'] = ROOT.RooExtendPdf("extend%sThisLumi"%finalPdfName,"extend%sThisLumi"%finalPdfName,self.Pdfs['final'],self.Functions['final_normThisLumi'])
  

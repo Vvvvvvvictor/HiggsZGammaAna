@@ -420,7 +420,7 @@ def plotPdfComponents(ssf,_outdir='./',_extension='',_proc='',_cat='',_Amass='1'
   lat.SetTextSize(0.045)
   lat.SetTextFont(52)  # 斜體字 Preliminary 標籤
   lat.DrawLatex(0.255, 0.965, "Simulation Preliminary")
-  lat.DrawLatex(0.74,0.97,("138 fb^{-1} (13 TeV)"))
+  lat.DrawLatex(0.74,0.97,("41.48 fb^{-1} (13 TeV)"))
 
   lat1 = ROOT.TLatex()
   lat1.SetTextFont(42)
@@ -520,7 +520,7 @@ def plotInterpolation(_finalModel,_outdir='./',_massPoints='120,121,122,123,124,
   lat.SetTextSize(0.045)
   lat.SetTextFont(52)  # 斜體字 Preliminary 標籤
   lat.DrawLatex(0.24, 0.965, "Simulation Preliminary")
-  lat.DrawLatex(0.74,0.97,("138 fb^{-1} (13 TeV)"))
+  lat.DrawLatex(0.74,0.97,("41.48 fb^{-1} (13 TeV)"))
 
   canv.Update()
   canv.SaveAs(f"{_outdir}/model_vs_mH_{_proc}_{_year}_{_cat}.pdf")
@@ -627,7 +627,7 @@ def plotSplines(_finalModel,_outdir="./",_nominalMass='125',splinesToPlot=['xs',
   lat.SetTextSize(0.045)
   lat.SetTextFont(52)  # 斜體字 Preliminary 標籤
   lat.DrawLatex(0.25, 0.965, "Simulation Preliminary")
-  lat.DrawLatex(0.74,0.97,("138 fb^{-1} (13 TeV)"))
+  lat.DrawLatex(0.74,0.97,("41.48 fb^{-1} (13 TeV)"))
   canv.Update()
   canv.SaveAs(f"{_outdir}/splines_{_proc}_{_year}_{_cat}.pdf")
 

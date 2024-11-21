@@ -332,7 +332,7 @@ for cidx in range(len(cats)):
   # Calculate yields
   SB, B = sbpdf.expectedEvents(_xvar_argset), bpdf.expectedEvents(_xvar_argset)
   S = SB-B
-  B = B**0.5 #FIXME: temporary fix for hzg analysis, multiply normalisation of bkg twice
+  B = B #FIXME: temporary fix for hzg analysis, multiply normalisation of bkg twice
   # If option doBkfRenormalization: renormalize B pdf to be S+B-S
   if opt.doBkgRenormalization:
     print("    * fixing B normalization")

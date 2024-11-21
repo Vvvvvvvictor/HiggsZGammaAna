@@ -12,14 +12,14 @@ import glob
 import pickle
 import math
 from collections import OrderedDict
-from systematics_HToZa import theory_systematics, experimental_systematics, signal_shape_systematics
+from systematics import theory_systematics, experimental_systematics, signal_shape_systematics
 
 from commonObjects import *
 from commonTools import *
 
-print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG DATACARD MAKER RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
+print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HZG DATACARD MAKER RUN II ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
 def leave():
-  print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HGG DATACARD MAKER RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
+  print(" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ HZG DATACARD MAKER RUN II (END) ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ")
   exit(0)
 
 def get_options():
@@ -277,6 +277,7 @@ for ir,r in data[data['type']=='sig'].iterrows():
       # Skip centralObjectWeight correction as concerns events in acceptance
       experimentalSystYields = calcSystYields(r['nominalDataName'],contents,inputWS,experimentalFactoryType,skipCOWCorr=True,proc=r['proc'],year=r['year'],ignoreWarnings=opt.ignore_warnings)
       for s,f in experimentalFactoryType.items():
+        print(f" --> {s} {f}")
         if f in ['a_w','a_h']: 
           for direction in ['up','down']: 
             data.at[ir,"%s_%s_yield"%(s,direction)] = experimentalSystYields["%s_%s"%(s,direction)]
