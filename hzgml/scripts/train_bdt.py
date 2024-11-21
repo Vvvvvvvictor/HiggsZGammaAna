@@ -31,6 +31,7 @@ def getArgs():
     parser.add_argument('--importance', action='store_true', default=True, help='Plot importance of variables, parameter "gain" is recommanded')
     parser.add_argument('--roc', action='store_true', default=True, help='Plot ROC')
     parser.add_argument('--optuna', action='store_true', default=False, help='Run hyperparameter tuning using optuna')
+    parser.add_argument('--optuna_metric', action='store', default='auc', choices=['eval_auc', 'sqrt_eval_auc_minus_train_auc', 'eval_auc_minus_train_auc', 'eval_auc_over_train_auc'], help='Optuna metric to optimize')
     parser.add_argument('--n-calls', action='store', type=int, default=36, help='Steps of hyperparameter tuning using optuna')
     parser.add_argument('--continue-optuna', action='store', type=int, default=0, help='Continue tuning hyperparameters using optuna')
 
@@ -62,6 +63,7 @@ class XGBoostHandler(object):
 
         args=getArgs()
         self.continue_optuna = args.continue_optuna
+        self.optuna_metric = args.optuna_metric
         self.n_calls = args.n_calls
         self._shield = args.shield
         self._add = args.add
@@ -614,7 +616,13 @@ class XGBoostHandler(object):
             eval_auc = self.getAUC(fold)[-1]
             train_auc = self.getAUC(fold, 'train')[-1]
             
-            return eval_auc**2/((eval_auc + train_auc)/2)
+            metrics = {
+                'eval_auc': eval_auc,
+                'sqrt_eval_auc_minus_train_auc': np.sqrt(train_auc * (2 * eval_auc - train_auc)),
+                'eval_auc_minus_train_auc': eval_auc * 2 - train_auc,
+                'eval_auc_over_train_auc': eval_auc ** 2 / ((eval_auc + train_auc) / 2)
+            }
+            return metrics.get(self.optuna_metric, eval_auc)
         
         exp_dir = f'models/optuna_{self._region}/'
         if not os.path.exists(exp_dir):

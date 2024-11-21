@@ -331,9 +331,10 @@ class ZGammaTaggerRun2(Tagger):
                 n_objects = 4,
                 dummy_value = DUMMY_VALUE
             )
-            
-        dZ = events.GenVtx_z - events.PV_z
-        awkward_utils.add_field(events, "dZ", dZ, overwrite=True)
+        
+        if not self.is_data:
+            dZ = events.GenVtx_z - events.PV_z
+            awkward_utils.add_field(events, "dZ", dZ, overwrite=True)
 
         n_electrons = awkward.fill_none(awkward.num(electrons), 0)
         # N_e_cut = n_electrons>=2
@@ -450,8 +451,8 @@ class ZGammaTaggerRun2(Tagger):
         mu_trigger_pt_cut = (single_mu_trigger_cut & m_cut) | (double_mu_trigger_cut & mm_cut)
         trigger_pt_cut = (single_ele_trigger_cut & e_cut) | (double_ele_trigger_cut & ee_cut) | (single_mu_trigger_cut & m_cut) | (double_mu_trigger_cut & mm_cut)
         
-        z_mumu = z_mumu_cut & mu_trigger_pt_cut
-        z_ee = z_ee_cut & ele_trigger_pt_cut
+        z_mumu = z_mumu_cut 
+        z_ee = z_ee_cut
         awkward_utils.add_field(events, "z_mumu", z_mumu, overwrite=True)
         awkward_utils.add_field(events, "z_ee", z_ee, overwrite=True)
 

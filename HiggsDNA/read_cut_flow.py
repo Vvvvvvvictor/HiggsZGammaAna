@@ -7,17 +7,17 @@ import time
 
 start_time = time.time()
 
-eos_path = '/eos/home-j/jiehan/parquet/nanov9/mc_cor/'
+eos_path = '/eos/home-j/jiehan/parquet/nanov9/'
 # log_path = '/eos/user/j/jiehan/eos_logs/'
 log_path = '/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/HiggsDNA/eos_logs/'
 
-# dataset_type = 'data'
-# dataset_names = ["Data"]
-# dataset_years = ["2016postVFP"] #"2016preVFP", "2016postVFP", "2017", "2018"
+dataset_type = 'data'
+dataset_names = ["Data"]
+dataset_years = ["2016preVFP"] #"2016preVFP", "2016postVFP", "2017", "2018"
 
-dataset_type = 'test'
-dataset_names = ["WplusH"] #, "VBFH_M125", "ZH_M125", "ttH_M125"] # "WplusH_M125", "WminusH_M125",
-dataset_years = ["2016preVFP"]#, "2017", "2018"]
+# dataset_type = 'test'
+# dataset_names = ["WplusH"] #, "VBFH_M125", "ZH_M125", "ttH_M125"] # "WplusH_M125", "WminusH_M125",
+# dataset_years = ["2016preVFP"]#, "2017", "2018"]
 
 # dataset_type = 'bkgmc'
 # dataset_names = ["DYJetsToLL"] # "Data_SingleMuon", "Data_DoubleMuon", "Data_SingleElectron", "Data_DoubleEG"
@@ -116,7 +116,7 @@ for dataset in dataset_names:
                         temp[cuti] += yields
                     cuti += 1
                 f.close()
-                break
+                if match: break
             if flag:
                 print(log_dir)
             # for i in range(cut_num):
