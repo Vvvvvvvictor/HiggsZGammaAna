@@ -566,6 +566,8 @@ class ZGammaTaggerRun2(Tagger):
 
         # additional leptons
         additional_leptons = awkward.concatenate([electrons, muons], axis = 1)
+        max_I_mini = awkward.max(additional_leptons.pt, axis = 1)
+        awkward_utils.add_field(events, "max_I_mini", max_I_mini)
         veto_Z_leptons = (additional_leptons.pt != events.Z_lead_lepton_pt) & (additional_leptons.pt != events.Z_sublead_lepton_pt)
         additional_leptons = additional_leptons[veto_Z_leptons]       
         additional_leptons = additional_leptons[awkward.argsort(additional_leptons.pt, ascending=False, axis=1)]
@@ -626,6 +628,11 @@ class ZGammaTaggerRun2(Tagger):
             cut8 = cut7 & sel_h_3
             cut9 = cut8 & event_filter
             
+            if cut_type == "zgammas_ele":
+                ee_all_cut = cut9
+            if cut_type == "zgammas_mu":
+                mm_all_cut = cut9
+            
             # if cut_type == "zgammas_mu":
             #     print(f"!!!start check events tag({cut_type})!!!")
             #     for i in events[cut4]:
@@ -645,7 +652,11 @@ class ZGammaTaggerRun2(Tagger):
             # for cut, cut_name in zip([cut1, cut2, cut3, cut4, cut5, cut6, cut7, cut8, cut9], cut_names):
             #     awkward_utils.add_field(events, f"{cut_type}_{cut_name}", cut)
 
-        # all_cuts = cut0
+        all_cuts = ee_all_cut | mm_all_cut
+        
+        # print(f"Sum of all_cuts: {sum(all_cuts)}")
+        # all_cuts = ee_all_cut | mm_all_cut
+        # print(f"Sum of all_cuts: {sum(all_cuts)}")
 
         # checked_cut = (z_ee_cut | z_mumu_cut) & pair_cut
         # checked_events = events[checked_cut]

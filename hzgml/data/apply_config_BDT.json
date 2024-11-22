@@ -1,7 +1,3 @@
-{"common":   {"observables": ["H_mass", "event", "weight", "n_jets"], "preselections": ["H_mass >= 80", "H_mass <= 180"]},
- "VH_ttH": {"#+preselections": ["n_leptons >= 3"], "models": {"VH_ttH": "bdt_score"}},
- "zero_to_one_jet": {"#+preselections": ["n_jets <= 1"], "models": {"zero_to_one_jet": "bdt_score"}},
- "zero_jet": {"#+preselections": ["n_jets == 0"], "models": {"zero_jet": "bdt_score"}},
- "one_jet":  {"#+preselections": ["n_jets == 1"], "models": {"one_jet": "bdt_score"}},
- "two_jet":  {"#+preselections": ["n_jets >= 2"], "models": {"two_jet": "bdt_score", "VBF": "vbf_score"}}
+{"common":   {"observables": ["lly_m", "event_number", "w_lumiXyear", "njet"], "preselections": ["lly_m > 100", "lly_m < 180", "leplep_m > 80", "leplep_m < 100", "leplep_m + lly_m > 185", "y_ptmass > 0.1363636"]},
+ "two_jet":  {"+preselections": ["njet >= 2"], "models": {"two_jet": "bdt_score", "VBF": "vbf_score"}}
 }

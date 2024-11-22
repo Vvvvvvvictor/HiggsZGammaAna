@@ -1,3 +1,5 @@
+# sw_lumiXyear
+# slly_m
 import uproot
 import numpy as np
 import pandas as pd
@@ -15,20 +17,21 @@ filepath = "/eos/user/j/jiehan/root/outputs/two_jet/"
 # Load data from ROOT files into pandas dataframes
 sig_data, bkg_data = [], []
 for name in signal_names:
-    sig_data.append(uproot.open(filepath + name + ".root")["two_jet"].arrays(["bdt_score_t", "vbf_score_t", "weight", "H_mass"], library="pd"))
+    sig_data.append(uproot.open(filepath + name + ".root")["two_jet"].arrays(["bdt_score_t", "vbf_score_t", "w_lumiXyear", "lly_m"], library="pd"))
 for name in background_names:
-    bkg_data.append(uproot.open(filepath + name + ".root")["two_jet"].arrays(["bdt_score_t", "vbf_score_t", "weight", "H_mass"], library="pd"))
+    bkg_data.append(uproot.open(filepath + name + ".root")["two_jet"].arrays(["bdt_score_t", "vbf_score_t", "w_lumiXyear", "lly_m"], library="pd"))
 
 # Create 2D histograms for signal and background
 bins = 100
 sig_hist, bkg_hist, full_bkg_hist = np.zeros((bins, bins)), np.zeros((bins, bins)), np.zeros((bins, bins))
 for sig in sig_data:
-    sig = sig.query("H_mass > 120 & H_mass < 130")
-    sig_hist += np.histogram2d(sig["bdt_score_t"], sig["vbf_score_t"], bins=bins, weights=sig["weight"])[0]
+    sig = sig.query("lly_m > 120 & lly_m < 130")
+    sig_hist += np.histogram2d(sig["bdt_score_t"], sig["vbf_score_t"], bins=bins, weights=sig["w_lumiXyear"])[0]
 for bkg in bkg_data:
-    full_bkg_hist += np.histogram2d(bkg["bdt_score_t"], bkg["vbf_score_t"], bins=bins, weights=bkg["weight"])[0]
-    bkg = bkg.query("H_mass > 120 & H_mass < 130")
-    bkg_hist += np.histogram2d(bkg["bdt_score_t"], bkg["vbf_score_t"], bins=bins, weights=bkg["weight"])[0]
+    bkg = bkg.query("lly_m > 100")
+    full_bkg_hist += np.histogram2d(bkg["bdt_score_t"], bkg["vbf_score_t"], bins=bins, weights=bkg["w_lumiXyear"])[0]
+    bkg = bkg.query("lly_m > 120 & lly_m < 130")
+    bkg_hist += np.histogram2d(bkg["bdt_score_t"], bkg["vbf_score_t"], bins=bins, weights=bkg["w_lumiXyear"])[0]
 
 # Function to calculate the sum of the squares of s/b
 def calculate_significance(params):
@@ -66,3 +69,6 @@ for i in range(len(bin_edges_x)-1):
         s = np.sum(sig_hist[int(bin_edges_x[i]):int(bin_edges_x[i+1]), int(bin_edges_y[j]):int(bin_edges_y[j+1])])
         b = np.sum(bkg_hist[int(bin_edges_x[i]):int(bin_edges_x[i+1]), int(bin_edges_y[j]):int(bin_edges_y[j+1])])
         print(f"Category {j * 2**(j) + i }: s={s}, b={b}, significance={np.sqrt(2 * ( ( s + b ) * np.log( 1 + s / b ) - s ))}")
+        
+with open("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/best_boundaries.txt", "w") as f:
+    f.write(f"{best_n/100:.2f},{best_m/100:.2f}")
