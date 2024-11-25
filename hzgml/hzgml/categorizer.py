@@ -17,7 +17,7 @@ def calc_sig(sig, bkg,s_err,b_err):
     #   significance = sig / sqrt(bkg)
 
     #error on significance
-    numer = sqrt((log(ntot/bkg)*s_err)**2 + ((log(1+(sig/bkg)) - (sig/bkg))*b_err)**2)
+    numer = sqrt((log(ntot/bkg)*s_err)**2 + ((log(ntot/bkg) - (sig/bkg))*b_err)**2)
     uncert = numer/significance
     #   uncert = sqrt((s_err**2/bkg) + (significance/2/bkg*b_err)**2)
 

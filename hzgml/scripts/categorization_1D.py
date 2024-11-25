@@ -169,7 +169,7 @@ def categorizing(input_path, region, variable, sigs, bkgs, nscan, minN, transfor
     # elif estimate == "fullSim":
     #     cgz = categorizer_shape(h_sig, h_bkgmc_cen)
     
-    # # cgz.smooth(1, nscan, SorB='B', function='Epoly2')
+    # cgz.smooth(50, nscan, SorB='B', function='Epoly2')
     # '''
     # uncomment upper line to fit a function to the BDT distribution. Usage: categorizer.smooth(left_bin_to_fit, right_bin_to_fit, SorB='S' (for signal) or 'B' (for bkg), function='Epoly2', printMessage=False (switch to "True" to print message))
     # TODO: first parameter must >= 1, 0 is banned.
@@ -203,7 +203,7 @@ def categorizing(input_path, region, variable, sigs, bkgs, nscan, minN, transfor
     elif estimate == "fullSim":
         cgz = categorizer(h_sig, h_bkgmc_cen)
     
-    # cgz.smooth(50, nscan, SorB='B', function='Epoly2')
+    cgz.smooth(70, nscan, SorB='B', function='Epoly2')
     '''
     uncomment upper line to fit a function to the BDT distribution. Usage: categorizer.smooth(left_bin_to_fit, right_bin_to_fit, SorB='S' (for signal) or 'B' (for bkg), function='Epoly2', printMessage=False (switch to "True" to print message))
     TODO: first parameter must >= 1, 0 is banned.

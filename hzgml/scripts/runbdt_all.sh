@@ -23,13 +23,13 @@ echo "Shielded parameter is: $S . Added variables is: $A ."
 # python scripts/train_bdt.py -r two_jet --optuna --n-calls 20 --continue-optuna 0 --optuna_metric "sqrt_eval_auc_minus_train_auc"
 # python scripts/train_bdt.py -r VBF --optuna --n-calls 20 --continue-optuna 0 --optuna_metric "sqrt_eval_auc_minus_train_auc"
 
-# for fold in {0..3};do
+# for fold in {1..1};do
 # # python scripts/train_bdt.py -r zero_to_one_jet --optuna --n-calls 40 --fold $fold --continue-optuna 1
-# python scripts/train_bdt.py -r two_jet --optuna --n-calls 40 --fold $fold --continue-optuna 1 
+# python scripts/train_bdt.py -r two_jet --optuna --n-calls 20 --fold $fold --continue-optuna 1 --optuna_metric "sqrt_eval_auc_minus_train_auc"
 # done
 
-# python scripts/train_bdt.py -r two_jet --save --hyperparams_path "models/optuna_two_jet_rui"
-# python scripts/train_bdt.py -r VBF --save --hyperparams_path "models/optuna_VBF_rui"
+python scripts/train_bdt.py -r two_jet --save --hyperparams_path "models/optuna_two_jet_1535_ewkzg"
+python scripts/train_bdt.py -r VBF --save --hyperparams_path "models/optuna_VBF_1535_ewkzg"
 python scripts/apply_bdt.py -r two_jet
 python ../plot_python/find_2D_best_boundaries.py
 python ../plot_python/plot_2D_bdt_score.py
@@ -39,8 +39,8 @@ python ../plot_python/plot_2D_cat_hmass_dis.py
 # python scripts/apply_bdt.py -r zero_to_one_jet
 
 # python scripts/categorization_1D.py -r zero_to_one_jet -b 4 --minN 10 --floatB
-# python scripts/categorization_1D.py -r two_jet -b 4 --minN 2 --floatB
-# python ../plot_python/plot_cats_hmass_dis.py
+python scripts/categorization_1D.py -r two_jet -b 4 --minN 2 --floatB -es "fullSimrw"
+python ../plot_python/plot_cats_hmass_dis.py
 
 # python scripts/apply_bdt_sig_corr.py
 # python scripts/apply_bdt_bkg.py

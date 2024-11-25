@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import mplhep as hep
 plt.style.use(hep.style.CMS)
+from pdb import set_trace
 
 # # Load the data
 # data = uproot.open("/eos/user/j/jiehan/root/outputs/two_jet/data.root")['test'].arrays(library='pd')
@@ -39,13 +40,25 @@ plt.style.use(hep.style.CMS)
 # ===================================
 cats = ['zero_to_one_jet', "two_jet"]
 years = ['2016preVFP']
+types = ["mu", "ele"]
+config = '275371 543 1048875969'.split(' ')
 for year in years:
     data = uproot.open(f"/eos/home-j/jiehan/root/skimmed_ntuples_run2/Data/{year}.root")
-    for cat in cats:
-        cat_data = data[cat].arrays(['run', 'luminosityBlock', 'event'], library='pd')
-        with open(f'{year}_{cat}_run_lumi_event.txt', 'w') as f:
-            for i in range(len(cat_data['run'])):
-                f.write(f'{int(cat_data["run"][i])} {int(cat_data["luminosityBlock"][i])} {int(cat_data["event"][i])}\n')
+    data = data['inclusive'].arrays(library='pd')
+    for i in data.columns:
+        temp = data.query(f'run == {config[0]} & luminosityBlock == {config[1]} & event == {config[2]}')
+        print(i, temp[i].values[0])
+    # for cat in cats:
+    #     cat_data = data[cat].arrays(['run', 'luminosityBlock', 'event', "z_mumu", "z_ee"], library='pd')
+    #     with open(f'{year}_{cat}_{types[0]}.txt', 'w') as f:
+    #         temp = cat_data.query('z_mumu > 0').reset_index(drop=True)
+    #         for i in range(len(temp)):
+    #             print(i)
+    #             f.write(f'{int(temp["run"][i])} {int(temp["luminosityBlock"][i])} {int(temp["event"][i])}\n')
+    #     with open(f'{year}_{cat}_{types[1]}.txt', 'w') as f:
+    #         temp = cat_data.query('z_ee > 0').reset_index(drop=True)
+    #         for i in range(len(temp)):
+    #             f.write(f'{int(temp["run"][i])} {int(temp["luminosityBlock"][i])} {int(temp["event"][i])}\n')
 
 # # ==================================
 # # Show MET_pt and n_b_jets

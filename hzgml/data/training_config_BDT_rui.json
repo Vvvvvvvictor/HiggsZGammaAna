@@ -4,7 +4,7 @@
               "train_data_background": [],
               "train_variables": [
                         ],
-              "preselections": ["lly_m >= 100", "lly_m <= 180"],
+              "preselections": ["lly_m > 100", "lly_m < 180", "leplep_m > 80", "leplep_m < 100", "leplep_m + lly_m > 185", "y_ptmass > 0.1363636"],
               "signal_preselections": [],
               "background_preselections": [],
               "data_preselections": ["is_center == 0"],

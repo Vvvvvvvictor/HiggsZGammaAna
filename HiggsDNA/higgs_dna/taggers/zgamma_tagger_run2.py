@@ -566,7 +566,7 @@ class ZGammaTaggerRun2(Tagger):
 
         # additional leptons
         additional_leptons = awkward.concatenate([electrons, muons], axis = 1)
-        max_I_mini = awkward.max(additional_leptons.pt, axis = 1)
+        max_I_mini = awkward.max(additional_leptons.miniPFRelIso_all, axis = 1)
         awkward_utils.add_field(events, "max_I_mini", max_I_mini)
         veto_Z_leptons = (additional_leptons.pt != events.Z_lead_lepton_pt) & (additional_leptons.pt != events.Z_sublead_lepton_pt)
         additional_leptons = additional_leptons[veto_Z_leptons]       
