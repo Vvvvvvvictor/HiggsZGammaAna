@@ -312,3 +312,275 @@ def tauE_sf(events, year, central_only, input_collection, working_point = "none"
 
     return variations
 
+SingleEle_HLT_FILE = {
+    "2016preVFP" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig32_2017_efficiencies",
+    "2016postVFP" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig32_2017_efficiencies",
+    "2017" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig32_2017_efficiencies",
+    "2018" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig32_2017_efficiencies"
+}
+DoubleEle_LowLeg_HLT_FILE = {
+    "2016preVFP" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig12_2017_efficiencies.json",
+    "2016postVFP" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig12_2017_efficiencies.json",
+    "2017" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig12_2017_efficiencies.json",
+    "2018" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig12_2017_efficiencies.json"
+}
+DoubleEle_HighLeg_HLT_FILE = {
+    "2016preVFP" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig32_2017_efficiencies.json",
+    "2016postVFP" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig32_2017_efficiencies.json",
+    "2017" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig32_2017_efficiencies.json",
+    "2018" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig32_2017_efficiencies.json"
+}
+
+SingleMuon_HLT_FILE = {
+    "2016preVFP" : "higgs_dna/systematics/data/2017_UL/hzg_mutrig27_2017_efficiencies.jsons",
+    "2016postVFP" : "higgs_dna/systematics/data/2017_UL/hzg_mutrig27_2017_efficiencies.jsons",
+    "2017" : "higgs_dna/systematics/data/2017_UL/hzg_mutrig27_2017_efficiencies.jsons",
+    "2018" : "higgs_dna/systematics/data/2017_UL/hzg_mutrig27_2017_efficiencies.jsons"
+}
+DoubleMuon_LowLeg_HLT_FILE = {
+    "2016preVFP" : "higgs_dna/systematics/data/2017_UL/hzg_mutrig8_2017_efficiencies.json",
+    "2016postVFP" : "higgs_dna/systematics/data/2017_UL/hzg_mutrig8_2017_efficiencies.json",
+    "2017" : "higgs_dna/systematics/data/2017_UL/hzg_mutrig8_2017_efficiencies.json",
+    "2018" : "higgs_dna/systematics/data/2017_UL/hzg_mutrig8_2017_efficiencies.json"
+}
+DoubleMuon_HighLeg_HLT_FILE = {
+    "2016preVFP" : "higgs_dna/systematics/data/2017_UL/hzg_mutrig17_2017_efficiencies.json",
+    "2016postVFP" : "higgs_dna/systematics/data/2017_UL/hzg_mutrig17_2017_efficiencies.json",
+    "2017" : "higgs_dna/systematics/data/2017_UL/hzg_mutrig17_2017_efficiencies.json",
+    "2018" : "higgs_dna/systematics/data/2017_UL/hzg_mutrig17_2017_efficiencies.json"
+}
+
+
+def singleEle_MCcorrection(events, year, central_only, input_collection, working_point = "none"):
+    """
+    See:
+        - https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/EGM_electron_Run2_UL/EGM_electron_2017_UL.html
+        - https://gitlab.cern.ch/cms-nanoAOD/jsonpog-integration/-/blob/master/examples/electronExample.py
+    """
+
+    required_fields = [
+        (input_collection, "pt"), (input_collection, "eta")
+    ]
+
+    missing_fields = awkward_utils.missing_fields(events, required_fields)
+
+    evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(SingleEle_HLT_FILE[year]))
+
+    electrons = events[input_collection]
+
+    # Flatten electrons then convert to numpy for compatibility with correctionlib
+    n_electrons = awkward.num(electrons)
+    electrons_flattened = awkward.flatten(electrons)
+
+    ele_eta = numpy.clip(
+        awkward.to_numpy(electrons_flattened.eta),
+        -2.49999,
+        2.49999 # SFs only valid up to eta 2.5
+    )
+
+    ele_pt = numpy.clip(
+        awkward.to_numpy(electrons_flattened.pt),
+        7.0, # SFs only valid for pT >= 10.0
+        499.999 # and pT < 500.
+    )
+
+    # Calculate SF and syst
+    variations = {}
+    sf = evaluator["effmc"].evalv(
+            ele_pt,
+            ele_eta
+    )
+    variations["central"] = awkward.unflatten(sf, n_electrons)
+
+    if not central_only:
+        syst = evaluator["systmc"].evalv(
+            ele_pt,
+            ele_eta
+            )
+        variations["up"] = awkward.unflatten(syst+sf, n_electrons)
+        variations["down"] = awkward.unflatten(sf-syst, n_electrons)
+
+    for var in variations.keys():
+        # Set SFs = 1 for leptons which are not applicable
+        variations[var] = awkward.where(
+                (electrons.pt < 7.0) | (electrons.pt >= 500.0) | (abs(electrons.eta) >= 2.5),
+                awkward.ones_like(variations[var], dtype=float),
+                variations[var]
+        )
+
+    return variations
+def singleEle_Datacorrection(events, year, central_only, input_collection, working_point = "none"):
+    """
+    See:
+        - https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/EGM_electron_Run2_UL/EGM_electron_2017_UL.html
+        - https://gitlab.cern.ch/cms-nanoAOD/jsonpog-integration/-/blob/master/examples/electronExample.py
+    """
+
+    required_fields = [
+        (input_collection, "pt"), (input_collection, "eta")
+    ]
+
+    missing_fields = awkward_utils.missing_fields(events, required_fields)
+
+    evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(SingleEle_HLT_FILE[year]))
+
+    electrons = events[input_collection]
+
+    # Flatten electrons then convert to numpy for compatibility with correctionlib
+    n_electrons = awkward.num(electrons)
+    electrons_flattened = awkward.flatten(electrons)
+
+    ele_eta = numpy.clip(
+        awkward.to_numpy(electrons_flattened.eta),
+        -2.49999,
+        2.49999 # SFs only valid up to eta 2.5
+    )
+
+    ele_pt = numpy.clip(
+        awkward.to_numpy(electrons_flattened.pt),
+        7.0, # SFs only valid for pT >= 10.0
+        499.999 # and pT < 500.
+    )
+
+    # Calculate SF and syst
+    variations = {}
+    sf = evaluator["effdata"].evalv(
+            ele_pt,
+            ele_eta
+    )
+    variations["central"] = awkward.unflatten(sf, n_electrons)
+
+    if not central_only:
+        syst = evaluator["systdata"].evalv(
+            ele_pt,
+            ele_eta
+            )
+        variations["up"] = awkward.unflatten(syst+sf, n_electrons)
+        variations["down"] = awkward.unflatten(sf-syst, n_electrons)
+
+    for var in variations.keys():
+        # Set SFs = 1 for leptons which are not applicable
+        variations[var] = awkward.where(
+                (electrons.pt < 7.0) | (electrons.pt >= 500.0) | (abs(electrons.eta) >= 2.5),
+                awkward.ones_like(variations[var], dtype=float),
+                variations[var]
+        )
+
+    return variations
+
+def doubleEleLowLeg_MCcorrection(events, year, central_only, input_collection, working_point = "none"):
+    """
+    See:
+        - https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/EGM_electron_Run2_UL/EGM_electron_2017_UL.html
+        - https://gitlab.cern.ch/cms-nanoAOD/jsonpog-integration/-/blob/master/examples/electronExample.py
+    """
+
+    required_fields = [
+        (input_collection, "pt"), (input_collection, "eta")
+    ]
+
+    missing_fields = awkward_utils.missing_fields(events, required_fields)
+
+    evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(DoubleEle_LowLeg_HLT_FILE[year]))
+
+    electrons = events[input_collection]
+
+    # Flatten electrons then convert to numpy for compatibility with correctionlib
+    n_electrons = awkward.num(electrons)
+    electrons_flattened = awkward.flatten(electrons)
+
+    ele_eta = numpy.clip(
+        awkward.to_numpy(electrons_flattened.eta),
+        -2.49999,
+        2.49999 # SFs only valid up to eta 2.5
+    )
+
+    ele_pt = numpy.clip(
+        awkward.to_numpy(electrons_flattened.pt),
+        7.0, # SFs only valid for pT >= 10.0
+        499.999 # and pT < 500.
+    )
+
+    # Calculate SF and syst
+    variations = {}
+    sf = evaluator["effmc"].evalv(
+            ele_pt,
+            ele_eta
+    )
+    variations["central"] = awkward.unflatten(sf, n_electrons)
+
+    if not central_only:
+        syst = evaluator["systmc"].evalv(
+            ele_pt,
+            ele_eta
+            )
+        variations["up"] = awkward.unflatten(syst+sf, n_electrons)
+        variations["down"] = awkward.unflatten(sf-syst, n_electrons)
+
+    for var in variations.keys():
+        # Set SFs = 1 for leptons which are not applicable
+        variations[var] = awkward.where(
+                (electrons.pt < 7.0) | (electrons.pt >= 500.0) | (abs(electrons.eta) >= 2.5),
+                awkward.ones_like(variations[var], dtype=float),
+                variations[var]
+        )
+
+    return variations
+def doubleEleLowLeg_Datacorrection(events, year, central_only, input_collection, working_point = "none"):
+    """
+    See:
+        - https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/EGM_electron_Run2_UL/EGM_electron_2017_UL.html
+        - https://gitlab.cern.ch/cms-nanoAOD/jsonpog-integration/-/blob/master/examples/electronExample.py
+    """
+
+    required_fields = [
+        (input_collection, "pt"), (input_collection, "eta")
+    ]
+
+    missing_fields = awkward_utils.missing_fields(events, required_fields)
+
+    evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(DoubleEle_LowLeg_HLT_FILE[year]))
+
+    electrons = events[input_collection]
+
+    # Flatten electrons then convert to numpy for compatibility with correctionlib
+    n_electrons = awkward.num(electrons)
+    electrons_flattened = awkward.flatten(electrons)
+
+    ele_eta = numpy.clip(
+        awkward.to_numpy(electrons_flattened.eta),
+        -2.49999,
+        2.49999 # SFs only valid up to eta 2.5
+    )
+
+    ele_pt = numpy.clip(
+        awkward.to_numpy(electrons_flattened.pt),
+        7.0, # SFs only valid for pT >= 10.0
+        499.999 # and pT < 500.
+    )
+
+    # Calculate SF and syst
+    variations = {}
+    sf = evaluator["effdata"].evalv(
+            ele_pt,
+            ele_eta
+    )
+    variations["central"] = awkward.unflatten(sf, n_electrons)
+
+    if not central_only:
+        syst = evaluator["systdata"].evalv(
+            ele_pt,
+            ele_eta
+            )
+        variations["up"] = awkward.unflatten(syst+sf, n_electrons)
+        variations["down"] = awkward.unflatten(sf-syst, n_electrons)
+
+    for var in variations.keys():
+        # Set SFs = 1 for leptons which are not applicable
+        variations[var] = awkward.where(
+                (electrons.pt < 7.0) | (electrons.pt >= 500.0) | (abs(electrons.eta) >= 2.5),
+                awkward.ones_like(variations[var], dtype=float),
+                variations[var]
+        )
+
+    return variations

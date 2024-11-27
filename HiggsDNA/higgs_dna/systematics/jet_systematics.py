@@ -46,6 +46,86 @@ DEEPJET_VARIATIONS = {
     "down_lfstats2" : [0],
 }
 
+
+def btag_deepjet_reshape_sf(events, year, central_only, input_collection):
+    """
+    See:
+        - https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/BTV_bjets_Run2_UL/
+        - https://gitlab.cern.ch/cms-nanoAOD/jsonpog-integration/-/blob/master/examples/btvExample.py
+
+    Note: application of SFs should not change the overall normalization of a sample (before any b-tagging selection) and each sample should be adjusted by an overall weight derived in a phase space with no requirements on b-jets such that the normalization is unchanged. TODO: link BTV TWiki that describes this.
+    """
+    required_fields = [
+        (input_collection, "eta"), (input_collection, "pt"), (input_collection, "hadronFlavour"), (input_collection, "btagDeepFlavB") 
+    ]
+    missing_fields = awkward_utils.missing_fields(events, required_fields)
+
+    evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(BTAG_RESHAPE_SF_FILE[year]))
+   
+    jets = events[input_collection]
+    jets["flavor"] = jets.hadronFlavour
+    n_jets = awkward.num(jets) # save n_jets to convert back to jagged format at the end 
+    jets_flattened = awkward.flatten(jets)
+
+    jet_flavor = awkward.to_numpy(jets_flattened.flavor)
+    jet_abs_eta = numpy.clip(
+        awkward.to_numpy(abs(jets_flattened.eta)),
+        0.0,
+        2.49999 # SFs only valid up to eta 2.5
+    )
+    jet_pt = numpy.clip(
+        awkward.to_numpy(jets_flattened.pt),
+        20.0, # SFs only valid for pT > 20.
+        99999999.
+    )
+    jet_disc = awkward.to_numpy(jets_flattened.btagDeepFlavB)        
+
+    variations_list = ["central"]
+    if not central_only:
+        variations_list += DEEPJET_VARIATIONS.keys()
+
+    variations = {}
+
+    central_sf = evaluator[DEEPJET_RESHAPE_SF[year]].evalv(
+            "central",
+            jet_flavor,
+            jet_abs_eta,
+            jet_pt,
+            jet_disc
+    )
+
+    variations["central"] = awkward.unflatten(central_sf, n_jets)
+
+    for var in variations_list:
+        if var == "central":
+            continue
+        applicable_flavors = DEEPJET_VARIATIONS[var] # the up/down variations are only applicable to specific flavors of jet
+        var_sf = central_sf 
+        for f in applicable_flavors:
+            var_sf = numpy.where(
+                jet_flavor == f,
+                evaluator[DEEPJET_RESHAPE_SF[year]].evalv(
+                    var,
+                    numpy.ones_like(jet_flavor) * f,
+                    jet_abs_eta,
+                    jet_pt,
+                    jet_disc
+                ),
+                var_sf
+            )
+
+        variations[var] = awkward.unflatten(var_sf, n_jets) # make jagged again
+
+    for var in variations.keys():
+        # Set SFs = 1 for jets which are not applicable (pt <= 20 or |eta| >= 2.5)
+        variations[var] = awkward.where(
+                (jets.pt <= 20.0) | (abs(jets.eta) >= 2.5),
+                awkward.ones_like(variations[var]),
+                variations[var]
+        )
+
+    return variations
+
 def btag_deepjet_reshape_sf(events, year, central_only, input_collection):
     """
     See:
