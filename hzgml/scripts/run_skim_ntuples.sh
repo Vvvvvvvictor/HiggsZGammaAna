@@ -6,7 +6,7 @@ target="/eos/home-j/jiehan/root/skimmed_ntuples_run2/"
 # target="./"
 
 # years=(2016preVFP 2016postVFP 2017 2018 2022preEE 2022postEE 2023preBPix 2023postBPix)
-years=(2016preVFP)
+years=(2017 2018)
 
 # 函数定义：执行命令并处理错误
 execute_command() {

@@ -1,86 +1,87 @@
 import uproot
 import numpy as np
 import pandas as pd
+import os
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import mplhep as hep
 plt.style.use(hep.style.CMS)
 
-bkg_names = ["ZGToLLG", "DYJetsToLL", "ZG2JToG2L2J"]
-signal_names = ["ggH_M125", "VBF_M125"]
-data_names = ["Data"]
-bkg_hist, sig_hist, data_hist = [], [], []
-colors = [mcolors.CSS4_COLORS["green"], mcolors.CSS4_COLORS["orange"], mcolors.CSS4_COLORS["blue"]] #, mcolors.CSS4_COLORS["orange"], mcolors.CSS4_COLORS["purple"], mcolors.CSS4_COLORS["brown"], mcolors.CSS4_COLORS["pink"], mcolors.CSS4_COLORS["gray"], mcolors.CSS4_COLORS["olive"], mcolors.CSS4_COLORS["cyan"], mcolors.CSS4_COLORS["lime"], mcolors.CSS4_COLORS["teal"], mcolors.CSS4_COLORS["magenta"]]
+from pdb import set_trace
 
-with open("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/best_boundaries.txt", "r") as f:
-    p = list(map(float, f.readline().strip().split(",")))
-    significances = list(map(float, f.readline().split(",")))
-bin_edges_x = [0, 1]
-bin_edges_y = [0, 1]
-for i in p[:-1]:
-    bin_edges_x.insert(-1, i)
-bin_edges_y.insert(-1, p[-1])
-for bkg in bkg_names:
-    cat_data = []
-    data = uproot.open(f"/eos/user/j/jiehan/root/outputs/two_jet/{bkg}.root")["two_jet"].arrays(["H_mass", "bdt_score_t", "vbf_score_t", "weight"], library="pd")
-    for i in range(len(bin_edges_x)-1):
-        for j in range(len(bin_edges_y)-1):
-            data_c = data.query(f"bdt_score_t>{bin_edges_x[i]} & bdt_score_t<{bin_edges_x[i+1]} & vbf_score_t>{bin_edges_y[j]} & vbf_score_t<{bin_edges_y[j+1]}")
-            cat_data.append(data.query(f"bdt_score_t>{bin_edges_x[i]} & bdt_score_t<{bin_edges_x[i+1]} & vbf_score_t>{bin_edges_y[j]} & vbf_score_t<{bin_edges_y[j+1]}"))
-    for data_c in cat_data:
-        hist, bins = np.histogram(data_c["H_mass"], bins=80, weights=data_c["weight"], range=(100, 180))
-        bkg_hist.append(hist)
-        
-for sig in signal_names:
-    cat_data = []
-    data = uproot.open(f"/eos/user/j/jiehan/root/outputs/two_jet/{sig}.root")["two_jet"].arrays(["H_mass", "bdt_score_t", "vbf_score_t", "weight"], library="pd")
-    for i in range(len(bin_edges_x)-1):
-        for j in range(len(bin_edges_y)-1):
-            data_c = data.query(f"bdt_score_t>{bin_edges_x[i]} & bdt_score_t<{bin_edges_x[i+1]} & vbf_score_t>{bin_edges_y[j]} & vbf_score_t<{bin_edges_y[j+1]}")
-            cat_data.append(data.query(f"bdt_score_t>{bin_edges_x[i]} & bdt_score_t<{bin_edges_x[i+1]} & vbf_score_t>{bin_edges_y[j]} & vbf_score_t<{bin_edges_y[j+1]}"))
-    for data_c in cat_data:
-        hist, bins = np.histogram(data_c["H_mass"], bins=80, weights=data_c["weight"], range=(100, 180))
-        sig_hist.append(hist)
-        
-for data in data_names:
-    cat_data = []
-    data = uproot.open(f"/eos/user/j/jiehan/root/outputs/two_jet/{data}.root")["two_jet"].arrays(["H_mass", "bdt_score_t", "vbf_score_t", "weight"], library="pd").query("H_mass < 120 | H_mass > 130")
-    for i in range(len(bin_edges_x)-1):
-        for j in range(len(bin_edges_y)-1):
-            data_c = data.query(f"bdt_score_t>{bin_edges_x[i]} & bdt_score_t<{bin_edges_x[i+1]} & vbf_score_t>{bin_edges_y[j]} & vbf_score_t<{bin_edges_y[j+1]}")
-            cat_data.append(data.query(f"bdt_score_t>{bin_edges_x[i]} & bdt_score_t<{bin_edges_x[i+1]} & vbf_score_t>{bin_edges_y[j]} & vbf_score_t<{bin_edges_y[j+1]}"))
-    for data_c in cat_data:
-        hist, bins = np.histogram(data_c["H_mass"], bins=80, weights=data_c["weight"], range=(100, 180))
-        data_hist.append(hist)
-
-num_cat = (len(bin_edges_x) - 1) * (len(bin_edges_y) - 1)
-cat_num = []
-for i in range(len(bin_edges_x)-1):
-    for j in range(len(bin_edges_y)-1):
-        cat_num.append(j*(len(bin_edges_x)-1) + i)
-for i in range(num_cat):
-    fig, ax = plt.subplots()
-    plot_hist = [bkg_hist[i] for i in range(i, len(bkg_hist), num_cat)]
-    plot_sig = np.sum([sig_hist[i] for i in range(i, len(sig_hist), num_cat)], axis=0)
-    plot_data = np.sum([data_hist[i] for i in range(i, len(data_hist), num_cat)], axis=0)
-    hep.histplot(plot_hist, bins, stack=True, label=bkg_names, histtype="fill", ax=ax, color=colors)
-    ax.errorbar((bins[:-1] + bins[1:]) / 2, plot_data, yerr=np.sqrt(plot_data), fmt="o", label="data", color="black")
-    ax.plot((bins[:-1] + bins[1:]) / 2, plot_sig, label="signal", color="red")
-    ax.set_xlim(100, 180)
-    ax.set_xlabel("Higgs Mass [GeV]")
-    ax.set_ylabel("Events")
-    ax.annotate(f"Significance: {significances[i]:.4f}", xy=(0.1, 0.95), xycoords="axes fraction")
-    ax.legend()
-    plt.savefig(f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/two_jet/2D_hmass_dis_{cat_num[i]}.png")
+data = uproot.open("output_with_categories.root")["test"].arrays(library="pd")
+bkg = data.query("label == 0")
+sig = data.query("label == 1")
+if os.path.exists("figs") == False:
+    os.mkdir("figs")
+for i in range(max(data["category"])+1):
+    bkg_i = bkg.query("category == {}".format(i))
+    sig_i = sig.query("category == {}".format(i))
+    bkg_hist, bins = np.histogram(bkg_i["H_mass"], bins=80, range=(100, 180), weights=bkg_i["weight"])
+    bkg_error, _ = np.histogram(bkg_i["H_mass"], bins=80, range=(100, 180), weights=bkg_i["weight"]**2)
+    sig_hist, _ = np.histogram(sig_i["H_mass"], bins=80, range=(100, 180), weights=sig_i["weight"])
+    pos = (bins[:-1] + bins[1:]) / 2
+    sig_err, _ = np.histogram(sig_i["H_mass"], bins=80, range=(100, 180), weights=sig_i["weight"]**2)
     
+    fig, ax = plt.subplots()
+    hep.histplot(bkg_hist, bins, yerr=np.sqrt(bkg_error), label="bkg", histtype="fill", color="green")
+    ax.errorbar(pos, sig_hist, yerr=np.sqrt(sig_err), fmt="o", label="sig", color="red")
+    ax.set_xlabel(r"$m_{ll\gamma}$ [GeV]")
+    ax.set_ylabel("Events")
+    ax.legend()
+    plt.savefig("figs/output_{}.png".format(i))
+
+socre_boundaries = np.percentile(sig["score"], np.linspace(0, 100, 101))
+def get_significance(sig, bkg, score):
+    if bkg > 0:
+        return np.sqrt(2*((sig+bkg)*np.log(1+sig/bkg)-sig))
+significances = []
+for i in range(len(socre_boundaries)-1):
+    sig_i = sig.query("score > {} and score <= {} and H_mass > 120 and H_mass < 130".format(socre_boundaries[i], socre_boundaries[i+1]))
+    bkg_i = bkg.query("score > {} and score <= {} and H_mass > 120 and H_mass < 130".format(socre_boundaries[i], socre_boundaries[i+1]))
+    significances.append(get_significance(sig_i["weight"].sum(), bkg_i["weight"].sum(), bkg_i["weight"].sum()))
 fig, ax = plt.subplots()
-plot_hist = [np.sum(bkg_hist[i:i+num_cat], axis=0) for i in range(0, len(bkg_hist), num_cat)]
-hep.histplot(plot_hist, bins, stack=True, label=bkg_names, histtype="fill", ax=ax, color=colors)
-plot_sig = np.sum(sig_hist, axis=0)
-ax.errorbar((bins[:-1] + bins[1:]) / 2, plot_data, yerr=np.sqrt(plot_data), fmt="o", label="data", color="black")
-ax.plot((bins[:-1] + bins[1:]) / 2, plot_sig, label="signal", color="red")
-ax.set_xlim(100, 180)
-ax.set_xlabel("Higgs Mass [GeV]")
-ax.set_ylabel("Events")
-ax.legend()
-plt.savefig(f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/two_jet/2D_hmass_dis_all.png")
+ax.scatter(socre_boundaries[:-1], significances, s=25)
+ax.set_xlabel("score")
+ax.set_ylabel("significance")
+plt.savefig("figs/significance.png")
+
+dirpath = '/eos/home-j/jiehan/root/outputs/two_jet_2D_categories'
+bkg_names = ["ZGToLLG", "DYJetsToLL", "ZG2JToG2L2J"]
+sig_names = ["ggH_M125", "VBF_M125", "ZH_M125", "WplusH_M125", "WminusH_M125", "ZH_M125", "ttH_M125"]
+data_names = ["Data"]
+
+bkg_data, sig_data = [], []
+for name in bkg_names:
+    bkg_data.append(uproot.open(f"{dirpath}/{name}.root")["two_jet"].arrays(library="pd"))
+for name in sig_names:
+    sig_data.append(uproot.open(f"{dirpath}/{name}.root")["two_jet"].arrays(library="pd"))
+data_data = uproot.open(f"{dirpath}/Data.root")["two_jet"].arrays(library="pd").query("H_mass < 120 | H_mass > 130")
+
+with open("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/models/best_thresholds.txt", "r") as f:
+    boundaries = list(map(float, f.readline().strip().split(" ")))
+    print(boundaries)
+    
+for i in range(len(boundaries)-1):
+    selections = f"bdt_score_t>{boundaries[i]} & bdt_score_t<{boundaries[i+1]} & H_mass>100 & H_mass<180"
+    bkg_hists = [np.histogram(data.query(selections)["H_mass"], bins=80, range=(100, 180), weights=data.query(selections)["weight"])[0] for data in bkg_data]
+    bkg_err_hists = [np.histogram(data.query(selections)["H_mass"], bins=80, range=(100, 180), weights=data.query(selections)["weight"]**2)[0] for data in bkg_data]
+    sig_hist = np.histogram(np.concatenate([data.query(selections)["H_mass"] for data in sig_data]), bins=80, range=(100, 180), weights=np.concatenate([data.query(selections)["weight"] for data in sig_data]))[0]
+    VBF_hist = np.histogram(sig_data[1].query(selections)["H_mass"], bins=80, range=(100, 180), weights=sig_data[1].query(selections)["weight"])[0]
+    data_hist = np.histogram(data_data.query(selections)["H_mass"], bins=80, range=(100, 180), weights=data_data.query(selections)["weight"])[0]
+    
+    fig, ax = plt.subplots()
+    bins = np.linspace(100, 180, 81)
+    pos = (bins[:-1] + bins[1:]) / 2
+    
+    hep.histplot(bkg_hists, bins, yerr=np.sqrt(bkg_err_hists), label=bkg_names, histtype="fill", stack=True, ax=ax)
+    ax.errorbar(pos, data_hist, yerr=np.sqrt(data_hist), fmt="o", label="data", color="black")
+    ax.plot(pos, VBF_hist, label="VBF", color="yellow", linestyle="--", linewidth=2)
+    print("vbf purity", VBF_hist.sum()/sig_hist.sum())
+    ax.plot(pos, sig_hist, label="signal", color="red", linewidth=3)
+    
+    ax.set_xlabel(r"$m_{ll\gamma}$ [GeV/c$^2$]")
+    ax.set_ylabel("Events")
+    ax.legend()
+    
+    plt.savefig(f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/figs/hmass_dis_{i}.png")

@@ -17,8 +17,7 @@ def calc_sig(sig, bkg,s_err,b_err):
     #   significance = sig / sqrt(bkg)
 
     #error on significance
-    numer = sqrt((log(ntot/bkg)*s_err)**2 + ((log(ntot/bkg) - (sig/bkg))*b_err)**2)
-    uncert = numer/significance
+    uncert = sqrt((log(ntot/bkg)*s_err)**2 + ((log(ntot/bkg) - (sig/bkg))*b_err)**2)
     #   uncert = sqrt((s_err**2/bkg) + (significance/2/bkg*b_err)**2)
 
     return significance, uncert
@@ -584,7 +583,7 @@ class categorizer_shape(object):
 
     def fit(self, bl, br, nbin, minN=5, floatB=False, earlystop=-1, pbar=False):
         if nbin == 1:
-            if floatB: return [], 0
+            if floatB: return [], 0, 0
 
             nsig, dsig = self.h_sig.IntegralXAndError(bl, br)
             nbkg, dbkg = self.h_bkg.IntegralXAndError(bl, br)
@@ -615,7 +614,7 @@ class categorizer_shape(object):
                 if b2 == -1: break
 
                 z = sqrt(z1 ** 2 + z2 ** 2)
-                u = sqrt((u1 * z1)**2 + (u2 * z2)**2) / z if z != 0 else 0
+                u = sqrt((u1 * z1)**2 + (u2 * z2)**2)
 
                 if z > zmax:
                     stop = 0

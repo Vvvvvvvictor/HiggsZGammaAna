@@ -118,11 +118,11 @@ def gettingsig(input_path, region, variable, boundaries, transform, estimate):
 
     zs = calc_sig(yields.sig, yields.bkg, yields.sig_err, yields.bkg_err)
     yields['z'] = zs[0]
-    yields['u'] = zs[1]
+    yields['u'] = zs[1] / zs[0]
     yields['VBF purity [%]'] = yields['VBF']/yields['sig']*100
 
     z = np.sqrt((yields['z']**2).sum())
-    u = np.sqrt((yields['z']**2 * yields['u']**2).sum())/z
+    u = np.sqrt((zs[0]**2 * zs[1]**2).sum())/z
 
     print(f'Significance:  {z:.4f} +/- {abs(u):.4f}')
 
@@ -214,6 +214,7 @@ def categorizing(input_path, region, variable, sigs, bkgs, nscan, minN, transfor
 #################################################################################################
         
     bmax, zmax, umax = cgz.fit(1, nscan, nbin, minN=minN, floatB=floatB, earlystop=earlystop, pbar=True)
+    umax = umax / zmax if zmax != 0 else 0
     print(bmax)
     boundaries = bmax
     boundaries_values = [(i-1.)/nscan for i in boundaries]

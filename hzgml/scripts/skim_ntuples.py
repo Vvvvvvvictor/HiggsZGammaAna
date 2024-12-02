@@ -541,15 +541,15 @@ def main():
     data = preselect(data) #TODO add cutflow
     data = decorate(data)
     final_events += data.shape[0]
-    data_zero_jet = data.query("n_jets == 0 & n_leptons < 3 & MET_pt < 90")
-    data_one_jet = data.query("n_jets == 1 & n_leptons < 3 & MET_pt < 90")
-    data_two_jet = data.query("n_jets >= 2 & n_leptons < 3 & n_b_jets == 0")
-    data_zero_to_one_jet = data.query("n_jets < 2 & n_leptons < 3 & MET_pt < 90")
-    data_VH = data[(data.n_leptons > 2) & (data.n_b_jets == 0)]
-    data_VH_ttH =  data.query("n_leptons >= 3 & n_b_jets == 0 & max_I_mini < 0.15 & H_relpt > 0.3 & MET_pt > 30 & Z_mass > 85 & Z_mass < 95")
-    data_ZH = data.query("n_leptons < 3 & n_jets < 2 & MET_pt > 90 & H_relpt > 0.4 & Z_mass > 85 & Z_mass < 95") 
-    data_ttH_had = data.query("n_leptons == 2 & n_jets >= 5 & n_b_jets > 0 & Z_mass > 85 & Z_mass < 95")
-    data_ttH_lep = data.query("((n_leptons == 2 & n_jets >= 3 & n_b_jets > 0) | (n_leptons >= 4 & n_jets >= 1 & n_b_jets >= 1)) & (max_I_mini < 0.1 & Z_mass > 85 & Z_mass < 95)")
+    data_zero_jet = data.query("n_jets == 0 & n_leptons == 2 & MET_pt < 90")
+    data_one_jet = data.query("n_jets == 1 & n_leptons == 2 & MET_pt < 90")
+    data_two_jet = data.query("n_jets >= 2 & n_leptons == 2 & n_b_jets == 0")
+    data_zero_to_one_jet = data.query("n_jets <= 1 & n_leptons == 2 & MET_pt < 90")
+    data_VH_ttH = data[(data.n_leptons > 2) & (data.n_b_jets == 0)]
+    data_VH =  data.query("n_leptons >= 3 & n_b_jets == 0 & max_I_mini < 0.15 & H_relpt > 0.3 & MET_pt > 30 & Z_mass > 85 & Z_mass < 95")
+    data_ZH = data.query("n_leptons == 2 & n_jets <= 1 & MET_pt > 90 & H_relpt > 0.4 & Z_mass > 85 & Z_mass < 95") 
+    data_ttH_had = data.query("n_leptons == 2 & n_jets >= 5 & n_b_jets >= 1 & Z_mass > 85 & Z_mass < 95")
+    data_ttH_lep = data.query("((n_leptons == 3 & n_jets >= 3 & n_b_jets >= 1) | (n_leptons >= 4 & n_jets >= 1 & n_b_jets >= 1)) & (max_I_mini < 0.1 & Z_mass > 85 & Z_mass < 95)")
     with uproot.recreate(args.output) as f:
         f['inclusive'] = data
         f['zero_jet'] = data_zero_jet
