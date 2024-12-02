@@ -1,0 +1,1 @@
+ python scripts/run_analysis.py --config "metadata/zgamma_signal_run2.json"  --log-level "DEBUG"  --sample_list "ggH" --output_dir "/eos/user/s/shsong/HiggsDNA/testsya/" --short --batch_system "local"

@@ -1,0 +1,243 @@
+{
+  "schema_version": 2,
+  "description": "This json file contains the corrections for the deepJet, robustParticleTransformer, particleNet AK4 jet taggers for the Run3Summer22 campaign. Working points for the tagging algorithms are also supplied in this file (wp_values). ",
+  "corrections": [
+    {
+      "name": "deepJet_wp_values",
+      "description": "Working points values of the c-jet discrimination for deepJet in Run3Summer22. Important: the two axes 'CvB' and 'CvL' are to be used together, e.g. a loose working point is defined as a simultaneous cut on both values.",
+      "version": 1,
+      "inputs": [
+        {
+          "name": "working_point",
+          "type": "string",
+          "description": "L/M/T"
+        },
+        {
+          "name": "axis",
+          "type": "string",
+          "description": "CvB/CvL cut"
+        }
+      ],
+      "output": {
+        "name": "wp",
+        "type": "real",
+        "description": "Working point value of the CvL or CvB discriminator"
+      },
+      "data": {
+        "nodetype": "category",
+        "input": "working_point",
+        "content": [
+          {
+            "key": "L",
+            "value": {
+              "nodetype": "category",
+              "input": "axis",
+              "content": [
+                {
+                  "key": "CvL",
+                  "value": 0.042
+                },
+                {
+                  "key": "CvB",
+                  "value": 0.208
+                }
+              ]
+            }
+          },
+          {
+            "key": "M",
+            "value": {
+              "nodetype": "category",
+              "input": "axis",
+              "content": [
+                {
+                  "key": "CvL",
+                  "value": 0.108
+                },
+                {
+                  "key": "CvB",
+                  "value": 0.299
+                }
+              ]
+            }
+          },
+          {
+            "key": "T",
+            "value": {
+              "nodetype": "category",
+              "input": "axis",
+              "content": [
+                {
+                  "key": "CvL",
+                  "value": 0.303
+                },
+                {
+                  "key": "CvB",
+                  "value": 0.243
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "robustParticleTransformer_wp_values",
+      "description": "Working points values of the c-jet discrimination for robustParticleTransformer in Run3Summer22. Important: the two axes 'CvB' and 'CvL' are to be used together, e.g. a loose working point is defined as a simultaneous cut on both values.",
+      "version": 1,
+      "inputs": [
+        {
+          "name": "working_point",
+          "type": "string",
+          "description": "L/M/T"
+        },
+        {
+          "name": "axis",
+          "type": "string",
+          "description": "CvB/CvL cut"
+        }
+      ],
+      "output": {
+        "name": "wp",
+        "type": "real",
+        "description": "Working point value of the CvL or CvB discriminator"
+      },
+      "data": {
+        "nodetype": "category",
+        "input": "working_point",
+        "content": [
+          {
+            "key": "L",
+            "value": {
+              "nodetype": "category",
+              "input": "axis",
+              "content": [
+                {
+                  "key": "CvL",
+                  "value": 0.039
+                },
+                {
+                  "key": "CvB",
+                  "value": 0.068
+                }
+              ]
+            }
+          },
+          {
+            "key": "M",
+            "value": {
+              "nodetype": "category",
+              "input": "axis",
+              "content": [
+                {
+                  "key": "CvL",
+                  "value": 0.117
+                },
+                {
+                  "key": "CvB",
+                  "value": 0.13
+                }
+              ]
+            }
+          },
+          {
+            "key": "T",
+            "value": {
+              "nodetype": "category",
+              "input": "axis",
+              "content": [
+                {
+                  "key": "CvL",
+                  "value": 0.36
+                },
+                {
+                  "key": "CvB",
+                  "value": 0.095
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "particleNet_wp_values",
+      "description": "Working points values of the c-jet discrimination for particleNet in Run3Summer22. Important: the two axes 'CvB' and 'CvL' are to be used together, e.g. a loose working point is defined as a simultaneous cut on both values.",
+      "version": 1,
+      "inputs": [
+        {
+          "name": "working_point",
+          "type": "string",
+          "description": "L/M/T"
+        },
+        {
+          "name": "axis",
+          "type": "string",
+          "description": "CvB/CvL cut"
+        }
+      ],
+      "output": {
+        "name": "wp",
+        "type": "real",
+        "description": "Working point value of the CvL or CvB discriminator"
+      },
+      "data": {
+        "nodetype": "category",
+        "input": "working_point",
+        "content": [
+          {
+            "key": "L",
+            "value": {
+              "nodetype": "category",
+              "input": "axis",
+              "content": [
+                {
+                  "key": "CvL",
+                  "value": 0.054
+                },
+                {
+                  "key": "CvB",
+                  "value": 0.181
+                }
+              ]
+            }
+          },
+          {
+            "key": "M",
+            "value": {
+              "nodetype": "category",
+              "input": "axis",
+              "content": [
+                {
+                  "key": "CvL",
+                  "value": 0.16
+                },
+                {
+                  "key": "CvB",
+                  "value": 0.306
+                }
+              ]
+            }
+          },
+          {
+            "key": "T",
+            "value": {
+              "nodetype": "category",
+              "input": "axis",
+              "content": [
+                {
+                  "key": "CvL",
+                  "value": 0.492
+                },
+                {
+                  "key": "CvB",
+                  "value": 0.259
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
