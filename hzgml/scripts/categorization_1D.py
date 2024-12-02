@@ -118,11 +118,11 @@ def gettingsig(input_path, region, variable, boundaries, transform, estimate):
 
     zs = calc_sig(yields.sig, yields.bkg, yields.sig_err, yields.bkg_err)
     yields['z'] = zs[0]
-    yields['u'] = zs[1]
+    yields['u'] = zs[1] / zs[0]
     yields['VBF purity [%]'] = yields['VBF']/yields['sig']*100
 
     z = np.sqrt((yields['z']**2).sum())
-    u = np.sqrt((yields['z']**2 * yields['u']**2).sum())/z
+    u = np.sqrt((zs[0]**2 * zs[1]**2).sum())/z
 
     print(f'Significance:  {z:.4f} +/- {abs(u):.4f}')
 
@@ -169,7 +169,7 @@ def categorizing(input_path, region, variable, sigs, bkgs, nscan, minN, transfor
     # elif estimate == "fullSim":
     #     cgz = categorizer_shape(h_sig, h_bkgmc_cen)
     
-    # # cgz.smooth(1, nscan, SorB='B', function='Epoly2')
+    # cgz.smooth(50, nscan, SorB='B', function='Epoly2')
     # '''
     # uncomment upper line to fit a function to the BDT distribution. Usage: categorizer.smooth(left_bin_to_fit, right_bin_to_fit, SorB='S' (for signal) or 'B' (for bkg), function='Epoly2', printMessage=False (switch to "True" to print message))
     # TODO: first parameter must >= 1, 0 is banned.
@@ -203,7 +203,7 @@ def categorizing(input_path, region, variable, sigs, bkgs, nscan, minN, transfor
     elif estimate == "fullSim":
         cgz = categorizer(h_sig, h_bkgmc_cen)
     
-    # cgz.smooth(50, nscan, SorB='B', function='Epoly2')
+    cgz.smooth(70, nscan, SorB='B', function='Epoly2')
     '''
     uncomment upper line to fit a function to the BDT distribution. Usage: categorizer.smooth(left_bin_to_fit, right_bin_to_fit, SorB='S' (for signal) or 'B' (for bkg), function='Epoly2', printMessage=False (switch to "True" to print message))
     TODO: first parameter must >= 1, 0 is banned.
@@ -214,6 +214,7 @@ def categorizing(input_path, region, variable, sigs, bkgs, nscan, minN, transfor
 #################################################################################################
         
     bmax, zmax, umax = cgz.fit(1, nscan, nbin, minN=minN, floatB=floatB, earlystop=earlystop, pbar=True)
+    umax = umax / zmax if zmax != 0 else 0
     print(bmax)
     boundaries = bmax
     boundaries_values = [(i-1.)/nscan for i in boundaries]

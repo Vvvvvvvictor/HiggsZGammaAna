@@ -27,11 +27,11 @@ def getArgs():
     parser.add_argument('-p', '--params', action='store', type=dict, default=None, help='json string.') #type=json.loads
     parser.add_argument('--hyperparams_path', action='store', default=None, help='path of hyperparameters json') 
     parser.add_argument('--save', action='store_true', help='Save model weights to HDF5 file')
-    parser.add_argument('--corr', action='store_true', default=True, help='Plot corelation between each training variables')
+    parser.add_argument('--corr', action='store_true', default=False, help='Plot corelation between each training variables')
     parser.add_argument('--importance', action='store_true', default=True, help='Plot importance of variables, parameter "gain" is recommanded')
     parser.add_argument('--roc', action='store_true', default=True, help='Plot ROC')
     parser.add_argument('--optuna', action='store_true', default=False, help='Run hyperparameter tuning using optuna')
-    parser.add_argument('--optuna_metric', action='store', default='auc', choices=['eval_auc', 'sqrt_eval_auc_minus_train_auc', 'eval_auc_minus_train_auc', 'eval_auc_over_train_auc'], help='Optuna metric to optimize')
+    parser.add_argument('--optuna_metric', action='store', default='auc', choices=['eval_auc', 'sqrt_eval_auc_minus_train_auc', 'eval_auc_minus_train_auc', 'eval_auc_over_train_auc', "eval_auc_minus_train_auc"], help='Optuna metric to optimize')
     parser.add_argument('--n-calls', action='store', type=int, default=36, help='Steps of hyperparameter tuning using optuna')
     parser.add_argument('--continue-optuna', action='store', type=int, default=0, help='Continue tuning hyperparameters using optuna')
 
@@ -105,7 +105,7 @@ class XGBoostHandler(object):
         self.train_mc_background = []
         self.train_dd_background = []
         self.train_variables = []
-        self.preselections = ['gamma_pt > 0']
+        self.preselections = [] 
         self.mc_preselections = []
         self.data_preselections = []
         self.signal_preselections = []
@@ -185,16 +185,16 @@ class XGBoostHandler(object):
             self.randomIndex = self.randomIndex.replace('noexpand:', '')
             self.weight = self.weight.replace('noexpand:', '')
 
-            if self.preselections:
-                self.preselections = ['data.' + p for p in self.preselections]
-            if self.signal_preselections:
-                self.signal_preselections = ['data.' + p for p in self.signal_preselections]
-            if self.mc_preselections:
-                self.mc_preselections = ['data.' + p for p in self.mc_preselections]
-            if self.data_preselections:
-                self.data_preselections = ['data.' + p for p in self.data_preselections]
-            if self.background_preselections:
-                self.background_preselections = ['data.' + p for p in self.background_preselections]
+            # if self.preselections:
+            #     self.preselections = ['data.' + p for p in self.preselections]
+            # if self.signal_preselections:
+            #     self.signal_preselections = ['data.' + p for p in self.signal_preselections]
+            # if self.mc_preselections:
+            #     self.mc_preselections = ['data.' + p for p in self.mc_preselections]
+            # if self.data_preselections:
+            #     self.data_preselections = ['data.' + p for p in self.data_preselections]
+            # if self.background_preselections:
+            #     self.background_preselections = ['data.' + p for p in self.background_preselections]
 
         except Exception as e:
             logging.error("Error reading configuration '{config}'".format(config=configPath))
@@ -228,33 +228,32 @@ class XGBoostHandler(object):
         self._outputFolder = outputFolder
 
     def preselect(self, data, sample=''):
-
         if sample == 'signal':
             for p in self.signal_preselections:
-                data = data[eval(p)]
+                data = data.query(p)
             for p in self.mc_preselections:
-                data = data[eval(p)]
+                data = data.query(p)
         elif sample == 'background':
             for p in self.background_preselections:
-                data = data[eval(p)]
+                data = data.query(p)
         elif sample == 'data':
             for p in self.background_preselections:
-                data = data[eval(p)]
+                data = data.query(p)
             for p in self.data_preselections:
-                data = data[eval(p)]
+                data = data.query(p)
         elif sample == 'mc_background':
             for p in self.background_preselections:
-                data = data[eval(p)]
+                data = data.query(p)
             for p in self.mc_preselections:
-                data = data[eval(p)]
+                data = data.query(p)
         elif sample == 'DYJetsToLL':
-            data = data[data.n_iso_photons==0]
+            # data = data.query('n_iso_photons == 0')
             for p in self.background_preselections:
-                data = data[eval(p)]
+                data = data.query(p)
             for p in self.mc_preselections:
-                data = data[eval(p)]
+                data = data.query(p)
         for p in self.preselections:
-            data = data[eval(p)]
+            data = data.query(p)
 
         return data
 
@@ -293,7 +292,7 @@ class XGBoostHandler(object):
             for bkg in tqdm(sorted(bkg_mc_list), desc='XGB INFO: Loading training backgrounds', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
                 #TODO put this to the config
                 if "DY" in bkg:
-                    branches = self._mc_branches + ["n_iso_photons"]
+                    branches = self._mc_branches #+ ["n_iso_photons"]
                 else: 
                     branches = self._mc_branches
                 file = uproot.open(bkg)
@@ -620,7 +619,8 @@ class XGBoostHandler(object):
                 'eval_auc': eval_auc,
                 'sqrt_eval_auc_minus_train_auc': np.sqrt(train_auc * (2 * eval_auc - train_auc)),
                 'eval_auc_minus_train_auc': eval_auc * 2 - train_auc,
-                'eval_auc_over_train_auc': eval_auc ** 2 / ((eval_auc + train_auc) / 2)
+                'eval_auc_over_train_auc': eval_auc ** 2 / ((eval_auc + train_auc) / 2),
+                'eval_auc_minus_train_auc': eval_auc - train_auc,
             }
             return metrics.get(self.optuna_metric, eval_auc)
         

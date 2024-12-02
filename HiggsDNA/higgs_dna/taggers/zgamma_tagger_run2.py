@@ -565,9 +565,12 @@ class ZGammaTaggerRun2(Tagger):
             )
 
         # additional leptons
-        additional_leptons = awkward.concatenate([electrons, muons], axis = 1)
-        veto_Z_leptons = (additional_leptons.pt != events.Z_lead_lepton_pt) & (additional_leptons.pt != events.Z_sublead_lepton_pt)
-        additional_leptons = additional_leptons[veto_Z_leptons]       
+        leptons = awkward.concatenate([electrons, muons], axis = 1)
+        max_I_mini = awkward.fill_none(awkward.max(leptons.miniPFRelIso_all, axis = 1), 9999)
+        awkward_utils.add_field(events, "max_I_mini", max_I_mini)
+        
+        veto_Z_leptons = (leptons.pt != events.Z_lead_lepton_pt) & (leptons.pt != events.Z_sublead_lepton_pt)
+        additional_leptons = leptons[veto_Z_leptons]       
         additional_leptons = additional_leptons[awkward.argsort(additional_leptons.pt, ascending=False, axis=1)]
 
         for objects, name in zip([additional_leptons], ["additional_lepton"]):
@@ -626,6 +629,11 @@ class ZGammaTaggerRun2(Tagger):
             cut8 = cut7 & sel_h_3
             cut9 = cut8 & event_filter
             
+            if cut_type == "zgammas_ele":
+                ee_all_cut = cut9
+            if cut_type == "zgammas_mu":
+                mm_all_cut = cut9
+            
             # if cut_type == "zgammas_mu":
             #     print(f"!!!start check events tag({cut_type})!!!")
             #     for i in events[cut4]:
@@ -645,7 +653,11 @@ class ZGammaTaggerRun2(Tagger):
             # for cut, cut_name in zip([cut1, cut2, cut3, cut4, cut5, cut6, cut7, cut8, cut9], cut_names):
             #     awkward_utils.add_field(events, f"{cut_type}_{cut_name}", cut)
 
-        # all_cuts = cut0
+        all_cuts = ee_all_cut | mm_all_cut
+        
+        # print(f"Sum of all_cuts: {sum(all_cuts)}")
+        # all_cuts = ee_all_cut | mm_all_cut
+        # print(f"Sum of all_cuts: {sum(all_cuts)}")
 
         # checked_cut = (z_ee_cut | z_mumu_cut) & pair_cut
         # checked_events = events[checked_cut]
@@ -817,13 +829,14 @@ class ZGammaTaggerRun2(Tagger):
         # electron veto
         e_veto_cut = (photons.electronVeto > options["e_veto"])
         
-        new_pho = awkward.unflatten(awkward.unflatten(awkward.flatten(photons.electronIdx), [1]*awkward.sum(awkward.num(photons.electronIdx))), awkward.num(photons.electronIdx, axis=1))
+        photon_ele_idx = awkward.where(awkward.num(photons.electronIdx, axis=1) == 0, awkward.ones_like(photons.pt)*-1, photons.electronIdx)
+        new_pho = awkward.unflatten(awkward.unflatten(awkward.flatten(photon_ele_idx), [1]*awkward.sum(awkward.num(photon_ele_idx))), awkward.num(photon_ele_idx, axis=1))
         new_ele = awkward.broadcast_arrays(electrons.Idx[:,None], new_pho, depth_limit=2)[0]
         eg_overlap_cut = ~awkward.where(
             awkward.is_none(electrons.Idx),
             awkward.broadcast_arrays(photons.electronIdx, False)[1],
             awkward.flatten(awkward.any(new_pho[:, :, None] == new_ele, axis=-2), axis=-1)
-        )
+        ) # some events may have no electrons, so we need to replace None with False
 
         # use_central_nano = options["use_central_nano"] # indicates whether we are using central nanoAOD (with some branches that are necessary for full diphoton preselection missing) or custom nanoAOD (with these branches added)
 

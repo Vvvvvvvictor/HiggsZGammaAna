@@ -148,7 +148,7 @@ def delta_R(objects1, objects2, min_dr):
 
     dR = obj1.deltaR(obj2) # shape [n_events, n_obj1, n_obj2]
 
-    selection = awkward.all(dR >= min_dr, axis = -1)
+    selection = awkward.all(dR > min_dr, axis = -1)
     return selection
 
 

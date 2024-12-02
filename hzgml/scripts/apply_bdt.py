@@ -69,7 +69,7 @@ class ApplyXGBHandler(object):
         self.readApplyConfig(configPath[1])
         self.readTrainConfig(configPath[0])
         self.arrangeBranches()
-        self.arrangePreselections()
+        # self.arrangePreselections()
 
     def readApplyConfig(self, configPath):
         """Read configuration file formated in json to extract information to fill TemplateMaker variables."""
@@ -169,9 +169,9 @@ class ApplyXGBHandler(object):
         self._outputFolder = outputFolder
 
     def preselect(self, data):
-
+        print(self.preselections)
         for p in self.preselections:
-            data = data[eval(p)]
+            data = data.query(p)
 
         return data
 
