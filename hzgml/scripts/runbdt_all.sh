@@ -39,10 +39,8 @@ echo "Shielded parameter is: $S . Added variables is: $A ."
 # python scripts/apply_bdt.py -r zero_to_one_jet
 
 # python scripts/categorization_1D.py -r zero_to_one_jet -b 4 --minN 10 --floatB
-for ncat in {2..7};do
-    python scripts/categorization_1D.py -r two_jet -b $ncat --minN 2 --floatB -es "fullSimrw"
-done
-# python ../plot_python/plot_cats_hmass_dis.py
+# python scripts/categorization_1D.py -r two_jet -b 5 --minN 2 --floatB -es "fullSimrw"
+python ../plot_python/plot_cats_hmass_dis.py
 
 cd ../plot_python
 # python find_2D_best_boundaries.py
