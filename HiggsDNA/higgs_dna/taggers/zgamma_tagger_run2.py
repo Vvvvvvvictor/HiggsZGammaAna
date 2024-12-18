@@ -436,8 +436,26 @@ class ZGammaTaggerRun2(Tagger):
         trigger_cut = single_ele_trigger_cut | double_ele_trigger_cut | single_mu_trigger_cut  | double_mu_trigger_cut
         ele_trigger_cut = single_ele_trigger_cut | double_ele_trigger_cut
         mu_trigger_cut = single_mu_trigger_cut  | double_mu_trigger_cut
+        # HLT lepton status: 
+        # 0: failed all triggers ->  double_ele_trigger_cut = False, single_ele_trigger_cut = False
+        # 1: passed lower dilepton trigger -> double_ele_trigger_cut = False, single_ele_trigger_cut = True
+        # 2: passed upper dilepton trigger -> double_ele_trigger_cut = True, single_ele_trigger_cut = False
+        # 3: passed single lepton trigger ->  single_ele_trigger_cut = True
         
-        # a trick that give 0 to the empty array
+        # 0: lep_prob = 1 - probability(1), lep_unc = uncertainty(1)
+        # 1: lep_prob = prob(1) - prob(2), lep_unc = sqrt(uncertainty(1)**2 + uncertainty(2)**2)
+        # 2: lep_prob = prob(2) - prob(3), lep_unc = sqrt(uncertainty(2)**2 + uncertainty(3)**2)
+        # 3: lep_prob = prob(3), lep_unc = uncertainty(3)
+        
+        #if mc_prob < 0.001: mc_prob = 0.
+        # sf = 1.0;
+        # unc = 0.0;
+        # propagate_uncertainty_ratio(data_prob, data_unc, mc_prob, mc_unc, sf, unc);
+        # sf,unc=1
+        # if mc_prob !=0: sf = data_prob/mc_prob; unc = sqrt((data_unc/mc_prob)**2 + ((mc_unc*data_prob)/(mc_prob*mc*prob))**2)
+        # elif mc_prob == 0 sf = 1; unc = 0
+        
+        # a trick that give 0 to the empty array    
         if self.year is not None:
             year = self.year[:4]
             e_cut = awkward.fill_none(awkward.pad_none(electrons.pt, 1, axis=1)[:, 0], 0) > self.options["lead_ele_pt"][year]

@@ -44,7 +44,24 @@ If you notice issues with the `conda pack` command for creating the tarball, try
 conda env update --file environment.yml --prune
 ```
 
-**3. Some useful note**
+**3. Run the tagger**
+
+The name of samples are documented in `metadata/samples/zgamma_tutorial.json`. If you want to analysis other samples, please modify this file.
+
+The selection of samples and the cutflow are defined in `higgs_dna/taggers/zgamma_tagger_run2.py`. This is for the Run2 and partial Run3 Higgs to ZGamma analysis. If you want to analysis other samples, please modify this file.
+
+To start a job(i.e. for Run2 data), a config file is needed. The config file is defined in `metadata/zgamma_data_run2.json`. If you want to analysis other samples, please modify this file.
+
+The tagger can be run by:
+```
+bash scripts/run_analysis_data_run2.sh
+```
+
+The output will be stored in the path documented in `scripts/run_analysis_data_run2.sh`. Please check it before running the jobs.
+
+The meaning of option could be found in the `scripts/run_analysis.py`.
+
+**4. Some useful note**
 
 The logic computation sequance is: 1. `&`, 2. `|`. It would be better use `()` between each `&`.
 
@@ -244,12 +261,6 @@ for the background function for fitting, we can change inside the codes.
 **Take care that the observed variable in this code should be `CMS_hzg_mass`, because this is the name used in `ZGMCShape.root`. We should use the same name, or we would fail.**
 
 We select the best background function by spurial signal, chi square and F test. We can see the fitting result and name of the best function in the log file.(not done yet)
-
-## NOTE
-After setting up three environment(HiggsDNA, machine learning and spurial signal test), we can set up those three by running the compacted setup shell script:
-```
-source setup.sh
-```
 
 ## Final Fit
 ### Setup environment

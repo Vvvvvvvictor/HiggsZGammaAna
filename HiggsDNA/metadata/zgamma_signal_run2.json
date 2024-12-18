@@ -57,12 +57,36 @@
                 },
                 "modify_central_weight": false
             },
+            "btag_reshape_sf" : {
+                "type" : "object",
+                "method" : "from_function",
+                "function" : {
+                    "module_name" : "higgs_dna.systematics.jet_systematics",
+                    "name" : "btag_deepjet_reshape_sf"
+                },
+                "modify_central_weight" : true,
+                "input_collection" : "Jet",
+                "target_collections" : ["SelectedJet"]
+            },
             "electron_wplid_sf": {
                 "type": "object",
                 "method": "from_function",
                 "function": {
                     "module_name": "higgs_dna.systematics.lepton_systematics",
                     "name": "electron_WPL_sf"
+                },
+                "modify_central_weight": false,
+                "input_collection": "Electron",
+                "target_collections": [
+                    "SelectedElectron"
+                ]
+            },
+            "SingleEle_HLT_MC_sf": {
+                "type": "object",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.lepton_systematics",
+                    "name": "singleEle_MCcorrection"
                 },
                 "modify_central_weight": false,
                 "input_collection": "Electron",
@@ -217,7 +241,7 @@
             "ggH_M125", "VBF_M125", "WplusH_M125", "WminusH_M125", "ZH_M125", "ttH_M125"
         ],
         "years": [
-            "2016preVFP", "2016postVFP", "2017", "2018"
+             "2017"
         ]
     },
     "variables_of_interest": [

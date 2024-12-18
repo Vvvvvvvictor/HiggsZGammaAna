@@ -29,7 +29,8 @@ SSTest/bkg*
 */old*
 
 # Byte-compiled / optimized / DLL files
-__pycache__/
+*/__init__.py
+*/__pycache__/
 *.py[cod]
 *$py.class
 

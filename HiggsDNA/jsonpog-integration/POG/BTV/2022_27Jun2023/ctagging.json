@@ -1,0 +1,85 @@
+{
+  "schema_version": 2,
+  "description": "This json file contains the corrections for the deepJetRun2 AK4 jet taggers for the Run3Summer22EE-PartialReReco campaign. Working points for the tagging algorithms are also supplied in this file (wp_values). ",
+  "corrections": [
+    {
+      "name": "deepJetRun2_wp_values",
+      "description": "Working points values of the c-jet discrimination for deepJetRun2 in Run3Summer22EE-PartialReReco. Important: the two axes 'CvB' and 'CvL' are to be used together, e.g. a loose working point is defined as a simultaneous cut on both values.",
+      "version": 1,
+      "inputs": [
+        {
+          "name": "working_point",
+          "type": "string",
+          "description": "L/M/T"
+        },
+        {
+          "name": "axis",
+          "type": "string",
+          "description": "CvB/CvL cut"
+        }
+      ],
+      "output": {
+        "name": "wp",
+        "type": "real",
+        "description": "Working point value of the CvL or CvB discriminator"
+      },
+      "data": {
+        "nodetype": "category",
+        "input": "working_point",
+        "content": [
+          {
+            "key": "L",
+            "value": {
+              "nodetype": "category",
+              "input": "axis",
+              "content": [
+                {
+                  "key": "CvL",
+                  "value": 0.037
+                },
+                {
+                  "key": "CvB",
+                  "value": 0.277
+                }
+              ]
+            }
+          },
+          {
+            "key": "M",
+            "value": {
+              "nodetype": "category",
+              "input": "axis",
+              "content": [
+                {
+                  "key": "CvL",
+                  "value": 0.098
+                },
+                {
+                  "key": "CvB",
+                  "value": 0.37
+                }
+              ]
+            }
+          },
+          {
+            "key": "T",
+            "value": {
+              "nodetype": "category",
+              "input": "axis",
+              "content": [
+                {
+                  "key": "CvL",
+                  "value": 0.335
+                },
+                {
+                  "key": "CvB",
+                  "value": 0.312
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
