@@ -44,15 +44,16 @@ def select_electrons(electrons, options, clean, name = "none", tagger = None, ye
     elif options["id"] == "WPL":
         if int(year) > 2020:
             points = 2.0 / (1.0 + numpy.exp(-2.0 * numpy.array([0.3685, 0.2662, -0.5444, 1.6339, 1.5499, 2.0629]))) - 1.0
+            etasc = electrons.eta + electrons.deltaEtaSC
             id_cut = (
                 ((electrons.pt > 10) & 
-                 ((abs(electrons.eta) < 0.8) & (electrons.mvaHZZIso > points[0])) | 
-                 ((abs(electrons.eta) < 1.479) & (abs(electrons.eta) > 0.8) & (electrons.mvaHZZIso > points[1])) | 
-                 ((abs(electrons.eta) > 1.479) & (electrons.mvaHZZIso > points[2]))) | 
+                 (((abs(etasc) < 0.8) & (electrons.mvaHZZIso > points[0])) | 
+                  ((abs(etasc) < 1.479) & (abs(etasc) > 0.8) & (electrons.mvaHZZIso > points[1])) | 
+                  ((abs(etasc) > 1.479) & (electrons.mvaHZZIso > points[2])))) | 
                 ((electrons.pt < 10) & 
-                 ((abs(electrons.eta) < 0.8) & (electrons.mvaHZZIso > points[3])) | 
-                 ((abs(electrons.eta) < 1.479) & (abs(electrons.eta) > 0.8) & (electrons.mvaHZZIso > points[4])) | 
-                 ((abs(electrons.eta) > 1.479) & (electrons.mvaHZZIso > points[5])))
+                 (((abs(etasc) < 0.8) & (electrons.mvaHZZIso > points[3])) | 
+                  ((abs(etasc) < 1.479) & (abs(etasc) > 0.8) & (electrons.mvaHZZIso > points[4])) | 
+                  ((abs(etasc) > 1.479) & (electrons.mvaHZZIso > points[5]))))
             )
         elif int(year) < 2020:
             id_cut = electrons.mvaFall17V2Iso_WPL == True # run2 nanoaodv9
@@ -68,6 +69,13 @@ def select_electrons(electrons, options, clean, name = "none", tagger = None, ye
         transition_cut = electrons.pt > 0.
 
     all_cuts = standard_cuts & id_cut & transition_cut
+    # print(points)
+    # print(electrons.pt > 10)
+    # print(((abs(etasc) < 0.8) & (electrons.mvaHZZIso > points[0])))
+    # print(((abs(etasc) < 1.479) & (abs(etasc) > 0.8) & (electrons.mvaHZZIso > points[1])))
+    # print(((abs(etasc) > 1.479) & (electrons.mvaHZZIso > points[2])))
+    # print(((electrons.pt > 10) & ((abs(etasc) < 0.8) & (electrons.mvaHZZIso > points[0])) | ((abs(etasc) < 1.479) & (abs(etasc) > 0.8) & (electrons.mvaHZZIso > points[1])) | ((abs(etasc) > 1.479) & (electrons.mvaHZZIso > points[2]))))
+    # print(f"Electron: pt = {electrons.pt}, etasc = {electrons.eta + electrons.deltaEtaSC}, mvaHZZIso = {electrons.mvaHZZIso}, standard_cuts = {standard_cuts}, id_cut = {id_cut}, transition_cut = {transition_cut}, all_cuts = {all_cuts}")
     standard_cuts = awkward.sum(standard_cuts, axis=1) > 0
     id_cut = awkward.sum(standard_cuts & id_cut, axis=1) > 0
     transition_cut = awkward.sum(id_cut & transition_cut, axis=1) > 0

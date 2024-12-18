@@ -24,6 +24,9 @@ SSTest/bkg*
 *.__afs*
 */CMSSW*
 */log
+*/model*
+*/figs*
+*/old*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

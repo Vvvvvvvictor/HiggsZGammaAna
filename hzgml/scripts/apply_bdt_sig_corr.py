@@ -14,9 +14,9 @@ def get_args():
     """Parse command-line arguments."""
     parser = ArgumentParser(description='Apply BDT signal correction to data')
     parser.add_argument('-c', '--config', default='data/training_config_BDT.json', help='Path to the training config file')
-    parser.add_argument('-i', '--inputFolder', default='/eos/home-j/jiehan/root/mc_cor_syst', help='Path to the input folder')
+    parser.add_argument('-i', '--inputFolder', default='/eos/home-j/jiehan/root/skimmed_ntuples_run2', help='Path to the input folder')
     parser.add_argument('-m', '--modelFolder', default='models', help='Path to the model folder')
-    parser.add_argument('-o', '--outputFolder', default='/eos/home-j/jiehan/root/output_cor_syst', help='Path to the output folder')
+    parser.add_argument('-o', '--outputFolder', default='/eos/home-j/jiehan/root/fitting_signal', help='Path to the output folder')
     parser.add_argument('-s', '--catSplitFolder', default='/eos/home-j/jiehan/root/outputs/significances', help='Path to the category split folder')
     return parser.parse_args()
 
@@ -91,16 +91,17 @@ class BDTApplicator:
 def process_files(applicators, output_folder, input_folder):
     """Process input files and write the results to output ROOT files."""
     region_map = {
-        'zero_to_one_jet': 'ggH', 'two_jet': 'VBF',
-        'VH': 'VH', 'ZH': 'ZH', 'ttH_had': 'ttHh', 'ttH_lep': 'ttHl'
+        # 'zero_to_one_jet': 'ggH', 'two_jet': 'VBF',
+        # 'VH': 'VHlep', 'ZH': 'ZHinv', 'ttH_had': 'ttHh', 'ttH_lep': 'ttHl'
+        'two_jet': 'VBF'
     }
     syst_variations = [
-        "nominal", "fnuf_up", "fnuf_down", "material_up", "material_down",
-        "scale_up", "scale_down", "smear_up", "smear_down", "JER_up", 
+        "nominal", "FNUF_up", "FNUF_down", "Material_up", "Material_down",
+        "Scale_up", "Scale_down", "Smearing_up", "Smearing_down", "JER_up", 
         "JER_down", "JES_up", "JES_down", "MET_JES_up", "MET_JES_down",
         "MET_Unclustered_up", "MET_Unclustered_down", "Muon_pt_up", "Muon_pt_down"
     ]
-    procductions = ['WplusH', 'WminusH'] #'ggH', 'VBF', 'WplusH', 'WminusH', 'ZH', 'ttH'
+    procductions = ['ggH_M125', 'VBF_M125', 'WplusH_M125', 'WminusH_M125', 'ZH_M125', 'ttH_M125'] # 'ggH_M125', 'VBF_M125', 'WplusH_M125', 'WminusH_M125', 'ZH_M125', 'ttH_M125'
     years = ['2016preVFP', '2016postVFP', '2017', '2018']
 
     # Create all necessary directories in one go
@@ -108,25 +109,38 @@ def process_files(applicators, output_folder, input_folder):
 
     # Iterate over all process-year combinations and write output
     for proc, year in [(p, y) for p in procductions for y in years]:
-        with uproot.recreate(f"{output_folder}/{proc}/{year}/output.root") as outfile:
-            logging.info(f"Output file: {output_folder}/{proc}/{year}/output.root")
+        proc_name = proc.replace('M125', '125')
+        if not os.path.exists(f"{output_folder}/{proc}_{year}/output_{proc}.root"): os.makedirs(f"{output_folder}/{proc}_{year}", exist_ok=True)
+        with uproot.recreate(f"{output_folder}/{proc}_{year}/output_{proc}.root") as outfile:
+            logging.info(f"Output file: {output_folder}/{proc}_{year}/output_{proc}.root")
             for syst in syst_variations:
                 logging.info(f"Processing {proc} {year} {syst}")
-                input_path = f'{input_folder}/{proc}_{syst}/{year}.root'
+                if syst == 'nominal':
+                    input_path = f'{input_folder}/{proc}/{year}.root'
+                    syst_name = ''
+                else:
+                    input_path = f'{input_folder}/{proc}_{syst}/{year}.root'
+                    syst_parts = syst.split('_')
+                    syst_type = syst_parts[0] + ''.join(part.capitalize() for part in syst_parts[1:-1])
+                    syst_uod = syst_parts[-1].capitalize()
+                    syst_name = f'_{syst_type}{syst_uod}01sigma'
                 with uproot.open(input_path) as infile:
                     for channel in region_map.keys():
                         data = infile[channel].arrays(library='pd')
+                        data.columns = [col.replace('up', 'Up').replace('down', 'Down') for col in data.columns]
                         if channel in applicators:
                             applicator = applicators[channel]
                             data_splits = applicator.apply_bdt(data)
                             for i, split_data in enumerate(data_splits):
-                                logging.info(f"Number of events in {region_map[channel]}_{i}_{syst}: {len(split_data)}")
-                                split_data = split_data.rename(columns={"H_mass": "CMS_hzg_mass"})
-                                outfile[f'{region_map[channel]}{i}_{syst}'] = split_data
+                                logging.info(f"Number of events in {region_map[channel]}{i}{syst_name}: {len(split_data)}")
+                                split_data = split_data.rename(columns={"H_mass": "CMS_hgg_mass"})
+                                tree_name = f'{proc_name}_13TeV_{region_map[channel]}{i}{syst_name}'
+                                outfile[f'DiphotonTree/{tree_name}'] = split_data
                         else:
-                            logging.info(f"Number of events in {region_map[channel]}_{syst}: {len(data)}")
-                            data = data.rename(columns={"H_mass": "CMS_hzg_mass"})
-                            outfile[f'{region_map[channel]}_{syst}'] = data
+                            logging.info(f"Number of events in {region_map[channel]}{syst_name}: {len(data)}")
+                            data = data.rename(columns={"H_mass": "CMS_hgg_mass"})
+                            tree_name = f'{proc_name}_13TeV_{region_map[channel]}{syst_name}'
+                            outfile[f'DiphotonTree/{tree_name}'] = data
 
 if __name__ == "__main__":
     args = get_args()

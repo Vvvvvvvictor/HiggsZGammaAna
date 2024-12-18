@@ -203,13 +203,13 @@ def categorizing(input_path, region, variable, sigs, bkgs, nscan, minN, transfor
     elif estimate == "fullSim":
         cgz = categorizer(h_sig, h_bkgmc_cen)
     
-    cgz.smooth(70, nscan, SorB='B', function='Epoly2')
+    # cgz.smooth(80, nscan, SorB='B', function='Epoly2')
     '''
     uncomment upper line to fit a function to the BDT distribution. Usage: categorizer.smooth(left_bin_to_fit, right_bin_to_fit, SorB='S' (for signal) or 'B' (for bkg), function='Epoly2', printMessage=False (switch to "True" to print message))
     TODO: first parameter must >= 1, 0 is banned.
     '''
 
-    # cgz.smooth_sim(1, SorB='B')
+    cgz.smooth_sim(1, SorB='B')
 
 #################################################################################################
         
@@ -235,7 +235,7 @@ def main():
     shield = args.shield
     add = args.add
 
-    input_path = args.input
+    input_path = args.input + '/val'
 
     sigs = ['ggH_M125','VBF_M125','WminusH_M125','WplusH_M125','ZH_M125','ttH_M125']
     # sigs = ['ggH','VBF','WminusH','WplusH','ZH','ttH']
@@ -281,6 +281,16 @@ def main():
     smax = sum(smaxs)/n_fold
     print('Averaged significance: ', smax)
 
+    input_path = args.input + '/test'
+    if not args.skip:
+        siglist=''
+        for sig in sigs:
+            if os.path.isfile('%s/%s/%s.root'% (input_path, region,sig)): siglist+=' %s/%s/%s.root'% (input_path, region,sig)
+        os.system("hadd -f %s/%s/sig.root"%(input_path, region)+siglist)
+        bkglist=''
+        for bkg in bkgs:
+            if os.path.isfile('%s/%s/%s.root'% (input_path, region,bkg)): bkglist+=' %s/%s/%s.root'% (input_path,region,bkg)
+        os.system("hadd -f %s/%s/bkgmc.root"%(input_path, region)+bkglist)
     s, u, yields = gettingsig(input_path, region, variable, boundaries_values, args.transform, estimate=args.estimate)
 
     outs={}

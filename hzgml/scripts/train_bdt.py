@@ -386,12 +386,12 @@ class XGBoostHandler(object):
         # training, validation, test split
         print('----------------------------------------------------------')
         print('XGB INFO: Splitting samples to training, validation, and test...')
-        test_sig = self.m_data_sig[self.m_data_sig[self.randomIndex]%4 == fold]
-        test_bkg = self.m_data_bkg[self.m_data_bkg[self.randomIndex]%4 == fold]
-        val_sig = self.m_data_sig[(self.m_data_sig[self.randomIndex]-1)%4 == fold]
-        val_bkg = self.m_data_bkg[(self.m_data_bkg[self.randomIndex]-1)%4 == fold]
-        train_sig = self.m_data_sig[((self.m_data_sig[self.randomIndex]-2)%4 == fold) | ((self.m_data_sig[self.randomIndex]-3)%4 == fold)]
-        train_bkg = self.m_data_bkg[((self.m_data_bkg[self.randomIndex]-2)%4 == fold) | ((self.m_data_bkg[self.randomIndex]-3)%4 == fold)]
+        test_sig = self.m_data_sig[self.m_data_sig[self.randomIndex]%314159%4 == fold]
+        test_bkg = self.m_data_bkg[self.m_data_bkg[self.randomIndex]%314159%4 == fold]
+        val_sig = self.m_data_sig[(self.m_data_sig[self.randomIndex]-1)%314159%4 == fold]
+        val_bkg = self.m_data_bkg[(self.m_data_bkg[self.randomIndex]-1)%314159%4 == fold]
+        train_sig = self.m_data_sig[((self.m_data_sig[self.randomIndex]-2)%314159%4 == fold) | ((self.m_data_sig[self.randomIndex]-3)%314159%4 == fold)]
+        train_bkg = self.m_data_bkg[((self.m_data_bkg[self.randomIndex]-2)%314159%4 == fold) | ((self.m_data_bkg[self.randomIndex]-3)%314159%4 == fold)]
 
         headers = ['Sample', 'Total', 'Training', 'Validation']
         sample_size_table = [
@@ -459,7 +459,7 @@ class XGBoostHandler(object):
         evals_result = {}
         eval_result_history = []
         try:
-            self.m_bst[fold] = xgb.train(param, self.m_dTrain[fold], self.numRound, evals=evallist, early_stopping_rounds=self.early_stopping_rounds, evals_result=evals_result)
+            self.m_bst[fold] = xgb.train(param, self.m_dTrain[fold], self.numRound, evals=evallist, early_stopping_rounds=self.early_stopping_rounds, evals_result=evals_result, verbose_eval=False)
         except KeyboardInterrupt:
             print('Finishing on SIGINT.')
 
@@ -616,12 +616,18 @@ class XGBoostHandler(object):
             train_auc = self.getAUC(fold, 'train')[-1]
             
             metrics = {
+                'train_auc': train_auc,
                 'eval_auc': eval_auc,
                 'sqrt_eval_auc_minus_train_auc': np.sqrt(train_auc * (2 * eval_auc - train_auc)),
                 'eval_auc_minus_train_auc': eval_auc * 2 - train_auc,
                 'eval_auc_over_train_auc': eval_auc ** 2 / ((eval_auc + train_auc) / 2),
-                'eval_auc_minus_train_auc': eval_auc - train_auc,
+                'eval_auc_minus_train_auc': 2 * eval_auc - train_auc,
             }
+            print(f"params: {params}, eval_auc: {eval_auc}, train_auc: {train_auc}, "
+                  f"sqrt_eval_auc_minus_train_auc: {metrics['sqrt_eval_auc_minus_train_auc']}, "
+                  f"eval_auc_minus_train_auc: {metrics['eval_auc_minus_train_auc']}, "
+                  f"eval_auc_over_train_auc: {metrics['eval_auc_over_train_auc']}, "
+                  f"eval_auc_minus_train_auc: {metrics['eval_auc_minus_train_auc']}")
             return metrics.get(self.optuna_metric, eval_auc)
         
         exp_dir = f'models/optuna_{self._region}/'

@@ -29,7 +29,7 @@ data = ["Data"]
 if not os.path.exists("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/two_jet/"):
     os.makedirs("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/two_jet/")
 
-for i in range(4):
+for i in range(len(boundaries)-1):
     bkg_hist = []
     for bkg in backgrounds:
         hist, bins = get_hist(f"/eos/user/j/jiehan/root/outputs/two_jet/{bkg}.root", "two_jet", "H_mass", boundaries[i:], [80, 100, 180])

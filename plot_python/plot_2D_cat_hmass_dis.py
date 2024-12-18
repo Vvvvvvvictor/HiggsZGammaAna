@@ -82,6 +82,7 @@ for i in range(len(boundaries)-1):
     
     ax.set_xlabel(r"$m_{ll\gamma}$ [GeV/c$^2$]")
     ax.set_ylabel("Events")
+    ax.set_xlim(100, 180)
     ax.legend()
     
     plt.savefig(f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/figs/hmass_dis_{i}.png")

@@ -51,16 +51,18 @@ BRANCHES = {
         "2018" : [
             "HLT_Diphoton30_22_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass90"
         ],
-        "2022" : [
+        "2022preEE" : [
             "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ"
         ],
-        "2022preEE" : [],
-        "2022postEE" : [],
-        "2023" : [
+        "2022postEE" : [
             "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ"
         ],
-        "2023preBPix" : [],
-        "2023postBPix" : [],
+        "2023preBPix" : [
+            "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ"
+        ],
+        "2023postBPix" : [
+            "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ"
+        ],
         "any" : ["event", "run", "luminosityBlock"]
     },
     "mc" : {

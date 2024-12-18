@@ -8,6 +8,8 @@ from argparse import ArgumentParser
 from sklearn.preprocessing import StandardScaler, QuantileTransformer
 import logging
 
+from pdb import set_trace
+
 logging.basicConfig(format='[%(asctime)s] %(levelname)s: %(message)s', level=logging.DEBUG)
 
 def get_args():
@@ -16,7 +18,7 @@ def get_args():
     parser.add_argument('-c', '--config', default='data/training_config_BDT.json', help='Path to the training config file')
     parser.add_argument('-i', '--inputFolder', default='/eos/home-j/jiehan/root/skimmed_ntuples_run2/', help='Path to the input folder')
     parser.add_argument('-m', '--modelFolder', default='models', help='Path to the model folder')
-    parser.add_argument('-o', '--outputFolder', default='/eos/home-j/jiehan/root/output_bkg', help='Path to the output folder')
+    parser.add_argument('-o', '--outputFolder', default='/eos/home-j/jiehan/root/fitting_bkg', help='Path to the output folder')
     parser.add_argument('-s', '--catSplitFolder', default='/eos/home-j/jiehan/root/outputs/significances', help='Path to the category split folder')
     return parser.parse_args()
 
@@ -91,16 +93,17 @@ class BDTApplicator:
 def process_files(applicators, output_folder, input_folder):
     """Process input files and write the results to output ROOT files."""
     region_map = {
-        'zero_to_one_jet': 'ggH', 'two_jet': 'VBF',
-        'VH': 'VH', 'ZH': 'ZH', 'ttH_had': 'ttHh', 'ttH_lep': 'ttHl'
+        # 'zero_to_one_jet': 'ggH', 'two_jet': 'VBF',
+        # 'VH': 'VHlep', 'ZH': 'ZHinv', 'ttH_had': 'ttHh', 'ttH_lep': 'ttHl'
+        'two_jet': 'VBF'
     }
     syst_variations = [
-        "nominal", "fnuf_up", "fnuf_down", "material_up", "material_down",
-        "scale_up", "scale_down", "smear_up", "smear_down", "JER_up", 
+        "nominal", "FNUF_up", "FNUF_down", "Material_up", "Material_down",
+        "Scale_up", "Scale_down", "Smearing_up", "Smearing_down", "JER_up", 
         "JER_down", "JES_up", "JES_down", "MET_JES_up", "MET_JES_down",
         "MET_Unclustered_up", "MET_Unclustered_down", "Muon_pt_up", "Muon_pt_down"
     ]
-    procductions = ['Data', 'DYJetsToLL', 'ZGToLLG', 'ZG2JToG2L2J', 'EWKZ2J', 'TT', "TTGJets", "TGJets", "ttWJets", "ttZJets", "WW", "WZ", "ZZ", "WGToLNuG"]
+    procductions = ['Data']
     years = ['2016preVFP', '2016postVFP', '2017', '2018']
 
     # Create all necessary directories in one go
@@ -108,9 +111,9 @@ def process_files(applicators, output_folder, input_folder):
 
     # Iterate over all process-year combinations and write output
     for proc, year in [(p, y) for p in procductions for y in years]:
-        if not os.path.exists(f"{output_folder}/{proc}/{year}/output.root"): os.makedirs(f"{output_folder}/{proc}/{year}", exist_ok=True)
-        with uproot.recreate(f"{output_folder}/{proc}/{year}/output.root") as outfile:
-            logging.info(f"Output file: {output_folder}/{proc}/{year}/output.root")
+        if not os.path.exists(f"{output_folder}/{proc}_{year}/output_{proc}_{year}.root"): os.makedirs(f"{output_folder}/{proc}_{year}", exist_ok=True)
+        with uproot.recreate(f"{output_folder}/{proc}_{year}/output_{proc}_{year}.root") as outfile:
+            logging.info(f"Output file: {output_folder}/{proc}_{year}/output_{proc}_{year}.root")
             logging.info(f"Processing {proc} {year}")
             input_path = f'{input_folder}/{proc}/{year}.root'
             with uproot.open(input_path) as infile:
@@ -120,13 +123,15 @@ def process_files(applicators, output_folder, input_folder):
                         applicator = applicators[channel]
                         data_splits = applicator.apply_bdt(data)
                         for i, split_data in enumerate(data_splits):
-                            logging.info(f"Number of events in {region_map[channel]}_{i}: {len(split_data)}")
-                            split_data = split_data.rename(columns={"H_mass": "CMS_hzg_mass"})
-                            outfile[f'{region_map[channel]}{i}'] = split_data
+                            logging.info(f"Number of events in {region_map[channel]}{i}: {len(split_data)}")
+                            split_data = split_data.rename(columns={"H_mass": "CMS_hgg_mass"})
+                            outfile[f'DiphotonTree/Data_13TeV_{region_map[channel]}{i}'] = split_data
                     else:
                         logging.info(f"Number of events in {region_map[channel]}: {len(data)}")
-                        data = data.rename(columns={"H_mass": "CMS_hzg_mass"})
-                        outfile[f'{region_map[channel]}'] = data
+                        data = data.rename(columns={"H_mass": "CMS_hgg_mass"})
+                        outfile[f'DiphotonTree/Data_13TeV_{region_map[channel]}'] = data
+    if not os.path.exists(f"{output_folder}/Data"): os.makedirs(f"{output_folder}/Data", exist_ok=True)
+    os.system(f"hadd -f {output_folder}/Data/output_Data_Run2.root {output_folder}/Data_*/output_{proc}_{year}.root")
 
 if __name__ == "__main__":
     args = get_args()

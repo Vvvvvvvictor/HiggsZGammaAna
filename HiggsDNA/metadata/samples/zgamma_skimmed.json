@@ -1,4 +1,4 @@
-{"ggH":
+{"ggH_M125":
 {"xs":48.58,
 "bf":0.000154793142,
 "fpo":1,
@@ -13,7 +13,7 @@
 ["/eos/project-h/htozg-dy-privatemc/jiehan/Run2017HZGSig/RunIISummer20UL17NanoAODv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112247"]
 }
 },
-"VBF":
+"VBF_M125":
 {"xs":3.782,
 "bf":0.000154793142,
 "fpo":1,
@@ -28,8 +28,8 @@
 ["/eos/project-h/htozg-dy-privatemc/jiehan/Run2016preHZGSig/RunIISummer20UL16NanoAODAPVv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_111745"]
 }
 },
-"WplusH": {
-"xs": 0.8399,
+"WplusH_M125": {
+"xs": 0.8400,
 "bf": 0.000154793142,
 "files": {
     "2016preVFP": "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016preHZGSig/RunIISummer20UL16NanoAODAPVv9/WplusH_HToZG_WToAll_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241107_033003",
@@ -38,8 +38,8 @@
     "2018": "/eos/project-h/htozg-dy-privatemc/jiehan/Run2018HZGSig/RunIISummer20UL18NanoAODv9/WplusH_HToZG_WToAll_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241107_033756"
 }
 },
-"WminusH": {
-"xs":0.5331,
+"WminusH_M125": {
+"xs":0.5328,
 "bf": 0.000154793142,
 "files": {
     "2016preVFP": "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016preHZGSig/RunIISummer20UL16NanoAODAPVv9/WminusH_HToZG_WToAll_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241107_033003",
@@ -48,7 +48,7 @@
     "2018": "/eos/project-h/htozg-dy-privatemc/jiehan/Run2018HZGSig/RunIISummer20UL18NanoAODv9/WminusH_HToZG_WToAll_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241107_033756"
 }
 },
-"ZH": {
+"ZH_M125": {
 "xs": 0.8839,
 "bf": 0.000154793142,
 "files": {
@@ -58,7 +58,7 @@
     "2018":  "/eos/project-h/htozg-dy-privatemc/jiehan/Run2018HZGSig/RunIISummer20UL18NanoAODv9/ZH_HToZG_ZToAll_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112319"
 }
 },
-"ttH": {
+"ttH_M125": {
 "xs": 0.5071,
 "bf": 0.000154793142,
 "files": {

@@ -1,12 +1,12 @@
 import os
 import re
 
-for dataset in ["Data_2016postVFP"]: #"Data_SingleElectron_2017", "Data_SingleMuon_2017", "Data_DoubleEG_2017", "Data_DoubleMuon_2017"
+for dataset in ["Data_2022preEE"]: #"Data_SingleElectron_2017", "Data_SingleMuon_2017", "Data_DoubleEG_2017", "Data_DoubleMuon_2017"
     # Define folder path
     # folder_path = f"/eos/user/j/jiehan/eos_logs/data/{dataset}"
     folder_path = f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/HiggsDNA/eos_logs/data/{dataset}"
 
-    for event_type in ["zgammas_mu"]:
+    for event_type in ["zgammas_ele"]:
         # Define output file path
         output_file = f"/eos/user/j/jiehan/run_lumi_eve_no/{dataset}_{event_type}.txt"
 
@@ -27,13 +27,14 @@ for dataset in ["Data_2016postVFP"]: #"Data_SingleElectron_2017", "Data_SingleMu
                     # Concatenate the file path
                     file_path = os.path.join(root, file_name)
 
+                    print(f"Reading {file_path}...")
+                    
                     # Read the file content
                     with open(file_path, 'r') as in_file:
                         lines = in_file.read()
 
                         # Use regular expression to extract content between start and end patterns
                         match = re.search(f"{re.escape(start_pattern)}(.*?){re.escape(end_pattern)}", lines, re.DOTALL)
-
                         if match:
                             # Extracted content is in the first group of the matching object
                             extracted_content = match.group(1).strip()
