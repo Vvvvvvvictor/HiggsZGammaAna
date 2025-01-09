@@ -25,29 +25,33 @@ DEEPJET_RESHAPE_SF = {
     "2018" : "deepJet_shape"
 }
 
-DEEPJET_VARIATIONS = { 
-    "up_jes" : [5, 0], # applicable to b (5) and light (0) jets, but not charm (4)
-    "up_lf" : [5],
-    "up_hfstats1" : [5],
-    "up_hfstats2" : [5],
-    "up_cferr1" : [4],
-    "up_cferr2" : [4],
-    "up_hf" : [0],
-    "up_lfstats1" : [0],
-    "up_lfstats2" : [0],
-    "down_jes" : [5, 0], # applicable to b (5) and light (0) jets, but not charm(4)
-    "down_lf" : [5],
-    "down_hfstats1" : [5],
-    "down_hfstats2" : [5],
-    "down_cferr1" : [4],
-    "down_cferr2" : [4],
-    "down_hf" : [0],
-    "down_lfstats1" : [0],
-    "down_lfstats2" : [0],
+DEEPJET_VARIATIONS = { # b, c, light
+    "up_correlated" : [5, 4, 0], 
+    "down_correlated" : [5, 4, 0],
+    "up_uncorrelated" : [5, 4, 0],
+    "down_uncorrelated" : [5, 4, 0],
+    # "up_jes" : [5, 0], # applicable to b (5) and light (0) jets, but not charm (4)
+    # "up_lf" : [5],
+    # "up_hfstats1" : [5],
+    # "up_hfstats2" : [5],
+    # "up_cferr1" : [4],
+    # "up_cferr2" : [4],
+    # "up_hf" : [0],
+    # "up_lfstats1" : [0],
+    # "up_lfstats2" : [0],
+    # "down_jes" : [5, 0], # applicable to b (5) and light (0) jets, but not charm(4)
+    # "down_lf" : [5],
+    # "down_hfstats1" : [5],
+    # "down_hfstats2" : [5],
+    # "down_cferr1" : [4],
+    # "down_cferr2" : [4],
+    # "down_hf" : [0],
+    # "down_lfstats1" : [0],
+    # "down_lfstats2" : [0],
 }
 
 
-def btag_deepjet_reshape_sf(events, year, central_only, input_collection):
+def btag_deepjet_wp_sf(events, year, central_only, input_collection):
     """
     See:
         - https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/BTV_bjets_Run2_UL/
@@ -78,7 +82,6 @@ def btag_deepjet_reshape_sf(events, year, central_only, input_collection):
         20.0, # SFs only valid for pT > 20.
         99999999.
     )
-    jet_disc = awkward.to_numpy(jets_flattened.btagDeepFlavB)        
 
     variations_list = ["central"]
     if not central_only:
@@ -86,13 +89,19 @@ def btag_deepjet_reshape_sf(events, year, central_only, input_collection):
 
     variations = {}
 
-    central_sf = evaluator[DEEPJET_RESHAPE_SF[year]].evalv(
-            "central",
-            jet_flavor,
-            jet_abs_eta,
-            jet_pt,
-            jet_disc
-    )
+    central_sf = numpy.ones_like(jet_flavor)
+    for f in [0, 4, 5]:
+        central_sf = numpy.where(
+            jet_flavor == f,
+            evaluator["deepJet_comb" if f > 0 else "deepJet_incl"].evalv(
+                "central",
+                "M",
+                numpy.ones_like(jet_flavor) * f,
+                jet_abs_eta,
+                jet_pt
+            ),
+            central_sf
+        )
 
     variations["central"] = awkward.unflatten(central_sf, n_jets)
 
@@ -104,12 +113,12 @@ def btag_deepjet_reshape_sf(events, year, central_only, input_collection):
         for f in applicable_flavors:
             var_sf = numpy.where(
                 jet_flavor == f,
-                evaluator[DEEPJET_RESHAPE_SF[year]].evalv(
+                evaluator["deepJet_comb" if f > 0 else "deepJet_incl"].evalv(
                     var,
+                    "M",
                     numpy.ones_like(jet_flavor) * f,
                     jet_abs_eta,
-                    jet_pt,
-                    jet_disc
+                    jet_pt
                 ),
                 var_sf
             )
