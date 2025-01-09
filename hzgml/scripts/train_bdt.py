@@ -31,7 +31,7 @@ def getArgs():
     parser.add_argument('--importance', action='store_true', default=True, help='Plot importance of variables, parameter "gain" is recommanded')
     parser.add_argument('--roc', action='store_true', default=True, help='Plot ROC')
     parser.add_argument('--optuna', action='store_true', default=False, help='Run hyperparameter tuning using optuna')
-    parser.add_argument('--optuna_metric', action='store', default='auc', choices=['eval_auc', 'sqrt_eval_auc_minus_train_auc', 'eval_auc_minus_train_auc', 'eval_auc_over_train_auc', "eval_auc_minus_train_auc"], help='Optuna metric to optimize')
+    parser.add_argument('--optuna_metric', action='store', default='auc', choices=['eval_auc', 'sqrt_eval_auc_minus_train_auc', 'eval_auc_minus_train_auc', 'eval_auc_over_train_auc', "eval_auc_minus_train_auc", "eval_significance", "sqrt_eval_significance_minus_train_significance"], help='Optuna metric to optimize')
     parser.add_argument('--n-calls', action='store', type=int, default=36, help='Steps of hyperparameter tuning using optuna')
     parser.add_argument('--continue-optuna', action='store', type=int, default=0, help='Continue tuning hyperparameters using optuna')
 
@@ -80,6 +80,12 @@ class XGBoostHandler(object):
 
         self.m_data_sig = pd.DataFrame()
         self.m_data_bkg = pd.DataFrame()
+        self.m_train_w = {}
+        self.m_val_w = {}
+        self.m_test_w = {}
+        self.m_train_mass = {}
+        self.m_val_mass = {}
+        self.m_test_mass = {}
         self.m_train_wt = {}
         self.m_val_wt = {}
         self.m_test_wt = {}
@@ -425,6 +431,14 @@ class XGBoostHandler(object):
         test_sig_wt = test_sig[[self.weight]]
         test_bkg_wt = test_bkg[[self.weight]]
 
+        self.m_train_w[fold] = pd.concat([train_sig[self.weight], train_bkg[self.weight]]).to_numpy()
+        self.m_val_w[fold] = pd.concat([val_sig[self.weight], val_bkg[self.weight]]).to_numpy()
+        self.m_test_w[fold] = pd.concat([test_sig[self.weight], test_bkg[self.weight]]).to_numpy()
+
+        self.m_train_mass[fold] = pd.concat([train_sig['H_mass'], train_bkg['H_mass']]).to_numpy()
+        self.m_val_mass[fold] = pd.concat([val_sig['H_mass'], val_bkg['H_mass']]).to_numpy()
+        self.m_test_mass[fold] = pd.concat([test_sig['H_mass'], test_bkg['H_mass']]).to_numpy()
+
         self.m_train_wt[fold] = pd.concat([train_sig_wt, train_bkg_wt]).to_numpy()
         self.m_train_wt[fold][self.m_train_wt[fold] < 0] = 0
         self.m_val_wt[fold] = pd.concat([val_sig_wt, val_bkg_wt]).to_numpy()
@@ -566,6 +580,47 @@ class XGBoostHandler(object):
 
         return self.params[0 if len(self.params) == 1 else fold], roc_auc
 
+    def calSignificance(self, s, b, s_err, b_err):
+        ntot, bkg, sig = s+b, b, s
+        return np.sqrt(2*((ntot * np.log(ntot/bkg)) - sig)), np.sqrt((np.log(ntot/bkg)*s_err)**2 + ((np.log(ntot/bkg) - (sig/bkg))*b_err)**2)
+
+    def getSignificance(self, fold=0, sample_set='val'):
+        if sample_set == "train":
+            dataset = pd.DataFrame({'score': self.m_score_train[fold], 'weight': self.m_train_w[fold], 'mass': self.m_train_mass[fold], 'type': self.m_y_train[fold]})
+        elif sample_set == "val":
+            dataset = pd.DataFrame({'score': self.m_score_val[fold], 'weight': self.m_val_w[fold], 'mass': self.m_val_mass[fold], 'type': self.m_y_val[fold]})
+        elif sample_set == "test":
+            dataset = pd.DataFrame({'score': self.m_score_test[fold], 'weight': self.m_test_w[fold], 'mass': self.m_test_mass[fold], 'type': self.m_y_test[fold]})
+
+        significance_sum, significance_sum_err = 0, 0
+        significances, significance_errs = [], []
+        sig_dataset = dataset.query('mass > 120 & mass < 130 & type == 1').sort_values('score', ascending=True)  
+        sig_dataset['culmulative_sig'] = sig_dataset['weight'].cumsum()
+        sig_dataset['culmulative_sig'] = sig_dataset['culmulative_sig'] / sig_dataset['culmulative_sig'].max()
+        percentiles = [np.where(sig_dataset['culmulative_sig'] >= p/10)[0][0] for p in range(0, 11)]
+        scores = [sig_dataset.iloc[p]['score'] for p in percentiles]
+        store = [0, 0, 0, 0, 0]
+        for i in range(10, 0, -1):
+            sig = dataset.query(f'mass > 120 & mass < 130 & type == 1 & score > {scores[i-1]} & score < {scores[i]}')['weight'].sum()
+            sig_err = np.sqrt((dataset.query(f'mass > 120 & mass < 130 & type == 1 & score > {scores[i-1]} & score < {scores[i]}')['weight']**2).sum())
+            bkg = dataset.query(f'mass > 120 & mass < 130 & type == 0 & score > {scores[i-1]} & score < {scores[i]}')['weight'].sum()
+            bkg_err = np.sqrt((dataset.query(f'mass > 120 & mass < 130 & type == 0 & score > {scores[i-1]} & score < {scores[i]}')['weight']**2).sum())
+            if store[0] == 1:
+                sig += store[1]
+                bkg += store[2]
+                sig_err = np.sqrt(sig_err**2 + store[3]**2)
+                bkg_err = np.sqrt(bkg_err**2 + store[4]**2)
+            if bkg < 10: 
+                store = [1, sig, bkg, sig_err, bkg_err]
+                continue
+            store = [0, 0, 0, 0, 0]
+            significance, significance_err = self.calSignificance(sig, bkg, sig_err, bkg_err)
+            significances.append(significance)
+            significance_errs.append(significance_err)
+        significance_sum = np.sqrt((np.array(significances)**2).sum())
+        significance_sum_err = np.sqrt((np.array(significance_errs)**2*np.array(significances)**2).sum()) / significance_sum
+        return significance_sum, significance_sum_err
+
     def transformScore(self, fold=0, sample='sig'):
 
         print(f'XGB INFO: transforming scores based on {sample}')
@@ -614,6 +669,8 @@ class XGBoostHandler(object):
             self.testModel(fold)
             eval_auc = self.getAUC(fold)[-1]
             train_auc = self.getAUC(fold, 'train')[-1]
+            eval_signi, eval_signi_err = self.getSignificance(fold, 'val')
+            train_signi, train_signi_err = self.getSignificance(fold, 'train')
             
             metrics = {
                 'train_auc': train_auc,
@@ -622,12 +679,18 @@ class XGBoostHandler(object):
                 'eval_auc_minus_train_auc': eval_auc * 2 - train_auc,
                 'eval_auc_over_train_auc': eval_auc ** 2 / ((eval_auc + train_auc) / 2),
                 'eval_auc_minus_train_auc': 2 * eval_auc - train_auc,
+                'eval_significance': eval_signi,
+                'train_significance': train_signi,
+                'sqrt_eval_significance_minus_train_significance': np.sqrt(train_signi * (2 * eval_signi - train_signi)),
             }
             print(f"params: {params}, eval_auc: {eval_auc}, train_auc: {train_auc}, "
                   f"sqrt_eval_auc_minus_train_auc: {metrics['sqrt_eval_auc_minus_train_auc']}, "
                   f"eval_auc_minus_train_auc: {metrics['eval_auc_minus_train_auc']}, "
                   f"eval_auc_over_train_auc: {metrics['eval_auc_over_train_auc']}, "
-                  f"eval_auc_minus_train_auc: {metrics['eval_auc_minus_train_auc']}")
+                  f"eval_auc_minus_train_auc: {metrics['eval_auc_minus_train_auc']}, "
+                  f"eval_significance: {eval_signi}, train_significance: {train_signi}, "
+                  f"sqrt_eval_significance_minus_train_significance: {metrics['sqrt_eval_significance_minus_train_significance']}"
+                )
             return metrics.get(self.optuna_metric, eval_auc)
         
         exp_dir = f'models/optuna_{self._region}/'
@@ -703,6 +766,7 @@ def main():
 
         xgb_model.testModel(i)
         print("param: %s, Val AUC: %f" % xgb_model.getAUC(i))
+        print("Train significance: %f +/- %f, " % xgb_model.getSignificance(i,'train'), "Val significance: %f +/- %f" % xgb_model.getSignificance(i))
 
         #xgb_model.plotScore(i, 'test')
         if args.importance:

@@ -13,35 +13,33 @@ config_dict = {
     # "gamma_relpt": {"range": (0.1, 1), "title": r"${p_T^{\gamma}\cdot c}/{m_{ll\gamma}}$"},
     # "pt_balance_0j": {"range": (0, 1), "title": r"$Zeppenfeld_{\gamma}(0j)$"},
     # "H_mass": {"range": (100, 180), "title": r"$m_{ll\gamma}(GeV/c^{2})$"},
-    "delta_eta_jj": {"range": (0, 9), "title": r"$\Delta\eta_{jj}$"},
-    "delta_phi_jj": {"range": (0, 3.2), "title": r"$\Delta\phi_{jj}$"},
-    "delta_phi_zgjj": {"range": (0, 3.2), "title": r"$\Delta\phi_{ll\gamma,jj}$"},
-    "gamma_eta": {"range": (-2.5, 2.5), "title": r"$\eta_{\gamma}$"},
-    "gamma_mvaID": {"range": (0.14, 1), "title": "photon MVA"},
+    "delta_eta_jj": {"range": (0, 9), "bins": 50, "title": r"$\Delta\eta_{jj}$"},
+    "delta_phi_jj": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi_{jj}$"},
+    "delta_phi_zgjj": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi_{ll\gamma,jj}$"},
+    "gamma_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta_{\gamma}$"},
+    "gamma_mvaID": {"range": (0.14, 1), "bins": 43, "title": "photon MVA"},
     # "H_ptt": {"range": (0, 160), "title": r"$p_{T_{t}}^{ll\gamma}$"},
-    "jet_1_pt": {"range": (30, 330), "title": r"$p_{T_{j1}}(GeV/c)$"},
-    "jet_2_pt": {"range": (30, 150), "title": r"$p_{T_{j2}}(GeV/c)$"},
-    "jet1G_deltaR": {"range": (0.4, 6.4), "title": r"$\Delta R(\gamma,j1)$"},
-    "jet2G_deltaR": {"range": (0.4, 6.4), "title": r"$\Delta R(\gamma,j2)$"},
+    "jet_1_pt": {"range": (30, 330), "bins": 50, "title": r"$p_{T_{j1}}(GeV/c)$"},
+    "jet_2_pt": {"range": (30, 150), "bins": 50, "title": r"$p_{T_{j2}}(GeV/c)$"},
+    "jet1G_deltaR": {"range": (0.4, 6.4), "bins": 40, "title": r"$\Delta R(\gamma,j1)$"},
+    "jet2G_deltaR": {"range": (0.4, 6.4), "bins": 40, "title": r"$\Delta R(\gamma,j2)$"},
     # "jet_1_btagDeepFlavB": {"range": (0, 0.1), "title": "j1 btag"},
     # "jet_2_btagDeepFlavB": {"range": (0, 0.15), "title": "j2 btag"},
-    "l1g_deltaR": {"range": (0.4, 4.8), "title": r"max($\Delta R(l,\gamma)$)"},
-    "l2g_deltaR": {"range": (0.4, 3.4), "title": r"min($\Delta R(l,\gamma)$)"},
-    "lep_cos_theta": {"range": (-1, 1), "title": r"$\cos\theta$"},
-    "lep_phi": {"range": (-3.2, 3.2), "title": r"$\phi$"},
-    "photon_zeppenfeld": {"range": (0, 5), "title": "Zeppenfeld $\gamma$"},
-    "pt_balance": {"range": (0, 1), "title": "system balance"},
-    "Z_cos_theta": {"range": (-1, 1), "title": r"$\cos\Theta$"},
-    "Z_lead_lepton_eta": {"range": (-2.5, 2.5), "title": r"$\eta_{l1}$"},
-    "Z_sublead_lepton_eta": {"range": (-2.5, 2.5), "title": r"$\eta_{l2}$"},
-    "H_relpt": {"range": (0, 3), "title": r"${p_{T_{ll\gamma}}\cdot c}/{m_{ll\gamma}}$"},
-    "gamma_ptRelErr": {"range": (0, 0.1), "title": r"$\sigma_{p_T^{\gamma}}/p_T^{\gamma}$"},
+    "l1g_deltaR": {"range": (0.4, 4.8), "bins": 40, "title": r"max($\Delta R(l,\gamma)$)"},
+    "l2g_deltaR": {"range": (0.4, 3.4), "bins": 40, "title": r"min($\Delta R(l,\gamma)$)"},
+    "lep_cos_theta": {"range": (-1, 1), "bins": 40, "title": r"$\cos\theta$"},
+    "lep_phi": {"range": (-3.2, 3.2), "bins": 40, "title": r"$\phi$"},
+    "photon_zeppenfeld": {"range": (0, 5), "bins": 50, "title": "Zeppenfeld $\gamma$"},
+    "pt_balance": {"range": (0, 1), "bins": 50, "title": "system balance"},
+    "Z_cos_theta": {"range": (-1, 1), "bins": 50, "title": r"$\cos\Theta$"},
+    "Z_lead_lepton_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta_{l1}$"},
+    "Z_sublead_lepton_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta_{l2}$"},
+    "H_relpt": {"range": (0, 3), "bins": 50, "title": r"${p_{T_{ll\gamma}}\cdot c}/{m_{ll\gamma}}$"},
+    "gamma_ptRelErr": {"range": (0.008, 0.108), "bins": 50, "title": r"$\sigma_{p_T^{\gamma}}/p_T^{\gamma}$"},
     # "HZ_deltaRap": {"range": (-0.7, 0.7), "title": r"$\Delta y(ll,ll\gamma)$"}
 }
 
 TREE = "two_jet"
-
-BINS = 25
 WEIGHT = "weight"
 PATH = "/eos/user/j/jiehan/root/skimmed_ntuples_run2/"
 
@@ -103,6 +101,7 @@ for i in config_dict:
     # if i != 4 :
     #     continue
     VAR = i
+    BINS = config_dict[VAR]["bins"]
     XLABLE = config_dict[VAR]["title"]
     RMIN = config_dict[VAR]["range"][0]
     RMAX = config_dict[VAR]["range"][1]

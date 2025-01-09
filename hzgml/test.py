@@ -17,11 +17,11 @@ from pdb import set_trace
 # plt.colorbar()
 # plt.savefig('two_jet.png')
 
-# # ==================================
-# # Teset yields in categories
-# # ==================================
+# ==================================
+# Test yields in categories
+# ==================================
 # cats = ['zero_to_one_jet', "two_jet", "VH", "ZH", "ttH_had", "ttH_lep"]
-# years = ['2022preEE']
+# years = ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"]
 # for year in years:
 #     data = uproot.open(f"/eos/home-j/jiehan/root/skimmed_ntuples_run3/Data/{year}.root")
 #     data_inc = data["inclusive"].arrays(['z_mumu', 'z_ee', 'H_mass'], library='pd').query('H_mass > 100')
@@ -95,17 +95,22 @@ from pdb import set_trace
 # Get weight with syst
 # =====================================
 # cats = ["inclusive"]
-# years = ['2016preVFP', '2016postVFP', '2017', '2018']
+# years = ['2017']
 # types = ["mumu", "ee"]
 # for year in years:
-#     data = uproot.open(f"/eos/home-j/jiehan/root/cutflow/ggH_M125/{year}.root")
+#     # data = uproot.open(f"/eos/home-j/jiehan/root/cutflow/ggH_M125/{year}.root")
+#     data = pd.read_parquet(f"/eos/home-j/jiehan/parquet/nanov9/signal/ggH_M125_{year}/merged_nominal.parquet")
 #     for cat in cats:
 #         # 加入所有满足这个格式的变量 'weight*central'
 #         variables = ['H_mass', 'z_mumu', 'z_ee']
-#         for i in data[cat].keys():
-#             if i.startswith('weight') and i.endswith('central'):
-#                 variables.append(i)
-#         cat_data = data[cat].arrays(variables, library='pd')
+#         # for i in data[cat].keys():
+#         #     if i.startswith('weight') and i.endswith('central'):
+#         #         variables.append(i)
+#         # cat_data = data[cat].arrays(variables, library='pd')
+#         if cat == "inclusive":
+#             cat_data = data
+#         else:
+#             exit()
 #         for t in types:
 #             temp = cat_data.query(f'z_{t} > 0')
 #             weight = temp["weight_central"]
@@ -114,9 +119,39 @@ from pdb import set_trace
 #             print(f'{year} {cat} {t} prefire weight: {weight.sum()}')
 #             weight = weight * temp["weight_pu_reweight_sf_central"]
 #             print(f'{year} {cat} {t} pileup weight: {weight.sum()}')
+#             weight = weight * temp["weight_btag_reshape_sf_SelectedJet_central"]
+#             print(f'{year} {cat} {t} btag weight: {weight.sum()}')
+#             weight = weight * temp["weight_electron_wplid_sf_SelectedElectron_central"]
+#             print(np.unique(temp["weight_electron_wplid_sf_SelectedElectron_central"]))
+#             print(f'{year} {cat} {t} ele id weight: {weight.sum()}')
+#             weight = weight * temp["weight_muon_looseid_sf_SelectedMuon_central"]
+#             print(f'{year} {cat} {t} muon id weight: {weight.sum()}')
 
 # =====================================
 # Have a look at the hgg data
 # =====================================
 # data = uproot.open("/eos/user/c/chpan/hgg_ntuples/root_fiducial_final/root_fiducial/GluGluHtoGG_M-125_preEE/output_GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8_in.root")['DiphotonTree/ggh_125_13TeV_best_resolution'].arrays(library='pd')
 # print(data.columns)
+
+
+# =====================================
+# Check ntuples
+# =====================================
+for cat in ["VBF0", "VBF1", "VBF2", "VBF3"]:
+    cat_sum = 0
+    for proc in ["ggH", "VBF", "ZH", "WplusH", "WminusH", "ttH"]:
+        for year in ["2016preVFP", "2016postVFP", "2017", "2018"]:
+            data = uproot.open(f"/eos/home-j/jiehan/root/fitting_signal/{proc}_M125_{year}/output_{proc}_M125.root")[f"DiphotonTree/{proc}_125_13TeV_{cat}"].arrays(['weight'], library='pd')
+            print(f'{year} {proc} {cat} weight: {data["weight"].sum()}')
+            cat_sum += data["weight"].sum()
+    print(f'{cat} total weight: {cat_sum}\n')
+
+for cat in ["VBF0", "VBF1", "VBF2", "VBF3"]:
+    cat_sum = 0
+    # data = uproot.open(f"/eos/home-j/jiehan/root/fitting_bkg/Data/output_Data_Run2.root")[f"DiphotonTree/Data_13TeV_{cat}"].arrays(['weight'], library='pd')
+    # print(f'data {cat} weight: {data["weight"].sum()}')
+    for year in ["2016preVFP", "2016postVFP", "2017", "2018"]:
+        data = uproot.open(f"/eos/home-j/jiehan/root/fitting_bkg/Data_{year}/output_Data_{year}.root")[f"DiphotonTree/Data_13TeV_{cat}"].arrays(['weight'], library='pd')
+        print(f'{year} data {cat} weight: {data["weight"].sum()}')
+        cat_sum += data["weight"].sum()
+    print(f'{cat} total weight: {cat_sum}\n')

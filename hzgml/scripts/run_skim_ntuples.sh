@@ -7,7 +7,9 @@ target="/eos/home-j/jiehan/root/skimmed_ntuples_run2/"
 
 # years=(2016preVFP 2016postVFP 2017 2018 2022preEE 2022postEE 2023preBPix 2023postBPix)
 years=(2016preVFP 2016postVFP 2017 2018)
+# years=(2022preEE 2022postEE 2023preBPix 2023postBPix)
 systs=("FNUF" "Material" "Scale" "Smearing" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt")
+# systs=("FNUF" "Material" "Scale" "Smearing" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt")
 
 # 函数定义：执行命令并处理错误
 execute_command() {
@@ -102,10 +104,10 @@ process_sample_syst() {
 #     process_sample "$sample" "$type"
 # done
 
-samples=(VBF_M125) # VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125
+samples=(WminusH_M125 WplusH_M125) # ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125
 type="signal"
 for sample in "${samples[@]}"; do
-    for sf in "up"; do # "down"
+    for sf in "up" "down"; do #  "up" "down"
         for syst in "${systs[@]}"; do
             mkdir -p "$target${sample}_${syst}_${sf}"
         done

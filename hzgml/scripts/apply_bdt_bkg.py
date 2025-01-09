@@ -19,7 +19,7 @@ def get_args():
     parser.add_argument('-i', '--inputFolder', default='/eos/home-j/jiehan/root/skimmed_ntuples_run2/', help='Path to the input folder')
     parser.add_argument('-m', '--modelFolder', default='models', help='Path to the model folder')
     parser.add_argument('-o', '--outputFolder', default='/eos/home-j/jiehan/root/fitting_bkg', help='Path to the output folder')
-    parser.add_argument('-s', '--catSplitFolder', default='/eos/home-j/jiehan/root/outputs/significances', help='Path to the category split folder')
+    parser.add_argument('-s', '--catSplitFolder', default='/eos/home-j/jiehan/root/outputs/test/significances', help='Path to the category split folder')
     return parser.parse_args()
 
 class BDTApplicator:
@@ -93,9 +93,9 @@ class BDTApplicator:
 def process_files(applicators, output_folder, input_folder):
     """Process input files and write the results to output ROOT files."""
     region_map = {
-        # 'zero_to_one_jet': 'ggH', 'two_jet': 'VBF',
-        # 'VH': 'VHlep', 'ZH': 'ZHinv', 'ttH_had': 'ttHh', 'ttH_lep': 'ttHl'
-        'two_jet': 'VBF'
+        'zero_to_one_jet': 'ggH', 'two_jet': 'VBF',
+        'VH': 'VHlep', 'ZH': 'ZHinv', 'ttH_had': 'ttHh', 'ttH_lep': 'ttHl'
+        # 'two_jet': 'VBF'
     }
     syst_variations = [
         "nominal", "FNUF_up", "FNUF_down", "Material_up", "Material_down",
@@ -131,7 +131,7 @@ def process_files(applicators, output_folder, input_folder):
                         data = data.rename(columns={"H_mass": "CMS_hgg_mass"})
                         outfile[f'DiphotonTree/Data_13TeV_{region_map[channel]}'] = data
     if not os.path.exists(f"{output_folder}/Data"): os.makedirs(f"{output_folder}/Data", exist_ok=True)
-    os.system(f"hadd -f {output_folder}/Data/output_Data_Run2.root {output_folder}/Data_*/output_{proc}_{year}.root")
+    os.system(f"hadd -f {output_folder}/Data/output_Data_Run2.root {output_folder}/Data_*/output_{proc}_*.root")
 
 if __name__ == "__main__":
     args = get_args()

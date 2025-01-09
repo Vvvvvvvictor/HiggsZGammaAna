@@ -13,9 +13,9 @@ ratio = 1
 mc_legend = ["SM ZG", "DYJets", "EWK Z+Jets", "EWK ZG", "TT", "TTG+Jets", "TTVJets", "Diboson"]#"DYJets", "EWK Z+Jets", "EWK ZG", "TT", "TTG+Jets", "TTVJets", "Diboson", "SM ZG", "EWK ZG", "fake photon"]
 sig_legend = ["sig", "ggH", "VBF"]
 # path = "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/final_fit/CMSSW_10_2_13/src/flashggFinalFit/InputData/outputs/"
-path = "/eos/home-j/jiehan/root/outputs/"
-channel = "zero_to_one_jet"
-tree = "zero_to_one_jet"
+path = "/eos/home-j/jiehan/root/outputs/test/"
+channel = "two_jet"
+tree = "two_jet"
 var = "bdt_score_t"
 bins = 100
 x_range = (0, 1)
@@ -28,8 +28,8 @@ selections = ["H_mass>120", "H_mass<130"]
 # Dataset list
 sig_file_list = [
     ["sig.root"],
-    "ggH.root",
-    "VBF.root"
+    "ggH_M125.root",
+    "VBF_M125.root"
 ]
 mc_file_list = [
     "ZGToLLG.root",
@@ -60,26 +60,26 @@ print("============================")
 # for i, bkg in enumerate(mc_file_list):
 #     if isinstance(bkg, list):
 #         for sub_bkg in bkg:
-#             arrays = pic.read_file(path+channel+"/"+sub_bkg, var, tree, selections)
+#             arrays = pic.read_root_file(path+channel+"/"+sub_bkg, var, tree, selections)
 #             if file_hist in globals():
 #                 file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range, file_hist)
 #             else:
 #                 file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range)
 #     else: 
-#         arrays = pic.read_file(path+channel+"/"+bkg, var, tree, selections)
+#         arrays = pic.read_root_file(path+channel+"/"+bkg, var, tree, selections)
 #         file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range)
 #     mc_sb_yields = mc_sb_yields + yields
 
 # for data in data_file_list:
 #     if isinstance(data, list):
 #         for sub_data in data:
-#             arrays = pic.read_file(path+channel+"/"+sub_data, var, tree, selections)
+#             arrays = pic.read_root_file(path+channel+"/"+sub_data, var, tree, selections)
 #             if file_hist in globals():
 #                 file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range, file_hist)
 #             else:
 #                 file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range)
 #     else: 
-#         arrays = pic.read_file(path+channel+"/"+data, var, tree, selections)
+#         arrays = pic.read_root_file(path+channel+"/"+data, var, tree, selections)
 #         file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range)
 #     data_sb_yields = data_sb_yields + yields
 
@@ -93,13 +93,13 @@ sig_yields, sig_hist_list = [], []
 for i, sig in enumerate(sig_file_list):
     if isinstance(sig, list):
         for sub_sig in sig:
-            arrays, _ = pic.read_file(path+channel+"/"+sub_sig, var, tree, selections)
+            arrays, _ = pic.read_root_file(path+channel+"/"+sub_sig, var, tree, selections)
             if "sig_hist" in globals():
                 sig_hist, _, yields = pic.get_hist(arrays, var, ratio, "sig_{}".format(i), bins, x_range, sig_hist)
             else:
                 sig_hist, _, yields = pic.get_hist(arrays, var, ratio, "sig_{}".format(i), bins, x_range)
     else:
-        arrays, _ = pic.read_file(path+channel+"/"+sig, var, tree, selections)
+        arrays, _ = pic.read_root_file(path+channel+"/"+sig, var, tree, selections)
         sig_hist, _, yields = pic.get_hist(arrays, var, ratio, "sig_{}".format(i), bins, x_range)
     plot.Set(sig_hist, LineWidth=2, LineStyle=i+1)
     sig_hist_list.append(sig_hist)
@@ -112,13 +112,13 @@ mc_yields, mc_hist_list = [], []
 for i, bkg in enumerate(mc_file_list):
     if isinstance(bkg, list):
         for sub_bkg in bkg:
-            arrays, _ = pic.read_file(path+channel+"/"+sub_bkg, var, tree, selections)
+            arrays, _ = pic.read_root_file(path+channel+"/"+sub_bkg, var, tree, selections)
             if file_hist in globals():
                 file_hist, _, yields = pic.get_hist(arrays, var, sb_ratio, "mc_{}".format(i), bins, x_range, file_hist)
             else:
                 file_hist, _, yields = pic.get_hist(arrays, var, sb_ratio, "mc_{}".format(i), bins, x_range)
     else: 
-        arrays, _ = pic.read_file(path+channel+"/"+bkg, var, tree, selections)
+        arrays, _ = pic.read_root_file(path+channel+"/"+bkg, var, tree, selections)
         file_hist, _, yields = pic.get_hist(arrays, var, sb_ratio, "mc_{}".format(i), bins, x_range)
     mc_hist.Add(file_hist)
     mc_hist_list.append(file_hist)
@@ -148,6 +148,7 @@ for sig_hist in sig_hist_list:
 plot.Set(sig_hist, MarkerStyle=1, MarkerSize=3)
 
 plot.Set(h_stack, Maximum=1.3*pads[0].GetFrame().GetY2())
+plot.Set(h_stack, Minimum=0.00005)
 # plot.Set(h_stack, Maximum=0.045)
 
 # x1, x2 = 0.61, 0.8
@@ -171,7 +172,7 @@ print("========================")
 
 pads[1].cd()
 rp.Draw("E")
-boundaries = [0.26, 0.56, 0.72, 0.83]
+boundaries = [0.07, 0.3, 0.61, 0.9]
 for i in range(4):
     line.DrawLine(boundaries[i], 0, boundaries[i], 1)
 # plot.Set(pads[1], Logy=1)

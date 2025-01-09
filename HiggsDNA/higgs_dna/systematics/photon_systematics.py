@@ -16,11 +16,11 @@ from higgs_dna.systematics.utils import systematic_from_bins, ic_systematic_from
 ########################
 
 PHOTON_ID_SF_FILE = {
-    "2016" : "jsonpog-integration/POG/EGM/2016postVFP_UL/photon.json",
-    "2016preVFP" : "jsonpog-integration/POG/EGM/2016preVFP_UL/photon.json",
-    "2016postVFP" : "jsonpog-integration/POG/EGM/2016postVFP_UL/photon.json",
-    "2017" : "jsonpog-integration/POG/EGM/2017_UL/photon.json",
-    "2018" : "jsonpog-integration/POG/EGM/2018_UL/photon.json"
+    "2016" : "higgs_dna/systematics/data/2016postVFP_UL/photon_wp80mceff_2016.json",
+    "2016preVFP" : "higgs_dna/systematics/data/2016preVFP_UL/photon_wp80mceff_2016.json",
+    "2016postVFP" : "higgs_dna/systematics/data/2016postVFP_UL/photon_wp80mceff_2016APV.json",
+    "2017" : "higgs_dna/systematics/data/2017_UL/photon_wp80mceff_2017.json",
+    "2018" : "higgs_dna/systematics/data/2018_UL/photon_wp80mceff_2018.json"
 }
 
 PHOTON_ID_SF = {

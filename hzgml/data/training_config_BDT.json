@@ -5,7 +5,7 @@
               "train_variables": ["Z_cos_theta", "lep_phi", "lep_cos_theta",
                               "Z_lead_lepton_eta", "Z_sublead_lepton_eta", "gamma_eta",
                               "l2g_deltaR", "l1g_deltaR", 
-                              "gamma_mvaID", "gamma_ptRelErr", "H_relpt"
+                              "gamma_mvaID", "gamma_ptRelErr"
                         ],
               "preselections": ["H_mass >= 100", "H_mass <= 180", "gamma_pt > 0"],
               "signal_preselections": [],
@@ -17,9 +17,10 @@
 "two_jet":  {"+train_signal": [],
               "+preselections": ["n_jets >= 2", "H_mass >= 100", "H_mass <= 180"],
               "inputTree": "two_jet",
-              "+train_variables": ["delta_eta_jj", "pt_balance", "delta_phi_zgjj",
+              "+train_variables": ["H_relpt", 
+                                "delta_eta_jj", "pt_balance", "delta_phi_zgjj",
                                 "delta_phi_jj", "photon_zeppenfeld", 
-                                "max_jet_deltaR", "min_jet_deltaR", 
+                                "jet1G_deltaR", "jet2G_deltaR",
                                 "jet_1_pt", "jet_2_pt"],
               "params": [{"silent": 1, "eval_metric": ["logloss", "auc"], "grow_policy": "lossguide", "nthread": 4, "objective": "binary:logistic", "tree_method": "hist", "booster": "gbtree"},
                          {"silent": 1, "eval_metric": ["logloss", "auc"], "grow_policy": "lossguide", "nthread": 4, "objective": "binary:logistic", "tree_method": "hist", "booster": "gbtree"},
@@ -27,8 +28,9 @@
                          {"silent": 1, "eval_metric": ["logloss", "auc"], "grow_policy": "lossguide", "nthread": 4, "objective": "binary:logistic", "tree_method": "hist", "booster": "gbtree"}
                          ]
               },
-"zero_to_one_jet": {"+preselections": ["H_mass >= 115", "H_mass <= 135"],
+"zero_to_one_jet": {"+preselections": ["H_mass >= 120", "H_mass <= 130"],
             "inputTree": "zero_to_one_jet",
+            "+train_variables": ["H_ptt"],
             "params": [{"silent": 1, "eval_metric": ["logloss", "auc"], "grow_policy": "lossguide", "nthread": 4, "objective": "binary:logistic", "tree_method": "hist", "booster": "gbtree"},
                         {"silent": 1, "eval_metric": ["logloss", "auc"], "grow_policy": "lossguide", "nthread": 4, "objective": "binary:logistic", "tree_method": "hist", "booster": "gbtree"},
                         {"silent": 1, "eval_metric": ["logloss", "auc"], "grow_policy": "lossguide", "nthread": 4, "objective": "binary:logistic", "tree_method": "hist", "booster": "gbtree"},
