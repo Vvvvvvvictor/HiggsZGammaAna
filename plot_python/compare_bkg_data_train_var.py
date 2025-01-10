@@ -13,7 +13,7 @@ config_dict = {
     # "gamma_relpt": {"range": (0.1, 1), "title": r"${p_T^{\gamma}\cdot c}/{m_{ll\gamma}}$"},
     # "pt_balance_0j": {"range": (0, 1), "title": r"$Zeppenfeld_{\gamma}(0j)$"},
     # "H_mass": {"range": (100, 180), "title": r"$m_{ll\gamma}(GeV/c^{2})$"},
-    "delta_eta_jj": {"range": (0, 9), "bins": 50, "title": r"$\Delta\eta_{jj}$"},
+    "delta_eta_jj": {"range": (0, 8), "bins": 40, "title": r"$\Delta\eta_{jj}$"},
     "delta_phi_jj": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi_{jj}$"},
     "delta_phi_zgjj": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi_{ll\gamma,jj}$"},
     "gamma_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta_{\gamma}$"},
@@ -25,8 +25,8 @@ config_dict = {
     "jet2G_deltaR": {"range": (0.4, 6.4), "bins": 40, "title": r"$\Delta R(\gamma,j2)$"},
     # "jet_1_btagDeepFlavB": {"range": (0, 0.1), "title": "j1 btag"},
     # "jet_2_btagDeepFlavB": {"range": (0, 0.15), "title": "j2 btag"},
-    "l1g_deltaR": {"range": (0.4, 4.8), "bins": 40, "title": r"max($\Delta R(l,\gamma)$)"},
-    "l2g_deltaR": {"range": (0.4, 3.4), "bins": 40, "title": r"min($\Delta R(l,\gamma)$)"},
+    "l1g_deltaR": {"range": (0.3, 4.3), "bins": 40, "title": r"max($\Delta R(l,\gamma)$)"},
+    "l2g_deltaR": {"range": (0.3, 3.3), "bins": 40, "title": r"min($\Delta R(l,\gamma)$)"},
     "lep_cos_theta": {"range": (-1, 1), "bins": 40, "title": r"$\cos\theta$"},
     "lep_phi": {"range": (-3.2, 3.2), "bins": 40, "title": r"$\phi$"},
     "photon_zeppenfeld": {"range": (0, 5), "bins": 50, "title": "Zeppenfeld $\gamma$"},
@@ -35,7 +35,7 @@ config_dict = {
     "Z_lead_lepton_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta_{l1}$"},
     "Z_sublead_lepton_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta_{l2}$"},
     "H_relpt": {"range": (0, 3), "bins": 50, "title": r"${p_{T_{ll\gamma}}\cdot c}/{m_{ll\gamma}}$"},
-    "gamma_ptRelErr": {"range": (0.008, 0.108), "bins": 50, "title": r"$\sigma_{p_T^{\gamma}}/p_T^{\gamma}$"},
+    "gamma_ptRelErr": {"range": (0.01, 0.11), "bins": 50, "title": r"$\sigma_{p_T^{\gamma}}/p_T^{\gamma}$"},
     # "HZ_deltaRap": {"range": (-0.7, 0.7), "title": r"$\Delta y(ll,ll\gamma)$"}
 }
 
@@ -70,8 +70,12 @@ def convert_root_to_hist(file_dict, selection=""):
                 hist, _ = np.histogram(samples["H_mass"], bins=80, range=[100, 180], weights=samples[WEIGHT])
                 mass_hist = mass_hist + hist
                 hist, bins = np.histogram(samples[VAR], bins=BINS, range=[RMIN, RMAX], weights=samples[WEIGHT])
+                hist[0] += np.sum(samples[WEIGHT][samples[VAR] < RMIN])
+                hist[-1] += np.sum(samples[WEIGHT][samples[VAR] > RMAX])
                 type_hist = type_hist + hist
                 hist, _ = np.histogram(samples[VAR], bins=BINS, range=[RMIN, RMAX], weights=samples[WEIGHT]**2)
+                hist[0] += np.sum(samples[WEIGHT][samples[VAR] < RMIN])**2
+                hist[-1] += np.sum(samples[WEIGHT][samples[VAR] > RMAX])**2
                 error = error + hist
         hists.append(type_hist)
     return hists, np.sqrt(error), bins, mass_hist
@@ -127,7 +131,7 @@ for i in config_dict:
     ax1.set_xlim(RMIN, RMAX)
     ax1.set_ylim(0, 1.6*max(np.sum(hist1, axis=0).max(), np.sum(hist2, axis=0).max()))
 
-    ax1.annotate(rf"L=137.2 fb$^{{-1}}$, sf={sf:.2f}", xy=(0.65, 1.01), xycoords='axes fraction', fontsize=16)
+    ax1.annotate(rf"L=137.2 fb$^{{-1}}$, sf={sf:.2f}", xy=(1, 1.01), xycoords='axes fraction', fontsize=16, ha="right")
 
     data_sum, bkg_sum = np.where(np.sum(hist1, axis=0) == 0, 1e-8, np.sum(hist1, axis=0)), np.where(np.sum(hist2, axis=0) == 0, 1e-8, np.sum(hist2, axis=0))
     ratio = hist1[0]/bkg_sum
@@ -149,5 +153,5 @@ for i in config_dict:
     plt.tight_layout()
     if os.path.exists("pic/dataVbkg") == False:
         os.makedirs("pic/dataVbkg")
-    plt.savefig(f"pic/dataVbkg/{VAR}.png")
+    plt.savefig(f"pic/dataVbkg/{VAR}.pdf")
     plt.clf()
