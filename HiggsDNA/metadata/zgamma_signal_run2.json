@@ -57,16 +57,29 @@
                 },
                 "modify_central_weight": true
             },
-            "btag_reshape_sf" : {
+            "btag_deepjet_mujet_sf" : {
                 "type" : "object",
                 "method" : "from_function",
                 "function" : {
                     "module_name" : "higgs_dna.systematics.jet_systematics",
-                    "name" : "btag_deepjet_reshape_sf"
+                    "name" : "btag_deepjet_mujet_sf"
                 },
                 "modify_central_weight" : true,
                 "input_collection" : "Jet",
-                "target_collections" : ["SelectedJet"]
+                "target_collections" : ["SelectedmuJet"],
+                "working_point" : "M"
+            },
+            "btag_deepjet_incl_sf" : {
+                "type" : "object",
+                "method" : "from_function",
+                "function" : {
+                    "module_name" : "higgs_dna.systematics.jet_systematics",
+                    "name" : "btag_deepjet_incl_sf"
+                },
+                "modify_central_weight" : true,
+                "input_collection" : "Jet",
+                "target_collections" : ["SelectedlightJet"],
+                "working_point" : "M"
             },
             "electron_wplid_sf": {
                 "type": "object",

@@ -313,10 +313,10 @@ def tauE_sf(events, year, central_only, input_collection, working_point = "none"
     return variations
 
 SingleEle_HLT_FILE = {
-    "2016preVFP" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig32_2017_efficiencies",
-    "2016postVFP" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig32_2017_efficiencies",
-    "2017" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig32_2017_efficiencies",
-    "2018" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig32_2017_efficiencies"
+    "2016preVFP" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig32_2017_efficiencies.json",
+    "2016postVFP" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig32_2017_efficiencies.json",
+    "2017" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig32_2017_efficiencies.json",
+    "2018" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig32_2017_efficiencies.json"
 }
 DoubleEle_LowLeg_HLT_FILE = {
     "2016preVFP" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig12_2017_efficiencies.json",

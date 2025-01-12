@@ -297,6 +297,17 @@ class ZGammaTaggerRun2(Tagger):
             name = "SelectedJet",
             data = events.Jet[jet_cut]
         )
+        mujets = awkward_utils.add_field(
+            events = events,
+            name = "SelectedmuJet",
+            data = jets[jets.hadronFlavour!=0]
+        )
+        lightjets = awkward_utils.add_field(
+            events = events,
+            name = "SelectedlightJet",
+            data = jets[(jets.hadronFlavour==0)]
+        )
+
         photon = awkward_utils.add_field(
                 events = events,
                 name = "Photon",
@@ -435,12 +446,85 @@ class ZGammaTaggerRun2(Tagger):
         trigger_cut = single_ele_trigger_cut | double_ele_trigger_cut | single_mu_trigger_cut  | double_mu_trigger_cut
         ele_trigger_cut = single_ele_trigger_cut | double_ele_trigger_cut
         mu_trigger_cut = single_mu_trigger_cut  | double_mu_trigger_cut
-        # HLT lepton status: 
+        # HLT lepton status: [FIXME]
         # 0: failed all triggers ->  double_ele_trigger_cut = False, single_ele_trigger_cut = False
         # 1: passed lower dilepton trigger -> double_ele_trigger_cut = False, single_ele_trigger_cut = True
         # 2: passed upper dilepton trigger -> double_ele_trigger_cut = True, single_ele_trigger_cut = False
         # 3: passed single lepton trigger ->  single_ele_trigger_cut = True
+        # HLT_ele_cat0 = (~double_ele_trigger_cut) & (~single_ele_trigger_cut) 
+        # HLT_mu_cat0 = (~double_mu_trigger_cut) & (~single_mu_trigger_cut)
+        # HLT_ele_cat1 = (~double_ele_trigger_cut) & single_ele_trigger_cut
+        # HLT_mu_cat1 = (~double_mu_trigger_cut) & single_mu_trigger_cut
+        # HLT_ele_cat2 = double_ele_trigger_cut & (~single_ele_trigger_cut)
+        # HLT_mu_cat2 = double_mu_trigger_cut & (~single_mu_trigger_cut)
+        # HLT_ele_cat3 = single_ele_trigger_cut
+        # HLT_mu_cat3 = single_mu_trigger_cut
+        # def GetLeptonProbability(lepton_pt, lepton_eta, is_data, is_electron, trigger_leg) :
+        #     if (is_electron):
+        #         if (trigger_leg == pass_lowerdilep):
+        #             if is_data:
+        #                 prob_map = diele12_correction_data
+        #                 unc_map = diele12_uncertainty_data
+        #             else :
+        #                 prob_map = diele12_correction_mc
+        #                 unc_map = diele12_uncertainty_mc
+        #         elif (trigger_leg == pass_upperdilep):
+        #             if is_data:
+        #                 prob_map = diele23_correction_data
+        #                 unc_map = diele23_uncertainty_data
+        #             else :
+        #                 prob_map = diele23_correction_mc
+        #                 unc_map = diele23_uncertainty_mc
+        #         else :  
+        #             if is_data:
+        #                 prob_map = singleele_correction_data
+        #                 unc_map = singleele_uncertainty_data
+        #             else :
+        #                 prob_map = singleele_correction_mc
+        #                 unc_map = singleele_uncertainty_mc
+        #     else:
+        #         if (trigger_leg == pass_lowerdilep):
+        #             if is_data:
+        #                 prob_map = dimu12_correction_data
+        #                 unc_map = dimu12_uncertainty_data
+        #             else :
+        #                 prob_map = dimu12_correction_mc
+        #                 unc_map = dimu12_uncertainty_mc
+        #         elif (trigger_leg == pass_upperdilep):
+        #             if is_data:
+        #                 prob_map = dimu23_correction_data
+        #                 unc_map = dimu23_uncertainty_data
+        #             else :
+        #                 prob_map = dimu23_correction_mc
+        #                 unc_map = dimu23_uncertainty_mc
+        #         else :  
+        #             if is_data:
+        #                 prob_map = singlemu_correction_data
+        #                 unc_map = singlemu_uncertainty_data
+        #             else :
+        #                 prob_map = singlemu_correction_mc
+        #                 unc_map = singlemu_uncertainty_mc
+        #     prob = prob_map
+        #     uncr = unc_map
+        #     return prob, uncr
+
+        # def GetFlavorProbability(lepton_pt, lepton_eta, pass_singlelep, pass_dilep, is_data, is_electron):
+        #     n_pass_lower = awkward.num(1*HLT_ele_cat1[1*HLT_ele_cat1>0])+awkward.num(1*HLT_mu_cat1[1*HLT_mu_cat1>0])
+        #     n_pass_upper = awkward.num(1*HLT_ele_cat2[1*HLT_ele_cat2>0])+awkward.num(1*HLT_mu_cat2[1*HLT_mu_cat2>0])
+        #     n_pass_single = awkward.num(1*HLT_ele_cat3[1*HLT_ele_cat3>0])+awkward.num(1*HLT_mu_cat3[1*HLT_mu_cat3>0])
+        #     relevant_cat = awkward.ones_like(lepton_pt) * True
+        #     relevant_cat = awkward.where(((n_pass_single>0)!=pass_singlelep), awkward.ones_like(relevant_cat) * False, relevant_cat)
+        #     relevant_cat = awkward.where((((n_pass_upper>0)&(n_pass_lower>1))!=pass_dilep), awkward.ones_like(relevant_cat) * False, relevant_cat)
+        #     lep_prob = awkward.zero_like(lepton_pt) 
+        #     lep_unc = awkward.zero_like(lepton_pt)
+
+        # def GetTotalProbability(electron_pt,muon_pt, electron_eta,muon_eta, pass_singleel,pass_singlemu,pass_diel,pass_dimu, is_data):
+        #     electron_prob = GetFlavorProbability(electron_pt, electron_eta,pass_singleel, pass_diel, is_data, True)
+        #     muon_prob = GetFlavorProbability(muon_pt, muon_eta,pass_singlemu, pass_dimu, is_data, False)
         
+        # mc_prob = GetTotalProbability(electron_pt, muon_pt, electron_eta, muon_eta, pass_singleel, pass_singlemu, pass_diel, pass_dimu, False)
+
+
         # 0: lep_prob = 1 - probability(1), lep_unc = uncertainty(1)
         # 1: lep_prob = prob(1) - prob(2), lep_unc = sqrt(uncertainty(1)**2 + uncertainty(2)**2)
         # 2: lep_prob = prob(2) - prob(3), lep_unc = sqrt(uncertainty(2)**2 + uncertainty(3)**2)
@@ -453,7 +537,7 @@ class ZGammaTaggerRun2(Tagger):
         # sf,unc=1
         # if mc_prob !=0: sf = data_prob/mc_prob; unc = sqrt((data_unc/mc_prob)**2 + ((mc_unc*data_prob)/(mc_prob*mc*prob))**2)
         # elif mc_prob == 0 sf = 1; unc = 0
-        
+        #[FIXME]
         # a trick that give 0 to the empty array    
         if self.year is not None:
             year = self.year[:4]
