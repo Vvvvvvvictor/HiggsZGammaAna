@@ -23,7 +23,10 @@ HiggsDNA/core*
 SSTest/bkg*
 *.__afs*
 */CMSSW*
-*/*log*
+*/log
+*/model*
+*/figs*
+*/old*
 
 # Byte-compiled / optimized / DLL files
 */__init__.py

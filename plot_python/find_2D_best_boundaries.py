@@ -17,11 +17,11 @@ from pdb import set_trace
 from tqdm import tqdm
 
 # General settings
-TUNING_HYPERPARAMER = False
-USE_STORED_PARAMS = False
-USE_STORED_MODEL = True
-CATEGORIZATION = False
-APPLY_BDT = False
+TUNING_HYPERPARAMER = True
+USE_STORED_PARAMS = True
+USE_STORED_MODEL = False
+CATEGORIZATION = True
+APPLY_BDT = True
 FLOATB = True
 REWEIGHT = True
 TRANSFORM = True

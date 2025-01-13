@@ -106,10 +106,10 @@ DEFAULT_OPTIONS = {
         "2016postVFP": 0.2489,
         "2017": 0.3040,
         "2018": 0.2783,
-        "2022": 0.3086,
-        "2022EE": 0.3196,
-        "2023": 0.2431,
-        "2023BPix": 0.2435
+        "2022preEE": 0.3086,
+        "2022postEE": 0.3196,
+        "2023preBPix": 0.2431,
+        "2023postBPix": 0.2435
     },
     "FSRphotons" : {
         "iso" : 1.8,
@@ -216,6 +216,7 @@ class ZGammaTaggerRun2(Tagger):
 
         start = time.time()
 
+        # events = events[(events.run == 356077) & (events.luminosityBlock == 158) & (events.event == 196518696)]
         # Electrons
         electron_cut = lepton_selections.select_electrons(
             electrons = events.Electron,
@@ -297,11 +298,34 @@ class ZGammaTaggerRun2(Tagger):
             name = "SelectedJet",
             data = events.Jet[jet_cut]
         )
+        mujet_cut = jet_selections.select_jets(
+            mujets = events.Jet[events.Jet.hadronFlavour>0],
+            options = self.options["jets"],
+            clean = {
+                "photons" : {
+                    "objects" : photons,
+                    "min_dr" : self.options["jets"]["dr_photons"]
+                },
+                "electrons" : {
+                    
+                    "objects" : electrons,
+                    "min_dr" : self.options["jets"]["dr_electrons"]
+                },
+                "muons" : {
+                    "objects" : muons,
+                    "min_dr" : self.options["jets"]["dr_muons"]
+                }
+            },
+            name = "SelectedmuJet",
+            tagger = self
+        )
         mujets = awkward_utils.add_field(
             events = events,
             name = "SelectedmuJet",
-            data = jets[jets.hadronFlavour!=0]
+            data = mujets
         )
+        print(jets.hardonFlavour)
+        print(jets.hadronFlavour!=0)
         lightjets = awkward_utils.add_field(
             events = events,
             name = "SelectedlightJet",
@@ -326,7 +350,7 @@ class ZGammaTaggerRun2(Tagger):
         )
         FSRphotons = awkward.with_field(FSRphotons, awkward.ones_like(FSRphotons.pt) * 0.0, "mass")
 
-        if "2016" not in self.year:
+        if "2017" in self.year or "2018" in self.year:
             year = self.year[:4]
             b_jet_cut = jets.btagDeepFlavB > self.options["btag_med"][year]
         else:
@@ -736,9 +760,9 @@ class ZGammaTaggerRun2(Tagger):
             if cut_type == "zgammas_mu":
                 mm_all_cut = cut9
             
-            # if cut_type == "zgammas_mu":
+            # if cut_type == "zgammas_ele":
             #     print(f"!!!start check events tag({cut_type})!!!")
-            #     for i in events[cut4]:
+            #     for i in events[cut1]:
             #         print(f"{i.run} {i.luminosityBlock} {i.event}")
             #     print(f"!!!end check events tag({cut_type})!!!")
 

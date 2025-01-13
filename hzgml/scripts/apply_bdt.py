@@ -24,7 +24,7 @@ def getArgs():
     parser.add_argument('-c', '--config', action='store', nargs=2, default=['data/training_config_BDT.json', 'data/apply_config_BDT.json'], help='Region to process')
     parser.add_argument('-i', '--inputFolder', action='store', default='/eos/home-j/jiehan/root/skimmed_ntuples_run2', help='directory of training inputs')
     parser.add_argument('-m', '--modelFolder', action='store', default='models', help='directory of BDT models')
-    parser.add_argument('-o', '--outputFolder', action='store', default='/eos/home-j/jiehan/root/outputs', help='directory for outputs')
+    parser.add_argument('-o', '--outputFolder', action='store', default='/eos/home-j/jiehan/root/outputs/test', help='directory for outputs')
     parser.add_argument('-r', '--region', action='store', choices=['two_jet', 'one_jet', 'zero_jet', 'zero_to_one_jet', 'VH_ttH', 'all_jet'], default='zero_jet', help='Region to process')
     parser.add_argument('-cat', '--category', action='store', nargs='+', help='apply only for specific categories')
 
@@ -197,7 +197,7 @@ class ApplyXGBHandler(object):
                     tsf = pickle.load(open('%s/BDT_tsf_%s_%d.pkl'%(self._modelFolder, model, i), "rb" ), encoding = 'latin1' )
                     self.m_tsfs[model].append(tsf)
 
-    def applyBDT(self, category, scale=1):
+    def applyBDT(self, category, scale=1, shift=0):
         outputbraches = copy.deepcopy(self._outbranches)
         branches = copy.deepcopy(self._branches)
         # branches += ["Z_sublead_lepton_pt", "gamma_mvaID_WP80", "gamma_mvaID_WPL"]
@@ -248,7 +248,7 @@ class ApplyXGBHandler(object):
 
                     for i in range(4):
 
-                        data_s = data[data[self.randomIndex]%4 == i]
+                        data_s = data[(data[self.randomIndex]-shift)%4 == i]
                         data_o = data_s
                         # data_o = data_s[outputbraches]
 
@@ -285,7 +285,6 @@ def main():
 
     xgb.setInputFolder(args.inputFolder)
     xgb.setModelFolder(args.modelFolder)
-    xgb.setOutputFolder(args.outputFolder)
 
     xgb.loadModels()
     xgb.loadTransformer()
@@ -294,10 +293,16 @@ def main():
         config = json.load(f)
     sample_list = config['sample_list']
 
+    xgb.setOutputFolder(args.outputFolder)
     for category in sample_list:
         if args.category and category not in args.category: continue
         xgb.applyBDT(category)
-
+    
+    xgb.setOutputFolder(args.outputFolder.replace('test', 'val'))
+    for category in sample_list:
+        if args.category and category not in args.category: continue
+        xgb.applyBDT(category, shift=1)
+        
     return
 
 if __name__ == '__main__':

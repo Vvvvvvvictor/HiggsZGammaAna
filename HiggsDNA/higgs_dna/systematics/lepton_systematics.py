@@ -13,11 +13,11 @@ from higgs_dna.utils import awkward_utils, misc_utils
 from higgs_dna.systematics.utils import systematic_from_bins
 
 muon_ID_SF_FILE = {
-    "2016" : "higgs_dna/systematics/data/2017_UL/muon_mceff.json",
-    "2016preVFP" : "higgs_dna/systematics/data/2017_UL/muon_mceff.json",
-    "2016postVFP" : "higgs_dna/systematics/data/2017_UL/muon_mceff.json",
-    "2017" : "higgs_dna/systematics/data/2017_UL/muon_mceff.json",
-    "2018" : "higgs_dna/systematics/data/2017_UL/muon_mceff.json"
+    "2016" : "higgs_dna/systematics/data/2016postVFP_UL/muid_2016_2016APV.json",
+    "2016preVFP" : "higgs_dna/systematics/data/2016preVFP_UL/muid_2016_2016APV.json",
+    "2016postVFP" : "higgs_dna/systematics/data/2016postVFP_UL/muid_2016_2016APV.json",
+    "2017" : "higgs_dna/systematics/data/2017_UL/muid_2017.json",
+    "2018" : "higgs_dna/systematics/data/2018_UL/muid_2018.json"
 }
 
 muon_ID_SF = {
@@ -58,19 +58,27 @@ def muon_LooseID_sf(events, year, central_only, input_collection, working_point 
 
     # Calculate SF and syst
     variations = {}
-    sf = evaluator["Muon_LooseID_MCeff"].evalv(
-            "effmc",
-            abs(muon_eta),
-            muon_pt
+    # sf = evaluator["Muon_LooseID_MCeff"].evalv(
+    #         "effmc",
+    #         abs(muon_eta),
+    #         muon_pt
+    # )
+    sf = evaluator["sf_pass"].evalv(
+            muon_pt,
+            muon_eta
     )
     variations["central"] = awkward.unflatten(sf, n_muons)
 
     if not central_only:
-        syst_var = "systmc"
-        syst = evaluator["Muon_LooseID_MCeff"].evalv(
-            syst_var,
-            abs(muon_eta),
-            muon_pt
+        # syst_var = "systmc"
+        # syst = evaluator["Muon_LooseID_MCeff"].evalv(
+        #     syst_var,
+        #     abs(muon_eta),
+        #     muon_pt
+        #     )
+        syst = evaluator["unc_pass"].evalv(
+            muon_pt,
+            muon_eta
             )
         variations["up"] = awkward.unflatten(syst+sf, n_muons)
         variations["down"] = awkward.unflatten(sf-syst, n_muons)
@@ -87,11 +95,11 @@ def muon_LooseID_sf(events, year, central_only, input_collection, working_point 
 
 
 ELECTRON_ID_SF_FILE = {
-    "2016" : "higgs_dna/systematics/data/2017_UL/electron_WPL.json",
-    "2016preVFP" : "higgs_dna/systematics/data/2017_UL/electron_WPL.json",
-    "2016postVFP" : "higgs_dna/systematics/data/2017_UL/electron_WPL.json",
-    "2017" : "higgs_dna/systematics/data/2017_UL/electron_WPL.json",
-    "2018" : "higgs_dna/systematics/data/2017_UL/electron_WPL.json"
+    "2016" : "higgs_dna/systematics/data/2016postVFP_UL/hzg_elid_2016_scalefactors.json",
+    "2016preVFP" : "higgs_dna/systematics/data/2016preVFP_UL/hzg_elid_2016APV_scalefactors.json",
+    "2016postVFP" : "higgs_dna/systematics/data/2016postVFP_UL/hzg_elid_2016_scalefactors.json",
+    "2017" : "higgs_dna/systematics/data/2017_UL/hzg_elid_2017_scalefactors.json",
+    "2018" : "higgs_dna/systematics/data/2018_UL/hzg_elid_2018_scalefactors.json"
 }
 
 ELECTRON_ID_SF = {
@@ -137,19 +145,27 @@ def electron_WPL_sf(events, year, central_only, input_collection, working_point 
 
     # Calculate SF and syst
     variations = {}
-    sf = evaluator["ElectronWPL"].evalv(
-            "effmc",
-            ele_eta,
-            ele_pt
+    # sf = evaluator["ElectronWPL"].evalv(
+    #         "effmc",
+    #         ele_eta,
+    #         ele_pt
+    # )
+    sf = evaluator["sf_pass"].evalv(
+            ele_pt,
+            ele_eta
     )
     variations["central"] = awkward.unflatten(sf, n_electrons)
 
     if not central_only:
         syst_var = "systmc"
-        syst = evaluator["ElectronWPL"].evalv(
-            syst_var,
-            ele_eta,
-            ele_pt
+        # syst = evaluator["ElectronWPL"].evalv(
+        #     syst_var,
+        #     ele_eta,
+        #     ele_pt
+        #     )
+        syst = evaluator["unc_pass"].evalv(
+            ele_pt,
+            ele_eta
             )
         variations["up"] = awkward.unflatten(syst+sf, n_electrons)
         variations["down"] = awkward.unflatten(sf-syst, n_electrons)
@@ -167,11 +183,11 @@ def electron_WPL_sf(events, year, central_only, input_collection, working_point 
 
 
 MUON_ID_SF_FILE = {
-    "2016" : "jsonpog-integration/POG/MUO/2016postVFP_UL/muon.json",
-    "2016preVFP" : "jsonpog-integration/POG/MUO/2016preVFP_UL/muon.json",
-    "2016postVFP" : "jsonpog-integration/POG/MUO/2016postVFP_UL/muon.json",
-    "2017" : "jsonpog-integration/POG/MUO/2017_UL/muon.json",
-    "2018" : "jsonpog-integration/POG/MUO/2018_UL/muon.json"
+    "2016" : "higgs_dna/systematics/data/2016postVFP_UL/muid_2016_2016APV.json",
+    "2016preVFP" : "higgs_dna/systematics/data/2016preVFP_UL/muid_2016_2016APV.json",
+    "2016postVFP" : "higgs_dna/systematics/data/2016postVFP_UL/muid_2016_2016APV.json",
+    "2017" : "higgs_dna/systematics/data/2017_UL/muid_2017.json",
+    "2018" : "higgs_dna/systematics/data/2018_UL/muid_2018.json"
 }
 
 MUON_ID_SF = {
@@ -313,41 +329,48 @@ def tauE_sf(events, year, central_only, input_collection, working_point = "none"
     return variations
 
 SingleEle_HLT_FILE = {
+<<<<<<< HEAD
     "2016preVFP" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig32_2017_efficiencies.json",
     "2016postVFP" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig32_2017_efficiencies.json",
     "2017" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig32_2017_efficiencies.json",
     "2018" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig32_2017_efficiencies.json"
+=======
+    "2016preVFP" : "higgs_dna/systematics/data/2016preVFP_UL/hzg_eltrig27_2016APV_efficiencies.json",
+    "2016postVFP" : "higgs_dna/systematics/data/2016postVFP_UL/hzg_eltrig23_2016_efficiencies.json",
+    "2017" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig32_2017_efficiencies.json",
+    "2018" : "higgs_dna/systematics/data/2018_UL/hzg_eltrig32_2018_efficiencies.json"
+>>>>>>> fc3cbb7454688ec38ac40d2eca1d7f65fda26330
 }
 DoubleEle_LowLeg_HLT_FILE = {
-    "2016preVFP" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig12_2017_efficiencies.json",
-    "2016postVFP" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig12_2017_efficiencies.json",
+    "2016preVFP" : "higgs_dna/systematics/data/2016preVFP_UL/hzg_eltrig12_2016APV_efficiencies.json",
+    "2016postVFP" : "higgs_dna/systematics/data/2016postVFP_UL/hzg_eltrig12_2016_efficiencies.json",
     "2017" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig12_2017_efficiencies.json",
-    "2018" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig12_2017_efficiencies.json"
+    "2018" : "higgs_dna/systematics/data/2018_UL/hzg_eltrig12_2018_efficiencies.json"
 }
 DoubleEle_HighLeg_HLT_FILE = {
-    "2016preVFP" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig32_2017_efficiencies.json",
-    "2016postVFP" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig32_2017_efficiencies.json",
-    "2017" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig32_2017_efficiencies.json",
-    "2018" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig32_2017_efficiencies.json"
+    "2016preVFP" : "higgs_dna/systematics/data/2016preVFP_UL/hzg_eltrig23_2016APV_efficiencies.json",
+    "2016postVFP" : "higgs_dna/systematics/data/2016postVFP_UL/hzg_eltrig23_2016_efficiencies.json",
+    "2017" : "higgs_dna/systematics/data/2017_UL/hzg_eltrig23_2017_efficiencies.json",
+    "2018" : "higgs_dna/systematics/data/2018_UL/hzg_eltrig23_2018_efficiencies.json"
 }
 
 SingleMuon_HLT_FILE = {
-    "2016preVFP" : "higgs_dna/systematics/data/2017_UL/hzg_mutrig27_2017_efficiencies.jsons",
-    "2016postVFP" : "higgs_dna/systematics/data/2017_UL/hzg_mutrig27_2017_efficiencies.jsons",
-    "2017" : "higgs_dna/systematics/data/2017_UL/hzg_mutrig27_2017_efficiencies.jsons",
-    "2018" : "higgs_dna/systematics/data/2017_UL/hzg_mutrig27_2017_efficiencies.jsons"
+    "2016preVFP" : "higgs_dna/systematics/data/2016preVFP_UL/hzg_mutrig24_2016APV_efficiencies.json",
+    "2016postVFP" : "higgs_dna/systematics/data/2016postVFP_UL/hzg_mutrig24_2016_efficiencies.json",
+    "2017" : "higgs_dna/systematics/data/2017_UL/hzg_mutrig27_2017_efficiencies.json",
+    "2018" : "higgs_dna/systematics/data/2018_UL/hzg_mutrig24_2018_efficiencies.json"
 }
 DoubleMuon_LowLeg_HLT_FILE = {
-    "2016preVFP" : "higgs_dna/systematics/data/2017_UL/hzg_mutrig8_2017_efficiencies.json",
-    "2016postVFP" : "higgs_dna/systematics/data/2017_UL/hzg_mutrig8_2017_efficiencies.json",
+    "2016preVFP" : "higgs_dna/systematics/data/2016preVFP_UL/hzg_mutrig8_2016APV_efficiencies.json",
+    "2016postVFP" : "higgs_dna/systematics/data/2016postVFP_UL/hzg_mutrig8_2016_efficiencies.json",
     "2017" : "higgs_dna/systematics/data/2017_UL/hzg_mutrig8_2017_efficiencies.json",
-    "2018" : "higgs_dna/systematics/data/2017_UL/hzg_mutrig8_2017_efficiencies.json"
+    "2018" : "higgs_dna/systematics/data/2018_UL/hzg_mutrig8_2018_efficiencies.json"
 }
 DoubleMuon_HighLeg_HLT_FILE = {
-    "2016preVFP" : "higgs_dna/systematics/data/2017_UL/hzg_mutrig17_2017_efficiencies.json",
-    "2016postVFP" : "higgs_dna/systematics/data/2017_UL/hzg_mutrig17_2017_efficiencies.json",
+    "2016preVFP" : "higgs_dna/systematics/data/2016preVFP_UL/hzg_mutrig17_2016APV_efficiencies.json",
+    "2016postVFP" : "higgs_dna/systematics/data/2016postVFP_UL/hzg_mutrig17_2016_efficiencies.json",
     "2017" : "higgs_dna/systematics/data/2017_UL/hzg_mutrig17_2017_efficiencies.json",
-    "2018" : "higgs_dna/systematics/data/2017_UL/hzg_mutrig17_2017_efficiencies.json"
+    "2018" : "higgs_dna/systematics/data/2018_UL/hzg_mutrig17_2018_efficiencies.json"
 }
 
 
@@ -409,6 +432,7 @@ def singleEle_MCcorrection(events, year, central_only, input_collection, working
         )
 
     return variations
+
 def singleEle_Datacorrection(events, year, central_only, input_collection, working_point = "none"):
     """
     See:

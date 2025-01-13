@@ -439,6 +439,7 @@ class categorizer(object):
             # temp_nbkg = nbkg
             if self.reweight and nbkg != 0:
                 if self.h_bkg_rw_den.Integral(bl, br) == 0: print("what!!!", bl, br)
+                if self.h_bkg_rw_den.Integral(bl, br) < 5*minN or self.h_bkg_rw_num.Integral(bl, br) < 5*minN: return -1, -1, -1
                 nbkg, dbkg = nbkg*self.h_bkg_rw_num.Integral(bl, br)/self.h_bkg_rw_den.Integral(bl, br), dbkg*self.h_bkg_rw_num.Integral(bl, br)/self.h_bkg_rw_den.Integral(bl, br)
                 
             if nbkg < minN: return -1, -1, -1

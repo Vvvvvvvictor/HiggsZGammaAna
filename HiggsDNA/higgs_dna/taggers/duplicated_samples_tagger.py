@@ -51,7 +51,7 @@ class DuplicatedSamplesTagger(Tagger):
 
             if "/DoubleMuon/" in file:
                 cut = double_mu_trig
-            elif "/Muon/" in file:
+            elif "/Muon" in file:
                 cut = single_mu_trig | double_mu_trig
             elif "/SingleMuon/" in file:
                 cut = single_mu_trig & numpy.logical_not(double_mu_trig)
@@ -66,7 +66,7 @@ class DuplicatedSamplesTagger(Tagger):
 
             if "/DoubleEG/" in file:
                 cut = double_eg_trig & numpy.logical_not(single_mu_trig | double_mu_trig)
-            elif "/EGamma/" in file:
+            elif "/EGamma" in file:
                 cut = (single_eg_trig | double_eg_trig) & numpy.logical_not(single_mu_trig | double_mu_trig)
             elif "/SingleElectron/" in file:
                 cut = single_eg_trig & numpy.logical_not(double_eg_trig) & numpy.logical_not(single_mu_trig | double_mu_trig)

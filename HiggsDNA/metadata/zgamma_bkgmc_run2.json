@@ -165,7 +165,9 @@
         "weight_central",
         "run",
         "event",
-        "luminosityBlock"
+        "luminosityBlock",
+        "z_mumu",
+        "z_ee"
     ],
     "branches": [
         "GenVtx_z",
@@ -216,6 +218,7 @@
         "Photon_mvaID",
         "Photon_electronVeto",
         "Photon_electronIdx",
+        "Photon_jetIdx",
         "Photon_sieie",
         "Photon_energyErr",
         "Photon_r9",

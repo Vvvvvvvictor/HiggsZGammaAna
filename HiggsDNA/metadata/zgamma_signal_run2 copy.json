@@ -12,7 +12,7 @@
                 "name": "zgamma_tagger_run2",
                 "options": {
                     "gen_info": {
-                        "calculate": true
+                        "calculate": false
                     }
                 }
             }
@@ -27,7 +27,7 @@
                     "module_name": "higgs_dna.systematics.photon_systematics",
                     "name": "photon_electron_veto_sf"
                 },
-                "modify_central_weight": true,
+                "modify_central_weight": false,
                 "input_collection": "Photon",
                 "target_collections": [
                     [
@@ -42,7 +42,7 @@
                     "module_name": "higgs_dna.systematics.pileup_systematics",
                     "name": "pu_reweight_sf"
                 },
-                "modify_central_weight": true,
+                "modify_central_weight": false,
                 "requires_branches": [
                     "Pileup_nTrueInt"
                 ]
@@ -55,7 +55,18 @@
                     "up": "L1PreFiringWeight_Up",
                     "down": "L1PreFiringWeight_Dn"
                 },
-                "modify_central_weight": true
+                "modify_central_weight": false
+            },
+            "btag_reshape_sf" : {
+                "type" : "object",
+                "method" : "from_function",
+                "function" : {
+                    "module_name" : "higgs_dna.systematics.jet_systematics",
+                    "name" : "btag_deepjet_reshape_sf"
+                },
+                "modify_central_weight" : false,
+                "input_collection" : "Jet",
+                "target_collections" : ["SelectedJet"]
             },
             "electron_wplid_sf": {
                 "type": "object",
@@ -64,7 +75,20 @@
                     "module_name": "higgs_dna.systematics.lepton_systematics",
                     "name": "electron_WPL_sf"
                 },
-                "modify_central_weight": true,
+                "modify_central_weight": false,
+                "input_collection": "Electron",
+                "target_collections": [
+                    "SelectedElectron"
+                ]
+            },
+            "SingleEle_HLT_MC_sf": {
+                "type": "object",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.lepton_systematics",
+                    "name": "singleEle_MCcorrection"
+                },
+                "modify_central_weight": false,
                 "input_collection": "Electron",
                 "target_collections": [
                     "SelectedElectron"
@@ -77,7 +101,7 @@
                     "module_name": "higgs_dna.systematics.lepton_systematics",
                     "name": "muon_LooseID_sf"
                 },
-                "modify_central_weight": true,
+                "modify_central_weight": false,
                 "input_collection": "Muon",
                 "target_collections": [
                     "SelectedMuon"
@@ -85,113 +109,6 @@
             }
         },
         "independent_collections": {
-            "fnuf": {
-                "method": "from_function",
-                "branch_modified": [
-                    "Photon",
-                    "pt"
-                ],
-                "function": {
-                    "module_name": "higgs_dna.systematics.photon_systematics",
-                    "name": "fnuf_unc"
-                }
-            },
-            "material": {
-                "method": "from_function",
-                "branch_modified": [
-                    "Photon",
-                    "pt"
-                ],
-                "function": {
-                    "module_name": "higgs_dna.systematics.photon_systematics",
-                    "name": "material_unc"
-                }
-            },
-            "scale": {
-                "method": "from_branch",
-                "branch_modified": [
-                    "Photon",
-                    "pt"
-                ],
-                "branches": {
-                    "up": [
-                        "Photon",
-                        "pt_ScaleUp"
-                    ],
-                    "down": [
-                        "Photon",
-                        "pt_ScaleDown"
-                    ]
-                }
-            },
-            "smear": {
-                "method": "from_branch",
-                "branch_modified": [
-                    "Photon",
-                    "pt"
-                ],
-                "branches": {
-                    "up": [
-                        "Photon",
-                        "dEsigmaUp"
-                    ],
-                    "down": [
-                        "Photon",
-                        "dEsigmaDown"
-                    ]
-                },
-                "additive": true
-            },
-            "JER": {
-                "method": "from_branch",
-                "branch_modified": [
-                    "Jet",
-                    "pt"
-                ],
-                "branches": {
-                    "up": [
-                        "Jet",
-                        "pt_jerUp"
-                    ],
-                    "down": [
-                        "Jet",
-                        "pt_jerDown"
-                    ]
-                }
-            },
-            "JES": {
-                "method": "from_branch",
-                "branch_modified": [
-                    "Jet",
-                    "pt"
-                ],
-                "branches": {
-                    "up": [
-                        "Jet",
-                        "pt_jesTotalUp"
-                    ],
-                    "down": [
-                        "Jet",
-                        "pt_jesTotalDown"
-                    ]
-                }
-            },
-            "MET_JES": {
-                "method": "from_branch",
-                "branch_modified": "MET_pt",
-                "branches": {
-                    "up": "MET_T1_pt_jesTotalUp",
-                    "down": "MET_T1_pt_jesTotalDown"
-                }
-            },
-            "MET_Unclustered": {
-                "method": "from_branch",
-                "branch_modified": "MET_pt",
-                "branches": {
-                    "up": "MET_T1_pt_unclustEnUp",
-                    "down": "MET_T1_pt_unclustEnDown"
-                }
-            },
             "Muon_pt": {
                 "method": "from_branch",
                 "branch_modified": [
@@ -214,11 +131,10 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_skimmed.json",
         "sample_list": [
-            "WplusH",
-            "WminusH"
+            "ggH_M125"
         ],
         "years": [
-            "2016preVFP", "2016postVFP", "2017", "2018"
+             "2017"
         ]
     },
     "variables_of_interest": [
@@ -320,6 +236,7 @@
         "additional_lepton_2_mass",
         "additional_lepton_2_charge",
         "additional_lepton_2_id",
+        "max_I_mini",
         "GenHzgHiggs_pt",
         "GenHzgHiggs_eta",
         "GenHzgHiggs_phi",
@@ -409,6 +326,7 @@
         "Photon_mvaID",
         "Photon_electronVeto",
         "Photon_electronIdx",
+        "Photon_jetIdx",
         "Photon_sieie",
         "Photon_energyErr",
         "Photon_r9",
@@ -439,6 +357,7 @@
         "Muon_mass",
         "Muon_charge",
         "Muon_ptErr",
+        "Muon_miniPFRelIso_all",
         "Muon_pfRelIso03_all",
         "Muon_sip3d",
         "Muon_dxy",
@@ -458,6 +377,7 @@
         "Electron_energyErr",
         "Electron_ptErr",
         "Electron_charge",
+        "Electron_miniPFRelIso_all",
         "Electron_pfRelIso03_all",
         "Electron_dxy",
         "Electron_dz",

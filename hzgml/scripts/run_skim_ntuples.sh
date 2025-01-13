@@ -6,7 +6,10 @@ target="/eos/home-j/jiehan/root/skimmed_ntuples_run2/"
 # target="./"
 
 # years=(2016preVFP 2016postVFP 2017 2018 2022preEE 2022postEE 2023preBPix 2023postBPix)
-years=(2017 2018)
+years=(2016preVFP 2016postVFP 2017 2018)
+# years=(2022preEE 2022postEE 2023preBPix 2023postBPix)
+systs=("FNUF" "Material" "Scale" "Smearing" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt")
+# systs=("FNUF" "Material" "Scale" "Smearing" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt")
 
 # 函数定义：执行命令并处理错误
 execute_command() {
@@ -41,6 +44,8 @@ process_sample() {
         command+="-i ${input}${type}/${sample}_${year}/merged_${corr}.parquet "
         if [ "$type" = "Data" ]; then
             command+="-o ${target}data/${year}.root"
+        # elif [ "$type" = "signal" ]; then
+        #     command+="-o ${target}${sample}_M125/${year}.root"
         else
             command+="-o ${target}${sample}/${year}.root"
         fi
@@ -58,30 +63,63 @@ process_sample() {
     echo "Sample $sample completed successfully."
 }
 
-# # 处理 signal 样本
+# 函数定义：处理样本数据
+process_sample_syst() {
+    local sample="$1"
+    local type="$2"
+    local year="$3"
+    local uod="$4"
+    
+    for syst in "${systs[@]}"; do
+        corr="${syst}_${uod}"
+        command="python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py "
+        command+="-i ${input}${type}/${sample}_${year}/merged_${corr}.parquet "
+        command+="-o ${target}${sample}_${syst}_${uod}/${year}.root"
+        
+        # 使用函数执行命令
+        execute_command "$command" &
+        pid_list+=($!)
+    done
 
-# # samples=(ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125 ggH_M120 VBFH_M120 WplusH_M120 WminusH_M120 ZH_M120 ttH_M120 ggH_M130 VBFH_M130 WplusH_M130 WminusH_M130 ZH_M130 ttH_M130 ggH_mix VBF_mix ggH VBF WplusH WminusH ZH ttH)
+    # 等待所有后台任务完成
+    for pid in "${pid_list[@]}"; do
+        wait $pid
+    done
+
+    echo "Sample $sample completed successfully."
+}
+
+# 处理 signal 样本
+
+# samples=(ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125 ggH_M120 VBFH_M120 WplusH_M120 WminusH_M120 ZH_M120 ttH_M120 ggH_M130 VBFH_M130 WplusH_M130 WminusH_M130 ZH_M130 ttH_M130 ggH_mix VBF_mix ggH VBF WplusH WminusH ZH ttH)
+
 # samples=(ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125) 
 # type="signal"
 # for sample in "${samples[@]}"; do
-#     mkdir -p "$target${sample}"
+#     mkdir -p "$target${sample}/"
 #     # 存储后台任务的进程ID列表
 #     pid_list=()
 
 #     # 调用函数处理样本数据
 #     process_sample "$sample" "$type"
-
-#     # for sf in "up" "down"; do
-#     #     for corr in "fnuf" "material" "scale" "smear" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt"; do
-#     #         mkdir -p "$target${sample}_${corr}_${sf}"
-#     #         # 存储后台任务的进程ID列表
-#     #         pid_list=()
-
-#     #         # 调用函数处理样本数据
-#     #         process_sample "$sample" "$type" "${corr}_${sf}"
-#     #     done
-#     # done
 # done
+
+samples=(WminusH_M125 WplusH_M125) # ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125
+type="signal"
+for sample in "${samples[@]}"; do
+    for sf in "up" "down"; do #  "up" "down"
+        for syst in "${systs[@]}"; do
+            mkdir -p "$target${sample}_${syst}_${sf}"
+        done
+        for year in "${years[@]}"; do
+            # 存储后台任务的进程ID列表
+            pid_list=()
+
+            # 调用函数处理样本数据
+            process_sample_syst "$sample" "$type" "$year" "$sf"
+        done
+    done
+done
 
 # # 处理 bkgmc 样本
 
@@ -97,18 +135,18 @@ process_sample() {
 #     process_sample "$sample" "$type"
 # done
 
-# 处理 data 样本
+# # 处理 data 样本
 
-samples=(Data)
-type="data"
-for sample in "${samples[@]}"; do
-    mkdir -p "$target$sample"
-    # 存储后台任务的进程ID列表
-    pid_list=()
+# samples=(Data)
+# type="data"
+# for sample in "${samples[@]}"; do
+#     mkdir -p "$target$sample"
+#     # 存储后台任务的进程ID列表
+#     pid_list=()
 
-    # 调用函数处理样本数据
-    process_sample "$sample" "$type"
-done
+#     # 调用函数处理样本数据
+#     process_sample "$sample" "$type"
+# done
 
 # Use fake photon background estimation with data-driven
 
