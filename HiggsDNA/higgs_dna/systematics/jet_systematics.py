@@ -182,7 +182,7 @@ def btag_deepjet_mujet_sf(events, year, central_only, input_collection, working_
     central_sf = numpy.where(is_light,1,central_sf)
     variations["central"] = awkward.unflatten(central_sf, n_jets)
     if not central_only:
-        syst_vars = ["up", "down"] 
+        syst_vars = ["up_correlated", "down_correlated", "up_uncorrelated", "down_uncorrelated"]
         for syst_var in syst_vars:
             syst = evaluator["deepJet_mujets"].evalv(
                     syst_var,
@@ -191,10 +191,14 @@ def btag_deepjet_mujet_sf(events, year, central_only, input_collection, working_
                     jet_abs_eta,
                     jet_pt,
             )
-            if "up" in syst_var:
-                syst_var_name = "up"
-            elif "down" in syst_var:
-                syst_var_name = "down"
+            if "up_correlated" in syst_var:
+                syst_var_name = "up_correlated"
+            elif "down_correlated" in syst_var:
+                syst_var_name = "down_correlated"
+            elif "up_uncorrelated" in syst_var:
+                syst_var_name = "up_uncorrelated"
+            elif "down_uncorrelated" in syst_var:
+                syst_var_name = "down_uncorrelated"
             variations[syst_var_name] = awkward.unflatten(syst, n_jets)
     return variations
 
@@ -238,18 +242,22 @@ def btag_deepjet_incl_sf(events, year, central_only, input_collection, working_p
     central_sf = numpy.where(~is_light,1,central_sf)
     variations["central"] = awkward.unflatten(central_sf, n_jets)
     if not central_only:
-        syst_vars = ["up", "down"] 
+        syst_vars = ["up_correlated", "down_correlated", "up_uncorrelated", "down_uncorrelated"]
         for syst_var in syst_vars:
             syst = evaluator["deepJet_incl"].evalv(
                     syst_var,
                     working_point,
-                    numpy.where(~is_light,0,jet_flavor),
+                    numpy.where(is_light,4,jet_flavor),
                     jet_abs_eta,
                     jet_pt,
             )
-            if "up" in syst_var:
-                syst_var_name = "up"
-            elif "down" in syst_var:
-                syst_var_name = "down"
+            if "up_correlated" in syst_var:
+                syst_var_name = "up_correlated"
+            elif "down_correlated" in syst_var:
+                syst_var_name = "down_correlated"
+            elif "up_uncorrelated" in syst_var:
+                syst_var_name = "up_uncorrelated"
+            elif "down_uncorrelated" in syst_var:
+                syst_var_name = "down_uncorrelated"
             variations[syst_var_name] = awkward.unflatten(syst, n_jets)
     return variations
