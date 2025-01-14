@@ -57,24 +57,16 @@
                 },
                 "modify_central_weight": true
             },
-<<<<<<< HEAD
             "btag_deepjet_mujet_sf" : {
-=======
-            "btag_wp_sf" : {
->>>>>>> fc3cbb7454688ec38ac40d2eca1d7f65fda26330
                 "type" : "object",
                 "method" : "from_function",
                 "function" : {
                     "module_name" : "higgs_dna.systematics.jet_systematics",
-<<<<<<< HEAD
                     "name" : "btag_deepjet_mujet_sf"
-=======
-                    "name" : "btag_deepjet_wp_sf"
->>>>>>> fc3cbb7454688ec38ac40d2eca1d7f65fda26330
                 },
-                "modify_central_weight" : true,
+                "modify_central_weight" : false,
                 "input_collection" : "Jet",
-                "target_collections" : ["SelectedmuJet"],
+                "target_collections" : ["SelectedJet"],
                 "working_point" : "M"
             },
             "btag_deepjet_incl_sf" : {
@@ -84,9 +76,21 @@
                     "module_name" : "higgs_dna.systematics.jet_systematics",
                     "name" : "btag_deepjet_incl_sf"
                 },
-                "modify_central_weight" : true,
+                "modify_central_weight" : false,
                 "input_collection" : "Jet",
-                "target_collections" : ["SelectedlightJet"],
+                "target_collections" : ["SelectedJet"],
+                "working_point" : "M"
+            },
+            "btag_deepjet_wp_sf" : {
+                "type" : "object",
+                "method" : "from_function",
+                "function" : {
+                    "module_name" : "higgs_dna.systematics.jet_systematics",
+                    "name" : "btag_deepjet_wp_sf"
+                },
+                "modify_central_weight" : false,
+                "input_collection" : "Jet",
+                "target_collections" : ["SelectedJet"],
                 "working_point" : "M"
             },
             "electron_wplid_sf": {
@@ -249,7 +253,7 @@
             "ggH_M125", "VBF_M125", "WplusH_M125", "WminusH_M125", "ZH_M125", "ttH_M125"
         ],
         "years": [
-             "2016preVFP", "2016postVFP", "2017", "2018"
+             "2017"
         ]
     },
     "variables_of_interest": [

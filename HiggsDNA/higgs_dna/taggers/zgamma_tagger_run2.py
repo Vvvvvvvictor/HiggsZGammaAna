@@ -298,40 +298,7 @@ class ZGammaTaggerRun2(Tagger):
             name = "SelectedJet",
             data = events.Jet[jet_cut]
         )
-        mujet_cut = jet_selections.select_jets(
-            mujets = events.Jet[events.Jet.hadronFlavour>0],
-            options = self.options["jets"],
-            clean = {
-                "photons" : {
-                    "objects" : photons,
-                    "min_dr" : self.options["jets"]["dr_photons"]
-                },
-                "electrons" : {
-                    
-                    "objects" : electrons,
-                    "min_dr" : self.options["jets"]["dr_electrons"]
-                },
-                "muons" : {
-                    "objects" : muons,
-                    "min_dr" : self.options["jets"]["dr_muons"]
-                }
-            },
-            name = "SelectedmuJet",
-            tagger = self
-        )
-        mujets = awkward_utils.add_field(
-            events = events,
-            name = "SelectedmuJet",
-            data = mujets
-        )
-        print(jets.hardonFlavour)
-        print(jets.hadronFlavour!=0)
-        lightjets = awkward_utils.add_field(
-            events = events,
-            name = "SelectedlightJet",
-            data = jets[(jets.hadronFlavour==0)]
-        )
-
+        
         photon = awkward_utils.add_field(
                 events = events,
                 name = "Photon",

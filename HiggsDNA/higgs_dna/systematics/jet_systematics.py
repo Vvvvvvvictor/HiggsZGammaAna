@@ -18,8 +18,6 @@ BTAG_RESHAPE_SF_FILE = {
     "2018" : "higgs_dna/systematics/data/2018_UL/btagging.json"
 }
 
-<<<<<<< HEAD
-=======
 DEEPJET_RESHAPE_SF = {
     "2016" : "deepJet_shape", 
     "2016preVFP" : "deepJet_shape",
@@ -27,7 +25,6 @@ DEEPJET_RESHAPE_SF = {
     "2017" : "deepJet_shape",
     "2018" : "deepJet_shape"
 }
->>>>>>> fc3cbb7454688ec38ac40d2eca1d7f65fda26330
 
 DEEPJET_VARIATIONS = { # b, c, light
     "up_correlated" : [5, 4, 0], 
@@ -54,9 +51,6 @@ DEEPJET_VARIATIONS = { # b, c, light
     # "down_lfstats2" : [0],
 }
 
-<<<<<<< HEAD
-def btag_deepjet_mujet_sf(events, year, central_only, input_collection, working_point ="M"):
-=======
 
 def btag_deepjet_wp_sf(events, year, central_only, input_collection):
     """
@@ -66,19 +60,19 @@ def btag_deepjet_wp_sf(events, year, central_only, input_collection):
 
     Note: application of SFs should not change the overall normalization of a sample (before any b-tagging selection) and each sample should be adjusted by an overall weight derived in a phase space with no requirements on b-jets such that the normalization is unchanged. TODO: link BTV TWiki that describes this.
     """
->>>>>>> fc3cbb7454688ec38ac40d2eca1d7f65fda26330
     required_fields = [
-        (input_collection, "eta"), (input_collection, "pt"), (input_collection, "hadronFlavour")
-    ]    
+        (input_collection, "eta"), (input_collection, "pt"), (input_collection, "hadronFlavour"), (input_collection, "btagDeepFlavB") 
+    ]
+    missing_fields = awkward_utils.missing_fields(events, required_fields)
+
     evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(BTAG_RESHAPE_SF_FILE[year]))
-    
-    jets = events[input_collection]   
+   
+    jets = events[input_collection]
     jets["flavor"] = jets.hadronFlavour
     n_jets = awkward.num(jets) # save n_jets to convert back to jagged format at the end 
     jets_flattened = awkward.flatten(jets)
 
     jet_flavor = awkward.to_numpy(jets_flattened.flavor)
-    print(jet_flavor[jet_flavor==0])
     jet_abs_eta = numpy.clip(
         awkward.to_numpy(abs(jets_flattened.eta)),
         0.0,
@@ -87,97 +81,14 @@ def btag_deepjet_wp_sf(events, year, central_only, input_collection):
     jet_pt = numpy.clip(
         awkward.to_numpy(jets_flattened.pt),
         20.0, # SFs only valid for pT > 20.
-        999.99
+        99999999.
     )
-<<<<<<< HEAD
-=======
 
->>>>>>> fc3cbb7454688ec38ac40d2eca1d7f65fda26330
     variations_list = ["central"]
-
     if not central_only:
         variations_list += DEEPJET_VARIATIONS.keys()
 
     variations = {}
-<<<<<<< HEAD
-    central_sf = evaluator["deepJet_mujets"].evalv(
-            "central",
-            working_point,
-            jet_flavor,
-            jet_abs_eta,
-            jet_pt
-    )    
-    variations["central"] = awkward.unflatten(central_sf, n_jets)
-    if not central_only:
-        syst_vars = ["up", "down"] 
-        for syst_var in syst_vars:
-            syst = evaluator["deepJet_mujets"].evalv(
-                    syst_var,
-                    working_point,
-                    jet_flavor,
-                    jet_abs_eta,
-                    jet_pt,
-            )
-            if "up" in syst_var:
-                syst_var_name = "up"
-            elif "down" in syst_var:
-                syst_var_name = "down"
-            variations[syst_var_name] = awkward.unflatten(syst, n_jets)
-    return variations
-def btag_deepjet_incl_sf(events, year, central_only, input_collection, working_point ="M"):
-    required_fields = [
-        (input_collection, "eta"), (input_collection, "pt"), (input_collection, "hadronFlavour")
-    ]    
-    evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(BTAG_RESHAPE_SF_FILE[year]))
-    
-    jets = events[input_collection]   
-    jets["flavor"] = jets.hadronFlavour
-    n_jets = awkward.num(jets) # save n_jets to convert back to jagged format at the end 
-    jets_flattened = awkward.flatten(jets)
-
-    jet_flavor = awkward.to_numpy(jets_flattened.flavor)
-    jet_flavor = 0 * jet_flavor # set all jets to light flavor
-    jet_abs_eta = numpy.clip(
-        awkward.to_numpy(abs(jets_flattened.eta)),
-        0.00001,
-        2.499 # SFs only valid up to eta 2.5
-    )
-    jet_pt = numpy.clip(
-        awkward.to_numpy(jets_flattened.pt),
-        20.0, # SFs only valid for pT > 20.
-        999.9
-    )
-    variations_list = ["central"]
-
-    if not central_only:
-        variations_list += DEEPJET_VARIATIONS.keys()
-
-    variations = {}
-    central_sf = evaluator["deepJet_incl"].evalv(
-            "central",
-            "M",
-            jet_flavor,
-            jet_abs_eta,
-            jet_pt
-    )    
-    variations["central"] = awkward.unflatten(central_sf, n_jets)
-    if not central_only:
-        syst_vars = ["up", "down"] 
-        for syst_var in syst_vars:
-            syst = evaluator["deepJet_incl"].evalv(
-                    syst_var,
-                    working_point,
-                    jet_flavor,
-                    jet_abs_eta,
-                    jet_pt,
-            )
-            if "up" in syst_var:
-                syst_var_name = "up"
-            elif "down" in syst_var:
-                syst_var_name = "down"
-            variations[syst_var_name] = awkward.unflatten(syst, n_jets)
-    return variations
-=======
 
     central_sf = numpy.ones_like(jet_flavor)
     for f in [0, 4, 5]:
@@ -229,100 +140,116 @@ def btag_deepjet_incl_sf(events, year, central_only, input_collection, working_p
     }
 
     return swapped_variations
-    # return variations
+def btag_deepjet_mujet_sf(events, year, central_only, input_collection, working_point ="M"):
+    required_fields = [
+        (input_collection, "eta"), (input_collection, "pt"), (input_collection, "hadronFlavour")
+    ]    
+    evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(BTAG_RESHAPE_SF_FILE[year]))
+    
+    jets = events[input_collection]   
+    jets["flavor"] = jets.hadronFlavour
+    n_jets = awkward.num(jets) # save n_jets to convert back to jagged format at the end 
+    jets_flattened = awkward.flatten(jets)
 
-# def btag_deepjet_reshape_sf(events, year, central_only, input_collection):
-#     """
-#     See:
-#         - https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/BTV_bjets_Run2_UL/
-#         - https://gitlab.cern.ch/cms-nanoAOD/jsonpog-integration/-/blob/master/examples/btvExample.py
+    jet_flavor = awkward.to_numpy(jets_flattened.flavor)
+    is_light = jet_flavor == 0
+    
+    jet_abs_eta = numpy.clip(
+        awkward.to_numpy(abs(jets_flattened.eta)),
+        0.0,
+        2.49999 # SFs only valid up to eta 2.5
+    )
+    jet_pt = numpy.clip(
+        awkward.to_numpy(jets_flattened.pt),
+        20.0, # SFs only valid for pT > 20.
+        999.99
+    )
+    variations_list = ["central"]
 
-#     Note: application of SFs should not change the overall normalization of a sample (before any b-tagging selection) and each sample should be adjusted by an overall weight derived in a phase space with no requirements on b-jets such that the normalization is unchanged. TODO: link BTV TWiki that describes this.
-#     """
-#     required_fields = [
-#         (input_collection, "eta"), (input_collection, "pt"), (input_collection, "hadronFlavour"), (input_collection, "btagDeepFlavB") 
-#     ]
-#     missing_fields = awkward_utils.missing_fields(events, required_fields)
-
-#     evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(BTAG_RESHAPE_SF_FILE[year]))
-   
-#     jets = events[input_collection]
-#     jets["flavor"] = jets.hadronFlavour
-
-#     # Flatten jets then convert to numpy for compatibility with correctionlib
-#     n_jets = awkward.num(jets) # save n_jets to convert back to jagged format at the end 
-#     jets_flattened = awkward.flatten(jets)
-
-#     jet_flavor = awkward.to_numpy(jets_flattened.flavor)
-#     jet_abs_eta = numpy.clip(
-#         awkward.to_numpy(abs(jets_flattened.eta)),
-#         0.0,
-#         2.49999 # SFs only valid up to eta 2.5
-#     )
-#     jet_pt = numpy.clip(
-#         awkward.to_numpy(jets_flattened.pt),
-#         20.0, # SFs only valid for pT > 20.
-#         99999999.
-#     )
-#     jet_disc = awkward.to_numpy(jets_flattened.btagDeepFlavB)        
-
-#     variations_list = ["central"]
-#     if not central_only:
-#         variations_list += DEEPJET_VARIATIONS.keys()
-
-#     variations = {}
-
-#     central_sf = evaluator[DEEPJET_RESHAPE_SF[year]].evalv(
-#             "central",
-#             jet_flavor,
-#             jet_abs_eta,
-#             jet_pt,
-#             jet_disc
-#     )
-
-#     variations["central"] = awkward.unflatten(central_sf, n_jets)
-
-#     for var in variations_list:
-#         if var == "central":
-#             continue
-#         applicable_flavors = DEEPJET_VARIATIONS[var] # the up/down variations are only applicable to specific flavors of jet
-#         var_sf = central_sf 
-#         for f in applicable_flavors:
-#             var_sf = numpy.where(
-#                 jet_flavor == f,
-#                 evaluator[DEEPJET_RESHAPE_SF[year]].evalv(
-#                     var,
-#                     numpy.ones_like(jet_flavor) * f,
-#                     jet_abs_eta,
-#                     jet_pt,
-#                     jet_disc
-#                 ),
-#                 var_sf
-#             )
-
-#         variations[var] = awkward.unflatten(var_sf, n_jets) # make jagged again
-
-#     for var in variations.keys():
-#         # Set SFs = 1 for jets which are not applicable (pt <= 20 or |eta| >= 2.5)
-#         variations[var] = awkward.where(
-#                 (jets.pt <= 20.0) | (abs(jets.eta) >= 2.5),
-#                 awkward.ones_like(variations[var]),
-#                 variations[var]
-#         )
-
-#     return variations
->>>>>>> fc3cbb7454688ec38ac40d2eca1d7f65fda26330
-
-def dummy_jes_syst(events, is_data):
-    """
-    Dummy function illustrating a jet energy scale uncertainty that results in new jet collections with Jet.pt varied.
-    Should be deleted once real examples are implemented.
-    """
-    jets = events.Jet 
+    if not central_only:
+        variations_list += DEEPJET_VARIATIONS.keys()
 
     variations = {}
-    variations["central"] = jets.pt + (2 * awkward.ones_like(jets.pt))
-    if not is_data:
-        variations["up"] = jets.pt + (12 * awkward.ones_like(jets.pt))
-        variations["down"] = jets.pt - (8 * awkward.ones_like(jets.pt))
+    print(type(jet_flavor))
+    print(type(numpy.where(is_light,4,jet_flavor)))
+    central_sf = evaluator["deepJet_mujets"].evalv(
+            "central",
+            working_point,
+            numpy.where(is_light,4,jet_flavor),
+            jet_abs_eta,
+            jet_pt
+    )    
+    central_sf = numpy.where(is_light,1,central_sf)
+    variations["central"] = awkward.unflatten(central_sf, n_jets)
+    if not central_only:
+        syst_vars = ["up", "down"] 
+        for syst_var in syst_vars:
+            syst = evaluator["deepJet_mujets"].evalv(
+                    syst_var,
+                    working_point,
+                    numpy.where(is_light,4,jet_flavor),
+                    jet_abs_eta,
+                    jet_pt,
+            )
+            if "up" in syst_var:
+                syst_var_name = "up"
+            elif "down" in syst_var:
+                syst_var_name = "down"
+            variations[syst_var_name] = awkward.unflatten(syst, n_jets)
+    return variations
+
+def btag_deepjet_incl_sf(events, year, central_only, input_collection, working_point ="M"):
+    required_fields = [
+        (input_collection, "eta"), (input_collection, "pt"), (input_collection, "hadronFlavour")
+    ]    
+    evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(BTAG_RESHAPE_SF_FILE[year]))
+    
+    jets = events[input_collection]   
+    jets["flavor"] = jets.hadronFlavour
+    n_jets = awkward.num(jets) # save n_jets to convert back to jagged format at the end 
+    jets_flattened = awkward.flatten(jets)
+
+    jet_flavor = awkward.to_numpy(jets_flattened.flavor)
+    is_light = jet_flavor == 0
+
+    jet_abs_eta = numpy.clip(
+        awkward.to_numpy(abs(jets_flattened.eta)),
+        0.0,
+        2.49999 # SFs only valid up to eta 2.5
+    )
+    jet_pt = numpy.clip(
+        awkward.to_numpy(jets_flattened.pt),
+        20.0, # SFs only valid for pT > 20.
+        999.99
+    )
+    variations_list = ["central"]
+
+    if not central_only:
+        variations_list += DEEPJET_VARIATIONS.keys()
+    
+    variations = {}
+    central_sf = evaluator["deepJet_incl"].evalv(
+            "central",
+            working_point,
+            numpy.where(~is_light,0,jet_flavor),
+            jet_abs_eta,
+            jet_pt
+    )   
+    central_sf = numpy.where(~is_light,1,central_sf)
+    variations["central"] = awkward.unflatten(central_sf, n_jets)
+    if not central_only:
+        syst_vars = ["up", "down"] 
+        for syst_var in syst_vars:
+            syst = evaluator["deepJet_incl"].evalv(
+                    syst_var,
+                    working_point,
+                    numpy.where(~is_light,0,jet_flavor),
+                    jet_abs_eta,
+                    jet_pt,
+            )
+            if "up" in syst_var:
+                syst_var_name = "up"
+            elif "down" in syst_var:
+                syst_var_name = "down"
+            variations[syst_var_name] = awkward.unflatten(syst, n_jets)
     return variations
