@@ -19,18 +19,23 @@ echo "num: $2"
 echo "==================================================="
 echo "Shielded parameter is: $S . Added variables is: $A ."
 
+# 'eval_auc', 'sqrt_eval_auc_minus_train_auc', 'eval_auc_minus_train_auc', 'eval_auc_over_train_auc', "eval_auc_minus_train_auc", "eval_significance", "sqrt_eval_significance_minus_train_significance", 'eval_auc_with_mass_shape_factor'
+# python scripts/train_bdt.py -r two_jet --optuna --n-calls 60 --continue-optuna 0 --optuna_metric 'sqrt_eval_auc_minus_train_auc'
+python scripts/train_bdt.py -r two_jet --save --hyperparams_path "models/optuna_two_jet"
+python scripts/apply_bdt.py -r two_jet
+python scripts/categorization_1D.py -r two_jet -b 4 --floatB --minN 2 -es "fullSimrw"
+python ../plot_python/plot_cats_hmass_dis.py
 # python scripts/train_bdt.py -r zero_to_one_jet --optuna --n-calls 20 --continue-optuna 0 --optuna_metric "eval_auc"
-# python scripts/train_bdt.py -r two_jet --optuna --n-calls 20 --continue-optuna 0 --optuna_metric "sqrt_eval_auc_minus_train_auc"
 # python scripts/train_bdt.py -r VBF --optuna --n-calls 20 --continue-optuna 0 --optuna_metric "sqrt_eval_auc_minus_train_auc"
 
-# for fold in {0..3};do
+# for fold in {2..2};do
 # # python scripts/train_bdt.py -r zero_to_one_jet --optuna --n-calls 40 --fold $fold --continue-optuna 1
-# python scripts/train_bdt.py -r two_jet --optuna --n-calls 20 --fold $fold --continue-optuna 0 --optuna_metric "eval_auc"
+# python scripts/train_bdt.py -r two_jet --optuna --n-calls 100 --fold $fold --continue-optuna 0 --optuna_metric "eval_auc_with_mass_shape_factor"
 # done
+# python scripts/train_bdt.py -r two_jet --optuna --n-calls 10 --fold 0 --continue-optuna 0 --optuna_metric "eval_auc_with_mass_shape_factor"
 
-# python scripts/train_bdt.py -r two_jet --save --hyperparams_path "models/optuna_two_jet_sqrt"
 # python scripts/train_bdt.py -r VBF --save --hyperparams_path "models/optuna_VBF_1535_ewkzg"
-# python scripts/apply_bdt.py -r two_jet
+
 # python ../plot_python/find_2D_best_boundaries.py
 # python ../plot_python/plot_2D_bdt_score.py
 # python ../plot_python/plot_2D_cat_hmass_dis.py
@@ -42,14 +47,13 @@ echo "Shielded parameter is: $S . Added variables is: $A ."
 # python scripts/apply_bdt.py -r zero_jet
 # python scripts/apply_bdt.py -r one_jet
 
-python scripts/categorization_1D.py -r zero_to_one_jet -b 4 --floatB --minN 10 -es "fullSimrw"
+# python scripts/categorization_1D.py -r zero_to_one_jet -b 4 --floatB --minN 10 -es "fullSimrw"
 # python scripts/categorization_1D.py -r zero_jet -b 4 --minN 10 --floatB -es "fullSimrw"
 # python scripts/categorization_1D.py -r one_jet -b 4 --minN 10 --floatB -es "fullSimrw"
 # for ncat in {2..7};do
 #     python scripts/categorization_1D.py -r two_jet -b $ncat --minN 2 --floatB -es "fullSimrw"
 # done
-python scripts/categorization_1D.py -r two_jet -b 4 --floatB --minN 2 -es "fullSimrw"
-# python ../plot_python/plot_cats_hmass_dis.py
+
 # python ../plot_python/compare_two_var_slice.py
 
 # cd ../plot_python

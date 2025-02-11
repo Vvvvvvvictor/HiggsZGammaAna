@@ -2,7 +2,9 @@
 echo "==============STARTED=============="
 
 input="/eos/user/j/jiehan/parquet/nanov9/"
-target="/eos/home-j/jiehan/root/skimmed_ntuples_run2/"
+target="/eos/home-j/jiehan/root/skimmed_ntuples_data_driven/"
+# input="/eos/user/j/jiehan/parquet/nanov9/"
+# target="/eos/home-j/jiehan/root/skimmed_ntuples_run2/"
 # target="./"
 
 # years=(2016preVFP 2016postVFP 2017 2018 2022preEE 2022postEE 2023preBPix 2023postBPix)
@@ -104,36 +106,36 @@ process_sample_syst() {
 #     process_sample "$sample" "$type"
 # done
 
-samples=(WminusH_M125 WplusH_M125) # ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125
-type="signal"
-for sample in "${samples[@]}"; do
-    for sf in "up" "down"; do #  "up" "down"
-        for syst in "${systs[@]}"; do
-            mkdir -p "$target${sample}_${syst}_${sf}"
-        done
-        for year in "${years[@]}"; do
-            # 存储后台任务的进程ID列表
-            pid_list=()
-
-            # 调用函数处理样本数据
-            process_sample_syst "$sample" "$type" "$year" "$sf"
-        done
-    done
-done
-
-# # 处理 bkgmc 样本
-
-# # samples=(ZGToLLG DYJetsToLL WGToLNuG ZG2JToG2L2J EWKZ2J TT TTGJets TGJets ttWJets ttZJets WW WZ ZZ DYGto2LG_10to50 DYGto2LG_50to100)
-# samples=(ZGToLLG)
-# type="bkgmc"
+# samples=(WminusH_M125 WplusH_M125) # ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125
+# type="signal"
 # for sample in "${samples[@]}"; do
-#     mkdir -p "$target$sample"
-#     # 存储后台任务的进程ID列表
-#     pid_list=()
+#     for sf in "up" "down"; do #  "up" "down"
+#         for syst in "${systs[@]}"; do
+#             mkdir -p "$target${sample}_${syst}_${sf}"
+#         done
+#         for year in "${years[@]}"; do
+#             # 存储后台任务的进程ID列表
+#             pid_list=()
 
-#     # 调用函数处理样本数据
-#     process_sample "$sample" "$type"
+#             # 调用函数处理样本数据
+#             process_sample_syst "$sample" "$type" "$year" "$sf"
+#         done
+#     done
 # done
+
+# 处理 bkgmc 样本
+
+# samples=(ZGToLLG DYJetsToLL WGToLNuG ZG2JToG2L2J EWKZ2J TT TTGJets TGJets ttWJets ttZJets WW WZ ZZ DYGto2LG_10to50 DYGto2LG_50to100)
+samples=(ZGToLLG DYJetsToLL ZG2JToG2L2J EWKZ2J)
+type="photon_id_data_driven"
+for sample in "${samples[@]}"; do
+    mkdir -p "$target$sample"
+    # 存储后台任务的进程ID列表
+    pid_list=()
+
+    # 调用函数处理样本数据
+    process_sample "$sample" "$type"
+done
 
 # # 处理 data 样本
 

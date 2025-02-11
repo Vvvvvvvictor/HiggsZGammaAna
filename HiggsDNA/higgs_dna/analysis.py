@@ -542,6 +542,7 @@ class AnalysisManager():
         files = config["files"]
         branches = config["branches"]
         is_data = config["sample"]["is_data"]
+        year = config["sample"]["year"]
 
         for file in files:
             try:
@@ -593,7 +594,7 @@ class AnalysisManager():
 
                 events_file = events_file[duplicated_remove_cut]
             else:
-                mc_overlap_remover = MCOverlapTagger(is_data=is_data)
+                mc_overlap_remover = MCOverlapTagger(is_data=is_data, year=year)
                 overlap_cut = mc_overlap_remover.overlap_selection(file, tree)
 
                 trimmed_branches = [x for x in branches if x in tree.keys()]

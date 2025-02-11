@@ -29,7 +29,7 @@ data = ["Data"]
 if not os.path.exists("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/two_jet/"):
     os.makedirs("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/two_jet/")
 
-boundaries = [0,1]
+# boundaries = [0,1]
 
 for i in range(len(boundaries)-1):
     bkg_hist = []
@@ -64,8 +64,9 @@ for i in range(len(boundaries)-1):
     ax.set_ylim(0, max(np.sum(bkg_hist, axis=0).max(), data_hist.max()) * 1.1)
     ax.set_xlabel("Higgs Mass [GeV]")
     ax.set_ylabel("Events")
-    # ax.title.set_text(f"Events in category {i} of VBF channel")
-    ax.title.set_text(f"All events in VBF channel")
+    ax.title.set_text(f"Events in category {i} of VBF channel")
+    # ax.title.set_text(f"All events in VBF channel")
     ax.legend()
-    plt.savefig(f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/two_jet/hmass_dis_all.png")
+    # plt.savefig(f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/two_jet/hmass_dis_all.png")
+    plt.savefig(f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/two_jet/hmass_dis_{i}.png")
     plt.clf()

@@ -860,7 +860,7 @@ class ZGammaTaggerRun2(Tagger):
         # use_central_nano = options["use_central_nano"] # indicates whether we are using central nanoAOD (with some branches that are necessary for full diphoton preselection missing) or custom nanoAOD (with these branches added)
 
         all_cuts = pt_cut & eta_cut & id_cut & e_veto_cut & eg_overlap_cut
-        # all_cuts = pt_cut & eta_cut # bing for CR selection
+        # all_cuts = pt_cut & eta_cut & e_veto_cut & eg_overlap_cut # bing for CR selection
 
         self.register_cuts(
                 names = ["pt", "eta", "id", "e_veto", "ele_pho_overlap", "all"], #"pt", "eta", "id", "e_veto", "ele_pho_overlap", "all"

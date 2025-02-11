@@ -39,10 +39,10 @@ class MCOverlapTagger(Tagger):
 
         # Only use specific events in different MC NanoAOD
         logger.debug("MC_overlap_samples:  file: %s" % file)
-        if "DYto2L" in file or "DYJetsToLL" in file or "EWKZ2J" in file or "TTTo2L2Nu" in file:
-            cut = self.get_n_iso_photon(data) == 0
-        elif "DYGto2LG" in file or "ZGToLLG" in file or "ZG2JToG2L2J" in file or "TTGJets" in file:
-            cut = self.get_n_iso_photon(data) > 0
+        if "DYto2L" in file or "DYJetsToLL" in file or "EWKZ2Jets" in file or "TTTo2L2Nu" in file:
+            cut = self.get_n_iso_photon(data, file) == 0
+        elif "DYGto2LG" in file or "ZGToLLG" in file or "ZGamma2J" in file or "TTGJets" in file:
+            cut = self.get_n_iso_photon(data, file) > 0
         
         # cut = cut>0
         logger.debug("MC_overlap_samples:  cut type: %s" % cut.type)
@@ -50,7 +50,7 @@ class MCOverlapTagger(Tagger):
         return cut
 
 
-    def get_n_iso_photon(self, data):
+    def get_n_iso_photon(self, data, file):
         """
         Select isolation photons in data
         Return the number of isolation photons(int)
@@ -62,7 +62,7 @@ class MCOverlapTagger(Tagger):
         Filling "1" on corresponding digit when the particle meets one of the 14 conditions, else remaining "0".
         Echo paticles can meet more than one kind of condition, thus, more than one digit in "statusFlags" is "1".
         """
-        iso_photons_cut = (data.GenPart.pdgId == 22) & (data.GenPart.pt > 9) & (( (data.GenPart.statusFlags & 0x1) != 0 ) | ( (data.GenPart.statusFlags & 0x100) != 0 )) #& (abs(data.GenPart.eta) < 2.6)
+        iso_photons_cut = (data.GenPart.pdgId == 22) & (data.GenPart.pt > 9 if (int(self.year[:4]) < 2019 and ("DY" in file or "ZGTo" in file)) else data.GenPart.pt > 10) & (( (data.GenPart.statusFlags & 0x1) != 0 ) | ( (data.GenPart.statusFlags & 0x100) != 0 ))
         iso_photons = data.GenPart[iso_photons_cut]
         n_iso_photons = awkward.num(iso_photons, axis=1)
         logger.debug("MC_overlap_samples: n_iso_photons: %s" % n_iso_photons)

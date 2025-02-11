@@ -31,7 +31,7 @@ def getArgs():
     parser.add_argument('--importance', action='store_true', default=True, help='Plot importance of variables, parameter "gain" is recommanded')
     parser.add_argument('--roc', action='store_true', default=True, help='Plot ROC')
     parser.add_argument('--optuna', action='store_true', default=False, help='Run hyperparameter tuning using optuna')
-    parser.add_argument('--optuna_metric', action='store', default='auc', choices=['eval_auc', 'sqrt_eval_auc_minus_train_auc', 'eval_auc_minus_train_auc', 'eval_auc_over_train_auc', "eval_auc_minus_train_auc", "eval_significance", "sqrt_eval_significance_minus_train_significance"], help='Optuna metric to optimize')
+    parser.add_argument('--optuna_metric', action='store', default='auc', choices=['eval_auc', 'sqrt_eval_auc_minus_train_auc', 'eval_auc_minus_train_auc', 'eval_auc_over_train_auc', "eval_auc_minus_train_auc", "eval_significance", "sqrt_eval_significance_minus_train_significance", 'eval_auc_with_mass_shape_factor'], help='Optuna metric to optimize')
     parser.add_argument('--n-calls', action='store', type=int, default=36, help='Steps of hyperparameter tuning using optuna')
     parser.add_argument('--continue-optuna', action='store', type=int, default=0, help='Continue tuning hyperparameters using optuna')
 
@@ -120,7 +120,7 @@ class XGBoostHandler(object):
         self.weight = 'weight'
         self.params = [{'eval_metric': ['auc', 'logloss']}]
         self.early_stopping_rounds = 10
-        self.numRound = 10000
+        self.numRound = 1000
         self.SF = -1
         self.readConfig(configPath)
         self.checkConfig()
@@ -621,6 +621,32 @@ class XGBoostHandler(object):
         significance_sum_err = np.sqrt((np.array(significance_errs)**2*np.array(significances)**2).sum()) / significance_sum
         return significance_sum, significance_sum_err
 
+    def get_mass_shape_factor(self, fold=0, sample_set='val'):
+        if sample_set == "train":
+            dataset = pd.DataFrame({'score': self.m_score_train[fold], 'weight': self.m_train_w[fold], 'mass': self.m_train_mass[fold], 'type': self.m_y_train[fold]})
+        elif sample_set == "val":
+            dataset = pd.DataFrame({'score': self.m_score_val[fold], 'weight': self.m_val_w[fold], 'mass': self.m_val_mass[fold], 'type': self.m_y_val[fold]})
+        elif sample_set == "test":
+            dataset = pd.DataFrame({'score': self.m_score_test[fold], 'weight': self.m_test_w[fold], 'mass': self.m_test_mass[fold], 'type': self.m_y_test[fold]})
+
+        bkg_dataset = dataset.query('type == 0').sort_values('score', ascending=True)
+        bkg_dataset['culmulative_bkg'] = bkg_dataset['weight'].cumsum()
+        bkg_dataset['culmulative_bkg'] = bkg_dataset['culmulative_bkg'] / bkg_dataset['culmulative_bkg'].max()
+        bkg_dataset = bkg_dataset.query('culmulative_bkg > 0.8')
+
+        y1, y2, y3, y4 = bkg_dataset.query('mass > 110 & mass < 120')['weight'].sum(), bkg_dataset.query('mass > 115 & mass < 125')['weight'].sum(), bkg_dataset.query('mass > 120 & mass < 130')['weight'].sum(), bkg_dataset.query('mass > 125 & mass < 135')['weight'].sum()
+        mass_shape_factor = np.log10((2 * y1 + y4) / (3 * y2) ) + np.log10((y1 + 2 * y4) / (3 * y3))
+
+        print(f'XGB INFO: y1: {y1}, y2: {y2}, y3: {y3}, y4: {y4}, mass_shape_factor: {mass_shape_factor}')
+
+        # y1, y2, y3 = bkg_dataset.query('mass > 100 & mass < 110')['weight'].sum(), bkg_dataset.query('mass > 105 & mass < 115')['weight'].sum(), bkg_dataset.query('mass > 110 & mass < 120')['weight'].sum()
+
+        # mass_shape_factor -= np.log10((y1 + y3) / (2 * y2))
+
+        # print(f'XGB INFO: y1: {y1}, y2: {y2}, y3: {y3}, mass_shape_factor: {mass_shape_factor}')
+
+        return mass_shape_factor
+
     def transformScore(self, fold=0, sample='sig'):
 
         print(f'XGB INFO: transforming scores based on {sample}')
@@ -671,6 +697,7 @@ class XGBoostHandler(object):
             train_auc = self.getAUC(fold, 'train')[-1]
             eval_signi, eval_signi_err = self.getSignificance(fold, 'val')
             train_signi, train_signi_err = self.getSignificance(fold, 'train')
+            mass_shape_factor = self.get_mass_shape_factor(fold, 'val')
             
             metrics = {
                 'train_auc': train_auc,
@@ -682,6 +709,7 @@ class XGBoostHandler(object):
                 'eval_significance': eval_signi,
                 'train_significance': train_signi,
                 'sqrt_eval_significance_minus_train_significance': np.sqrt(train_signi * (2 * eval_signi - train_signi)),
+                'eval_auc_with_mass_shape_factor': eval_auc + mass_shape_factor
             }
             print(f"params: {params}, eval_auc: {eval_auc}, train_auc: {train_auc}, "
                   f"sqrt_eval_auc_minus_train_auc: {metrics['sqrt_eval_auc_minus_train_auc']}, "
@@ -689,7 +717,8 @@ class XGBoostHandler(object):
                   f"eval_auc_over_train_auc: {metrics['eval_auc_over_train_auc']}, "
                   f"eval_auc_minus_train_auc: {metrics['eval_auc_minus_train_auc']}, "
                   f"eval_significance: {eval_signi}, train_significance: {train_signi}, "
-                  f"sqrt_eval_significance_minus_train_significance: {metrics['sqrt_eval_significance_minus_train_significance']}"
+                  f"sqrt_eval_significance_minus_train_significance: {metrics['sqrt_eval_significance_minus_train_significance']}, "
+                  f"eval_auc_with_mass_shape_factor: {metrics['eval_auc_with_mass_shape_factor']}"
                 )
             return metrics.get(self.optuna_metric, eval_auc)
         

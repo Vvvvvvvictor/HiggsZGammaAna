@@ -45,7 +45,7 @@ PATH = "/eos/user/j/jiehan/root/skimmed_ntuples_run2/"
 
 sig = {"sig": ["ggH_M125", "VBF_M125"], "ggH": ["ggH_M125"], "VBF": ["VBF_M125"]}
 bkg = {r"Z$+\gamma$": ["ZGToLLG"], "Z+Fake Photon": ["DYJetsToLL", "EWKZ2J"], r"VBSZ+$\gamma$": ["ZG2JToG2L2J"], r"t$\bar{t}$": ["TT"], r"t$\gamma$/t$\bar{t}\gamma$": ["TTGJets", "TGJets"], "multiboson": ["WW", "WZ", "ZZ"], r"t$\bar{t}$+X": ["ttZJets", "ttWJets"]}
-color_dict = {r"Z$+\gamma$": "#3f90da", "Z+Fake Photon": "#ffa90e", r"VBSZ+$\gamma$": "#92dadd", r"t$\bar{t}$": "#e76300", r"t$\gamma$/t$\bar{t}\gamma$": "#bd1f01", "multiboson": "#832db6", r"t$\bar{t}$+X": "#94a4a2", "ggH": "red", "VBF": "Green"}
+color_dict = {r"Z$+\gamma$": "#3f90da", "Z+Fake Photon": "#ffa90e", r"VBSZ+$\gamma$": "#92dadd", r"t$\bar{t}$": "#e76300", r"t$\gamma$/t$\bar{t}\gamma$": "#bd1f01", "multiboson": "#832db6", r"t$\bar{t}$+X": "#94a4a2", "data": "black", "sig": "red", "ggH": "magenta", "VBF": "green"}
 
 def convert_root_to_hist(file_dict, selection=None):
     mass_hist = np.zeros(80)
@@ -92,8 +92,8 @@ for var in config_dict:
     
     print("\n\n", VAR, RMIN, RMAX, "\n\n")
 
-    hist2, hist2_err, bins, mass2_hist = convert_root_to_hist(bkg)
-    hist1, hist1_err, _, mass1_hist = convert_root_to_hist(sig)
+    hist2, hist2_err, bins, mass2_hist = convert_root_to_hist(bkg, selection="(H_mass>100) & (H_mass<180)")
+    hist1, hist1_err, _, mass1_hist = convert_root_to_hist(sig, selection="(H_mass>100) & (H_mass<180)")
 
     sig_yields = [np.sum(i) for i in hist1]
     bkg_yields = [np.sum(i) for i in hist2]
@@ -109,9 +109,8 @@ for var in config_dict:
     colors = [color_dict[i] for i in bkg]
     labels = [i+f"[N={bkg_yields[j]:.1f}]" for j, i in enumerate(bkg.keys())]
     hep.histplot(hist2, bins, color=colors, label=labels, stack=True, histtype="fill", ax=ax1)
-    ax1.errorbar(points, hist1[0], yerr=hist1_err, xerr=(bins[1:] - bins[:-1]) / 2, fmt="o", label=f"Sig[N={sig_yields[0]:.1f}]", color="black", markersize=7, linewidth=3)
-    for j, i in enumerate(hist1[1:]):
-        hep.histplot(i, bins, color=color_dict[list(sig.keys())[j+1]], label=list(sig.keys())[j+1]+f"[N={sig_yields[j+1]:.1f}]", histtype="step", ax=ax1, linewidth=3)
+    for j, i in enumerate(hist1[0:]):
+        hep.histplot(i, bins, color=color_dict[list(sig.keys())[j]], label=list(sig.keys())[j]+f"[N={sig_yields[j]:.1f}]", histtype="step", ax=ax1, linewidth=3)
     
     bin_width = (RMAX - RMIN) / BINS
     if bin_width < 0.01:

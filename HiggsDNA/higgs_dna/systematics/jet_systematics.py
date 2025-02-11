@@ -93,7 +93,7 @@ def btag_deepjet_wp_sf(events, year, central_only, input_collection):
     for f in [0, 4, 5]:
         central_sf = numpy.where(
             jet_flavor == f,
-            evaluator["deepJet_comb" if f > 0 else "deepJet_incl"].evalv(
+            evaluator["deepJet_mujets" if f > 0 else "deepJet_incl"].evalv(
                 "central",
                 "M",
                 numpy.ones_like(jet_flavor) * f,
@@ -113,7 +113,7 @@ def btag_deepjet_wp_sf(events, year, central_only, input_collection):
         for f in applicable_flavors:
             var_sf = numpy.where(
                 jet_flavor == f,
-                evaluator["deepJet_comb" if f > 0 else "deepJet_incl"].evalv(
+                evaluator["deepJet_mujets" if f > 0 else "deepJet_incl"].evalv(
                     var,
                     "M",
                     numpy.ones_like(jet_flavor) * f,
