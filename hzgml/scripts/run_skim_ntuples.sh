@@ -1,10 +1,10 @@
 #!/bin/bash                                                                                                                                                                       
 echo "==============STARTED=============="
 
-input="/eos/user/j/jiehan/parquet/nanov9/"
-target="/eos/home-j/jiehan/root/skimmed_ntuples_data_driven/"
 # input="/eos/user/j/jiehan/parquet/nanov9/"
-# target="/eos/home-j/jiehan/root/skimmed_ntuples_run2/"
+# target="/eos/home-j/jiehan/root/skimmed_ntuples_data_driven/"
+input="/eos/user/j/jiehan/parquet/nanov9/"
+target="/eos/home-j/jiehan/root/skimmed_ntuples_run2/"
 # target="./"
 
 # years=(2016preVFP 2016postVFP 2017 2018 2022preEE 2022postEE 2023preBPix 2023postBPix)
@@ -126,8 +126,8 @@ process_sample_syst() {
 # 处理 bkgmc 样本
 
 # samples=(ZGToLLG DYJetsToLL WGToLNuG ZG2JToG2L2J EWKZ2J TT TTGJets TGJets ttWJets ttZJets WW WZ ZZ DYGto2LG_10to50 DYGto2LG_50to100)
-samples=(ZGToLLG DYJetsToLL ZG2JToG2L2J EWKZ2J)
-type="photon_id_data_driven"
+samples=(ZGToLLG DYJetsToLL ZG2JToG2L2J EWKZ2J TT TTGJets TGJets ttWJets ttZJets WW WZ ZZ WWG WZG ZZG)
+type="bkgmc"
 for sample in "${samples[@]}"; do
     mkdir -p "$target$sample"
     # 存储后台任务的进程ID列表

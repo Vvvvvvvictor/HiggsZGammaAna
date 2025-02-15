@@ -248,7 +248,7 @@ class ApplyXGBHandler(object):
 
                     for i in range(4):
 
-                        data_s = data[(data[self.randomIndex]-shift)%4 == i]
+                        data_s = data[(data[self.randomIndex]-shift)%314159%4 == i]
                         data_o = data_s
                         # data_o = data_s[outputbraches]
 

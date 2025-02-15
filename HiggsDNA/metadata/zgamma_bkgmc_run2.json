@@ -23,7 +23,7 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "DYJetsToLL", "ZGToLLG", "ZG2JToG2L2J", "EWKZ2J"
+            "TT", "TTGJets", "TGJets", "WW", "WZ", "ZZ", "ttZJets", "ttWJets", "WWG", "WZG", "ZZG"
         ],
         "years": [
             "2016preVFP", "2016postVFP", "2017", "2018"

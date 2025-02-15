@@ -1,3 +1,3 @@
-outdir="/eos/home-j/jiehan/parquet/nanov9/photon_id_data_driven_data"
+outdir="/eos/home-j/jiehan/parquet/nanov9/photon_id_data_driven"
 
 python scripts/run_analysis.py --config "metadata/zgamma_data_run2.json" --log-level "DEBUG" --n_cores 10 --output_dir $outdir --batch_system "condor" --unretire_jobs 

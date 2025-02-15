@@ -39,9 +39,9 @@ class MCOverlapTagger(Tagger):
 
         # Only use specific events in different MC NanoAOD
         logger.debug("MC_overlap_samples:  file: %s" % file)
-        if "DYto2L" in file or "DYJetsToLL" in file or "EWKZ2Jets" in file or "TTTo2L2Nu" in file:
+        if "DYto2L" in file or "DYJetsToLL" in file or "EWKZ2Jets" in file or "TTTo2L2Nu" in file or "WJets" in file or "WZ_" in file or "WW_" in file or "ZZ_" in file:
             cut = self.get_n_iso_photon(data, file) == 0
-        elif "DYGto2LG" in file or "ZGToLLG" in file or "ZGamma2J" in file or "TTGJets" in file:
+        elif "DYGto2LG" in file or "ZGToLLG" in file or "ZGamma2J" in file or "TTGJets" in file or "WGTo" in file or "WZG_" in file or "WWG_" in file or "ZZG_" in file:
             cut = self.get_n_iso_photon(data, file) > 0
         
         # cut = cut>0
@@ -62,7 +62,15 @@ class MCOverlapTagger(Tagger):
         Filling "1" on corresponding digit when the particle meets one of the 14 conditions, else remaining "0".
         Echo paticles can meet more than one kind of condition, thus, more than one digit in "statusFlags" is "1".
         """
-        iso_photons_cut = (data.GenPart.pdgId == 22) & (data.GenPart.pt > 9 if (int(self.year[:4]) < 2019 and ("DY" in file or "ZGTo" in file)) else data.GenPart.pt > 10) & (( (data.GenPart.statusFlags & 0x1) != 0 ) | ( (data.GenPart.statusFlags & 0x100) != 0 ))
+        if int(self.year[:4]) < 2019 and ("DY" in file or "ZGTo" in file):
+            iso_photon_pt_thresh = 9
+        elif "WJets" in file or "WGTo" in file:
+            iso_photon_pt_thresh = 15
+        elif "WW" in file or "WZ" in file:
+            iso_photon_pt_thresh = 20
+        else:
+            iso_photon_pt_thresh = 10
+        iso_photons_cut = (data.GenPart.pdgId == 22) & (data.GenPart.pt > iso_photon_pt_thresh) & (( (data.GenPart.statusFlags & 0x1) != 0 ) | ( (data.GenPart.statusFlags & 0x100) != 0 ))
         iso_photons = data.GenPart[iso_photons_cut]
         n_iso_photons = awkward.num(iso_photons, axis=1)
         logger.debug("MC_overlap_samples: n_iso_photons: %s" % n_iso_photons)
