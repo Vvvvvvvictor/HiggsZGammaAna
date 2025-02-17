@@ -8,13 +8,13 @@ plt.style.use(hep.style.CMS)
 from pdb import set_trace
 
 # Load data
-branches = ["H_mass", "weight", "bdt_score_t", "regions"]
-data_cr = uproot.open("/eos/home-j/jiehan/data_for_norm_float_v1/output/two_jet/Data_fake.root")["two_jet"].arrays(branches, library="pd")
-zg_cr = uproot.open("/eos/home-j/jiehan/data_for_norm_float_v1/output/two_jet/ZGToLLG_fake.root")["two_jet"].arrays(branches, library="pd")
-ewkzg_cr = uproot.open("/eos/home-j/jiehan/data_for_norm_float_v1/output/two_jet/ZG2JToG2L2J_fake.root")["two_jet"].arrays(branches, library="pd")
-dy_sr = uproot.open("/eos/home-j/jiehan/root/outputs/two_jet/DYJetsToLL.root")["test"].arrays(branches, library="pd")
+branches = ["H_mass", "weight", "bdt_score_t"]
+data_cr = uproot.open("/eos/home-j/jiehan/root/skimmed_ntuples_data_driven/output/two_jet/Data_fake.root")["two_jet"].arrays(branches, library="pd")
+zg_cr = uproot.open("/eos/home-j/jiehan/root/skimmed_ntuples_data_driven/output/two_jet/ZGToLLG_fake.root")["two_jet"].arrays(branches, library="pd")
+ewkzg_cr = uproot.open("/eos/home-j/jiehan/root/skimmed_ntuples_data_driven/output/two_jet/ZG2JToG2L2J_fake.root")["two_jet"].arrays(branches, library="pd")
+dy_sr = uproot.open("/eos/home-j/jiehan/root/outputs/test/two_jet/DYJetsToLL.root")["two_jet"].arrays(branches, library="pd")
 
-boundaries = [float(i) for i in open("/eos/home-j/jiehan/root/outputs/significances/bin_binaries_1D_two_jet.txt", "r").readlines()[2].split()[1:]]
+boundaries = [float(i) for i in open("/eos/home-j/jiehan/root/outputs/test/significances/bin_boundaries_1D_two_jet.txt", "r").readlines()[0].split()]
 print(boundaries)
 
 # ewkzg_cr = ewkzg_cr[ewkzg_cr["H_mass"]<100]
@@ -23,7 +23,7 @@ print(boundaries)
 # Compare data-driven photon samples with fake photon samples(SR)
 ##############################################################################
 
-bkg_list = ["EWKZ2J", "WGToLNuG", "TT", "TTGJets", "TGJets", "WW", "WZ", "ZZ", "ttZJets", "ttWJets", "DYJetsToLL"]
+bkg_list = ["EWKZ2J", "TT", "TTGJets", "TGJets", "WZ", "ZZ", "ttZJets", "ttWJets", "DYJetsToLL"]
 def draw(data_cr, zg_cr, ewkzg_cr, dy_sr, bounds):
     data_cr, zg_cr = data_cr[(data_cr["bdt_score_t"]>bounds[0]) & (data_cr["bdt_score_t"]<bounds[1])], zg_cr[(zg_cr["bdt_score_t"]>bounds[0]) & (zg_cr["bdt_score_t"]<bounds[1])]
     ewkzg_cr = ewkzg_cr[(ewkzg_cr["bdt_score_t"]>bounds[0]) & (ewkzg_cr["bdt_score_t"]<bounds[1])]
@@ -38,7 +38,7 @@ def draw(data_cr, zg_cr, ewkzg_cr, dy_sr, bounds):
     bkg_sum_err = 0
     for i in range(len(bkg_list)):
         bkg = bkg_list[i]
-        bkg_cr = uproot.open(f"/eos/home-j/jiehan/root/outputs/two_jet/{bkg}.root")["test"].arrays(branches, library="pd")
+        bkg_cr = uproot.open(f"/eos/home-j/jiehan/root/outputs/test/two_jet/{bkg}.root")["two_jet"].arrays(branches, library="pd")
         bkg_cr = bkg_cr[(bkg_cr["bdt_score_t"]>bounds[0]) & (bkg_cr["bdt_score_t"]<bounds[1])]
         bkg_cr_hist, bin_edges = np.histogram(bkg_cr["H_mass"], bins=80, weights=bkg_cr["weight"], range=[100, 180])
         bkg_hists.append(bkg_cr_hist)
@@ -70,7 +70,7 @@ for i in range(0, len(boundaries)-1):
 ##############################################################################
 
 bkg_list = ["ZGToLLG", "ZG2JToG2L2J"]#, "EWKZ2J", "ZG2JToG2L2J", "WGToLNuG", "TT", "TTGJets", "TGJets", "WW", "WZ", "ZZ", "ttZJets", "ttWJets"]
-fake_bkg_list = ["EWKZ2J", "WGToLNuG", "TT", "TTGJets", "TGJets", "WW", "WZ", "ZZ", "ttZJets", "ttWJets", "DYJetsToLL"]
+fake_bkg_list = ["EWKZ2J", "TT", "TTGJets", "TGJets", "WZ", "ZZ", "ttZJets", "ttWJets", "DYJetsToLL"]
 
 def draw(data_cr, zg_cr, ewkzg_cr, bkg_list, fake_bkg_list, bounds):
     data_cr, zg_cr = data_cr[(data_cr["bdt_score_t"] > bounds[0]) & (data_cr["bdt_score_t"] < bounds[1])], zg_cr[(zg_cr["bdt_score_t"] > bounds[0]) & (zg_cr["bdt_score_t"] < bounds[1])]
@@ -83,7 +83,7 @@ def draw(data_cr, zg_cr, ewkzg_cr, bkg_list, fake_bkg_list, bounds):
 
     fake_bkg_sum = 0
     for fake_bkg in fake_bkg_list:
-        fake_bkg_sample = uproot.open(f"/eos/home-j/jiehan/root/outputs/two_jet/{fake_bkg}.root")["test"].arrays(branches, library="pd")
+        fake_bkg_sample = uproot.open(f"/eos/home-j/jiehan/root/outputs/test/two_jet/{fake_bkg}.root")["two_jet"].arrays(branches, library="pd")
         fake_bkg_sample = fake_bkg_sample[(fake_bkg_sample["bdt_score_t"] > bounds[0]) & (fake_bkg_sample["bdt_score_t"] < bounds[1])]
         fake_bkg_sum += np.sum(fake_bkg_sample["weight"])
 
@@ -93,13 +93,13 @@ def draw(data_cr, zg_cr, ewkzg_cr, bkg_list, fake_bkg_list, bounds):
     bkg_hists = []
     bkg_sum = 0
     for bkg in bkg_list:
-        bkg_cr = uproot.open(f"/eos/home-j/jiehan/root/outputs/two_jet/{bkg}.root")["test"].arrays(branches, library="pd")
+        bkg_cr = uproot.open(f"/eos/home-j/jiehan/root/outputs/test/two_jet/{bkg}.root")["two_jet"].arrays(branches, library="pd")
         bkg_cr = bkg_cr[(bkg_cr["bdt_score_t"] > bounds[0]) & (bkg_cr["bdt_score_t"] < bounds[1])]
         bkg_cr_hist, bin_edges = np.histogram(bkg_cr["H_mass"], bins=80, weights=bkg_cr["weight"], range=[100, 180])
         bkg_hists.append(bkg_cr_hist)
         bkg_sum = bkg_sum + np.sum(bkg_cr_hist[np.where((bin_edges[1:] < 120) | (bin_edges[:-1] > 130))])
 
-    data_sr = uproot.open("/eos/home-j/jiehan/root/outputs/two_jet/data.root")["test"].arrays(branches, library="pd")
+    data_sr = uproot.open("/eos/home-j/jiehan/root/outputs/test/two_jet/Data.root")["two_jet"].arrays(branches, library="pd")
     data_sr = data_sr[(data_sr["bdt_score_t"] > bounds[0]) & (data_sr["bdt_score_t"] < bounds[1])]
     data_hist, bin_edges = np.histogram(data_sr[(data_sr["H_mass"] < 120) | (data_sr["H_mass"] > 130)]["H_mass"], bins=80, weights=data_sr[(data_sr["H_mass"] < 120) | (data_sr["H_mass"] > 130)]["weight"], range=[100, 180])
     cr_side_band = cr_hist[np.where((bin_edges[1:] < 120) | (bin_edges[:-1] > 130))]
@@ -161,48 +161,48 @@ def draw(data_cr, zg_cr, ewkzg_cr, bkg_list, fake_bkg_list, bounds):
 for i in range(0, len(boundaries)-1):
     draw(data_cr, zg_cr, ewkzg_cr, bkg_list, fake_bkg_list, [boundaries[i], boundaries[i+1]])
     
-##############################################################################
-# Compare data-driven photon samples with MC samples in control region
-##############################################################################
+# ##############################################################################
+# # Compare data-driven photon samples with MC samples in control region
+# ##############################################################################
 
-bkg_list = ["ZGToLLG", "ZG2JToG2L2J", "DYJets_2J"]
-def draw(data_cr, bkg_list, bounds):
-    data_cr= data_cr[(data_cr["bdt_score_t"]>bounds[0]) & (data_cr["bdt_score_t"]<bounds[1])]
-    data_cr_hist, bin_edges = np.histogram(data_cr["H_mass"], bins=80, weights=data_cr["weight"], range=[100, 180])
+# bkg_list = ["ZGToLLG", "ZG2JToG2L2J", "DYJets_2J"]
+# def draw(data_cr, bkg_list, bounds):
+#     data_cr= data_cr[(data_cr["bdt_score_t"]>bounds[0]) & (data_cr["bdt_score_t"]<bounds[1])]
+#     data_cr_hist, bin_edges = np.histogram(data_cr["H_mass"], bins=80, weights=data_cr["weight"], range=[100, 180])
     
-    bkg_hist_list = []
-    for bkg in bkg_list:
-        bkg_cr = uproot.open(f"/eos/home-j/jiehan/data_for_norm_float_v1/output/two_jet/{bkg}_fake.root")["two_jet"].arrays(branches, library="pd")
-        bkg_cr = bkg_cr[(bkg_cr["bdt_score_t"]>bounds[0]) & (bkg_cr["bdt_score_t"]<bounds[1])]
-        bkg_cr_hist, bin_edges = np.histogram(bkg_cr["H_mass"], bins=80, weights=bkg_cr["weight"], range=[100, 180])
-        bkg_hist_list.append(bkg_cr_hist)
+#     bkg_hist_list = []
+#     for bkg in bkg_list:
+#         bkg_cr = uproot.open(f"/eos/home-j/jiehan/root/skimmed_ntuples_data_driven/output/two_jet/{bkg}_fake.root")["two_jet"].arrays(branches, library="pd")
+#         bkg_cr = bkg_cr[(bkg_cr["bdt_score_t"]>bounds[0]) & (bkg_cr["bdt_score_t"]<bounds[1])]
+#         bkg_cr_hist, bin_edges = np.histogram(bkg_cr["H_mass"], bins=80, weights=bkg_cr["weight"], range=[100, 180])
+#         bkg_hist_list.append(bkg_cr_hist)
     
-    plt.figure()
-    fig, [ax1, ax2] = plt.subplots(2, 1, gridspec_kw={"height_ratios": [4, 1]})
-    # print(bkg_hist_list)
-    hep.histplot(bkg_hist_list, bins=bin_edges, label=[bkg_list[i]+f"({sum(bkg_hist_list[i]):.2f})" for i in range(len(bkg_list))], stack=True, histtype="fill", ax=ax1)
-    # print(data_cr_hist)
-    ax1.errorbar(bin_edges[:-1]+np.diff(bin_edges)/2, data_cr_hist, fmt='o', label=f"Data({sum(data_cr_hist):.2f})", yerr=np.sqrt(data_cr_hist), color='k')
-    ax1.legend(fontsize=16, loc="best")
-    ax1.set_title(f"Data vs bkg: {bounds[0]} < BDT < {bounds[1]}")
-    ax1.set_xlim(100, 180)
-    ax1.set_ylabel("Events")
-    ax1.grid()
+#     plt.figure()
+#     fig, [ax1, ax2] = plt.subplots(2, 1, gridspec_kw={"height_ratios": [4, 1]})
+#     # print(bkg_hist_list)
+#     hep.histplot(bkg_hist_list, bins=bin_edges, label=[bkg_list[i]+f"({sum(bkg_hist_list[i]):.2f})" for i in range(len(bkg_list))], stack=True, histtype="fill", ax=ax1)
+#     # print(data_cr_hist)
+#     ax1.errorbar(bin_edges[:-1]+np.diff(bin_edges)/2, data_cr_hist, fmt='o', label=f"Data({sum(data_cr_hist):.2f})", yerr=np.sqrt(data_cr_hist), color='k')
+#     ax1.legend(fontsize=16, loc="best")
+#     ax1.set_title(f"Data vs bkg: {bounds[0]} < BDT < {bounds[1]}")
+#     ax1.set_xlim(100, 180)
+#     ax1.set_ylabel("Events")
+#     ax1.grid()
     
-    ax2.errorbar(bin_edges[:-1]+np.diff(bin_edges)/2, data_cr_hist/np.sum(bkg_hist_list, axis=0), fmt='o', yerr=np.sqrt(data_cr_hist)/np.sum(bkg_hist_list, axis=0))
-    ax2.axhline(y=1, color='k', linestyle='--')
-    ax2.set_ylim(0, 2)
-    ax2.set_xlim(100, 180)
-    ax2.set_xlabel("Higgs Mass")
-    ax2.set_ylabel("Data / Bkg.")
+#     ax2.errorbar(bin_edges[:-1]+np.diff(bin_edges)/2, data_cr_hist/np.sum(bkg_hist_list, axis=0), fmt='o', yerr=np.sqrt(data_cr_hist)/np.sum(bkg_hist_list, axis=0))
+#     ax2.axhline(y=1, color='k', linestyle='--')
+#     ax2.set_ylim(0, 2)
+#     ax2.set_xlim(100, 180)
+#     ax2.set_xlabel("Higgs Mass")
+#     ax2.set_ylabel("Data / Bkg.")
     
-    plt.savefig(f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/2J/compare_data_mc_cr_hmass_{bounds[0]}_{bounds[1]}.png")
-    plt.clf()
+#     plt.savefig(f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/2J/compare_data_mc_cr_hmass_{bounds[0]}_{bounds[1]}.png")
+#     plt.clf()
     
-# Plot
-# for i in range(0, len(boundaries)-1):
-#     draw(data_cr, bkg_list, [boundaries[i], boundaries[i+1]])
-draw(data_cr, bkg_list, [0, 1])
+# # Plot
+# # for i in range(0, len(boundaries)-1):
+# #     draw(data_cr, bkg_list, [boundaries[i], boundaries[i+1]])
+# draw(data_cr, bkg_list, [0, 1])
 
 ###############################################################################
 # Compare data-driven photon samples plus MC samples(SR) with data(SR) for different variables distributions
@@ -211,17 +211,17 @@ variables = ["H_mass", "gamma_pt", "Z_pt", "gamma_mvaID"]
 xlabels = [r"Higgs Mass [GeV/$c^2$]", "Photon pT [GeV/c]", "Z pT [GeV/c]", "Photon MVA ID"]
 x_ranges = [(100, 180), (15, 75), (0, 100), (0, 1)]
 xbin = 40
-bkg_list = ["EWKZ2J", "WGToLNuG", "TT", "TTGJets", "TGJets", "WW", "WZ", "ZZ", "ttZJets", "ttWJets", "DYJetsToLL"]
+bkg_list = ["EWKZ2J", "TT", "TTGJets", "TGJets", "WZ", "ZZ", "ttZJets", "ttWJets", "DYJetsToLL"]
 branches = ["weight", "bdt_score_t"] + variables
 
 for i in range(len(variables)):
-    data_cr = uproot.open("/eos/home-j/jiehan/data_for_norm_float_v1/output/two_jet/Data_fake.root")["two_jet"].arrays(branches, library="pd")
-    zg_cr = uproot.open("/eos/home-j/jiehan/data_for_norm_float_v1/output/two_jet/ZGToLLG_fake.root")["two_jet"].arrays(branches, library="pd")
-    ewkzg_cr = uproot.open("/eos/home-j/jiehan/data_for_norm_float_v1/output/two_jet/ZG2JToG2L2J_fake.root")["two_jet"].arrays(branches, library="pd")
+    data_cr = uproot.open("/eos/home-j/jiehan/root/skimmed_ntuples_data_driven/output/two_jet/Data_fake.root")["two_jet"].arrays(branches, library="pd")
+    zg_cr = uproot.open("/eos/home-j/jiehan/root/skimmed_ntuples_data_driven/output/two_jet/ZGToLLG_fake.root")["two_jet"].arrays(branches, library="pd")
+    ewkzg_cr = uproot.open("/eos/home-j/jiehan/root/skimmed_ntuples_data_driven/output/two_jet/ZG2JToG2L2J_fake.root")["two_jet"].arrays(branches, library="pd")
     
     bkg_srs = []
     for bkg in bkg_list:
-        bkg_sr = uproot.open(f"/eos/home-j/jiehan/root/outputs/two_jet/{bkg}.root")["test"].arrays(branches, library="pd")
+        bkg_sr = uproot.open(f"/eos/home-j/jiehan/root/outputs/test/two_jet/{bkg}.root")["two_jet"].arrays(branches, library="pd")
         bkg_srs.append(bkg_sr)
         
     for j in range(len(boundaries)-1):
@@ -278,14 +278,14 @@ for i in range(len(variables)):
 # Compare data and MC in signal region
 ###############################################################################
 
-bkg_list = ["ZGToLLG", "ZG2JToG2L2J", "EWKZ2J", "WGToLNuG", "TT", "TTGJets", "TGJets", "WW", "WZ", "ZZ", "ttZJets", "ttWJets", "DYJetsToLL"]
+bkg_list = ["ZGToLLG", "ZG2JToG2L2J", "EWKZ2J", "TT", "TTGJets", "TGJets", "WZ", "ZZ", "ttZJets", "ttWJets", "DYJetsToLL", "WWG", "WZG", "ZZG"]
 
-data_sr = uproot.open("/eos/home-j/jiehan/root/outputs/two_jet/data.root")["test"].arrays(branches, library="pd")
+data_sr = uproot.open("/eos/home-j/jiehan/root/outputs/test/two_jet/Data.root")["two_jet"].arrays(branches, library="pd")
 data_sr = data_sr[(data_sr["bdt_score_t"]>boundaries[0]) & (data_sr["bdt_score_t"]<boundaries[-1])]
 
 bkg_srs = []
 for bkg in bkg_list:
-    bkg_sr = uproot.open(f"/eos/home-j/jiehan/root/outputs/two_jet/{bkg}.root")["test"].arrays(branches, library="pd")
+    bkg_sr = uproot.open(f"/eos/home-j/jiehan/root/outputs/test/two_jet/{bkg}.root")["two_jet"].arrays(branches, library="pd")
     bkg_srs.append(bkg_sr)
     
 def draw(data_sr, bkg_srs, bkg_list, bounds):

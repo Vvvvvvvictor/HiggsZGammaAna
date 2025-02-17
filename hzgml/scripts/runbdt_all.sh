@@ -21,10 +21,10 @@ echo "Shielded parameter is: $S . Added variables is: $A ."
 
 # 'eval_auc', 'sqrt_eval_auc_minus_train_auc', 'eval_auc_minus_train_auc', 'eval_auc_over_train_auc', "eval_auc_minus_train_auc", "eval_significance", "sqrt_eval_significance_minus_train_significance", 'eval_auc_with_mass_shape_factor'
 # python scripts/train_bdt.py -r two_jet --optuna --n-calls 60 --continue-optuna 0 --optuna_metric 'sqrt_eval_auc_minus_train_auc'
-python scripts/train_bdt.py -r two_jet --save --hyperparams_path "models/optuna_two_jet"
-python scripts/apply_bdt.py -r two_jet
-python scripts/categorization_1D.py -r two_jet -b 4 --floatB --minN 2 -es "fullSimrw"
-python ../plot_python/plot_cats_hmass_dis.py
+# python scripts/train_bdt.py -r two_jet --save --hyperparams_path "models/optuna_two_jet"
+# python scripts/apply_bdt.py -r two_jet
+# python scripts/categorization_1D.py -r two_jet -b 4 --floatB --minN 2 -es "fullSimrw"
+# python ../plot_python/plot_cats_hmass_dis.py
 # python scripts/train_bdt.py -r zero_to_one_jet --optuna --n-calls 20 --continue-optuna 0 --optuna_metric "eval_auc"
 # python scripts/train_bdt.py -r VBF --optuna --n-calls 20 --continue-optuna 0 --optuna_metric "sqrt_eval_auc_minus_train_auc"
 
@@ -65,7 +65,7 @@ python ../plot_python/plot_cats_hmass_dis.py
 # python ../SSTest/Generate_template.py
 
 
-# python ../SSTest/Generate_template.py
+python ../SSTest/Generate_template.py
 # python scripts/Generate_fake_photon_template.py -r two_jet
 # python ../plot_python/make_data_driven_two_jet.py 
 # python ../plot_python/compare_sig_bkg_bdt_sosb.py

@@ -5,12 +5,43 @@ from correctionlib import _core
 
 from higgs_dna.utils import misc_utils, awkward_utils
 
+import logging
+logger = logging.getLogger(__name__)
+
 ###################################
 ### b-tag continuous reshape SF ###
 ###################################
 
+
+BATG_MED = {
+    "2016preVFP": 0.2598,
+    "2016postVFP": 0.2489,
+    "2017": 0.3040,
+    "2018": 0.2783,
+    "2022preEE": 0.3086,
+    "2022postEE": 0.3196,
+    "2023preBPix": 0.2431,
+    "2023postBPix": 0.2435
+}
+
+JET_VETO_MAP_FILE = {
+    "2016" : "higgs_dna/systematics/data/2016postVFP_UL/jetvetomaps.json",
+    "2016preVFP" : "higgs_dna/systematics/data/2016preVFP_UL/jetvetomaps.json",
+    "2016postVFP" : "higgs_dna/systematics/data/2016postVFP_UL/jetvetomaps.json",
+    "2017" : "higgs_dna/systematics/data/2017_UL/jetvetomaps.json",
+    "2018" : "higgs_dna/systematics/data/2018_UL/jetvetomaps.json"
+}
+
+BTAG_MCEFF_FILE = {
+    "2016" : "higgs_dna/systematics/data/2016postVFP_UL/btag_mceff.json",
+    "2016preVFP" : "higgs_dna/systematics/data/2016preVFP_UL/btag_mceff.json", 
+    "2016postVFP" : "higgs_dna/systematics/data/2016postVFP_UL/btag_mceff.json", 
+    "2017" : "higgs_dna/systematics/data/2017_UL/btag_mceff.json",
+    "2018" : "higgs_dna/systematics/data/2018_UL/btag_mceff.json"
+}
+
 BTAG_RESHAPE_SF_FILE = {
-    "2016" : "higgs_dna/systematics/data/2016postVFP_UL/btag_mceff.json", 
+    "2016" : "higgs_dna/systematics/data/2016postVFP_UL/btagging.json", 
     "2016preVFP" : "higgs_dna/systematics/data/2016preVFP_UL/btagging.json", 
     "2016postVFP" : "higgs_dna/systematics/data/2016postVFP_UL/btagging.json", 
     "2017" : "higgs_dna/systematics/data/2017_UL/btagging.json",
@@ -60,28 +91,57 @@ def btag_deepjet_wp_sf(events, year, central_only, input_collection):
     Note: application of SFs should not change the overall normalization of a sample (before any b-tagging selection) and each sample should be adjusted by an overall weight derived in a phase space with no requirements on b-jets such that the normalization is unchanged. TODO: link BTV TWiki that describes this.
     """
     required_fields = [
-        (input_collection, "eta"), (input_collection, "pt"), (input_collection, "hadronFlavour"), (input_collection, "btagDeepFlavB") 
+        (input_collection, "eta"), (input_collection, "pt"), (input_collection, "phi"), (input_collection, "hadronFlavour"), (input_collection, "btagDeepFlavB") 
     ]
     missing_fields = awkward_utils.missing_fields(events, required_fields)
 
     evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(BTAG_RESHAPE_SF_FILE[year]))
+    # jet_veto_map_evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(JET_VETO_MAP_FILE[year]))
+    jet_mc_eff_evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(BTAG_MCEFF_FILE[year]))
    
     jets = events[input_collection]
     jets["flavor"] = jets.hadronFlavour
-    n_jets = awkward.num(jets) # save n_jets to convert back to jagged format at the end 
+    n_jets = awkward.num(jets) # save n_jets to convert back to jagged format at the end
+    logger.debug(f"Number of jets(syst): {n_jets[:10]}")
     jets_flattened = awkward.flatten(jets)
 
     jet_flavor = awkward.to_numpy(jets_flattened.flavor)
+    jet_btag_deepjet = awkward.to_numpy(jets_flattened.btagDeepFlavB)
     jet_abs_eta = numpy.clip(
         awkward.to_numpy(abs(jets_flattened.eta)),
         0.0,
         2.49999 # SFs only valid up to eta 2.5
     )
+    jet_eta = numpy.clip(
+        awkward.to_numpy(jets_flattened.eta),
+        -2.39999,
+        2.39999
+    )
     jet_pt = numpy.clip(
         awkward.to_numpy(jets_flattened.pt),
         20.0, # SFs only valid for pT > 20.
-        99999999.
+        999.99999
     )
+    # jet_phi = numpy.clip(
+    #     awkward.to_numpy(jets_flattened.phi),
+    #     -3.1415925,
+    #     3.1415925
+    # )
+
+    # jet_veto_sf = numpy.where(
+    #     jet_veto_map_evaluator["jetvetomap"].evalv(
+    #         "jetvetomap",
+    #         jet_eta,
+    #         jet_phi
+    #     ) > 0,
+    #     0.0,
+    #     1.0
+    # )
+    # jet_veto_sf = numpy.where(
+    #     (abs(jet_eta) >= 5.191) | (abs(jet_phi) >= 3.1415926),
+    #     0.0,
+    #     jet_veto_sf
+    # )
 
     variations_list = ["central"]
     if not central_only:
@@ -90,6 +150,7 @@ def btag_deepjet_wp_sf(events, year, central_only, input_collection):
     variations = {}
 
     central_sf = numpy.ones_like(jet_flavor)
+    jet_mc_eff, jet_mc_eff_syst = numpy.ones_like(jet_flavor), numpy.ones_like(jet_flavor)
     for f in [0, 4, 5]:
         central_sf = numpy.where(
             jet_flavor == f,
@@ -102,6 +163,41 @@ def btag_deepjet_wp_sf(events, year, central_only, input_collection):
             ),
             central_sf
         )
+        flavour_name = "b" if f == 5 else "c" if f == 4 else "uds"
+        jet_mc_eff = numpy.where(
+            jet_flavor == f,
+            jet_mc_eff_evaluator["Btag_{}_WPmedium_MCeff".format(flavour_name)].evalv(
+                "effmc",
+                jet_eta,
+                jet_pt
+            ),
+            jet_mc_eff
+        )
+        jet_mc_eff_syst = numpy.where(
+            jet_flavor == f,
+            jet_mc_eff_evaluator["Btag_{}_WPmedium_MCeff".format(flavour_name
+            )].evalv(
+                "systmc",
+                jet_eta,
+                jet_pt
+            ),
+            jet_mc_eff
+        )
+
+    jet_mc_eff_up = jet_mc_eff + jet_mc_eff_syst
+    jet_mc_eff_down = jet_mc_eff - jet_mc_eff_syst
+
+    # central_sf = numpy.where(
+    #     jet_veto_sf == 0,
+    #     1.0,
+    #     central_sf
+    # )
+
+    central_sf = numpy.where(
+        jet_btag_deepjet > BATG_MED[year],
+        central_sf,
+        (1 - central_sf*jet_mc_eff) / (1 - jet_mc_eff)
+    )
 
     variations["central"] = awkward.unflatten(central_sf, n_jets)
 
@@ -122,6 +218,18 @@ def btag_deepjet_wp_sf(events, year, central_only, input_collection):
                 ),
                 var_sf
             )
+
+        # var_sf = numpy.where(
+        #     jet_veto_sf == 0,
+        #     1.0,
+        #     var_sf
+        # )
+
+        var_sf = numpy.where(
+            jet_btag_deepjet > BATG_MED[year],
+            var_sf,
+            (1 - var_sf * jet_mc_eff) / (1 - (jet_mc_eff_up if "up_uncorrelated" in var else jet_mc_eff_down if "down_uncorrelated" in var else jet_mc_eff))
+        )
 
         variations[var] = awkward.unflatten(var_sf, n_jets) # make jagged again
 

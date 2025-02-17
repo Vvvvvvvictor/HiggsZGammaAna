@@ -21,9 +21,10 @@ from pdb import set_trace
 # Test yields in categories
 # ==================================
 # cats = ['zero_to_one_jet', "two_jet", "VH", "ZH", "ttH_had", "ttH_lep"]
-# years = ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"]
+# # years = ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"]
+# years = ["2018"]
 # for year in years:
-#     data = uproot.open(f"/eos/home-j/jiehan/root/skimmed_ntuples_run3/Data/{year}.root")
+#     data = uproot.open(f"/eos/home-j/jiehan/root/skimmed_ntuples_run2/Data/{year}.root")
 #     data_inc = data["inclusive"].arrays(['z_mumu', 'z_ee', 'H_mass'], library='pd').query('H_mass > 100')
 #     print(f'Year {year} inclusive z_mumu: {data_inc["z_mumu"].sum()}, z_ee: {data_inc["z_ee"].sum()}')
 #     for cat in cats:
@@ -99,7 +100,7 @@ years = ['2017']
 types = ["mumu", "ee"]
 for year in years:
     # data = uproot.open(f"/eos/home-j/jiehan/root/cutflow/ggH_M125/{year}.root")
-    data = pd.read_parquet(f"/eos/home-j/jiehan/parquet/nanov9/signal/ggH_M125_{year}/merged_nominal.parquet")
+    data = pd.read_parquet(f"/eos/home-j/jiehan/parquet/nanov9/cutflow/ggH_M125_{year}/merged_nominal.parquet")
     for cat in cats:
         # 加入所有满足这个格式的变量 'weight*central'
         variables = ['H_mass', 'z_mumu', 'z_ee']

@@ -29,7 +29,7 @@ def getArgs():
     """Get arguments from command line."""
     parser = ArgumentParser()
     parser.add_argument('-c', '--config', action='store', nargs=2, default=['/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/data/training_config_BDT.json', '/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/data/apply_config_BDT.json'], help='Region to process')
-    parser.add_argument('-i', '--inputFolder', action='store', default='/eos/home-j/jiehan/root/skimmed_ntuples_data_driven/', help='directory of training inputs')
+    parser.add_argument('-i', '--inputFolder', action='store', default='/eos/home-j/jiehan/root/skimmed_ntuples_data_driven', help='directory of training inputs')
     parser.add_argument('-m', '--modelFolder', action='store', default='/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/models', help='directory of BDT models')
     parser.add_argument('-o', '--outputFolder', action='store', default='/eos/home-j/jiehan/root/skimmed_ntuples_data_driven/output', help='directory for outputs')
     parser.add_argument('-r', '--region', action='store', choices=['two_jet', 'one_jet', 'zero_jet', 'zero_to_one_jet', 'VH_ttH', 'all_jet'], default='zero_to_one_jet', help='Region to process')
@@ -196,7 +196,7 @@ class ApplyXGBHandler(object):
     def applyBDT(self, category, scale=1):
         outputbraches = copy.deepcopy(self._outbranches)
         branches = copy.deepcopy(self._branches)
-        branches += ["gamma_mvaID_WPL", 'gamma_mvaID_WP80', "gamma_eta", "Z_mass", "H_mass"]
+        branches += ["gamma_mvaID_WPL", 'gamma_mvaID_WP80', 'gamma_mvaID_WP90', "gamma_eta", "Z_mass", "H_mass"]
         outputbraches += []
         
         outputContainer = self._outputFolder + '/' + self._region
@@ -230,8 +230,8 @@ class ApplyXGBHandler(object):
                     os.makedirs('figures/fake')
                 # get the distribution of 'gamma_mvaID' with 'region==0', and mimic the distribution to 'region==2'
                 
-                gamma_mvaID_dist_B = data[(data['gamma_mvaID_WP80'] == 1) & (data['gamma_eta'] < 1.5)]['gamma_mvaID'].values
-                gamma_mvaID_dist_E = data[(data['gamma_mvaID_WP80'] == 1) & (data['gamma_eta'] > 1.5)]['gamma_mvaID'].values
+                gamma_mvaID_dist_B = data[(data['gamma_mvaID_WP90'] == 1) & (data['gamma_eta'] < 1.5)]['gamma_mvaID'].values
+                gamma_mvaID_dist_E = data[(data['gamma_mvaID_WP90'] == 1) & (data['gamma_eta'] > 1.5)]['gamma_mvaID'].values
                 prob_dist_B, gamma_mvaID_dist_B = np.histogram(gamma_mvaID_dist_B, bins=100, density=True)
                 prob_dist_E, gamma_mvaID_dist_E = np.histogram(gamma_mvaID_dist_E, bins=100, density=True)
                 gamma_mvaID_dist_B, gamma_mvaID_dist_E = (gamma_mvaID_dist_B[1:] + gamma_mvaID_dist_B[:-1])/2, (gamma_mvaID_dist_E[1:] + gamma_mvaID_dist_E[:-1])/2
@@ -300,7 +300,7 @@ class ApplyXGBHandler(object):
                 data.loc[output_selection & (data['gamma_eta'] > 1.5), 'gamma_mvaID'] = sampled_values_E
 
                 # Plot histogram of the transformed data
-                plt.hist(data[(data['regions'] == 2)]['gamma_mvaID'], bins=100, histtype='step', label='Transformed')
+                plt.hist(data[(data['gamma_mvaID_WP80'] == 0)]['gamma_mvaID'], bins=100, histtype='step', label='Transformed')
                 plt.legend(fontsize=28)
                 plt.xlabel('gamma_mvaID', fontsize=28)
                 plt.ylabel('a.u.', fontsize=28)
@@ -371,7 +371,7 @@ def main():
     # with open('/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/data/inputs_config.json') as f:
     #     config = json.load(f)
     # sample_list = config['sample_list']
-    sample_list = ["Data", "ZGToLLG", "ZG2JToG2L2J", "DYJetsToLL"] # "Data", "ZGToLLG", "ZG2JToG2L2J", "DYJets_2J"
+    sample_list = ["Data", "ZGToLLG", "ZG2JToG2L2J", "DYJetsToLL", "EWKZ2J"] # "Data", "ZGToLLG", "ZG2JToG2L2J", "DYJets_2J"
 
     for category in sample_list:
         if args.category and category not in args.category: continue

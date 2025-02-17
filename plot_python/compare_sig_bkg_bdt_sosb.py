@@ -39,7 +39,7 @@ mc_file_list = [
     "TT.root",
     "TTGJets.root",
     ["ttWJets.root", "ttZJets.root"],
-    ["WW.root", "WZ.root", "ZZ.root"]
+    ["WZ.root", "ZZ.root", "WWG.root", "WZG.root", "ZZG.root"]
     # "data_driven_bkg_v3.root"
 ]
 data_file_list = [

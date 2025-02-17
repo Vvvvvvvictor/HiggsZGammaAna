@@ -289,6 +289,7 @@ class ZGammaTaggerRun2(Tagger):
                     "min_dr" : self.options["jets"]["dr_muons"]
                 }
             },
+            year = self.year,
             name = "SelectedJet",
             tagger = self
         )
@@ -350,6 +351,7 @@ class ZGammaTaggerRun2(Tagger):
         awkward_utils.add_field(events, "n_leptons", n_leptons, overwrite=True)
 
         n_jets = awkward.num(jets)
+        logger.debug(f"Number of jets(tagger): {n_jets[:10]}")
         awkward_utils.add_field(events, "n_jets", n_jets, overwrite=True)
 
         n_b_jets = awkward.sum(b_jet_cut, axis=1)

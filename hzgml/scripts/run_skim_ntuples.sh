@@ -1,10 +1,10 @@
 #!/bin/bash                                                                                                                                                                       
 echo "==============STARTED=============="
 
-# input="/eos/user/j/jiehan/parquet/nanov9/"
-# target="/eos/home-j/jiehan/root/skimmed_ntuples_data_driven/"
 input="/eos/user/j/jiehan/parquet/nanov9/"
-target="/eos/home-j/jiehan/root/skimmed_ntuples_run2/"
+target="/eos/home-j/jiehan/root/skimmed_ntuples_data_driven/"
+# input="/eos/user/j/jiehan/parquet/nanov9/"
+# target="/eos/home-j/jiehan/root/skimmed_ntuples_run2/"
 # target="./"
 
 # years=(2016preVFP 2016postVFP 2017 2018 2022preEE 2022postEE 2023preBPix 2023postBPix)
@@ -91,12 +91,12 @@ process_sample_syst() {
     echo "Sample $sample completed successfully."
 }
 
-# 处理 signal 样本
+# # 处理 signal 样本
 
-# samples=(ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125 ggH_M120 VBFH_M120 WplusH_M120 WminusH_M120 ZH_M120 ttH_M120 ggH_M130 VBFH_M130 WplusH_M130 WminusH_M130 ZH_M130 ttH_M130 ggH_mix VBF_mix ggH VBF WplusH WminusH ZH ttH)
+# # samples=(ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125 ggH_M120 VBFH_M120 WplusH_M120 WminusH_M120 ZH_M120 ttH_M120 ggH_M130 VBFH_M130 WplusH_M130 WminusH_M130 ZH_M130 ttH_M130 ggH_mix VBF_mix ggH VBF WplusH WminusH ZH ttH)
 
-# samples=(ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125) 
-# type="signal"
+# samples=(ggH_M125) 
+# type="cutflow"
 # for sample in "${samples[@]}"; do
 #     mkdir -p "$target${sample}/"
 #     # 存储后台任务的进程ID列表
@@ -126,8 +126,8 @@ process_sample_syst() {
 # 处理 bkgmc 样本
 
 # samples=(ZGToLLG DYJetsToLL WGToLNuG ZG2JToG2L2J EWKZ2J TT TTGJets TGJets ttWJets ttZJets WW WZ ZZ DYGto2LG_10to50 DYGto2LG_50to100)
-samples=(ZGToLLG DYJetsToLL ZG2JToG2L2J EWKZ2J TT TTGJets TGJets ttWJets ttZJets WW WZ ZZ WWG WZG ZZG)
-type="bkgmc"
+samples=(Data)
+type="photon_id_data_driven"
 for sample in "${samples[@]}"; do
     mkdir -p "$target$sample"
     # 存储后台任务的进程ID列表

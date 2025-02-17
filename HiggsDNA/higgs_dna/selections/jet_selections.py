@@ -1,10 +1,20 @@
 import awkward
+import numpy
 
 import logging
 logger = logging.getLogger(__name__)
 
+from correctionlib import _core
 from higgs_dna.selections import object_selections
 from higgs_dna.utils import misc_utils
+
+JET_VETO_MAP_FILE = {
+    "2016" : "higgs_dna/systematics/data/2016postVFP_UL/jetvetomaps.json",
+    "2016preVFP" : "higgs_dna/systematics/data/2016preVFP_UL/jetvetomaps.json",
+    "2016postVFP" : "higgs_dna/systematics/data/2016postVFP_UL/jetvetomaps.json",
+    "2017" : "higgs_dna/systematics/data/2017_UL/jetvetomaps.json",
+    "2018" : "higgs_dna/systematics/data/2018_UL/jetvetomaps.json"
+}
 
 DEFAULT_JETS = {
     "pt" : 30.0,
@@ -12,7 +22,7 @@ DEFAULT_JETS = {
     "looseID" : True
 }
 
-def select_jets(jets, options, clean, name = "none", tagger = None):
+def select_jets(jets, options, clean, year, name = "none", tagger = None):
     """
 
     """
@@ -42,15 +52,45 @@ def select_jets(jets, options, clean, name = "none", tagger = None):
     else:
         photon_veto_cut = jets.pt > 0
 
-    all_cuts = standard_cuts & id_cut & photon_veto_cut
+    jet_veto_map_evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(JET_VETO_MAP_FILE[year]))
+    n_jets = awkward.num(jets) # save n_jets to convert back to jagged format at the end 
+    jets_flattened = awkward.flatten(jets)
+    jet_eta = numpy.clip(
+        awkward.to_numpy(jets_flattened.eta),
+        -5.19099,
+        5.19099
+    )
+    jet_phi = numpy.clip(
+        awkward.to_numpy(jets_flattened.phi),
+        -3.1415925,
+        3.1415925
+    )
+    jet_veto_sf = numpy.where(
+        jet_veto_map_evaluator["jetvetomap"].evalv(
+            "jetvetomap",
+            jet_eta,
+            jet_phi
+        ) > 0,
+        False,
+        True
+    )
+    jet_veto_sf = numpy.where(
+        (abs(jet_eta) >= 5.191) | (abs(jet_phi) >= 3.1415926),
+        True,
+        jet_veto_sf
+    )
+    jet_veto_cut = awkward.unflatten(jet_veto_sf, n_jets)
+
+    all_cuts = standard_cuts & id_cut & photon_veto_cut & jet_veto_cut
     standard_cuts = awkward.sum(standard_cuts, axis=1) > 0
     id_cut = awkward.sum(standard_cuts & id_cut, axis=1) > 0
     photon_veto_cut = awkward.sum(standard_cuts & id_cut & photon_veto_cut, axis=1) > 0
+    jet_veto_cut = awkward.sum(standard_cuts & id_cut & photon_veto_cut & jet_veto_cut, axis=1) > 0
 
     if tagger is not None:
         tagger.register_cuts(
-            names = ["std cuts", "id cut", "photon veto cut", "all cuts"],
-            results = [standard_cuts, id_cut, photon_veto_cut, all_cuts],
+            names = ["std cuts", "id cut", "photon veto cut", "jet veto cut", "all cuts"],
+            results = [standard_cuts, id_cut, photon_veto_cut, jet_veto_cut, all_cuts],
             cut_type = name
         )
 

@@ -3,8 +3,8 @@ import uproot
 import ROOT
 from pdb import set_trace
 
-log_path = "/eos/home-j/jiehan/root/outputs/"
-bkg_list = ["ZGToLLG", "EWKZ2J", "ZG2JToG2L2J", "WGToLNuG", "TT", "TTGJets", "TGJets", "WW", "WZ", "ZZ", "ttZJets", "ttWJets"]
+log_path = "/eos/home-j/jiehan/root/outputs/test/"
+bkg_list = ["ZGToLLG", "EWKZ2J", "ZG2JToG2L2J", "TT", "TTGJets", "TGJets", "WZ", "ZZ", "ttZJets", "ttWJets"]
 sig_list = ["ggH", "VBF", "WminusH", "WplusH", "ZH", "ttH"]
 data_list = ["Data"]
 # channels = ["zero_jet", "one_jet", "two_jet", "VH_ttH"]
@@ -17,12 +17,13 @@ f = ROOT.TFile(target_path, "RECREATE")
 xmin, xmax, xbin = 80, 180, 100
 
 for chan in channels:
-    result = ut.GetBDTBinary(log_path+"significances/bin_binaries_1D_{}.txt".format(chan))
-    num_bin = int(result[0])
-    binaries = result[1:num_bin+2]
+    with open(log_path+"significances/bin_boundaries_1D_{}.txt".format(chan)) as log_file:
+        boundaries = log_file.readlines()[0].split(" ")
+        num_bin = len(boundaries)
+        boundaries = [0.0] + [float(i) for i in boundaries]
 
     for cat in range(num_bin):
-        selections = com_sel + ["(bdt_score_t>{}) & (bdt_score_t<{})".format(binaries[cat], binaries[cat+1])]
+        selections = com_sel + ["(bdt_score_t>{}) & (bdt_score_t<{})".format(boundaries[cat], boundaries[cat+1])]
 
         name = "bkg_{}_cat{}".format(chan, cat)
         bkg_hist = ROOT.TH1D(name,name, xbin, xmin, xmax)
