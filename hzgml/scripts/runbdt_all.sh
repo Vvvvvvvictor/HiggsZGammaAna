@@ -60,12 +60,12 @@ echo "Shielded parameter is: $S . Added variables is: $A ."
 # python find_2D_best_boundaries.py
 # python plot_2D_cat_hmass_dis.py
 
-# python scripts/apply_bdt_bkg.py
-# python scripts/apply_bdt_sig_corr.py
+python scripts/apply_bdt_bkg.py
+python scripts/apply_bdt_sig_corr.py
 # python ../SSTest/Generate_template.py
 
 
-python ../SSTest/Generate_template.py
+# python ../SSTest/Generate_template.py
 # python scripts/Generate_fake_photon_template.py -r two_jet
 # python ../plot_python/make_data_driven_two_jet.py 
 # python ../plot_python/compare_sig_bkg_bdt_sosb.py

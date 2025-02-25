@@ -234,7 +234,11 @@ class ApplyXGBHandler(object):
         with uproot.recreate(output_path) as output_file:
             out_data = pd.DataFrame()
             for filename in tqdm(sorted(f_list), desc='XGB INFO: Applying BDTs to %s samples' % category, bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
-                file = uproot.open(filename)
+                try:
+                    file = uproot.open(filename)
+                except Exception as e:
+                    print('XGB ERROR: Failed to open file: ', filename)
+                    continue
                 for data in file[self._inputTree].iterate(branches, library='pd', step_size=self._chunksize): 
                 # for data in file[self._inputTree].iterate(library='pd', step_size=self._chunksize):
                     data = self.preselect(data)
@@ -251,6 +255,7 @@ class ApplyXGBHandler(object):
                         data_s = data[(data[self.randomIndex]-shift)%314159%4 == i]
                         data_o = data_s
                         # data_o = data_s[outputbraches]
+                        if data_s.shape[0] == 0: continue
 
                         for model in self.train_variables.keys():
                             x_Events = data_s[self.train_variables[model]]
@@ -265,10 +270,10 @@ class ApplyXGBHandler(object):
                             data_o[xgb_basename] = scores
                             data_o[xgb_basename+'_t'] = scores_t
 
-                        if out_data.shape[0] != 0 and data_o.shape[0] != 0:
+                        if out_data.shape[0] != 0:
                             out_data = pd.concat([out_data, data_o], ignore_index=True, sort=False)
                         else:
-                            out_data = data_o if data_o.shape[0] != 0 else out_data
+                            out_data = data_o
 
                 # out_data.to_root(output_path, key='test', mode='a', index=False)
                 

@@ -241,7 +241,7 @@ def main():
     # sigs = ['ggH','VBF','WminusH','WplusH','ZH','ttH']
 
     # bkgs = ['data_fake', 'mc_med', 'mc_true']
-    bkgs = ["ZGToLLG", "DYJetsToLL", "EWKZ2J", "ZG2JToG2L2J", "WGToLNuG", "TT", "TTGJets", "TGJets", "WW", "WZ", "ZZ", "ttZJets", "ttWJets"]
+    bkgs = ["ZGToLLG", "DYJetsToLL", "EWKZ2J", "ZG2JToG2L2J", "TT", "TTGJets", "TGJets", "WW", "WZ", "ZZ", "WWG", "WZG", "ZZG", "ttZJets", "ttWJets"]
     if args.floatB and args.nbin == 16:
         print('ERROR: With floatB option, the maximun nbin is 15!!')
         quit()

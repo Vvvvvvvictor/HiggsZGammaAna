@@ -368,7 +368,6 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     //     p->setConstant(kTRUE);
     // }
 
-
     cout << "\t=================================\n";
     cout << "\n\tFinish background function fit\n" << endl;
 
@@ -398,7 +397,6 @@ void SSTest(int cat = 0, int sig = 0, TString channel = "two_jet", TString bkg_f
     output << "\t" << bkg_fun.Data() << "\tsig:\tnpars = " << sig_npars << "\tchi^2 = " << frame_sig->chiSquare(sig_npars) << "\tprob = " << TMath::Prob(frame_sig->chiSquare(sig_npars)*sig_ndof, sig_ndof) << endl;
     frame_sig->Draw();
     gPad->Print(Form("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/SSTest/test/signal_shape_%s_cat%d_%s.png",channel.Data(),cat,bkg_fun.Data()));
-
 
     sigma.setConstant(true);MH.setConstant(true);sigma_CB.setConstant(true);alpha.setConstant(true);n_CB.setConstant(true);fracG1.setConstant(true);
 

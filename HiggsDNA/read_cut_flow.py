@@ -7,21 +7,21 @@ import time
 
 start_time = time.time()
 
-eos_path = '/eos/home-j/jiehan/parquet/nanov9/'
+eos_path = '/eos/home-j/jiehan/parquet/nanov12/'
 # log_path = '/eos/user/j/jiehan/eos_logs/'
 log_path = '/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/HiggsDNA/eos_logs/'
 
-# dataset_type = 'data'
-# dataset_names = ["Data"]
-# dataset_years = ["2023preBPix"] #"2016preVFP", "2016postVFP", "2017", "2018"
+dataset_type = 'data'
+dataset_names = ["Data"]
+dataset_years = ["2016postVFP"] #"2016preVFP", "2016postVFP", "2017", "2018", "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"
 
 # dataset_type = 'signal'
 # dataset_names = ["ggH_M125"] #"ggH", "VBF", "ZH", "ttH", "WplusH", "WminusH" "ggH_M125", "VBFH_M125", "ZH_M125", "ttH_M125", "WplusH_M125", "WminusH_M125"
 # dataset_years = ["2017"]#"2016preVFP", "2016postVFP", "2017", "2018", "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"
 
-dataset_type = 'bkgmc'
-dataset_names = ["DYJetsToLL"] # "DYJetsToLL", "EWKZ2J", "ZG2JToG2L2J" "ZGToLLG" "Data_SingleMuon", "Data_DoubleMuon", "Data_SingleElectron", "Data_DoubleEG"
-dataset_years = ["2017"] #"2016preVFP", "2016postVFP", "2017", "2018"]
+# dataset_type = 'bkgmc'
+# dataset_names = ["DYJetsToLL"] # "DYJetsToLL", "EWKZ2J", "ZG2JToG2L2J" "ZGToLLG" "Data_SingleMuon", "Data_DoubleMuon", "Data_SingleElectron", "Data_DoubleEG" "DYGto2LG_10to100" "DYGto2LG_10to50", "DYGto2LG_50to100"
+# dataset_years = ["2022preEE", "2022postEE"] #"2016preVFP", "2016postVFP", "2017", "2018"]
 
 cutflow_type = ['zgammas','zgammas_ele','zgammas_mu','zgammas_w','zgammas_ele_w','zgammas_mu_w']
 type_num = len(cutflow_type)
@@ -38,9 +38,9 @@ cut_num = len(cut_type)
 cutflow = {'zgammas':np.array(np.zeros(cut_num)), 'zgammas_ele':np.array(np.zeros(cut_num)), 'zgammas_mu':np.array(np.zeros(cut_num)), 'zgammas_w':np.array(np.zeros(cut_num)), 'zgammas_ele_w':np.array(np.zeros(cut_num)), 'zgammas_mu_w':np.array(np.zeros(cut_num))}
 
 electron_yields_dict, muon_yields_dict = {}, {}
-for dataset in dataset_names:
-    for year in dataset_years:
-        cutflow = {'zgammas':np.array(np.zeros(cut_num)), 'zgammas_ele':np.array(np.zeros(cut_num)), 'zgammas_mu':np.array(np.zeros(cut_num)), 'zgammas_w':np.array(np.zeros(cut_num)), 'zgammas_ele_w':np.array(np.zeros(cut_num)), 'zgammas_mu_w':np.array(np.zeros(cut_num))}
+for year in dataset_years:
+    cutflow = {'zgammas':np.array(np.zeros(cut_num)), 'zgammas_ele':np.array(np.zeros(cut_num)), 'zgammas_mu':np.array(np.zeros(cut_num)), 'zgammas_w':np.array(np.zeros(cut_num)), 'zgammas_ele_w':np.array(np.zeros(cut_num)), 'zgammas_mu_w':np.array(np.zeros(cut_num))}
+    for dataset in dataset_names:
         weight = 1
         try:
             print("reading: {}{}/{}_{}/merged_nominal.parquet".format(eos_path, dataset_type, dataset, year))
@@ -127,23 +127,23 @@ for dataset in dataset_names:
             #         print(log_dir)
             # break
 
-        for name in cutflow:
-            print(name)
-            cuts = cut_name[name]
-            for i, yields in enumerate(cutflow[name]):
-                cut = cuts[i]
-                # if i == 1 and 'w' not in name:
-                #     if 'mu' in name:
-                #         # print(muon_yields_dict)
-                #         print('\n'.join([f'{cut:>40} {yields:.0f}' for cut, yields in muon_yields_dict.items()]))
-                #     if "ele" in name:
-                #         # print(electron_yields_dict)
-                #         print('\n'.join([f'{cut:>40} {yields:.0f}' for cut, yields in electron_yields_dict.items()]))
-                if 'w' in name:
-                    print(f'{cut:>40} {yields:.3f}')
-                else:
-                    print(f'{cut:>40} {yields:.0f}')
-            print(' ')
+    for name in cutflow:
+        print(name)
+        cuts = cut_name[name]
+        for i, yields in enumerate(cutflow[name]):
+            cut = cuts[i]
+            # if i == 1 and 'w' not in name:
+            #     if 'mu' in name:
+            #         # print(muon_yields_dict)
+            #         print('\n'.join([f'{cut:>40} {yields:.0f}' for cut, yields in muon_yields_dict.items()]))
+            #     if "ele" in name:
+            #         # print(electron_yields_dict)
+            #         print('\n'.join([f'{cut:>40} {yields:.0f}' for cut, yields in electron_yields_dict.items()]))
+            if 'w' in name:
+                print(f'{cut:>40} {yields:.3f}')
+            else:
+                print(f'{cut:>40} {yields:.0f}')
+        print(' ')
 # print(cutflow['zgammas_ele'] + cutflow['zgammas_mu'])
 end_time = time.time()
 run_time = end_time - start_time

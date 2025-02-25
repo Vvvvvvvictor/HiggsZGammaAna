@@ -1,6 +1,6 @@
 {"common":   {"train_signal": ["ggH_M125", "VBF_M125"],
               "train_dd_background": [],
-              "train_mc_background": ["ZGToLLG", "DYJetsToLL", "EWKZ2J", "ZG2JToG2L2J", "TT", "TTGJets", "TGJets", "WW", "WZ", "ZZ", "ttZJets", "ttWJets"],
+              "train_mc_background": ["ZGToLLG", "DYJetsToLL", "EWKZ2J", "ZG2JToG2L2J", "TT", "TTGJets", "TGJets", "WW", "WZ", "ZZ", "WWG", "WZG", "ZZG", "ttZJets", "ttWJets"],
               "train_data_background": [],
               "train_variables": ["Z_cos_theta", "lep_phi", "lep_cos_theta",
                               "Z_lead_lepton_eta", "Z_sublead_lepton_eta", "gamma_eta",

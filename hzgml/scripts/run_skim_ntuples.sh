@@ -1,15 +1,15 @@
 #!/bin/bash                                                                                                                                                                       
 echo "==============STARTED=============="
 
-input="/eos/user/j/jiehan/parquet/nanov9/"
-target="/eos/home-j/jiehan/root/skimmed_ntuples_data_driven/"
 # input="/eos/user/j/jiehan/parquet/nanov9/"
-# target="/eos/home-j/jiehan/root/skimmed_ntuples_run2/"
+# target="/eos/home-j/jiehan/root/skimmed_ntuples_data_driven/"
+input="/eos/user/j/jiehan/parquet/nanov12/"
+target="/eos/home-j/jiehan/root/skimmed_ntuples_run3/"
 # target="./"
 
 # years=(2016preVFP 2016postVFP 2017 2018 2022preEE 2022postEE 2023preBPix 2023postBPix)
-years=(2016preVFP 2016postVFP 2017 2018)
-# years=(2022preEE 2022postEE 2023preBPix 2023postBPix)
+# years=(2016preVFP 2016postVFP 2017 2018)
+years=(2022preEE 2022postEE 2023preBPix 2023postBPix)
 systs=("FNUF" "Material" "Scale" "Smearing" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt")
 # systs=("FNUF" "Material" "Scale" "Smearing" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt")
 
@@ -123,19 +123,19 @@ process_sample_syst() {
 #     done
 # done
 
-# 处理 bkgmc 样本
+# # 处理 bkgmc 样本
 
-# samples=(ZGToLLG DYJetsToLL WGToLNuG ZG2JToG2L2J EWKZ2J TT TTGJets TGJets ttWJets ttZJets WW WZ ZZ DYGto2LG_10to50 DYGto2LG_50to100)
-samples=(Data)
-type="photon_id_data_driven"
-for sample in "${samples[@]}"; do
-    mkdir -p "$target$sample"
-    # 存储后台任务的进程ID列表
-    pid_list=()
+# # samples=(ZGToLLG DYJetsToLL WGToLNuG ZG2JToG2L2J EWKZ2J TT TTGJets TGJets ttWJets ttZJets WW WZ ZZ DYGto2LG_10to50 DYGto2LG_50to100)
+# samples=(Data)
+# type="photon_id_data_driven"
+# for sample in "${samples[@]}"; do
+#     mkdir -p "$target$sample"
+#     # 存储后台任务的进程ID列表
+#     pid_list=()
 
-    # 调用函数处理样本数据
-    process_sample "$sample" "$type"
-done
+#     # 调用函数处理样本数据
+#     process_sample "$sample" "$type"
+# done
 
 # # 处理 data 样本
 

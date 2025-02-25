@@ -44,7 +44,7 @@ WEIGHT = "weight"
 PATH = "/eos/user/j/jiehan/root/skimmed_ntuples_run2/"
 
 sig = {"sig": ["ggH_M125", "VBF_M125"], "ggH": ["ggH_M125"], "VBF": ["VBF_M125"]}
-bkg = {r"Z$+\gamma$": ["ZGToLLG"], "Z+Fake Photon": ["DYJetsToLL", "EWKZ2J"], r"VBSZ+$\gamma$": ["ZG2JToG2L2J"], r"t$\bar{t}$": ["TT"], r"t$\gamma$/t$\bar{t}\gamma$": ["TTGJets", "TGJets"], "multiboson": ["WW", "WZ", "ZZ"], r"t$\bar{t}$+X": ["ttZJets", "ttWJets"]}
+bkg = {r"Z$+\gamma$": ["ZGToLLG"], "Z+Fake Photon": ["DYJetsToLL", "EWKZ2J"], r"VBSZ+$\gamma$": ["ZG2JToG2L2J"], r"t$\bar{t}$": ["TT"], r"t$\gamma$/t$\bar{t}\gamma$": ["TTGJets", "TGJets"], "multiboson": ["WW", "WZ", "ZZ", "WWG", "WZG", "ZZG"], r"t$\bar{t}$+X": ["ttZJets", "ttWJets"]}
 color_dict = {r"Z$+\gamma$": "#3f90da", "Z+Fake Photon": "#ffa90e", r"VBSZ+$\gamma$": "#92dadd", r"t$\bar{t}$": "#e76300", r"t$\gamma$/t$\bar{t}\gamma$": "#bd1f01", "multiboson": "#832db6", r"t$\bar{t}$+X": "#94a4a2", "data": "black", "sig": "red", "ggH": "magenta", "VBF": "green"}
 
 def convert_root_to_hist(file_dict, selection=None):
@@ -132,5 +132,5 @@ for var in config_dict:
     plt.tight_layout()
     if os.path.exists("pic/sigVbkg") == False:
         os.makedirs("pic/sigVbkg")
-    plt.savefig(f"pic/sigVbkg/{VAR}.pdf")
+    plt.savefig(f"pic/sigVbkg/{VAR}.png")
     plt.clf()

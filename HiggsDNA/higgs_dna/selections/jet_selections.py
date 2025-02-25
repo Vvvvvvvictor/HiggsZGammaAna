@@ -13,7 +13,11 @@ JET_VETO_MAP_FILE = {
     "2016preVFP" : "higgs_dna/systematics/data/2016preVFP_UL/jetvetomaps.json",
     "2016postVFP" : "higgs_dna/systematics/data/2016postVFP_UL/jetvetomaps.json",
     "2017" : "higgs_dna/systematics/data/2017_UL/jetvetomaps.json",
-    "2018" : "higgs_dna/systematics/data/2018_UL/jetvetomaps.json"
+    "2018" : "higgs_dna/systematics/data/2018_UL/jetvetomaps.json",
+    "2022preEE" : "higgs_dna/systematics/data/2022preEE_UL/jetvetomaps.json",
+    "2022postEE" : "higgs_dna/systematics/data/2022postEE_UL/jetvetomaps.json",
+    "2023preBPix" : "higgs_dna/systematics/data/2023preBPix_UL/jetvetomaps.json",
+    "2023postBPix" : "higgs_dna/systematics/data/2023postBPix_UL/jetvetomaps.json"
 }
 
 DEFAULT_JETS = {
