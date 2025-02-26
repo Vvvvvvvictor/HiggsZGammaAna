@@ -1,0 +1,600 @@
+📌📌📌📌📌📌📌📌📌📌📌📌📌
+📌 Years 2016preVFP
+
+📌 Final Stored Data (Before Replacement):
+Cut Type: SelectedElectron
+   - pt > 7.0000                    → 542671381
+   - |etasc| <= 2.5000              → 541073316
+   - |dxy| <= 0.5000                → 521057583
+   - |dz| <= 1.0000                 → 464969462
+   - standard object cuts           → 461819989
+   - id cut                         → 275002943
+   - ee-eb transition               → 275002943
+   - all cuts                       → 288040440
+Cut Type: SelectedMuon
+   - pt > 5.0000                    → 452336289
+   - |eta| <= 2.4000                → 451073739
+   - |dxy| <= 0.5000                → 448951117
+   - |dz| <= 1.0000                 → 416644518
+   - pfRelIso03_all < 0.3500        → 336279398
+   - sip3d < 4.0000                 → 299433679
+   - standard object cuts           → 288302594
+   - id cut                         → 282998452
+   - global_muon cut                → 282998452
+   - all cuts                       → 305651455
+Cut Type: photon
+   - pt                             → 774864130
+   - eta                            → 807115152
+   - id                             → 257544001
+   - e_veto                         → 451105170
+   - ele_pho_overlap                → 572056879
+   - all                            → 45082817
+Cut Type: SelectedJet
+   - pt > 30.0000                   → 962140282
+   - |eta| <= 4.7000                → 962139998
+   - dR with 'photons' > 0.40       → 960377768
+   - dR with 'electrons' > 0.40     → 931983271
+   - dR with 'muons' > 0.40         → 889750484
+   - std cuts                       → 653527161
+   - id cut                         → 652412345
+   - photon veto cut                → 652410423
+Cut Type: zgammas
+   - all                            → 998168824
+   - N_lep_sel                      → 39031337
+   - trig_cut                       → 37545906
+   - lep_pt_cut                     → 33969095
+   - has_g_cand                     → 234157
+   - has_z_cand                     → 58494
+   - sel_h_1                        → 45838
+   - sel_h_2                        → 43209
+   - sel_h_3                        → 36616
+   - event                          → 36585
+   - all cuts                       → 36585
+Cut Type: zgammas_ele
+   - all                            → 998168824
+   - N_lep_sel                      → 15012536
+   - trig_cut                       → 14460634
+   - lep_pt_cut                     → 13888204
+   - has_g_cand                     → 92501
+   - has_z_cand                     → 26595
+   - sel_h_1                        → 20840
+   - sel_h_2                        → 19630
+   - sel_h_3                        → 16616
+   - event                          → 16601
+   - all cuts                       → 36585
+Cut Type: zgammas_mu
+   - all                            → 998168824
+   - N_lep_sel                      → 24018801
+   - trig_cut                       → 23071914
+   - lep_pt_cut                     → 20072641
+   - has_g_cand                     → 141585
+   - has_z_cand                     → 31893
+   - sel_h_1                        → 24992
+   - sel_h_2                        → 23573
+   - sel_h_3                        → 19995
+   - event                          → 19979
+   - all cuts                       → 36585
+
+📌 Final Stored Data (After Replacement):
+Cut Type: SelectedElectron
+     pt > 7.0000                    & 542671381 \\ 
+     |etasc| <= 2.5000              & 541073316 \\ 
+     |dxy| <= 0.5000                & 521057583 \\ 
+     |dz| <= 1.0000                 & 464969462 \\ 
+     standard object cuts           & 461819989 \\ 
+     id cut                         & 275002943 \\ 
+     ee-eb transition               & 275002943 \\ 
+     all cuts                       & 288040440 \\ 
+Cut Type: SelectedMuon
+     pt > 5.0000                    & 452336289 \\ 
+     |eta| <= 2.4000                & 451073739 \\ 
+     |dxy| <= 0.5000                & 448951117 \\ 
+     |dz| <= 1.0000                 & 416644518 \\ 
+     pfRelIso03_all < 0.3500        & 336279398 \\ 
+     sip3d < 4.0000                 & 299433679 \\ 
+     standard object cuts           & 288302594 \\ 
+     id cut                         & 282998452 \\ 
+     global_muon cut                & 282998452 \\ 
+     all cuts                       & 305651455 \\ 
+Cut Type: photon
+     pt                             & 774864130 \\ 
+     eta                            & 807115152 \\ 
+     id                             & 257544001 \\ 
+     e_veto                         & 451105170 \\ 
+     ele_pho_overlap                & 572056879 \\ 
+     all                            & 45082817 \\ 
+Cut Type: SelectedJet
+     pt > 30.0000                   & 962140282 \\ 
+     |eta| <= 4.7000                & 962139998 \\ 
+     dR with 'photons' > 0.40       & 960377768 \\ 
+     dR with 'electrons' > 0.40     & 931983271 \\ 
+     dR with 'muons' > 0.40         & 889750484 \\ 
+     std cuts                       & 653527161 \\ 
+     id cut                         & 652412345 \\ 
+     photon veto cut                & 652410423 \\ 
+Cut Type: zgammas
+     Initial Events                 & 998168824 \\ 
+     $N_{l} \geq 2$                 & 39031337 \\ 
+     e, ee trigger || $\mu\mu$, $\mu$ triggers  & 37545906 \\ 
+     lepton trigger pT cut          & 33969095 \\ 
+     $N_{\gamma} \geq 1$            & 234157 \\ 
+     $80 \text{ GeV} < m_{ll} < 100 \text{ GeV}$ & 58494 \\ 
+     $p_{T}^{\gamma}/m_{ll\gamma} > 15/110$ & 45838 \\ 
+     $m_{ll} + m_{ll\gamma} > 185 \text{ GeV}$ & 43209 \\ 
+     $100 \text{ GeV} < m_{ll\gamma} < 180 \text{ GeV}$ & 36616 \\ 
+     Event Filtering                & 36585 \\ 
+     Total Baseline Events          & 36585 \\ 
+Cut Type: zgammas_ele
+     Initial Events                 & 998168824 \\ 
+     $N_{\textrm{e}} \geq 2$        & 15012536 \\ 
+     ee, e triggers                 & 14460634 \\ 
+     ee, e trigger pT cut           & 13888204 \\ 
+     $N_{\gamma} \geq 1$            & 92501 \\ 
+     $80 \text{ GeV} < m_{\textrm{ee}} < 100 \text{ GeV}$ & 26595 \\ 
+     $p_{T}^{\gamma}/m_{\textrm{ee}\gamma} > 15/110$ & 20840 \\ 
+     $m_{\textrm{ee}} + m_{\textrm{ee}\gamma} > 185 \text{ GeV}$ & 19630 \\ 
+     $100 \text{ GeV} < m_{\textrm{ee}\gamma} < 180 \text{ GeV}$ & 16616 \\ 
+     Event Filtering                & 16601 \\ 
+     Total Baseline Events          & 36585 \\ 
+Cut Type: zgammas_mu
+     Initial Events                 & 998168824 \\ 
+     $N_{\mu} \geq 2$               & 24018801 \\ 
+     $\mu\mu$, $\mu$ triggers       & 23071914 \\ 
+     $\mu\mu$, $\mu$ trigger pT cut & 20072641 \\ 
+     $N_{\gamma} \geq 1$            & 141585 \\ 
+     $80 \text{ GeV} < m_{\mu\mu} < 100 \text{ GeV}$ & 31893 \\ 
+     $p_{T}^{\gamma}/m_{\mu\mu\gamma} > 15/110$ & 24992 \\ 
+     $m_{\mu\mu} + m_{\mu\mu\gamma} > 185 \text{ GeV}$ & 23573 \\ 
+     $100 \text{ GeV} < m_{\mu\mu\gamma} < 180 \text{ GeV}$ & 19995 \\ 
+     Event Filtering                & 19979 \\ 
+     Total Baseline Events          & 36585 \\ 
+
+📌 Years 2016postVFP
+
+📌 Final Stored Data (Before Replacement):
+Cut Type: SelectedElectron
+   - pt > 7.0000                    → 284630206
+   - |etasc| <= 2.5000              → 284023864
+   - |dxy| <= 0.5000                → 275414701
+   - |dz| <= 1.0000                 → 248278664
+   - standard object cuts           → 246869986
+   - id cut                         → 173221599
+   - ee-eb transition               → 173221599
+   - all cuts                       → 185355014
+Cut Type: SelectedMuon
+   - pt > 5.0000                    → 325614827
+   - |eta| <= 2.4000                → 324862290
+   - |dxy| <= 0.5000                → 323341129
+   - |dz| <= 1.0000                 → 306334938
+   - pfRelIso03_all < 0.3500        → 261438928
+   - sip3d < 4.0000                 → 238293811
+   - standard object cuts           → 231115872
+   - id cut                         → 227789373
+   - global_muon cut                → 227789373
+   - all cuts                       → 248779442
+Cut Type: photon
+   - pt                             → 386609622
+   - eta                            → 400500921
+   - id                             → 172803163
+   - e_veto                         → 215658304
+   - ele_pho_overlap                → 243072639
+   - all                            → 23443437
+Cut Type: SelectedJet
+   - pt > 30.0000                   → 563249777
+   - |eta| <= 4.7000                → 563249669
+   - dR with 'photons' > 0.40       → 562615654
+   - dR with 'electrons' > 0.40     → 546816612
+   - dR with 'muons' > 0.40         → 520051851
+   - std cuts                       → 333512714
+   - id cut                         → 333287407
+   - photon veto cut                → 333286970
+Cut Type: zgammas
+   - all                            → 584019429
+   - N_lep_sel                      → 34791275
+   - trig_cut                       → 34050564
+   - lep_pt_cut                     → 30578467
+   - has_g_cand                     → 220782
+   - has_z_cand                     → 55341
+   - sel_h_1                        → 42682
+   - sel_h_2                        → 40119
+   - sel_h_3                        → 34390
+   - event                          → 34366
+   - all cuts                       → 34366
+Cut Type: zgammas_ele
+   - all                            → 584019429
+   - N_lep_sel                      → 12875857
+   - trig_cut                       → 12602603
+   - lep_pt_cut                     → 12119085
+   - has_g_cand                     → 85107
+   - has_z_cand                     → 24869
+   - sel_h_1                        → 19280
+   - sel_h_2                        → 18066
+   - sel_h_3                        → 15410
+   - event                          → 15401
+   - all cuts                       → 34366
+Cut Type: zgammas_mu
+   - all                            → 584019429
+   - N_lep_sel                      → 21915418
+   - trig_cut                       → 21437489
+   - lep_pt_cut                     → 18452075
+   - has_g_cand                     → 135594
+   - has_z_cand                     → 30468
+   - sel_h_1                        → 23398
+   - sel_h_2                        → 22050
+   - sel_h_3                        → 18978
+   - event                          → 18963
+   - all cuts                       → 34366
+
+📌 Final Stored Data (After Replacement):
+Cut Type: SelectedElectron
+     pt > 7.0000                    & 284630206 \\ 
+     |etasc| <= 2.5000              & 284023864 \\ 
+     |dxy| <= 0.5000                & 275414701 \\ 
+     |dz| <= 1.0000                 & 248278664 \\ 
+     standard object cuts           & 246869986 \\ 
+     id cut                         & 173221599 \\ 
+     ee-eb transition               & 173221599 \\ 
+     all cuts                       & 185355014 \\ 
+Cut Type: SelectedMuon
+     pt > 5.0000                    & 325614827 \\ 
+     |eta| <= 2.4000                & 324862290 \\ 
+     |dxy| <= 0.5000                & 323341129 \\ 
+     |dz| <= 1.0000                 & 306334938 \\ 
+     pfRelIso03_all < 0.3500        & 261438928 \\ 
+     sip3d < 4.0000                 & 238293811 \\ 
+     standard object cuts           & 231115872 \\ 
+     id cut                         & 227789373 \\ 
+     global_muon cut                & 227789373 \\ 
+     all cuts                       & 248779442 \\ 
+Cut Type: photon
+     pt                             & 386609622 \\ 
+     eta                            & 400500921 \\ 
+     id                             & 172803163 \\ 
+     e_veto                         & 215658304 \\ 
+     ele_pho_overlap                & 243072639 \\ 
+     all                            & 23443437 \\ 
+Cut Type: SelectedJet
+     pt > 30.0000                   & 563249777 \\ 
+     |eta| <= 4.7000                & 563249669 \\ 
+     dR with 'photons' > 0.40       & 562615654 \\ 
+     dR with 'electrons' > 0.40     & 546816612 \\ 
+     dR with 'muons' > 0.40         & 520051851 \\ 
+     std cuts                       & 333512714 \\ 
+     id cut                         & 333287407 \\ 
+     photon veto cut                & 333286970 \\ 
+Cut Type: zgammas
+     Initial Events                 & 584019429 \\ 
+     $N_{l} \geq 2$                 & 34791275 \\ 
+     e, ee trigger || $\mu\mu$, $\mu$ triggers  & 34050564 \\ 
+     lepton trigger pT cut          & 30578467 \\ 
+     $N_{\gamma} \geq 1$            & 220782 \\ 
+     $80 \text{ GeV} < m_{ll} < 100 \text{ GeV}$ & 55341 \\ 
+     $p_{T}^{\gamma}/m_{ll\gamma} > 15/110$ & 42682 \\ 
+     $m_{ll} + m_{ll\gamma} > 185 \text{ GeV}$ & 40119 \\ 
+     $100 \text{ GeV} < m_{ll\gamma} < 180 \text{ GeV}$ & 34390 \\ 
+     Event Filtering                & 34366 \\ 
+     Total Baseline Events          & 34366 \\ 
+Cut Type: zgammas_ele
+     Initial Events                 & 584019429 \\ 
+     $N_{\textrm{e}} \geq 2$        & 12875857 \\ 
+     ee, e triggers                 & 12602603 \\ 
+     ee, e trigger pT cut           & 12119085 \\ 
+     $N_{\gamma} \geq 1$            & 85107 \\ 
+     $80 \text{ GeV} < m_{\textrm{ee}} < 100 \text{ GeV}$ & 24869 \\ 
+     $p_{T}^{\gamma}/m_{\textrm{ee}\gamma} > 15/110$ & 19280 \\ 
+     $m_{\textrm{ee}} + m_{\textrm{ee}\gamma} > 185 \text{ GeV}$ & 18066 \\ 
+     $100 \text{ GeV} < m_{\textrm{ee}\gamma} < 180 \text{ GeV}$ & 15410 \\ 
+     Event Filtering                & 15401 \\ 
+     Total Baseline Events          & 34366 \\ 
+Cut Type: zgammas_mu
+     Initial Events                 & 584019429 \\ 
+     $N_{\mu} \geq 2$               & 21915418 \\ 
+     $\mu\mu$, $\mu$ triggers       & 21437489 \\ 
+     $\mu\mu$, $\mu$ trigger pT cut & 18452075 \\ 
+     $N_{\gamma} \geq 1$            & 135594 \\ 
+     $80 \text{ GeV} < m_{\mu\mu} < 100 \text{ GeV}$ & 30468 \\ 
+     $p_{T}^{\gamma}/m_{\mu\mu\gamma} > 15/110$ & 23398 \\ 
+     $m_{\mu\mu} + m_{\mu\mu\gamma} > 185 \text{ GeV}$ & 22050 \\ 
+     $100 \text{ GeV} < m_{\mu\mu\gamma} < 180 \text{ GeV}$ & 18978 \\ 
+     Event Filtering                & 18963 \\ 
+     Total Baseline Events          & 34366 \\ 
+
+📌 Years 2017
+
+📌 Final Stored Data (Before Replacement):
+Cut Type: SelectedElectron
+   - pt > 7.0000                    → 572069086
+   - |etasc| <= 2.5000              → 566727935
+   - |dxy| <= 0.5000                → 557937634
+   - |dz| <= 1.0000                 → 507588878
+   - standard object cuts           → 504874160
+   - id cut                         → 356812674
+   - ee-eb transition               → 356812674
+   - all cuts                       → 386636150
+Cut Type: SelectedMuon
+   - pt > 5.0000                    → 734694046
+   - |eta| <= 2.4000                → 733145827
+   - |dxy| <= 0.5000                → 730451132
+   - |dz| <= 1.0000                 → 692623368
+   - pfRelIso03_all < 0.3500        → 588987280
+   - sip3d < 4.0000                 → 530236338
+   - standard object cuts           → 510846908
+   - id cut                         → 503538801
+   - global_muon cut                → 503538801
+   - all cuts                       → 550728212
+Cut Type: photon
+   - pt                             → 870474375
+   - eta                            → 896165582
+   - id                             → 335950769
+   - e_veto                         → 457575714
+   - ele_pho_overlap                → 576555929
+   - all                            → 35875166
+Cut Type: SelectedJet
+   - pt > 30.0000                   → 1212693435
+   - |eta| <= 4.7000                → 1212693290
+   - dR with 'photons' > 0.40       → 1212139121
+   - dR with 'electrons' > 0.40     → 1182988972
+   - dR with 'muons' > 0.40         → 1130507317
+   - std cuts                       → 731094740
+   - id cut                         → 730787725
+   - photon veto cut                → 730787599
+Cut Type: zgammas
+   - all                            → 1244773972
+   - N_lep_sel                      → 81085079
+   - trig_cut                       → 76755001
+   - lep_pt_cut                     → 71691323
+   - has_g_cand                     → 507989
+   - has_z_cand                     → 138380
+   - sel_h_1                        → 105608
+   - sel_h_2                        → 99736
+   - sel_h_3                        → 85796
+   - event                          → 85694
+   - all cuts                       → 85694
+Cut Type: zgammas_ele
+   - all                            → 1244773972
+   - N_lep_sel                      → 31641392
+   - trig_cut                       → 30129789
+   - lep_pt_cut                     → 29279481
+   - has_g_cand                     → 196694
+   - has_z_cand                     → 61469
+   - sel_h_1                        → 47100
+   - sel_h_2                        → 44375
+   - sel_h_3                        → 38014
+   - event                          → 37973
+   - all cuts                       → 85694
+Cut Type: zgammas_mu
+   - all                            → 1244773972
+   - N_lep_sel                      → 49443687
+   - trig_cut                       → 46597592
+   - lep_pt_cut                     → 42394021
+   - has_g_cand                     → 311105
+   - has_z_cand                     → 76903
+   - sel_h_1                        → 58500
+   - sel_h_2                        → 55353
+   - sel_h_3                        → 47775
+   - event                          → 47714
+   - all cuts                       → 85694
+
+📌 Final Stored Data (After Replacement):
+Cut Type: SelectedElectron
+     pt > 7.0000                    & 572069086 \\ 
+     |etasc| <= 2.5000              & 566727935 \\ 
+     |dxy| <= 0.5000                & 557937634 \\ 
+     |dz| <= 1.0000                 & 507588878 \\ 
+     standard object cuts           & 504874160 \\ 
+     id cut                         & 356812674 \\ 
+     ee-eb transition               & 356812674 \\ 
+     all cuts                       & 386636150 \\ 
+Cut Type: SelectedMuon
+     pt > 5.0000                    & 734694046 \\ 
+     |eta| <= 2.4000                & 733145827 \\ 
+     |dxy| <= 0.5000                & 730451132 \\ 
+     |dz| <= 1.0000                 & 692623368 \\ 
+     pfRelIso03_all < 0.3500        & 588987280 \\ 
+     sip3d < 4.0000                 & 530236338 \\ 
+     standard object cuts           & 510846908 \\ 
+     id cut                         & 503538801 \\ 
+     global_muon cut                & 503538801 \\ 
+     all cuts                       & 550728212 \\ 
+Cut Type: photon
+     pt                             & 870474375 \\ 
+     eta                            & 896165582 \\ 
+     id                             & 335950769 \\ 
+     e_veto                         & 457575714 \\ 
+     ele_pho_overlap                & 576555929 \\ 
+     all                            & 35875166 \\ 
+Cut Type: SelectedJet
+     pt > 30.0000                   & 1212693435 \\ 
+     |eta| <= 4.7000                & 1212693290 \\ 
+     dR with 'photons' > 0.40       & 1212139121 \\ 
+     dR with 'electrons' > 0.40     & 1182988972 \\ 
+     dR with 'muons' > 0.40         & 1130507317 \\ 
+     std cuts                       & 731094740 \\ 
+     id cut                         & 730787725 \\ 
+     photon veto cut                & 730787599 \\ 
+Cut Type: zgammas
+     Initial Events                 & 1244773972 \\ 
+     $N_{l} \geq 2$                 & 81085079 \\ 
+     e, ee trigger || $\mu\mu$, $\mu$ triggers  & 76755001 \\ 
+     lepton trigger pT cut          & 71691323 \\ 
+     $N_{\gamma} \geq 1$            & 507989 \\ 
+     $80 \text{ GeV} < m_{ll} < 100 \text{ GeV}$ & 138380 \\ 
+     $p_{T}^{\gamma}/m_{ll\gamma} > 15/110$ & 105608 \\ 
+     $m_{ll} + m_{ll\gamma} > 185 \text{ GeV}$ & 99736 \\ 
+     $100 \text{ GeV} < m_{ll\gamma} < 180 \text{ GeV}$ & 85796 \\ 
+     Event Filtering                & 85694 \\ 
+     Total Baseline Events          & 85694 \\ 
+Cut Type: zgammas_ele
+     Initial Events                 & 1244773972 \\ 
+     $N_{\textrm{e}} \geq 2$        & 31641392 \\ 
+     ee, e triggers                 & 30129789 \\ 
+     ee, e trigger pT cut           & 29279481 \\ 
+     $N_{\gamma} \geq 1$            & 196694 \\ 
+     $80 \text{ GeV} < m_{\textrm{ee}} < 100 \text{ GeV}$ & 61469 \\ 
+     $p_{T}^{\gamma}/m_{\textrm{ee}\gamma} > 15/110$ & 47100 \\ 
+     $m_{\textrm{ee}} + m_{\textrm{ee}\gamma} > 185 \text{ GeV}$ & 44375 \\ 
+     $100 \text{ GeV} < m_{\textrm{ee}\gamma} < 180 \text{ GeV}$ & 38014 \\ 
+     Event Filtering                & 37973 \\ 
+     Total Baseline Events          & 85694 \\ 
+Cut Type: zgammas_mu
+     Initial Events                 & 1244773972 \\ 
+     $N_{\mu} \geq 2$               & 49443687 \\ 
+     $\mu\mu$, $\mu$ triggers       & 46597592 \\ 
+     $\mu\mu$, $\mu$ trigger pT cut & 42394021 \\ 
+     $N_{\gamma} \geq 1$            & 311105 \\ 
+     $80 \text{ GeV} < m_{\mu\mu} < 100 \text{ GeV}$ & 76903 \\ 
+     $p_{T}^{\gamma}/m_{\mu\mu\gamma} > 15/110$ & 58500 \\ 
+     $m_{\mu\mu} + m_{\mu\mu\gamma} > 185 \text{ GeV}$ & 55353 \\ 
+     $100 \text{ GeV} < m_{\mu\mu\gamma} < 180 \text{ GeV}$ & 47775 \\ 
+     Event Filtering                & 47714 \\ 
+     Total Baseline Events          & 85694 \\ 
+
+📌 Years 2018
+
+📌 Final Stored Data (Before Replacement):
+Cut Type: SelectedElectron
+   - pt > 7.0000                    → 933021067
+   - |etasc| <= 2.5000              → 919787130
+   - |dxy| <= 0.5000                → 904566731
+   - |dz| <= 1.0000                 → 821328989
+   - standard object cuts           → 816377495
+   - id cut                         → 562369517
+   - ee-eb transition               → 562369517
+   - all cuts                       → 605538060
+Cut Type: SelectedMuon
+   - pt > 5.0000                    → 998566346
+   - |eta| <= 2.4000                → 995959400
+   - |dxy| <= 0.5000                → 992093319
+   - |dz| <= 1.0000                 → 941081672
+   - pfRelIso03_all < 0.3500        → 819159075
+   - sip3d < 4.0000                 → 744310184
+   - standard object cuts           → 720846710
+   - id cut                         → 711584740
+   - global_muon cut                → 711584740
+   - all cuts                       → 778778165
+Cut Type: photon
+   - pt                             → 1471616842
+   - eta                            → 1478347026
+   - id                             → 516041957
+   - e_veto                         → 764526494
+   - ele_pho_overlap                → 1003779500
+   - all                            → 59366796
+Cut Type: SelectedJet
+   - pt > 30.0000                   → 1820437857
+   - |eta| <= 4.7000                → 1820437702
+   - dR with 'photons' > 0.40       → 1819627335
+   - dR with 'electrons' > 0.40     → 1779135909
+   - dR with 'muons' > 0.40         → 1703706804
+   - std cuts                       → 1112036386
+   - id cut                         → 1111594433
+   - photon veto cut                → 1111594217
+Cut Type: zgammas
+   - all                            → 1853252426
+   - N_lep_sel                      → 116228406
+   - trig_cut                       → 113667417
+   - lep_pt_cut                     → 106386920
+   - has_g_cand                     → 751681
+   - has_z_cand                     → 200261
+   - sel_h_1                        → 155505
+   - sel_h_2                        → 146765
+   - sel_h_3                        → 125665
+   - event                          → 125508
+   - all cuts                       → 125508
+Cut Type: zgammas_ele
+   - all                            → 1853252426
+   - N_lep_sel                      → 46792938
+   - trig_cut                       → 44884074
+   - lep_pt_cut                     → 43693829
+   - has_g_cand                     → 292112
+   - has_z_cand                     → 90626
+   - sel_h_1                        → 70350
+   - sel_h_2                        → 66224
+   - sel_h_3                        → 56333
+   - event                          → 56265
+   - all cuts                       → 125508
+Cut Type: zgammas_mu
+   - all                            → 1853252426
+   - N_lep_sel                      → 69435468
+   - trig_cut                       → 68744378
+   - lep_pt_cut                     → 62665283
+   - has_g_cand                     → 459284
+   - has_z_cand                     → 109622
+   - sel_h_1                        → 85144
+   - sel_h_2                        → 80530
+   - sel_h_3                        → 69321
+   - event                          → 69232
+   - all cuts                       → 125508
+
+📌 Final Stored Data (After Replacement):
+Cut Type: SelectedElectron
+     pt > 7.0000                    & 933021067 \\ 
+     |etasc| <= 2.5000              & 919787130 \\ 
+     |dxy| <= 0.5000                & 904566731 \\ 
+     |dz| <= 1.0000                 & 821328989 \\ 
+     standard object cuts           & 816377495 \\ 
+     id cut                         & 562369517 \\ 
+     ee-eb transition               & 562369517 \\ 
+     all cuts                       & 605538060 \\ 
+Cut Type: SelectedMuon
+     pt > 5.0000                    & 998566346 \\ 
+     |eta| <= 2.4000                & 995959400 \\ 
+     |dxy| <= 0.5000                & 992093319 \\ 
+     |dz| <= 1.0000                 & 941081672 \\ 
+     pfRelIso03_all < 0.3500        & 819159075 \\ 
+     sip3d < 4.0000                 & 744310184 \\ 
+     standard object cuts           & 720846710 \\ 
+     id cut                         & 711584740 \\ 
+     global_muon cut                & 711584740 \\ 
+     all cuts                       & 778778165 \\ 
+Cut Type: photon
+     pt                             & 1471616842 \\ 
+     eta                            & 1478347026 \\ 
+     id                             & 516041957 \\ 
+     e_veto                         & 764526494 \\ 
+     ele_pho_overlap                & 1003779500 \\ 
+     all                            & 59366796 \\ 
+Cut Type: SelectedJet
+     pt > 30.0000                   & 1820437857 \\ 
+     |eta| <= 4.7000                & 1820437702 \\ 
+     dR with 'photons' > 0.40       & 1819627335 \\ 
+     dR with 'electrons' > 0.40     & 1779135909 \\ 
+     dR with 'muons' > 0.40         & 1703706804 \\ 
+     std cuts                       & 1112036386 \\ 
+     id cut                         & 1111594433 \\ 
+     photon veto cut                & 1111594217 \\ 
+Cut Type: zgammas
+     Initial Events                 & 1853252426 \\ 
+     $N_{l} \geq 2$                 & 116228406 \\ 
+     e, ee trigger || $\mu\mu$, $\mu$ triggers  & 113667417 \\ 
+     lepton trigger pT cut          & 106386920 \\ 
+     $N_{\gamma} \geq 1$            & 751681 \\ 
+     $80 \text{ GeV} < m_{ll} < 100 \text{ GeV}$ & 200261 \\ 
+     $p_{T}^{\gamma}/m_{ll\gamma} > 15/110$ & 155505 \\ 
+     $m_{ll} + m_{ll\gamma} > 185 \text{ GeV}$ & 146765 \\ 
+     $100 \text{ GeV} < m_{ll\gamma} < 180 \text{ GeV}$ & 125665 \\ 
+     Event Filtering                & 125508 \\ 
+     Total Baseline Events          & 125508 \\ 
+Cut Type: zgammas_ele
+     Initial Events                 & 1853252426 \\ 
+     $N_{\textrm{e}} \geq 2$        & 46792938 \\ 
+     ee, e triggers                 & 44884074 \\ 
+     ee, e trigger pT cut           & 43693829 \\ 
+     $N_{\gamma} \geq 1$            & 292112 \\ 
+     $80 \text{ GeV} < m_{\textrm{ee}} < 100 \text{ GeV}$ & 90626 \\ 
+     $p_{T}^{\gamma}/m_{\textrm{ee}\gamma} > 15/110$ & 70350 \\ 
+     $m_{\textrm{ee}} + m_{\textrm{ee}\gamma} > 185 \text{ GeV}$ & 66224 \\ 
+     $100 \text{ GeV} < m_{\textrm{ee}\gamma} < 180 \text{ GeV}$ & 56333 \\ 
+     Event Filtering                & 56265 \\ 
+     Total Baseline Events          & 125508 \\ 
+Cut Type: zgammas_mu
+     Initial Events                 & 1853252426 \\ 
+     $N_{\mu} \geq 2$               & 69435468 \\ 
+     $\mu\mu$, $\mu$ triggers       & 68744378 \\ 
+     $\mu\mu$, $\mu$ trigger pT cut & 62665283 \\ 
+     $N_{\gamma} \geq 1$            & 459284 \\ 
+     $80 \text{ GeV} < m_{\mu\mu} < 100 \text{ GeV}$ & 109622 \\ 
+     $p_{T}^{\gamma}/m_{\mu\mu\gamma} > 15/110$ & 85144 \\ 
+     $m_{\mu\mu} + m_{\mu\mu\gamma} > 185 \text{ GeV}$ & 80530 \\ 
+     $100 \text{ GeV} < m_{\mu\mu\gamma} < 180 \text{ GeV}$ & 69321 \\ 
+     Event Filtering                & 69232 \\ 
+     Total Baseline Events          & 125508 \\ 

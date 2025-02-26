@@ -67,7 +67,7 @@ def convert_root_to_hist(file_dict, selection=""):
                     except:
                         continue
                 samples = samples.query(selection)
-                hist, _ = np.histogram(samples.query("H_mass<120 | H_mass>130")["H_mass"], bins=80, range=[100, 180], weights=samples.query("H_mass<120 | H_mass>130")[WEIGHT])
+                hist, _ = np.histogram(samples["H_mass"], bins=80, range=[100, 180], weights=samples[WEIGHT])
                 mass_hist = mass_hist + hist
                 hist, bins = np.histogram(samples[VAR], bins=BINS, range=[RMIN, RMAX], weights=samples[WEIGHT])
                 hist[0] += np.sum(samples[WEIGHT][samples[VAR] < RMIN])
@@ -91,7 +91,7 @@ for i in config_dict:
     
     print("\n\n", VAR, RMIN, RMAX, "\n\n")
 
-    hist2, hist2_err, bins, mass2_hist = convert_root_to_hist(bkg, selection="(H_mass<120) | (H_mass>130)" if "H_mass" not in VAR else None)
+    hist2, hist2_err, bins, mass2_hist = convert_root_to_hist(bkg, selection="(H_mass<120) | (H_mass>130)" if "H_mass" not in VAR else "")
 
     hist1, hist1_err, _, mass1_hist = convert_root_to_hist(data, selection="(H_mass<120) | (H_mass>130)")
     sf = sum(mass1_hist)/sum(mass2_hist)

@@ -27,11 +27,11 @@ def getArgs():
     parser.add_argument('-p', '--params', action='store', type=dict, default=None, help='json string.') #type=json.loads
     parser.add_argument('--hyperparams_path', action='store', default=None, help='path of hyperparameters json') 
     parser.add_argument('--save', action='store_true', help='Save model weights to HDF5 file')
-    parser.add_argument('--corr', action='store_true', default=True, help='Plot corelation between each training variables')
+    parser.add_argument('--corr', action='store_true', default=False, help='Plot corelation between each training variables')
     parser.add_argument('--importance', action='store_true', default=True, help='Plot importance of variables, parameter "gain" is recommanded')
     parser.add_argument('--roc', action='store_true', default=True, help='Plot ROC')
     parser.add_argument('--optuna', action='store_true', default=False, help='Run hyperparameter tuning using optuna')
-    parser.add_argument('--optuna_metric', action='store', default='auc', choices=['eval_auc', 'sqrt_eval_auc_minus_train_auc', 'eval_auc_minus_train_auc', 'eval_auc_over_train_auc', "eval_auc_minus_train_auc", "eval_significance", "sqrt_eval_significance_minus_train_significance", 'eval_auc_with_mass_shape_factor'], help='Optuna metric to optimize')
+    parser.add_argument('--optuna_metric', action='store', default='auc', choices=['eval_auc', 'sqrt_eval_auc_minus_train_auc', 'eval_auc_minus_train_auc', 'eval_auc_over_train_auc', "eval_auc_minus_train_auc", "eval_significance", "sqrt_eval_significance_minus_train_significance"], help='Optuna metric to optimize')
     parser.add_argument('--n-calls', action='store', type=int, default=36, help='Steps of hyperparameter tuning using optuna')
     parser.add_argument('--continue-optuna', action='store', type=int, default=0, help='Continue tuning hyperparameters using optuna')
 
@@ -120,7 +120,7 @@ class XGBoostHandler(object):
         self.weight = 'weight'
         self.params = [{'eval_metric': ['auc', 'logloss']}]
         self.early_stopping_rounds = 10
-        self.numRound = 1000
+        self.numRound = 10000
         self.SF = -1
         self.readConfig(configPath)
         self.checkConfig()
@@ -336,16 +336,12 @@ class XGBoostHandler(object):
             data = self.m_data_sig
         else:
             data = self.m_data_bkg
-        rename_map = {"l1g_deltaR": "max_deltaR", "l2g_deltaR": "min_deltaR"}
-        for col in rename_map.keys():
-            if col in data.columns:
-                data = data.rename(columns={col: rename_map[col]})
         columns = list(data.columns)
-        for rem in ("is_center", "weight", "event", "gamma_mvaID_WP80", "gamma_mvaID_WPL", "n_iso_photons", "n_b_jets", "n_jets", "H_mass", "gamma_pt"):
+        for rem in ("is_center", "weight", "event", "gamma_mvaID_WP80", "gamma_mvaID_WPL", "n_iso_photons", "n_b_jets", "n_jets"):
             if rem in columns:
                 columns.remove(rem)
                 data = data.drop(rem, axis=1)
-        # print(columns)
+        print(columns)
 
         data = data.corr() * 100
         # data = data.dropna(axis=0, how='all').dropna(axis=1, how='all')
@@ -362,26 +358,18 @@ class XGBoostHandler(object):
             print(f"Correlation between {var1:<{max_var_length}} and {var2:<{max_var_length}} is {corr:.2f}")
         # print(data)
 
-        lower_triangle = np.tril(data, -1)
-        mask = np.triu(np.ones_like(data, dtype=bool), k=0)
-        lower_triangle[mask] = np.nan
         plt.figure(figsize=(12, 9), dpi=300)
-        plt.imshow(lower_triangle, cmap='coolwarm')
-        plt.colorbar().ax.tick_params(labelsize=16)
-        plt.clim(-100, 100)
+        plt.imshow(data)
+        plt.colorbar()
         for i in range(0, len(columns)):
             line = list(data[columns[i]])
             for j in range(0, len(line)):
-                if i < j:
-                    plt.text(i, j, int(line[j]), verticalalignment='center', horizontalalignment='center', fontsize=12)
-        plt.xticks(np.arange(0, len(columns)), columns, rotation=-45, fontsize=16, ha="left")
-        plt.yticks(np.arange(0, len(columns)), columns, fontsize=16)
-        plt.gca().spines['top'].set_visible(False)
-        plt.gca().spines['right'].set_visible(False)
-        
-        # plt.title(self._region)
+                plt.text(i, j, int(line[j]), verticalalignment='center', horizontalalignment='center', fontsize=8)
+        plt.xticks(np.arange(0, len(columns)), columns, rotation=-90, fontsize=12)
+        plt.yticks(np.arange(0, len(columns)), columns, fontsize=12)
+        plt.title(self._region)
         plt.tight_layout()
-        plt.savefig("plots/corr/corr_%s_%s.png" % (self._region, data_type))
+        plt.savefig("plots/corr/corr_%s_%s.pdf" % (self._region, data_type))
 
     def reweightSignal(self):
         min_mass, max_mass = 100, 180
@@ -633,32 +621,6 @@ class XGBoostHandler(object):
         significance_sum_err = np.sqrt((np.array(significance_errs)**2*np.array(significances)**2).sum()) / significance_sum
         return significance_sum, significance_sum_err
 
-    def get_mass_shape_factor(self, fold=0, sample_set='val'):
-        if sample_set == "train":
-            dataset = pd.DataFrame({'score': self.m_score_train[fold], 'weight': self.m_train_w[fold], 'mass': self.m_train_mass[fold], 'type': self.m_y_train[fold]})
-        elif sample_set == "val":
-            dataset = pd.DataFrame({'score': self.m_score_val[fold], 'weight': self.m_val_w[fold], 'mass': self.m_val_mass[fold], 'type': self.m_y_val[fold]})
-        elif sample_set == "test":
-            dataset = pd.DataFrame({'score': self.m_score_test[fold], 'weight': self.m_test_w[fold], 'mass': self.m_test_mass[fold], 'type': self.m_y_test[fold]})
-
-        bkg_dataset = dataset.query('type == 0').sort_values('score', ascending=True)
-        bkg_dataset['culmulative_bkg'] = bkg_dataset['weight'].cumsum()
-        bkg_dataset['culmulative_bkg'] = bkg_dataset['culmulative_bkg'] / bkg_dataset['culmulative_bkg'].max()
-        bkg_dataset = bkg_dataset.query('culmulative_bkg > 0.8')
-
-        y1, y2, y3, y4 = bkg_dataset.query('mass > 110 & mass < 120')['weight'].sum(), bkg_dataset.query('mass > 115 & mass < 125')['weight'].sum(), bkg_dataset.query('mass > 120 & mass < 130')['weight'].sum(), bkg_dataset.query('mass > 125 & mass < 135')['weight'].sum()
-        mass_shape_factor = np.log10((2 * y1 + y4) / (3 * y2) ) + np.log10((y1 + 2 * y4) / (3 * y3))
-
-        print(f'XGB INFO: y1: {y1}, y2: {y2}, y3: {y3}, y4: {y4}, mass_shape_factor: {mass_shape_factor}')
-
-        # y1, y2, y3 = bkg_dataset.query('mass > 100 & mass < 110')['weight'].sum(), bkg_dataset.query('mass > 105 & mass < 115')['weight'].sum(), bkg_dataset.query('mass > 110 & mass < 120')['weight'].sum()
-
-        # mass_shape_factor -= np.log10((y1 + y3) / (2 * y2))
-
-        # print(f'XGB INFO: y1: {y1}, y2: {y2}, y3: {y3}, mass_shape_factor: {mass_shape_factor}')
-
-        return mass_shape_factor
-
     def transformScore(self, fold=0, sample='sig'):
 
         print(f'XGB INFO: transforming scores based on {sample}')
@@ -709,7 +671,6 @@ class XGBoostHandler(object):
             train_auc = self.getAUC(fold, 'train')[-1]
             eval_signi, eval_signi_err = self.getSignificance(fold, 'val')
             train_signi, train_signi_err = self.getSignificance(fold, 'train')
-            mass_shape_factor = self.get_mass_shape_factor(fold, 'val')
             
             metrics = {
                 'train_auc': train_auc,
@@ -721,7 +682,6 @@ class XGBoostHandler(object):
                 'eval_significance': eval_signi,
                 'train_significance': train_signi,
                 'sqrt_eval_significance_minus_train_significance': np.sqrt(train_signi * (2 * eval_signi - train_signi)),
-                'eval_auc_with_mass_shape_factor': eval_auc + mass_shape_factor
             }
             print(f"params: {params}, eval_auc: {eval_auc}, train_auc: {train_auc}, "
                   f"sqrt_eval_auc_minus_train_auc: {metrics['sqrt_eval_auc_minus_train_auc']}, "
@@ -729,8 +689,7 @@ class XGBoostHandler(object):
                   f"eval_auc_over_train_auc: {metrics['eval_auc_over_train_auc']}, "
                   f"eval_auc_minus_train_auc: {metrics['eval_auc_minus_train_auc']}, "
                   f"eval_significance: {eval_signi}, train_significance: {train_signi}, "
-                  f"sqrt_eval_significance_minus_train_significance: {metrics['sqrt_eval_significance_minus_train_significance']}, "
-                  f"eval_auc_with_mass_shape_factor: {metrics['eval_auc_with_mass_shape_factor']}"
+                  f"sqrt_eval_significance_minus_train_significance: {metrics['sqrt_eval_significance_minus_train_significance']}"
                 )
             return metrics.get(self.optuna_metric, eval_auc)
         

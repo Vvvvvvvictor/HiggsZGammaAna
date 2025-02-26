@@ -13,10 +13,13 @@ git clone https://github.com/Vvvvvvvictor/HiggsZGammaAna.git --recursive
 **1. Setup environment**
 
 The conda env would occupy a large quota. Make sure that you have a few GB left in your path(exp. : `/eos/user`). This step would take a few hours, please keep patient.
+
 ```
 cd HiggsZGammaAna/HiggsDNA/
-conda env create -f environment.yml -p <some_path_where_you_have_more_disk_space>/.conda/envs/
+
+conda env create -f environment.yml -p <some_path_where_you_have_more_disk_space>/.conda/envs/higgs-zg-ana
 ```
+
 Then, activate the conda environment
 
 ```

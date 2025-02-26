@@ -3,6 +3,7 @@ import time
 import datetime
 import copy
 import json
+import orjson
 import pickle
 import dill
 import numpy
@@ -164,10 +165,12 @@ def run_analysis(config):
     # Dump json summary
     if condor:
       with open(config["summary_file"].split("/")[-1], "w") as f_out:
-        json.dump(job_summary, f_out, sort_keys = True, indent = 4)
+        #json.dump(job_summary, f_out, sort_keys = True, indent = 4)
+        f_out.write(orjson.dumps(job_summary, option=orjson.OPT_SERIALIZE_NUMPY).decode("utf-8"))    
     else:
       with open(config["summary_file"], "w") as f_out:
-        json.dump(job_summary, f_out, sort_keys = True, indent = 4)
+        # json.dump(job_summary, f_out, sort_keys = True, indent = 4)
+        f_out.write(orjson.dumps(job_summary, option=orjson.OPT_SERIALIZE_NUMPY).decode("utf-8"))        
     return job_summary
 
 class AnalysisManager():
