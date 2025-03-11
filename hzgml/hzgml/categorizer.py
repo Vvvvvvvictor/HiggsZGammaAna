@@ -367,6 +367,9 @@ class categorizer(object):
         hist.SetLineColor(ROOT.kBlue)
         hist.Draw()
 
+        # Set y-axis to logarithmic scale
+        canvas.SetLogy(True)
+
         # Draw smoothed histogram
         hist_smoothed = ROOT.TH1F("hist_smoothed", "Smoothed Histogram", len(py_hist.BinContent), py_hist.BinLowEdge[0], py_hist.BinLowEdge[-1] + py_hist.BinWidth[-1])
         for i in range(len(py_hist.BinContent)):

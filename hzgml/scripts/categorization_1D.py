@@ -291,6 +291,7 @@ def main():
         for bkg in bkgs:
             if os.path.isfile('%s/%s/%s.root'% (input_path, region,bkg)): bkglist+=' %s/%s/%s.root'% (input_path,region,bkg)
         os.system("hadd -f %s/%s/bkgmc.root"%(input_path, region)+bkglist)
+
     s, u, yields = gettingsig(input_path, region, variable, boundaries_values, args.transform, estimate=args.estimate)
 
     outs={}

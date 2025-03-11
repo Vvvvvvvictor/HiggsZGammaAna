@@ -5,10 +5,10 @@
         "fpo": 1,
         "files": {
             "2016preVFP": [
-                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016preHZGSig/RunIISummer20UL16NanoAODAPVv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_111745"
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016preHZGSig/RunIISummer20UL16NanoAODAPVv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250301_082810"
             ],
             "2016postVFP": [
-                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016postHZGSig/RunIISummer20UL16NanoAODv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112139"
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016postHZGSig/RunIISummer20UL16NanoAODv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250301_083001"
             ],
             "2018": [
                 "/eos/project-h/htozg-dy-privatemc/jiehan/Run2018HZGSig/RunIISummer20UL18NanoAODv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112319"
@@ -28,7 +28,7 @@
         "fpo": 1,
         "files": {
             "2016postVFP": [
-                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016postHZGSig/RunIISummer20UL16NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112139"
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016postHZGSig/RunIISummer20UL16NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250301_083001"
             ],
             "2017": [
                 "/eos/project-h/htozg-dy-privatemc/jiehan/Run2017HZGSig/RunIISummer20UL17NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112247"
@@ -37,7 +37,7 @@
                 "/eos/project-h/htozg-dy-privatemc/jiehan/Run2018HZGSig/RunIISummer20UL18NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112319"
             ],
             "2016preVFP": [
-                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016preHZGSig/RunIISummer20UL16NanoAODAPVv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_111745"
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016preHZGSig/RunIISummer20UL16NanoAODAPVv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250301_082810"
             ]
         }
     },
@@ -45,8 +45,8 @@
         "xs": 0.84,
         "bf": 0.000154793142,
         "files": {
-            "2016preVFP": "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016preHZGSig/RunIISummer20UL16NanoAODAPVv9/WplusH_HToZG_WToAll_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241107_033003",
-            "2016postVFP": "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016postHZGSig/RunIISummer20UL16NanoAODv9/WplusH_HToZG_WToAll_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241107_033655",
+            "2016preVFP": "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016preHZGSig/RunIISummer20UL16NanoAODAPVv9/WplusH_HToZG_WToAll_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250301_082810",
+            "2016postVFP": "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016postHZGSig/RunIISummer20UL16NanoAODv9/WplusH_HToZG_WToAll_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250301_083001",
             "2017": "/eos/project-h/htozg-dy-privatemc/jiehan/Run2017HZGSig/RunIISummer20UL17NanoAODv9/WplusH_HToZG_WToAll_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241107_033718",
             "2018": "/eos/project-h/htozg-dy-privatemc/jiehan/Run2018HZGSig/RunIISummer20UL18NanoAODv9/WplusH_HToZG_WToAll_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241107_033756"
         }
@@ -55,8 +55,8 @@
         "xs": 0.5328,
         "bf": 0.000154793142,
         "files": {
-            "2016preVFP": "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016preHZGSig/RunIISummer20UL16NanoAODAPVv9/WminusH_HToZG_WToAll_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241107_033003",
-            "2016postVFP": "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016postHZGSig/RunIISummer20UL16NanoAODv9/WminusH_HToZG_WToAll_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241107_033655",
+            "2016preVFP": "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016preHZGSig/RunIISummer20UL16NanoAODAPVv9/WminusH_HToZG_WToAll_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250301_082810",
+            "2016postVFP": "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016postHZGSig/RunIISummer20UL16NanoAODv9/WminusH_HToZG_WToAll_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250301_083001",
             "2017": "/eos/project-h/htozg-dy-privatemc/jiehan/Run2017HZGSig/RunIISummer20UL17NanoAODv9/WminusH_HToZG_WToAll_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241107_033718",
             "2018": "/eos/project-h/htozg-dy-privatemc/jiehan/Run2018HZGSig/RunIISummer20UL18NanoAODv9/WminusH_HToZG_WToAll_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241107_033756"
         }
@@ -65,8 +65,8 @@
         "xs": 0.8839,
         "bf": 0.000154793142,
         "files": {
-            "2016preVFP": "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016preHZGSig/RunIISummer20UL16NanoAODAPVv9/ZH_HToZG_ZToAll_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_111745",
-            "2016postVFP": "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016postHZGSig/RunIISummer20UL16NanoAODv9/ZH_HToZG_ZToAll_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112139",
+            "2016preVFP": "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016preHZGSig/RunIISummer20UL16NanoAODAPVv9/ZH_HToZG_ZToAll_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250301_082810",
+            "2016postVFP": "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016postHZGSig/RunIISummer20UL16NanoAODv9/ZH_HToZG_ZToAll_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250301_083001",
             "2017": "/eos/project-h/htozg-dy-privatemc/jiehan/Run2017HZGSig/RunIISummer20UL17NanoAODv9/ZH_HToZG_ZToAll_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112247",
             "2018": "/eos/project-h/htozg-dy-privatemc/jiehan/Run2018HZGSig/RunIISummer20UL18NanoAODv9/ZH_HToZG_ZToAll_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112319"
         }
@@ -75,8 +75,8 @@
         "xs": 0.5071,
         "bf": 0.000154793142,
         "files": {
-            "2016preVFP": "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016preHZGSig/RunIISummer20UL16NanoAODAPVv9/ttHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_111745",
-            "2016postVFP": "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016postHZGSig/RunIISummer20UL16NanoAODv9/ttHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112139",
+            "2016preVFP": "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016preHZGSig/RunIISummer20UL16NanoAODAPVv9/ttHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250301_082810",
+            "2016postVFP": "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016postHZGSig/RunIISummer20UL16NanoAODv9/ttHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250301_083001",
             "2017": "/eos/project-h/htozg-dy-privatemc/jiehan/Run2017HZGSig/RunIISummer20UL17NanoAODv9/ttHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112247",
             "2018": "/eos/project-h/htozg-dy-privatemc/jiehan/Run2018HZGSig/RunIISummer20UL18NanoAODv9/ttHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112319"
         }

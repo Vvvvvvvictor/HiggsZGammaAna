@@ -200,7 +200,7 @@ class ApplyXGBHandler(object):
     def applyBDT(self, category, scale=1, shift=0):
         outputbraches = copy.deepcopy(self._outbranches)
         branches = copy.deepcopy(self._branches)
-        branches += ["Z_sublead_lepton_pt", "gamma_mvaID_WP80", "gamma_mvaID_WPL", "gamma_pt", "Z_pt"]
+        # branches += ["Z_sublead_lepton_pt", "gamma_mvaID_WP80", "gamma_mvaID_WPL", "gamma_pt", "Z_pt"]
         outputbraches += []
         # if category == "DYJetsToLL":
         #     branches.append('n_iso_photons')

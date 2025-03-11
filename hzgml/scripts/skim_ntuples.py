@@ -375,6 +375,28 @@ def compute_pt_balance(x):
         total = Z+gamma+Jet_1+Jet_2
         return total.Pt()/(x.Z_pt+x.gamma_pt+x.jet_1_pt+x.jet_2_pt)
 
+def compute_system_pt(x):
+    
+    if x.n_jets < 2:
+        return -9999
+    else:
+        Z = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.Z_pt, x.Z_eta, x.Z_phi, x.Z_mass)
+        gamma = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.gamma_pt, x.gamma_eta, x.gamma_phi, x.gamma_mass)
+        Jet_1 = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.jet_1_pt, x.jet_1_eta, x.jet_1_phi, x.jet_1_mass)
+        Jet_2 = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.jet_2_pt, x.jet_2_eta, x.jet_2_phi, x.jet_2_mass)
+        total = Z+gamma+Jet_1+Jet_2
+        return total.Pt()
+
+def compute_jet_pair_pt(x):
+    
+    if x.n_jets < 2:
+        return -9999
+    else:
+        Jet_1 = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.jet_1_pt, x.jet_1_eta, x.jet_1_phi, x.jet_1_mass)
+        Jet_2 = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.jet_2_pt, x.jet_2_eta, x.jet_2_phi, x.jet_2_mass)
+        Jet_pair = Jet_1+Jet_2
+        return Jet_pair.Pt()
+
 def compute_pt_balance_0j(x):
 
     Z = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.Z_pt, x.Z_eta, x.Z_phi, x.Z_mass)
@@ -439,6 +461,8 @@ def decorate(data):
 
     if data.shape[0] == 0: return data
 
+    data['jet_pair_pt'] = data.apply(lambda x: compute_jet_pair_pt(x), axis=1)
+    data['system_pt'] = data.apply(lambda x: compute_system_pt(x), axis=1)
     data['HZ_relM'] = data.H_mass / data.Z_mass
     data['H_relpt'] = data.H_pt / data.H_mass
     data['Z_relpt'] = data.Z_pt / data.H_mass

@@ -1,6 +1,8 @@
 {"sample_list": {"DYJetsToLL":   ["2016preVFP", "2016postVFP", "2017", "2018"],
                  "ZGToLLG":      ["2016preVFP", "2016postVFP", "2017", "2018"],
                  "EWKZ2J":       ["2016preVFP", "2016postVFP", "2017", "2018"],
+                 "VBF_M125":     ["2016preVFP", "2016postVFP", "2017", "2018"],
+                 "ggH_M125":     ["2016preVFP", "2016postVFP", "2017", "2018"],
                  "ZG2JToG2L2J":  ["2016preVFP", "2016postVFP", "2017", "2018"],
                  "WGToLNuG":     ["2016preVFP", "2016postVFP", "2017", "2018"],
                  "TTGJets":      ["2016preVFP", "2016postVFP", "2017", "2018"],
@@ -16,8 +18,6 @@
                  "ZH_M125":      ["2016preVFP", "2016postVFP", "2017", "2018"],
                  "WminusH_M125": ["2016preVFP", "2016postVFP", "2017", "2018"],
                  "WplusH_M125":  ["2016preVFP", "2016postVFP", "2017", "2018"],
-                 "VBF_M125":     ["2016preVFP", "2016postVFP", "2017", "2018"],
-                 "ggH_M125":     ["2016preVFP", "2016postVFP", "2017", "2018"],
                  "WZ":           ["2016preVFP", "2016postVFP", "2017", "2018"],
                  "ZZ":           ["2016preVFP", "2016postVFP", "2017", "2018"],
                  "WW":           ["2016preVFP", "2016postVFP", "2017", "2018"]}}

@@ -8,19 +8,24 @@ print("=====================================================================")
 print("Starting to run the tutorial of plotting in Higgs to Z Gamma analysis")
 print("=====================================================================")
 
+# 设置要使用的文件夹（"val" 或 "test"）
+folder = "test"  # 可以切换为 "test"
+
 # Basic set of picture's content
 ratio = 1
-mc_legend = ["SM ZG", "DYJets", "EWK Z+Jets", "EWK ZG", "TT", "TTG+Jets", "TTVJets", "Diboson"]#"DYJets", "EWK Z+Jets", "EWK ZG", "TT", "TTG+Jets", "TTVJets", "Diboson", "SM ZG", "EWK ZG", "fake photon"]
+mc_legend = ["Z+#gamma", "Z+Fake Photon", "VBSZ+#gamma", "t#bar{t}", "t#gamma/t#bar{t}#gamma", "t#bar{t}+X", "multiboson"]
 sig_legend = ["sig", "ggH", "VBF"]
 # path = "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/final_fit/CMSSW_10_2_13/src/flashggFinalFit/InputData/outputs/"
-path = "/eos/home-j/jiehan/root/outputs/test/"
+path = f"/eos/home-j/jiehan/root/outputs/{folder}/"
+# boundaries 文件的路径固定在 test 文件夹中
+boundaries_path = "/eos/home-j/jiehan/root/outputs/test/significances/bin_boundaries_1D_two_jet.txt"
 channel = "two_jet"
 tree = "two_jet"
 var = "bdt_score_t"
 bins = 100
 x_range = (0, 1)
 blind_range = (120, 130)
-x_title = "BDT score"
+x_title = "Transformed BDT score"
 y_title = "Events/{:.2f}".format((x_range[1]-x_range[0])/bins)
 sub_y_title = "S/#sqrt{B}"
 selections = ["H_mass>120", "H_mass<130"]
@@ -33,15 +38,17 @@ sig_file_list = [
 ]
 mc_file_list = [
     "ZGToLLG.root",
-    "DYJetsToLL.root",
-    "EWKZ2J.root",
+    ["DYJetsToLL.root", "EWKZ2J.root"],
     "ZG2JToG2L2J.root",
     "TT.root",
-    "TTGJets.root",
+    ["TTGJets.root", "TGJets.root"],
     ["ttWJets.root", "ttZJets.root"],
-    ["WZ.root", "ZZ.root", "WWG.root", "WZG.root", "ZZG.root"]
+    ["WW.root", "WZ.root", "ZZ.root", "WWG.root", "WZG.root", "ZZG.root"]
     # "data_driven_bkg_v3.root"
 ]
+
+bkg_color = ["#3f90da", "#ffa90e", "#92dadd", "#e76300", "#bd1f01", "#94a4a2", "#832db6"]
+
 data_file_list = [
     "data.root"
 ]
@@ -55,7 +62,7 @@ print("============================")
 print("Finish setting picture style")
 print("============================")
 
-# get hists
+# # get hists
 # data_sb_yields, mc_sb_yields = 0, 0
 # for i, bkg in enumerate(mc_file_list):
 #     if isinstance(bkg, list):
@@ -111,9 +118,9 @@ mc_yields, mc_hist_list = [], []
 
 for i, bkg in enumerate(mc_file_list):
     if isinstance(bkg, list):
-        for sub_bkg in bkg:
+        for j, sub_bkg in enumerate(bkg):
             arrays, _ = pic.read_root_file(path+channel+"/"+sub_bkg, var, tree, selections)
-            if file_hist in globals():
+            if j != 0:
                 file_hist, _, yields = pic.get_hist(arrays, var, sb_ratio, "mc_{}".format(i), bins, x_range, file_hist)
             else:
                 file_hist, _, yields = pic.get_hist(arrays, var, sb_ratio, "mc_{}".format(i), bins, x_range)
@@ -122,9 +129,11 @@ for i, bkg in enumerate(mc_file_list):
         file_hist, _, yields = pic.get_hist(arrays, var, sb_ratio, "mc_{}".format(i), bins, x_range)
     mc_hist.Add(file_hist)
     mc_hist_list.append(file_hist)
-    mc_yields.append(yields)
+    mc_yields.append(file_hist.Integral())
+
 for i, file_hist in enumerate(mc_hist_list):
-    plot.Set(file_hist, LineWidth=0, FillColor=ROOT.TColor.GetColorDark(i+2))
+    print(i, " mc_hist: ", file_hist.Integral())
+    plot.Set(file_hist, LineWidth=0, FillColor=ROOT.TColor.GetColor(bkg_color[i]), FillStyle=1001)
     file_hist.Scale(1./sum(mc_yields))
     h_stack.Add(file_hist)
 
@@ -166,14 +175,20 @@ for i in range(len(mc_file_list)):
     legend.AddEntry("mc_{}".format(i), mc_legend[i]+"({:4.2f})".format(mc_yields[i]), "f")
 legend.Draw()
 
+with open(boundaries_path, "r") as f:
+    boundaries = f.readline().split(" ")
+    boundaries = [float(i) for i in boundaries[1:-1]]
+
+for boundary in boundaries:
+        line.DrawLine(boundary, 0, boundary, pads[0].GetFrame().GetY2())
+
 print("========================")
 print("Finish drawing upper pad")
 print("========================")
 
 pads[1].cd()
 rp.Draw("E")
-boundaries = [0.07, 0.3, 0.61, 0.9]
-for i in range(4):
+for i in range(len(boundaries)):
     line.DrawLine(boundaries[i], 0, boundaries[i], 1)
 # plot.Set(pads[1], Logy=1)
 # line.DrawLine(0.29, 0, 0.29, 0.26)

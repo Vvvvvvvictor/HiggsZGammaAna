@@ -20,7 +20,7 @@ def getArgs():
     """Get arguments from command line."""
     parser = ArgumentParser()
     parser.add_argument('-c', '--config', action='store', default='data/training_config_BDT.json', help='Region to process')
-    parser.add_argument('-i', '--inputFolder', action='store', help='directory of training inputs')
+    parser.add_argument('-i', '--inputFolder', default='/eos/home-j/jiehan/root/skimmed_ntuples_run2', action='store', help='directory of training inputs')
     parser.add_argument('-o', '--outputFolder', action='store', help='directory for outputs')
     parser.add_argument('-r', '--region', action='store', choices=['two_jet', 'one_jet', 'zero_jet', 'zero_to_one_jet', 'VH_ttH', 'VBF', 'all_jet'], default='zero_jet', help='Region to process')
     parser.add_argument('-f', '--fold', action='store', type=int, nargs='+', choices=[0, 1, 2, 3], default=[0, 1, 2, 3], help='specify the fold for training')
@@ -70,7 +70,7 @@ class XGBoostHandler(object):
 
         self._region = region
 
-        self._inputFolder = '/eos/home-j/jiehan/root/skimmed_ntuples_run2'
+        self._inputFolder = args.inputFolder
         self._outputFolder = 'models'
         self._chunksize = 500000
         self._branches = []
@@ -347,6 +347,8 @@ class XGBoostHandler(object):
                 data = data.drop(rem, axis=1)
         # print(columns)
 
+        data = data[sorted(data.columns)]
+
         data = data.corr() * 100
         # data = data.dropna(axis=0, how='all').dropna(axis=1, how='all')
 
@@ -367,13 +369,14 @@ class XGBoostHandler(object):
         lower_triangle[mask] = np.nan
         plt.figure(figsize=(12, 9), dpi=300)
         plt.imshow(lower_triangle, cmap='coolwarm')
-        plt.colorbar().ax.tick_params(labelsize=16)
+        cbar = plt.colorbar()
+        cbar.ax.tick_params(labelsize=16)
+        cbar.set_label('Correlation (%)', fontsize=16)
         plt.clim(-100, 100)
-        for i in range(0, len(columns)):
-            line = list(data[columns[i]])
-            for j in range(0, len(line)):
-                if i < j:
-                    plt.text(i, j, int(line[j]), verticalalignment='center', horizontalalignment='center', fontsize=12)
+        for i in range(len(columns)):
+            for j in range(len(columns)):
+                if not np.isnan(lower_triangle[i, j]):
+                    plt.text(j, i, f"{lower_triangle[i, j]:3.0f}", ha="center", va="center", color="black", fontsize=12)
         plt.xticks(np.arange(0, len(columns)), columns, rotation=-45, fontsize=16, ha="left")
         plt.yticks(np.arange(0, len(columns)), columns, fontsize=16)
         plt.gca().spines['top'].set_visible(False)

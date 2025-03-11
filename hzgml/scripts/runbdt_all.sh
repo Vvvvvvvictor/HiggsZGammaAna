@@ -20,11 +20,13 @@ echo "==================================================="
 echo "Shielded parameter is: $S . Added variables is: $A ."
 
 # 'eval_auc', 'sqrt_eval_auc_minus_train_auc', 'eval_auc_minus_train_auc', 'eval_auc_over_train_auc', "eval_auc_minus_train_auc", "eval_significance", "sqrt_eval_significance_minus_train_significance", 'eval_auc_with_mass_shape_factor'
-# python scripts/train_bdt.py -r two_jet --optuna --n-calls 60 --continue-optuna 0 --optuna_metric 'sqrt_eval_auc_minus_train_auc'
-# python scripts/train_bdt.py -r two_jet --save --hyperparams_path "models/optuna_two_jet"
-# python scripts/apply_bdt.py -r two_jet
-# python scripts/categorization_1D.py -r two_jet -b 4 --floatB --minN 2 -es "fullSimrw"
-# python ../plot_python/plot_cats_hmass_dis.py
+python scripts/train_bdt.py -r two_jet --optuna --n-calls 60 --continue-optuna 0 --optuna_metric 'sqrt_eval_auc_minus_train_auc' --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui"
+# cp models/optuna_two_jet/*0.* models/optuna_two_jet_nosyst_sqrt_base/
+python scripts/train_bdt.py -r two_jet --save --hyperparams_path "models/optuna_two_jet" --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui"
+python scripts/apply_bdt.py -r two_jet --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui"
+python scripts/categorization_1D.py -r two_jet -b 4 --minN 10 -es "fullSim"
+python ../plot_python/plot_cats_hmass_dis.py
+python ../plot_python/compare_sig_bkg_bdt_sosb.py
 # python scripts/train_bdt.py -r zero_to_one_jet --optuna --n-calls 20 --continue-optuna 0 --optuna_metric "eval_auc"
 # python scripts/train_bdt.py -r VBF --optuna --n-calls 20 --continue-optuna 0 --optuna_metric "sqrt_eval_auc_minus_train_auc"
 
@@ -60,8 +62,8 @@ echo "Shielded parameter is: $S . Added variables is: $A ."
 # python find_2D_best_boundaries.py
 # python plot_2D_cat_hmass_dis.py
 
-python scripts/apply_bdt_bkg.py
-python scripts/apply_bdt_sig_corr.py
+# python scripts/apply_bdt_bkg.py
+# python scripts/apply_bdt_sig_corr.py
 # python ../SSTest/Generate_template.py
 
 

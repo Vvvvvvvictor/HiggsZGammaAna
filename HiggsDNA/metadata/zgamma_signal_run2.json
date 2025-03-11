@@ -12,7 +12,7 @@
                 "name": "zgamma_tagger_run2",
                 "options": {
                     "gen_info": {
-                        "calculate": true
+                        "calculate": false
                     }
                 }
             }
@@ -57,30 +57,6 @@
                 },
                 "modify_central_weight": false
             },
-            "btag_deepjet_mujet_sf" : {
-                "type" : "object",
-                "method" : "from_function",
-                "function" : {
-                    "module_name" : "higgs_dna.systematics.jet_systematics",
-                    "name" : "btag_deepjet_mujet_sf"
-                },
-                "modify_central_weight" : false,
-                "input_collection" : "Jet",
-                "target_collections" : ["SelectedJet"],
-                "working_point" : "M"
-            },
-            "btag_deepjet_incl_sf" : {
-                "type" : "object",
-                "method" : "from_function",
-                "function" : {
-                    "module_name" : "higgs_dna.systematics.jet_systematics",
-                    "name" : "btag_deepjet_incl_sf"
-                },
-                "modify_central_weight" : false,
-                "input_collection" : "Jet",
-                "target_collections" : ["SelectedJet"],
-                "working_point" : "M"
-            },
             "btag_deepjet_wp_sf" : {
                 "type" : "object",
                 "method" : "from_function",
@@ -118,25 +94,6 @@
                 "target_collections": [
                     "SelectedMuon"
                 ]
-            }
-        },
-        "independent_collections": {
-            "Muon_pt": {
-                "method": "from_branch",
-                "branch_modified": [
-                    "Muon",
-                    "pt"
-                ],
-                "branches": {
-                    "up": [
-                        "Muon",
-                        "correctedUp_pt"
-                    ],
-                    "down": [
-                        "Muon",
-                        "correctedDown_pt"
-                    ]
-                }
             }
         }
     },
