@@ -101,7 +101,7 @@ class Task():
         """
         logger.info("[Task: create_jobs] Task '%s' : splitting %d input files into %d jobs" % (self.name, len(self.files), math.ceil(float(len(self.files)) / float(self.fpo)))) 
         file_splits = create_chunks(self.files, self.fpo)
-        
+        file_splits = file_splits
         for idx, file_split in enumerate(tqdm(file_splits)):
             if self.max_jobs >= 0:
                 if idx >= self.max_jobs:

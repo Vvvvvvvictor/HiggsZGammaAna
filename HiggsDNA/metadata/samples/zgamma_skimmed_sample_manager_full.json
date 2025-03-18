@@ -14,11 +14,7 @@
                 "/eos/project-h/htozg-dy-privatemc/jiehan/Run2018HZGSig/RunIISummer20UL18NanoAODv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112319"
             ],
             "2017": [
-                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2017HZGSig/RunIISummer20UL17NanoAODv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112247/93B37B9F-16D5-6F4F-B920-3B9C682CA8A8skimmed.root",
-                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2017HZGSig/RunIISummer20UL17NanoAODv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112247/AED2B035-3C41-E044-92B7-5A908898EE0Fskimmed.root",
-                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2017HZGSig/RunIISummer20UL17NanoAODv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112247/E3D30224-C63D-CC48-9259-B0BE9FED9BB1skimmed.root",
-                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2017HZGSig/RunIISummer20UL17NanoAODv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112247/E419E91C-A62B-4A4A-9BF9-16D4DA4A6BD9skimmed.root",
-                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2017HZGSig/RunIISummer20UL17NanoAODv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112247/E794DDC9-6560-064E-B36C-4E0D9DEF8556skimmed.root"
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2017HZGSig/RunIISummer20UL17NanoAODv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112247"
             ]
         }
     },
@@ -28,16 +24,46 @@
         "fpo": 1,
         "files": {
             "2016postVFP": [
-                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016postHZGSig/RunIISummer20UL16NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250301_083001"
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016postHZGSig/RunIISummer20UL16NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250301_083001/0300A3CF-C70A-624A-A855-E3AC25437BF0skimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016postHZGSig/RunIISummer20UL16NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250301_083001/22520F29-F591-394D-B133-8066F9B0464Cskimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016postHZGSig/RunIISummer20UL16NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250301_083001/2551E6F4-68A6-F34E-B936-570762A20E41skimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016postHZGSig/RunIISummer20UL16NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250301_083001/402B9738-F1D2-C848-8BD3-6280144F7CA7skimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016postHZGSig/RunIISummer20UL16NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250301_083001/8E910DEA-1D78-284A-96B2-E6A54F7018ADskimmed.root"
             ],
             "2017": [
-                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2017HZGSig/RunIISummer20UL17NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112247"
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2017HZGSig/RunIISummer20UL17NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112247/0286B576-DC6D-F94C-BB74-6EB4B1539D43skimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2017HZGSig/RunIISummer20UL17NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112247/0814AE8A-7B06-0A41-9B68-F52B9AEAAEF5skimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2017HZGSig/RunIISummer20UL17NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112247/1C53C7A8-FAF3-2F4D-A7C4-58C49D872A6Bskimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2017HZGSig/RunIISummer20UL17NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112247/236A6B35-BF17-6644-A2A5-AC2D447E89E5skimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2017HZGSig/RunIISummer20UL17NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112247/27F61A81-30A5-5E4A-86DF-A06A48CDFA69skimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2017HZGSig/RunIISummer20UL17NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112247/2DCB8393-921B-4141-AE66-57067B2CB94Bskimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2017HZGSig/RunIISummer20UL17NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112247/3087AED5-03E7-D34C-BA9D-29AA4F815FC7skimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2017HZGSig/RunIISummer20UL17NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112247/46AB840D-1818-1347-9498-E6BA7A5320AEskimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2017HZGSig/RunIISummer20UL17NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112247/8045C169-3269-B648-ACA3-EBA458880253skimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2017HZGSig/RunIISummer20UL17NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112247/B314FCF6-F803-8740-9B81-0FD18541D023skimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2017HZGSig/RunIISummer20UL17NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112247/C94D7629-8A6D-3547-BCEE-34036D962EB0skimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2017HZGSig/RunIISummer20UL17NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112247/D979FA7C-E7C5-674A-B7D9-135A5A59A2E6skimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2017HZGSig/RunIISummer20UL17NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112247/E653D97F-E176-7F4B-8F9E-1E9DC26CC55Askimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2017HZGSig/RunIISummer20UL17NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112247/FF87E25A-CF6F-D246-9831-41466B1CEF4Bskimmed.root"
             ],
             "2018": [
-                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2018HZGSig/RunIISummer20UL18NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112319"
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2018HZGSig/RunIISummer20UL18NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112319/39C1CEFD-353D-A241-B16A-1CA9715618AAskimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2018HZGSig/RunIISummer20UL18NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112319/5A70B7B6-A192-8A45-A28D-D8E941583935skimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2018HZGSig/RunIISummer20UL18NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112319/61269B33-2644-B24C-BEDB-CEEECC69016Cskimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2018HZGSig/RunIISummer20UL18NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112319/7E634F2E-3E80-FB4B-96D4-B141A502680Bskimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2018HZGSig/RunIISummer20UL18NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112319/936D935A-6BF2-FC4A-9DB8-A3CAAAE0AF46skimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2018HZGSig/RunIISummer20UL18NanoAODv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/241026_112319/A484A5BC-A4CD-484E-B693-17CB98664C22skimmed.root"
             ],
             "2016preVFP": [
-                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016preHZGSig/RunIISummer20UL16NanoAODAPVv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250301_082810"
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016preHZGSig/RunIISummer20UL16NanoAODAPVv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250301_082810/06481F9C-2634-8B4A-9A93-4EB4FBF1F44Askimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016preHZGSig/RunIISummer20UL16NanoAODAPVv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250301_082810/221C2D7D-6CE6-9341-8605-B7BC76927362skimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016preHZGSig/RunIISummer20UL16NanoAODAPVv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250301_082810/305BD7A3-FD30-F84B-85F8-08B5F73E2D48skimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016preHZGSig/RunIISummer20UL16NanoAODAPVv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250301_082810/34EC499A-FF21-A94A-ABAE-DBEB6DCC3B62skimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016preHZGSig/RunIISummer20UL16NanoAODAPVv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250301_082810/6D33E7B3-B753-D544-B037-E691E81E0AD3skimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016preHZGSig/RunIISummer20UL16NanoAODAPVv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250301_082810/71C35B2B-B0D2-AA46-AAD7-2F970C02476Eskimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016preHZGSig/RunIISummer20UL16NanoAODAPVv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250301_082810/A9104088-E305-BC4A-8417-D6B85FE0895Askimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016preHZGSig/RunIISummer20UL16NanoAODAPVv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250301_082810/D3D6020F-140F-E645-B446-94E149C63502skimmed.root",
+                "/eos/project-h/htozg-dy-privatemc/jiehan/Run2016preHZGSig/RunIISummer20UL16NanoAODAPVv9/VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250301_082810/D6660D32-FEDE-4D4E-8EE7-0964E7B987BBskimmed.root"
             ]
         }
     },
