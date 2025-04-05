@@ -1,0 +1,27 @@
+# HTCondor submission file for training BDTs
+
+# Specify the executable (your shell script)
+executable = train_with_hyper_run.sh
+
+# Define arguments for each job (one per configuration)
+arguments = $(config)
+
+# Define the configurations to run
+config = zero_to_one_jet, two_jet
+
+# Resource requests (adjust as needed)
+request_cpus = 1
+request_memory = 2GB
+request_disk = 4GB
++JobFlavour = "longlunch"
+
+# Environment setup (optional, if needed)
+getenv = True
+
+# Output, error, and log files for each job
+output = info/train_with_hyper_$(ClusterId)_$(ProcId).out
+error = info/train_with_hyper_$(ClusterId)_$(ProcId).err
+log = info/train_with_hyper_$(ClusterId).log
+
+# Specify the queue (one job per config)
+queue 1 config in (zero_to_one_jet, two_jet)

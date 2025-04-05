@@ -108,7 +108,8 @@ for primary_process_name, tree_name in Tree_dict.items():
     # TREE = "zero_to_one_jet"
     TREE = tree_name
     WEIGHT = "weight"
-    PATH = "/eos/home-p/pelai/HZgamma/Root_Dataset/run3/NanoV12/"
+    PATH = "/eos/home-p/pelai/HZgamma/Root_Dataset/run3_jet_horn/NanoV12/"
+    # PATH = "/eos/home-p/pelai/HZgamma/Root_Dataset/run3/NanoV12/"
     # PATH = "/eos/user/j/jiehan/root/skimmed_ntuples_run2/"
 
     data = {"data": ["Data"]}
@@ -286,11 +287,18 @@ for primary_process_name, tree_name in Tree_dict.items():
         ax2.set_xlabel(XLABLE, fontsize=24)
 
         plt.tight_layout()
-        if os.path.exists(f"pic/run3/dataVbkg_{primary_process_name}") == False:
-            os.makedirs(f"pic/run3/dataVbkg_{primary_process_name}")
+        # if os.path.exists(f"pic/run3/dataVbkg_{primary_process_name}") == False:
+        #     os.makedirs(f"pic/run3/dataVbkg_{primary_process_name}")
+        # if primary_process_name == "ggF":
+        #     plt.savefig(f"pic/run3/dataVbkg_{primary_process_name}/{name_dict_ggF[VAR]}.pdf")
+        # elif primary_process_name == "VBF":
+        #     plt.savefig(f"pic/run3/dataVbkg_{primary_process_name}/{name_dict_VBF[VAR]}.pdf")
+        
+        if os.path.exists(f"pic/run3_jet_horn/dataVbkg_{primary_process_name}") == False:
+            os.makedirs(f"pic/run3_jet_horn/dataVbkg_{primary_process_name}")
         if primary_process_name == "ggF":
-            plt.savefig(f"pic/run3/dataVbkg_{primary_process_name}/{name_dict_ggF[VAR]}.pdf")
+            plt.savefig(f"pic/run3_jet_horn/dataVbkg_{primary_process_name}/{name_dict_ggF[VAR]}.pdf")
         elif primary_process_name == "VBF":
-            plt.savefig(f"pic/run3/dataVbkg_{primary_process_name}/{name_dict_VBF[VAR]}.pdf")
+            plt.savefig(f"pic/run3_jet_horn/dataVbkg_{primary_process_name}/{name_dict_VBF[VAR]}.pdf")
         
         plt.clf()

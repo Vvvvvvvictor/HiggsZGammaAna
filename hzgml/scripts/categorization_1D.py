@@ -27,7 +27,7 @@ def getArgs():
     """Get arguments from command line."""
     parser = ArgumentParser()
     parser.add_argument('-r', '--region', action = 'store', choices = ['all_jet', 'two_jet', 'one_jet', 'zero_jet', 'zero_to_one_jet', 'VH_ttH'], default = 'zero_jet', help = 'Region to process')
-    parser.add_argument('-i', '--input', action = 'store', default = '/eos/home-j/jiehan/root/outputs', help = 'Path of root file for categorization')
+    parser.add_argument('-i', '--input', action = 'store', default = '/eos/home-p/pelai/HZgamma/bdt_root_dataset/run2/outputs', help = 'Path of root file for categorization')
     parser.add_argument('-n', '--nscan', type = int, default = 100, help='number of scan.')
     parser.add_argument('-b', '--nbin', type = int, default = 10, choices = [1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16], help = 'number of BDT bins.')
     parser.add_argument('--skip', action = 'store_true', default = False, help = 'skip the hadd part')
@@ -225,7 +225,17 @@ def categorizing(input_path, region, variable, sigs, bkgs, nscan, minN, transfor
     print('=========================================================================')
 
     return boundaries, boundaries_values, zmax
-    
+
+def round_floats(obj, ndigits=3):
+    if isinstance(obj, float):
+        return round(obj, ndigits)
+    elif isinstance(obj, dict):
+        return {k: round_floats(v, ndigits) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [round_floats(elem, ndigits) for elem in obj]
+    else:
+        return obj
+
 def main():
 
     gROOT.SetBatch(True)
@@ -296,10 +306,10 @@ def main():
     outs={}
     outs['boundaries'] = boundaries
     outs['boundaries_values'] = boundaries_values
-    outs['smax'] = smax
-    outs['significance'] = s
-    outs['Delta_significance'] = u
-    outs['nscan'] = nscan
+    outs['smax'] = round(smax, 2)
+    outs['significance'] = round(s, 2)
+    outs['Delta_significance'] = round(u, 2)
+    outs['nscan'] = round(nscan, 2)
     outs['transform'] = args.transform
     outs['floatB'] = args.floatB
     outs['nfold'] = n_fold
@@ -308,8 +318,9 @@ def main():
     outs['variable'] = variable
     outs['estimate'] = args.estimate
     outs.update(yields.to_dict())
+    rounded_outs = round_floats(outs, ndigits=3)
 
-    print(outs, '\n================================================\n')
+    print(rounded_outs, '\n================================================\n')
 
     if not os.path.isdir('%s/significances/%s'%(input_path,region)):
         print(f'INFO: Creating output folder: "{input_path}/significances/{region}"')

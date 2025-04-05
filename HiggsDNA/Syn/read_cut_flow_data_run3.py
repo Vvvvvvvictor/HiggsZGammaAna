@@ -7,19 +7,22 @@ import time
 
 start_time = time.time()
 
-# eos_path = '/eos/home-p/pelai/HZgamma/Parquet/NanoV9/run2/Sig_MC/'
-# log_path = '/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/HiggsDNA/eos_logs/Sig_MC/'
 
 # Specify the output file path
-output_file = "syn_list/cut_yields_output_Data_run2.txt"
+# output_file = "syn_list/cut_yields_output_Data_run2.txt"
+output_file = "syn_list/cut_yields_output_Data_run3.txt"
 
-eos_path = '/eos/home-p/pelai/HZgamma/Parquet/NanoV9/run2/'
-log_path = '/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/HiggsDNA/synchronization/eos_logs/'
+eos_path = '/eos/home-p/pelai/HZgamma/Parquet/NanoV12/run3/'
+log_path = '/afs/cern.ch/work/p/pelai/HZgamma/Output/HiggsDNA/Syn/eos_logs/run3/'
 # Reading log files from eos is too slow
 
 dataset_type = 'Data'
 dataset_names = ["Data"]
-dataset_years = ["2016preVFP", "2016postVFP", "2017", "2018"] #"2016preVFP", "2016postVFP", "2017", "2018", "2023preBPix"
+# dataset_years = ["2016preVFP", "2016postVFP", "2017", "2018"] #"2016preVFP", "2016postVFP", "2017", "2018", "2023preBPix"
+dataset_years = ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"] #"2022preEE", "2022postEE", "2023preBPix", "2023postBPix"
+
+# eos_path = '/eos/home-p/pelai/HZgamma/Parquet/NanoV9/run2/Sig_MC/'
+# log_path = '/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/HiggsDNA/eos_logs/Sig_MC/'
 
 # dataset_type = 'signal'
 # dataset_type = 'WI_Systematic'

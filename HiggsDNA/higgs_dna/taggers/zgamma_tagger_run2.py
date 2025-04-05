@@ -96,10 +96,13 @@ DEFAULT_OPTIONS = {
     "jets" : {
         "pt" : 30.0,
         "eta" : 4.7,
-        "eta" : 4.7,
         "dr_photons" : 0.4,
         "dr_electrons" : 0.4,
         "dr_muons" : 0.4,
+        "jets_horn" : {
+            "pt" : 40.0,
+            "eta" : [2.5, 3.0]
+        }
     },
     "btag_med": {
         "2016preVFP": 0.2598,
@@ -177,7 +180,7 @@ class ZGammaTaggerRun2(Tagger):
     def overlap_removal(self, events):
         """
         Select isolation photons in events
-        Add number of isolation photons (n_iso_photons) in output .parquet file to indetify thé overlap events
+        Add number of isolation photons (n_iso_photons) in output .parquet file to indetify the overlap events
         """
         
         """
@@ -185,7 +188,9 @@ class ZGammaTaggerRun2(Tagger):
         "statusFlags" is a number with 14 bits. 
         Filling "1" on corresponding digit when the particle meets one of the 14 conditions, else remaining "0".
         Echo paticles can meet more than one kind of condition, thus, more than one digit in "statusFlags" is "1".
+        ( (events.GenPart.statusFlags // numpy.power(2, 8)) % 2 == 1 ) Hard Scattering
         """
+        
         iso_photons_cut = (events.GenPart.pdgId == 22) & (events.GenPart.pt > 15) & (abs(events.GenPart.eta) < 2.6) & (( (events.GenPart.statusFlags // numpy.power(2, 0)) % 2 == 1 ) | ( (events.GenPart.statusFlags // numpy.power(2, 8)) % 2 == 1 ))
         iso_photons = events.GenPart[iso_photons_cut]
 
@@ -221,8 +226,7 @@ class ZGammaTaggerRun2(Tagger):
         electron_cut = lepton_selections.select_electrons(
             electrons = events.Electron,
             options = self.options["electrons"],
-            clean = {
-            },
+            clean = {},
             name = "SelectedElectron",
             tagger = self,
             year = self.year[:4]
@@ -280,7 +284,6 @@ class ZGammaTaggerRun2(Tagger):
                     "min_dr" : self.options["jets"]["dr_photons"]
                 },
                 "electrons" : {
-                    
                     "objects" : electrons,
                     "min_dr" : self.options["jets"]["dr_electrons"]
                 },
@@ -290,7 +293,8 @@ class ZGammaTaggerRun2(Tagger):
                 }
             },
             name = "SelectedJet",
-            tagger = self
+            tagger = self,
+            year = self.year
         )
 
         jets = awkward_utils.add_field(
@@ -301,7 +305,7 @@ class ZGammaTaggerRun2(Tagger):
         photon = awkward_utils.add_field(
                 events = events,
                 name = "Photon",
-                data = events.Photon[photon_selection],
+                data = events.Photon[photon_selection]
         )
         FSRphoton_selection = self.select_FSRphotons(
                 FSRphotons = events.FsrPhoton,
@@ -334,7 +338,16 @@ class ZGammaTaggerRun2(Tagger):
             )
         
         if not self.is_data:
-            dZ = events.GenVtx_z - events.PV_z
+            print("GenPart fields:", events.GenPart.fields)
+            print("Does PV exist?", hasattr(events, "PV"))
+            if hasattr(events, "PV"):
+                print("PV fields:", events.PV.fields)
+            
+            if hasattr(events, "GenVtx_z") and hasattr(events, "PV_z"):
+                dZ = events.GenVtx_z - events.PV_z
+            else:
+                print("Warning: GenVtx_z or PV_z missing, using placeholder")
+                dZ = awkward.zeros_like(events.MET_pt)
             awkward_utils.add_field(events, "dZ", dZ, overwrite=True)
 
         n_electrons = awkward.fill_none(awkward.num(electrons), 0)
@@ -585,11 +598,20 @@ class ZGammaTaggerRun2(Tagger):
 
         # additional leptons
         leptons = awkward.concatenate([electrons, muons], axis = 1)
-        max_I_mini = awkward.fill_none(awkward.max(leptons.miniPFRelIso_all, axis = 1), 9999)
-        awkward_utils.add_field(events, "max_I_mini", max_I_mini)
+        # print("Electron fields:", electrons.fields)
+        # print("Muon fields:", muons.fields)
+        # print("Lepton fields after concatenation:", leptons.fields)
+        if "miniPFRelIso_all" in leptons.fields:
+            max_I_mini = awkward.fill_none(awkward.max(leptons.miniPFRelIso_all, axis=1), 9999)
+        else:
+            print("Warning: miniPFRelIso_all missing, using pfRelIso03_all")
+            max_I_mini = awkward.fill_none(awkward.max(leptons.pfRelIso03_all, axis=1), 9999)
         
-        veto_Z_leptons = (leptons.pt != events.Z_lead_lepton_pt) & (leptons.pt != events.Z_sublead_lepton_pt)
-        additional_leptons = leptons[veto_Z_leptons]       
+        awkward_utils.add_field(events, "max_I_mini", max_I_mini)
+        # print("Sample max_I_mini values:", max_I_mini[:5])  # Optional validation
+        '''If leptons are not from Z boson, they are additional leptons.'''
+        is_additional_leptons = (leptons.pt != events.Z_lead_lepton_pt) & (leptons.pt != events.Z_sublead_lepton_pt)
+        additional_leptons = leptons[is_additional_leptons]       
         additional_leptons = additional_leptons[awkward.argsort(additional_leptons.pt, ascending=False, axis=1)]
 
         for objects, name in zip([additional_leptons], ["additional_lepton"]):
@@ -624,34 +646,37 @@ class ZGammaTaggerRun2(Tagger):
             else:
                 weighted = False
 
-            cut0 = awkward.num(events.Photon) >= 0
+            N_events = awkward.num(events.Photon) >= 0
+            
+            N_lep2 = z_ee_cut | z_mumu_cut
+            if "ele" in cut_type:
+                N_lep2 = z_ee_cut
+            elif "mu" in cut_type:
+                N_lep2 = z_mumu_cut
 
-            cut1 = z_ee_cut | z_mumu_cut
+            N_trigger = N_lep2 & trigger_cut
             if "ele" in cut_type:
-                cut1 = z_ee_cut
+                N_trigger = N_lep2 & ele_trigger_cut
             elif "mu" in cut_type:
-                cut1 = z_mumu_cut
-            cut2 = cut1 & trigger_cut
+                N_trigger = N_lep2 & mu_trigger_cut
+
+            N_lep_pt = N_trigger & trigger_pt_cut
             if "ele" in cut_type:
-                cut2 = cut1 & ele_trigger_cut
+                N_lep_pt = N_trigger & ele_trigger_pt_cut
             elif "mu" in cut_type:
-                cut2 = cut1 & mu_trigger_cut
-            cut3 = cut2 & trigger_pt_cut
-            if "ele" in cut_type:
-                cut3 = cut2 & ele_trigger_pt_cut
-            elif "mu" in cut_type:
-                cut3 = cut2 & mu_trigger_pt_cut
-            cut4 = cut3 & has_gamma_cand
-            cut5 = cut4 & has_z_cand
-            cut6 = cut5 & sel_h_1
-            cut7 = cut6 & sel_h_2
-            cut8 = cut7 & sel_h_3
-            cut9 = cut8 & event_filter
+                N_lep_pt = N_trigger & mu_trigger_pt_cut
+            
+            N_g1                = N_lep_pt          & has_gamma_cand
+            N_Zmass_W           = N_g1              & has_z_cand
+            N_g1pt_Hmass        = N_Zmass_W         & sel_h_1
+            N_Zmass_Sum_Hmass   = N_g1pt_Hmass      & sel_h_2
+            N_Hmass_W           = N_Zmass_Sum_Hmass & sel_h_3
+            N_event_filter      = N_Hmass_W         & event_filter
             
             if cut_type == "zgammas_ele":
-                ee_all_cut = cut9
+                ee_all_cut = N_event_filter
             if cut_type == "zgammas_mu":
-                mm_all_cut = cut9
+                mm_all_cut = N_event_filter
             
             # if cut_type == "zgammas_ele":
             #     print(f"!!!start check events tag({cut_type})!!!")
@@ -661,15 +686,15 @@ class ZGammaTaggerRun2(Tagger):
 
             self.register_event_cuts(
                 # names = ["all", "N_lep_sel", "trig_cut", "lead_lep_pt_cut", "sub_lep_pt_cut", "has_g_cand", "has_z_cand", "sel_h_1", "sel_h_2", "sel_h_3"],
-                # results = [cut0, cut1, cut2, cut3, cut4, cut5, cut6, cut7, cut8, cut9],
+                # results = [N_events, cut1, N_trigger, N_lep_pt, N_g1, N_Zmass_W, N_g1pt_Hmass, N_Zmass_Sum_Hmass, N_Hmass_W, N_event_filter],
                 names = ["all", "N_lep_sel", "trig_cut", "lep_pt_cut", "has_g_cand", "has_z_cand", "sel_h_1", "sel_h_2", "sel_h_3", "event", "all cuts"],
-                results = [cut0, cut1, cut2, cut3, cut4, cut5, cut6, cut7, cut8, cut9, all_cuts],
+                results = [N_events, N_lep2, N_trigger, N_lep_pt, N_g1, N_Zmass_W, N_g1pt_Hmass, N_Zmass_Sum_Hmass, N_Hmass_W, N_event_filter, all_cuts],
                 events = events,
                 cut_type = cut_type,
                 weighted = weighted
             )
             # cut_names = ["N_lep_sel", "trig_cut", "lep_pt_cut", "has_g_cand", "os_cut", "has_z_cand", "sel_h_1", "sel_h_2", "sel_h_3"]
-            # for cut, cut_name in zip([cut1, cut2, cut3, cut4, cut5, cut6, cut7, cut8, cut9], cut_names):
+            # for cut, cut_name in zip([cut1, N_trigger, N_lep_pt, N_g1, N_Zmass_W, N_g1pt_Hmass, N_Zmass_Sum_Hmass, N_Hmass_W, N_event_filter], cut_names):
             #     awkward_utils.add_field(events, f"{cut_type}_{cut_name}", cut)
 
         all_cuts = ee_all_cut | mm_all_cut
@@ -848,7 +873,11 @@ class ZGammaTaggerRun2(Tagger):
         # electron veto
         e_veto_cut = (photons.electronVeto > options["e_veto"])
         
-        photon_ele_idx = awkward.where(awkward.num(photons.electronIdx, axis=1) == 0, awkward.ones_like(photons.pt)*-1, photons.electronIdx)
+        photon_ele_idx = awkward.where(
+            awkward.num(photons.electronIdx, axis=1) == 0,
+            awkward.ones_like(photons.pt) * -1,
+            photons.electronIdx
+        )
         new_pho = awkward.unflatten(awkward.unflatten(awkward.flatten(photon_ele_idx), [1]*awkward.sum(awkward.num(photon_ele_idx))), awkward.num(photon_ele_idx, axis=1))
         new_ele = awkward.broadcast_arrays(electrons.Idx[:,None], new_pho, depth_limit=2)[0]
         eg_overlap_cut = ~awkward.where(
@@ -906,7 +935,7 @@ def produce_diphotons(photons, n_photons, lead_pt_cut, lead_pt_mgg_cut, sublead_
             for j in range(n_photons[i]):
                 for k in range(j+1, n_photons[i]):
                     # Choose who is the leading photon
-                    lead_idx = j if photons[i][j].pt > photons[i][k].pt else k
+                    lead_idx    = j if photons[i][j].pt > photons[i][k].pt else k
                     sublead_idx = k if photons[i][j].pt > photons[i][k].pt else j
                     lead_photon = photons[i][lead_idx]
                     sublead_photon = photons[i][sublead_idx]

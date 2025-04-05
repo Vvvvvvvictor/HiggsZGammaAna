@@ -18,9 +18,10 @@
 */models
 */eos*/
 */x509*
-HiggsDNA/jiehan.cc
+HiggsDNA/pelai.cc
 HiggsDNA/core*
-SSTest/bkg*
+HiggsDNA/Parquet
+*/hzgml/condor/info
 *.__afs*
 */CMSSW*
 */log

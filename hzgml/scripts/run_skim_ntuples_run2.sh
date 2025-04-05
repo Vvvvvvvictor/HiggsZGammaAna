@@ -1,8 +1,12 @@
 #!/bin/bash                                                                                                                                                                       
 echo "==============STARTED=============="
 
-input="/eos/user/j/jiehan/parquet/nanov9/"
-target="/eos/home-j/jiehan/root/skimmed_ntuples_run2/"
+input="/eos/home-p/pelai/HZgamma/Parquet/NanoV9/run2/"
+# target="/eos/home-p/pelai/HZgamma/Root_Dataset/run2/NanoV9"
+# target="/eos/home-p/pelai/HZgamma/Root_Dataset/run2/NanoV9/Bkg_MC"
+# target="/eos/home-p/pelai/HZgamma/Root_Dataset/run2/NanoV9/Data"
+target="/eos/home-p/pelai/HZgamma/Root_Dataset/run2/NanoV9/Sig_MC_WO_Systematic"
+
 # target="./"
 
 # years=(2016preVFP 2016postVFP 2017 2018 2022preEE 2022postEE 2023preBPix 2023postBPix)
@@ -11,7 +15,7 @@ years=(2016preVFP 2016postVFP 2017 2018)
 systs=("FNUF" "Material" "Scale" "Smearing" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt")
 # systs=("FNUF" "Material" "Scale" "Smearing" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt")
 
-# 函数定义：执行命令并处理错误
+# Execute Command
 execute_command() {
     local cmd="$1"
     local max_retries=10  # 最大重试次数
@@ -29,7 +33,7 @@ execute_command() {
     fi
 }
 
-# 函数定义：处理样本数据
+# Process Sample
 process_sample() {
     local sample="$1"
     local type="$2"
@@ -40,14 +44,14 @@ process_sample() {
     fi
     
     for year in "${years[@]}"; do
-        command="python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py "
+        command="python /afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py "
         command+="-i ${input}${type}/${sample}_${year}/merged_${corr}.parquet "
         if [ "$type" = "Data" ]; then
-            command+="-o ${target}data/${year}.root"
+            command+="-o ${target}/Data/${year}.root"
         # elif [ "$type" = "signal" ]; then
         #     command+="-o ${target}${sample}_M125/${year}.root"
         else
-            command+="-o ${target}${sample}/${year}.root"
+            command+="-o ${target}/${sample}/${year}.root"
         fi
         
         # 使用函数执行命令
@@ -63,7 +67,7 @@ process_sample() {
     echo "Sample $sample completed successfully."
 }
 
-# 函数定义：处理样本数据
+# Process Sample with Systematic Uncertainty
 process_sample_syst() {
     local sample="$1"
     local type="$2"
@@ -72,7 +76,7 @@ process_sample_syst() {
     
     for syst in "${systs[@]}"; do
         corr="${syst}_${uod}"
-        command="python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py "
+        command="python /afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py "
         command+="-i ${input}${type}/${sample}_${year}/merged_${corr}.parquet "
         command+="-o ${target}${sample}_${syst}_${uod}/${year}.root"
         
@@ -89,43 +93,77 @@ process_sample_syst() {
     echo "Sample $sample completed successfully."
 }
 
-# 处理 signal 样本
+# ****************************
+# ********** Signal **********
+# ****************************
+
+# ****************************
+# ********* Nomianl **********
+# ****************************
 
 # samples=(ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125 ggH_M120 VBFH_M120 WplusH_M120 WminusH_M120 ZH_M120 ttH_M120 ggH_M130 VBFH_M130 WplusH_M130 WminusH_M130 ZH_M130 ttH_M130 ggH_mix VBF_mix ggH VBF WplusH WminusH ZH ttH)
 
-# samples=(ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125) 
-# type="signal"
-# for sample in "${samples[@]}"; do
-#     mkdir -p "$target${sample}/"
-#     # 存储后台任务的进程ID列表
-#     pid_list=()
-
-#     # 调用函数处理样本数据
-#     process_sample "$sample" "$type"
-# done
-
-samples=(WminusH_M125 WplusH_M125) # ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125
-type="signal"
+samples=(WplusH_M125 WminusH_M125) 
+type="Sig_MC/WO_Systematic"
 for sample in "${samples[@]}"; do
-    for sf in "up" "down"; do #  "up" "down"
-        for syst in "${systs[@]}"; do
-            mkdir -p "$target${sample}_${syst}_${sf}"
-        done
-        for year in "${years[@]}"; do
-            # 存储后台任务的进程ID列表
-            pid_list=()
+    mkdir -p "$target${sample}/"
+    # 存储后台任务的进程ID列表
+    pid_list=()
 
-            # 调用函数处理样本数据
-            process_sample_syst "$sample" "$type" "$year" "$sf"
-        done
-    done
+    # 调用函数处理样本数据
+    process_sample "$sample" "$type"
 done
 
-# # 处理 bkgmc 样本
+# ****************************
+# ********** Signal **********
+# ****************************
 
-# # samples=(ZGToLLG DYJetsToLL WGToLNuG ZG2JToG2L2J EWKZ2J TT TTGJets TGJets ttWJets ttZJets WW WZ ZZ DYGto2LG_10to50 DYGto2LG_50to100)
-# samples=(ZGToLLG)
-# type="bkgmc"
+# *******************************************
+# ********* Systematic Uncertainty **********
+# *******************************************
+
+# samples=(WminusH_M125 WplusH_M125) # ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125
+# type="Sig_MC"
+# for sample in "${samples[@]}"; do
+#     for sf in "up" "down"; do #  "up" "down"
+#         for syst in "${systs[@]}"; do
+#             mkdir -p "$target${sample}_${syst}_${sf}"
+#         done
+#         for year in "${years[@]}"; do
+#             # 存储后台任务的进程ID列表
+#             pid_list=()
+
+#             # 调用函数处理样本数据
+#             process_sample_syst "$sample" "$type" "$year" "$sf"
+#         done
+#     done
+# done
+
+# ****************************
+# ********** Bkg *************
+# ****************************
+
+# ****************************
+# ********* Nomianl **********
+# ****************************
+
+#  Run 2
+#       Z + Fake g   |   Z + g          |   tt        |   tg/ttg  |   VBS Z + g   |   tt + X  |   Multibosons              |
+#       DYJetsToLL   |   ZGToLLG        |   TTtoLNu2Q |   TGJets  |   ZG2JToG2L2J |   ttWJets |   WW / WZ / ZZ / WGToLNuG  |
+#       EWKZ2J       |                  |   TT        |   TTGJets |               |   ttZJets |  
+
+#  Run 3
+#  2022 DYJetsToLL   |DYGto2LG_10to50   |   TTtoLNu2Q |   Lack    |   ZG2JToG2L2J |   Lack    |   WW / WZ / ZZ
+#  2022EE            |DYGto2LG_50to100  |   TT        |   Lack    |               |   Lack    |
+
+#  2023 DYJetsToLL   |DYGto2LG_10to100  |   TTtoLNu2Q |   Lack    |   ZG2JToG2L2J |   Lack    |   WW / WZ / ZZ 
+#                    |                  |   TT        |   Lack    |               |   Lack    |
+
+
+# samples=(ZGToLLG DYJetsToLL WGToLNuG ZG2JToG2L2J EWKZ2J TT TTGJets TGJets ttWJets ttZJets WW WZ ZZ DYGto2LG_10to50 DYGto2LG_50to100)
+# samples=(DYJetsToLL EWKZ2J ZGToLLG TT TGJets TTGJets ZG2JToG2L2J ttWJets ttZJets WW WZ ZZ)
+# samples=(WGToLNuG)
+# type="Bkg_MC"
 # for sample in "${samples[@]}"; do
 #     mkdir -p "$target$sample"
 #     # 存储后台任务的进程ID列表
@@ -135,10 +173,16 @@ done
 #     process_sample "$sample" "$type"
 # done
 
-# # 处理 data 样本
+# ****************************
+# ********** Data ************
+# ****************************
+
+# ****************************
+# ********* Nomianl **********
+# ****************************
 
 # samples=(Data)
-# type="data"
+# type="Data"
 # for sample in "${samples[@]}"; do
 #     mkdir -p "$target$sample"
 #     # 存储后台任务的进程ID列表

@@ -122,8 +122,8 @@ def main(args):
 
     logger.debug("Running HiggsDNA analysis with config:")
 
-    args = {k:v for k,v in vars(args).items() if v is not None} # throw away None-value args
-    analysis = AnalysisManager(**args)
+    args = {k:v for k,v in vars(args).items() if v is not None} # exclude None-value, key:value to exclude None
+    analysis = AnalysisManager(**args) # ** to make key=value to input the function
     analysis.run()
 
 

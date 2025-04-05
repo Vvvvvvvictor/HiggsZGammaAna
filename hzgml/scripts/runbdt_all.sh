@@ -19,13 +19,18 @@ echo "num: $2"
 echo "==================================================="
 echo "Shielded parameter is: $S . Added variables is: $A ."
 
-# python scripts/train_bdt.py -r zero_to_one_jet --optuna --n-calls 20 --continue-optuna 0 --optuna_metric "eval_auc"
-# python scripts/train_bdt.py -r two_jet --optuna --n-calls 20 --continue-optuna 0 --optuna_metric "sqrt_eval_auc_minus_train_auc"
-# python scripts/train_bdt.py -r VBF --optuna --n-calls 20 --continue-optuna 0 --optuna_metric "sqrt_eval_auc_minus_train_auc"
+# 1. Optimize Hyperparameters
+# python scripts/train_bdt.py -r zero_to_one_jet --optuna --n-calls 20 --continue-optuna 0 --optuna_metric "eval_auc" -f 0 --inputFolder "/eos/home-p/pelai/HZgamma/Root_Dataset/run2/NanoV9/Mix_Sig_WO_Systematic"
+# python scripts/train_bdt.py -r VBF --optuna --n-calls 20 --continue-optuna 0 --optuna_metric "eval_auc" --inputFolder "/eos/home-p/pelai/HZgamma/Root_Dataset/run2/NanoV9/Mix_Sig_WO_Systematic"
 
+# python seval_auccripts/train_bdt.py -r two_jet --optuna --n-calls 20 --continue-optuna 0 --optuna_metric "sqrt_eval_auc_minus_train_auc" --inputFolder "/eos/home-p/pelai/HZgamma/Root_Dataset/run2/NanoV9/Mix_Sig_WO_Systematic"
+# python scripts/train_bdt.py -r VBF --optuna --n-calls 20 --continue-optuna 0 --optuna_metric "sqrt_eval_auc_minus_train_ｚauc"
+
+# for fold in {0..1};do
+# for fold in {2..3};do
 # for fold in {0..3};do
-# # python scripts/train_bdt.py -r zero_to_one_jet --optuna --n-calls 40 --fold $fold --continue-optuna 1
-# python scripts/train_bdt.py -r two_jet --optuna --n-calls 20 --fold $fold --continue-optuna 0 --optuna_metric "eval_auc"
+# python scripts/train_bdt.py -r zero_to_one_jet --optuna --n-calls 40 --fold $fold --continue-optuna 0 --optuna_metric "eval_auc" --inputFolder "/eos/home-p/pelai/HZgamma/Root_Dataset/run2/NanoV9/Mix_Sig_WO_Systematic"
+# python scripts/train_bdt.py -r two_jet --optuna --n-calls 20 --fold $fold --continue-optuna 0 --optuna_metric "eval_auc" --inputFolder "/eos/home-p/pelai/HZgamma/Root_Dataset/run2/NanoV9/Mix_Sig_WO_Systematic"
 # done
 
 # python scripts/train_bdt.py -r two_jet --save --hyperparams_path "models/optuna_two_jet_sqrt"
@@ -35,20 +40,29 @@ echo "Shielded parameter is: $S . Added variables is: $A ."
 # python ../plot_python/plot_2D_bdt_score.py
 # python ../plot_python/plot_2D_cat_hmass_dis.py
 
-# python scripts/train_bdt.py -r zero_to_one_jet --save --hyperparams_path "models/optuna_zero_to_one_jet"
+# 2. Train with Hyperparameter
+# python scripts/train_bdt.py -r zero_to_one_jet --save --hyperparams_path "models/optuna_zero_to_one_jet" --inputFolder "/eos/home-p/pelai/HZgamma/Root_Dataset/run2/NanoV9/Mix_Sig_WO_Systematic"
+# python scripts/train_bdt.py -r two_jet --save --hyperparams_path "models/optuna_two_jet" --inputFolder "/eos/home-p/pelai/HZgamma/Root_Dataset/run2/NanoV9/Mix_Sig_WO_Systematic"
+
+# 3. Apple the BDT Training Results 
 # python scripts/apply_bdt.py -r zero_to_one_jet
+# python scripts/apply_bdt.py -r two_jet
 # python scripts/train_bdt.py -r zero_jet --save  #--hyperparams_path "models/optuna_zero_to_one_jet"
 # python scripts/train_bdt.py -r one_jet --save  #--hyperparams_path "models/optuna_zero_to_one_jet"
 # python scripts/apply_bdt.py -r zero_jet
 # python scripts/apply_bdt.py -r one_jet
 
-python scripts/categorization_1D.py -r zero_to_one_jet -b 4 --floatB --minN 10 -es "fullSimrw"
+# 4. Categorization_1D, ggF
+python scripts/categorization_1D.py -r zero_to_one_jet -b 4 --floatB --minN 10 -es "fullSimrw" > condor/info/categorize_zero_to_one_jet.log
 # python scripts/categorization_1D.py -r zero_jet -b 4 --minN 10 --floatB -es "fullSimrw"
 # python scripts/categorization_1D.py -r one_jet -b 4 --minN 10 --floatB -es "fullSimrw"
 # for ncat in {2..7};do
 #     python scripts/categorization_1D.py -r two_jet -b $ncat --minN 2 --floatB -es "fullSimrw"
 # done
-python scripts/categorization_1D.py -r two_jet -b 4 --floatB --minN 2 -es "fullSimrw"
+
+# 4. Categorization_1D, VBF
+python scripts/categorization_1D.py -r two_jet -b 4 --floatB --minN 10 -es "fullSimrw" > condor/info/categorize_two_jet.log
+
 # python ../plot_python/plot_cats_hmass_dis.py
 # python ../plot_python/compare_two_var_slice.py
 
@@ -59,7 +73,6 @@ python scripts/categorization_1D.py -r two_jet -b 4 --floatB --minN 2 -es "fullS
 # python scripts/apply_bdt_bkg.py
 # python scripts/apply_bdt_sig_corr.py
 # python ../SSTest/Generate_template.py
-
 
 # python ../SSTest/Generate_template.py
 # python scripts/Generate_fake_photon_template.py -r two_jet

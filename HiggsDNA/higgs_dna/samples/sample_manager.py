@@ -112,6 +112,7 @@ class SampleManager():
                         info["files"][year] = [info["files"][year]] # recast this as Option 2b/3b format
 
                     for path in info["files"][year]:
+                        files_dir = []  # Initialize files_dir as an empty list by default
                         if path.startswith("root://"): # access via xrd
                             logger.debug("[SampleManager : get_samples] For sample '%s', year '%s', we interpreted the specified files '%s' as a directory to be accessed via xrd" % (sample, year, path))
 
@@ -136,6 +137,9 @@ class SampleManager():
                                 raise RuntimeError()
                             files_dir = self.get_files_from_dasgoclient(path, is_data)
 
+                        else:
+                            logger.warning("[SampleManager : get_samples] For sample '%s', year '%s', path '%s' does not match any expected format (xrd, local dir, or DAS dataset). No files will be added for this path." % (sample, year, path))
+                        
                         files += files_dir
                     grabbed_files = True
 

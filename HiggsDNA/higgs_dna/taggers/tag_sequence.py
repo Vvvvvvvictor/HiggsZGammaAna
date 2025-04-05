@@ -46,7 +46,8 @@ class TagSequence():
                 if i != len(tag_list) - 1:
                     logger.exception("[TagSequence : __init__] A list of tags should only be given as the very last step of the tag sequence.")
                     raise ValueError()
-
+            
+            # tagger = { "module_name": "higgs_dna.taggers.zgamma_tagger_run2", "tagger": "ZGammaTaggerRun2", "kwargs": { "name": "zgamma_tagger_run2", "options": {"gen_info": {"calculate": true}} } }
             for j, tagger in enumerate(tag_set):
                 if isinstance(tagger, dict):
                     m_tagger = self.create_tagger(tagger)
@@ -70,6 +71,7 @@ class TagSequence():
 
 
     def create_tagger(self, config):
+        # config = { "module_name": "higgs_dna.taggers.zgamma_tagger_run2", "tagger": "ZGammaTaggerRun2", "kwargs": { "name": "zgamma_tagger_run2", "options": {"gen_info": {"calculate": true}} } }
         module = importlib.import_module(config["module_name"])
         
         if "kwargs" not in config.keys():
@@ -79,6 +81,13 @@ class TagSequence():
             config["kwargs"]["is_data"] = self.sample.is_data
             config["kwargs"]["year"] = self.sample.year
 
+        '''
+        where "tagger": "ZGammaTaggerRun2" was imported
+        module = <module 'higgs_dna.taggers.zgamma_tagger_run2'>
+        config["tagger"] = "ZGammaTaggerRun2"
+        config["kwargs"] = {"name": "zgamma_tagger_run2", "options": {"gen_info": {"calculate": True}}}
+        ZGammaTaggerRun2(name="zgamma_tagger_run2", options={"gen_info": {"calculate": True}}, is_data=True, year="2018")
+        '''
         tagger = getattr(
             module,
             config["tagger"]
@@ -102,7 +111,7 @@ class TagSequence():
 
             events = self.run_taggers(events, syst_tag, tag_set)
             if n_taggers > 1:
-                print("debuging: check events in run",events)
+                print("debuging: check events in run", events)
                 events = self.orthogonalize_tags(events, syst_tag, tag_set)
             events = self.select_events(events, syst_tag, tag_set)
 
@@ -110,6 +119,8 @@ class TagSequence():
         self.summarize()
 
         return events, self.tag_idx_map
+
+
     def run_taggers(self, events, syst_tag, tag_list):
         """
         Get initial selection for each tag and allow taggers to add fields to events array.

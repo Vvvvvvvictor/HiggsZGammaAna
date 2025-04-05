@@ -96,45 +96,39 @@ for primary_process_name, tree_name in Tree_dict.items():
         "delta_phi_zgjj": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi(jj,\;ll\gamma)$"}
         }
 
-    # inclusive, zero_jet, one_jet, zero_to_one_jet, two_jet, VH_ttH, VH, ZH, ttH_had, ttH_lep
-    # TREE = "zero_to_one_jet"
+
     TREE = tree_name
     WEIGHT = "weight"
-    PATH = "/eos/home-p/pelai/HZgamma/Root_Dataset/run2/NanoV9/Mix_Sig_WO_Systematic/"
-    # PATH = "/eos/user/j/jiehan/root/skimmed_ntuples_run2/"
+    PATH = "/eos/home-p/pelai/HZgamma/Root_Dataset/run3/NanoV12/"
 
-    data = {"data": ["Data"]}
-    # bkg = {r"Z$+\gamma$": ["ZGToLLG"], "Z+Fake Photon": ["DYJetsToLL", "EWKZ2J"], r"VBSZ+$\gamma$": ["ZG2JToG2L2J"], r"t$\bar{t}$": ["TT"], r"t$\gamma$/t$\bar{t}\gamma$": ["TTGJets", "TGJets"], "multiboson": ["WW", "WZ", "ZZ"], r"t$\bar{t}$+X": ["ttZJets", "ttWJets"]}
-    # bkg = {"Multiboson": ["WW", "WZ", "ZZ"], r"t$\bar{t}$+X": ["ttZJets", "ttWJets"], r"VBS Z+$\gamma$": ["ZG2JToG2L2J"], r"t$\gamma$/t$\bar{t}\gamma$": ["TTGJets", "TGJets"], r"t$\bar{t}$": ["TT"], r"Z$+\gamma$": ["DYGto2LG"], "Z+Fake Photon": ["DYJetsToLL"]}
-    bkg = {"Multiboson": ["WW", "WZ", "ZZ"], r"t$\bar{t}$+X": ["ttZJets", "ttWJets"], r"VBS Z+$\gamma$": ["ZG2JToG2L2J"], r"t$\gamma$/t$\bar{t}\gamma$": ["TTGJets", "TGJets"], r"t$\bar{t}$": ["TT"], r"Z$+\gamma$": ["ZGToLLG"], "Z+Fake Photon": ["DYJetsToLL", "EWKZ2J"]}
-    color_dict = {r"Z$+\gamma$": "#3f90da", "Z+Fake Photon": "#ffa90e", r"VBS Z+$\gamma$": "#92dadd", r"t$\bar{t}$": "#e76300", r"t$\gamma$/t$\bar{t}\gamma$": "#bd1f01", "Multiboson": "#832db6", r"t$\bar{t}$+X": "#94a4a2"}
+    sig = {"sig": ["ggH_M125", "VBF_M125"], "ggH": ["ggH_M125"], "VBF": ["VBF_M125"]}
+    bkg = {"Multiboson": ["WW", "WZ", "ZZ"], r"t$\bar{t}$": ["TT", "TTtoLNu2Q"], r"VBS Z+$\gamma$": ["ZG2JToG2L2J"], r"Z$+\gamma$": ["DYGto2LG"], "Z+Fake Photon": ["DYJetsToLL"]}
+    color_dict = {r"Z$+\gamma$": "#3f90da", "Z+Fake Photon": "#ffa90e", r"VBS Z+$\gamma$": "#92dadd", r"t$\bar{t}$": "#e76300", r"t$\gamma$/t$\bar{t}\gamma$": "#bd1f01", "Multiboson": "#832db6", r"t$\bar{t}$+X": "#94a4a2","ggH": "#FF3B4F", "VBF": "#4EFFEF"}
 
-    def convert_root_to_hist(file_dict, selection=""):
+    def convert_root_to_hist(file_dict, selection=None):
         mass_hist = np.zeros(80)
         error = np.zeros(BINS)
         hists = []
-        bins = np.linspace(RMIN, RMAX, BINS + 1)
         for file in file_dict.values():
             type_hist = np.zeros(BINS)
             for f in file:
-                for year in ["2016preVFP", "2016postVFP", "2017", "2018"]:
-                # for year in ["2016preVFP"]:
-                    print("Reading", PATH + f  + "/" + year + ".root:" + TREE, "...")
+                for year in ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"]:
+                    print("Reading", PATH+f+"/"+year+f".root:{TREE}", "...")
                     if "H_mass" not in VAR:
                         try:
-                            samples = uproot.open(PATH + f + "/" + year + ".root:" + TREE).arrays([VAR, WEIGHT, "H_mass"], library="pd")
+                            samples = uproot.open(PATH+f+"/"+year+f".root:{TREE}").arrays([VAR, WEIGHT, "H_mass"], library="pd")
                         except:
                             continue
                     else:
                         try:
-                            samples = uproot.open(PATH + f + "/" + year + ".root:" + TREE).arrays([VAR, WEIGHT], library="pd")
+                            samples = uproot.open(PATH+f+"/"+year+f".root:{TREE}").arrays([VAR, WEIGHT], library="pd")
                         except:
                             continue
-                    samples = samples.query(selection)
-                    hist, _ = np.histogram(samples.query("H_mass<120 | H_mass>130")["H_mass"], bins=80, range=[100, 180], weights=samples.query("H_mass<120 | H_mass>130")[WEIGHT])
+                    if selection != None:
+                        samples = samples.query(selection)
+                    hist, _ = np.histogram(samples["H_mass"], bins=80, range=[100, 180], weights=samples[WEIGHT])
                     mass_hist = mass_hist + hist
                     hist, bins = np.histogram(samples[VAR], bins=BINS, range=[RMIN, RMAX], weights=samples[WEIGHT])
-                    # print(f"bins length: {len(bins)}, expected: {BINS+1}")
                     hist[0] += np.sum(samples[WEIGHT][samples[VAR] < RMIN])
                     hist[-1] += np.sum(samples[WEIGHT][samples[VAR] > RMAX])
                     type_hist = type_hist + hist
@@ -145,10 +139,10 @@ for primary_process_name, tree_name in Tree_dict.items():
             hists.append(type_hist)
         return hists, np.sqrt(error), bins, mass_hist
 
-    for i in config_dict:
+    for var in config_dict:
         # if i != 4 :
         #     continue
-        VAR = i
+        VAR = var
         XLABLE = config_dict[VAR]["title"]
         RMIN = config_dict[VAR]["range"][0]
         RMAX = config_dict[VAR]["range"][1]
@@ -156,81 +150,48 @@ for primary_process_name, tree_name in Tree_dict.items():
         
         print("\n\n", VAR, RMIN, RMAX, "\n\n")
 
-        # hist2, hist2_err, bins, mass2_hist = convert_root_to_hist(bkg, selection="(H_mass<120) | (H_mass>130)" if "H_mass" not in VAR else None)
-        hist2, hist2_err, bin_edges, mass2_hist = convert_root_to_hist(bkg, selection="(H_mass<120) | (H_mass>130)" if "H_mass" not in VAR else None)
+        hist1, hist1_err, _, mass1_hist = convert_root_to_hist(sig)
+        hist2, hist2_err, bins, mass2_hist = convert_root_to_hist(bkg)
 
-        hist1, hist1_err, _, mass1_hist = convert_root_to_hist(data, selection="(H_mass<120) | (H_mass>130)")
-        sf = sum(mass1_hist)/sum(mass2_hist)
-        hist2 = [i*sf for i in hist2]
+        sig_yields = [np.sum(i) for i in hist1]
+        bkg_yields = [np.sum(i) for i in hist2]
+        # Normalize to Sum of Two Signal MC 
+        # hist1 = [i/sig_yields[0] for i in hist1]
+        # Normalize to Each Signal 
+        hist1 = [i / sig_yields[idx] if sig_yields[idx] != 0 else 0 for idx, i in enumerate(hist1)]
+        hist2 = [i/np.sum(bkg_yields) for i in hist2]
 
-        points = (bin_edges[:-1] + bin_edges[1:]) / 2
+        points = (bins[:-1] + bins[1:]) / 2
 
-        # split figure into 2x1
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 8), dpi=200, gridspec_kw={'height_ratios': [3, 1], 'hspace': 0})
-        ax1.tick_params(axis='x', which='both', bottom=True, top=True, labelbottom=False, left=True, right=True, labelright=False)
-        ax2.tick_params(axis='x', which='both', bottom=True, top=True, labelbottom=True, left=True, right=True, labelright=False)
+        fig, ax1 = plt.subplots(1, 1, figsize=(8, 8), dpi=200)
+        ax1.tick_params(axis='x', which='both', bottom=True, top=True, labelbottom=True, left=True, right=True, labelright=False)
 
-        # plt.figure(figsize=(8, 8), dpi=200)
-        # plt.plot(bins, hist1/sum(hist1), "o-", label="Signal")
-        if len(hist1) == 1:
-            # ax1.errorbar(points, hist1[0], yerr=hist1_err, fmt="o", label=f"Data[N={np.sum(hist1):.1f}]", color="black", markersize=7, linewidth=3)
-            # ax1.errorbar(points, hist1[0], yerr=hist1_err, xerr=(bins[1:] - bins[:-1]) / 2, fmt="o", label=f"Data[N={np.sum(hist1):.1f}]", color="black", markersize=7, linewidth=3)
-            ax1.errorbar(points, hist1[0], yerr=hist1_err, xerr=(bin_edges[1:] - bin_edges[:-1]) / 2, fmt="o", label=f"Data [N={np.sum(hist1):.0f}]", color="black", markersize=7, linewidth=3)
-        else:
-            raise ValueError("Data should be only 1")
         colors = [color_dict[i] for i in bkg]
-        labels = [i+f" [N={np.sum(hist2[j]):.0f}]" for j, i in enumerate(bkg)]
-        # print("hist2 shape:", np.array(hist2).shape)
-        # print("bin_edges shape:", bin_edges.shape)
-        hep.histplot(hist2, bin_edges, color=colors, label=labels, stack=True, histtype="fill", ax=ax1, zorder=1)
+        labels = [i+f" [N={bkg_yields[j]:.0f}]" for j, i in enumerate(bkg.keys())]
+        hep.histplot(hist2, bins, color=colors, label=labels, stack=True, histtype="fill", ax=ax1)
+        # ax1.errorbar(points, hist1[0], yerr=hist1_err, xerr=(bins[1:] - bins[:-1]) / 2, fmt="o", label=f"Sig [N={sig_yields[0]:.1f}]", color="black", markersize=7, linewidth=3)
+        hep.histplot(hist2, bins, color="black", stack=True, histtype="step", lw=0.5, ax=ax1, zorder=1)
+        for j, i in enumerate(hist1[1:]):
+            hep.histplot(i, bins, color=color_dict[list(sig.keys())[j+1]], label=list(sig.keys())[j+1]+f" [N={sig_yields[j+1]:.0f}]", histtype="step", ax=ax1, linewidth=2.8, linestyle="-")
         
-        bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
-
-        # 若 hist2 / hist2_err 目前是 list，需要先转成 np.array
-        hist2_array = np.array(hist2)          # (N_bkgs, N_bins)
-        hist2_err_array = np.array(hist2_err)  # (N_bkgs, N_bins)
-        bkg_total = np.sum(hist2_array, axis=0)                   
-        bkg_total_err = hist2_err_array  # 等于 hist2_err, 即已经是总误差
-
-        # ----------------------------------------------------------
-        # 准备 fill_between 不确定度带: 需要 N+1 长度
-        upper = np.concatenate([
-            bkg_total + bkg_total_err, 
-            [bkg_total[-1] + bkg_total_err[-1]]
-        ])  # shape: (N_bins+1,)
-        lower = np.concatenate([
-            bkg_total - bkg_total_err, 
-            [bkg_total[-1] - bkg_total_err[-1]]
-        ])  # shape: (N_bins+1,)
-
-        # Statistic Uncertainty: Hatch Style
-        # ax1.fill_between(bin_edges, lower, upper, step="post", facecolor="none", edgecolor="black", linewidth=0, hatch="///", alpha=1.0, label="Stat. Uncert.")
-        ax1.fill_between(bin_edges, lower, upper, step="post", facecolor="none", edgecolor="black", linewidth=1.0, hatch="///", alpha=1.0, label="Stat. Uncert.")
-        
-        # Statistic Uncertainty: Gray Box Style 
-        # ax1.fill_between(bin_edges, lower, upper, step="post", facecolor="gray", edgecolor="none", linewidth=0, alpha=0.4, label="Stat. Uncert.")
-
-        # 画出总背景的阶梯线
-        hep.histplot(hist2, bin_edges, color="black", stack=True, histtype="step", lw=0.8, ax=ax1, zorder=2)
-
         bin_width = (RMAX - RMIN) / BINS
         if bin_width < 0.01:
-            if i == "jet_1_pt" or i == "jet_2_pt":
+            if VAR == "jet_1_pt" or VAR == "jet_2_pt":
                 y_label = f"Events / {bin_width:.3f} GeV"
             else: 
                 y_label = f"Events / {bin_width:.3f}"
         elif bin_width < 0.1:
-            if i == "jet_1_pt" or i == "jet_2_pt":
+            if VAR == "jet_1_pt" or VAR == "jet_2_pt":
                 y_label = f"Events / {bin_width:.2f} GeV"
             else: 
                 y_label = f"Events / {bin_width:.2f}"
         elif bin_width < 1:
-            if i == "jet_1_pt" or i == "jet_2_pt":
+            if VAR == "jet_1_pt" or VAR == "jet_2_pt":
                 y_label = f"Events / {bin_width:.1f} GeV"
             else: 
                 y_label = f"Events / {bin_width:.1f}"
         else:
-            if i == "jet_1_pt" or i == "jet_2_pt":
+            if VAR == "jet_1_pt" or VAR == "jet_2_pt":
                 y_label = f"Events / {bin_width:.0f} GeV"
             else: 
                 y_label = f"Events / {bin_width:.0f}"
@@ -240,7 +201,7 @@ for primary_process_name, tree_name in Tree_dict.items():
         # ggF
         if primary_process_name == "ggF":
             # ax1.legend(fontsize=16, ncol=2, handletextpad=0.4, columnspacing=0.5, bbox_to_anchor=(1.02, 1.01),loc="upper right", frameon=False, handlelength=0.7, handleheight=1.2, labelspacing=0.1)
-            ax1.legend(fontsize=16, ncol=2, loc="best", frameon=False, handletextpad=0.4, columnspacing=0.5, handlelength=0.7, handleheight=1.2, labelspacing=0.1)
+            ax1.legend(fontsize=17, ncol=2, loc="best", frameon=False, handletextpad=0.4, columnspacing=0.5, handlelength=0.7, handleheight=1.2, labelspacing=0.1)
 
         # VBF
         elif primary_process_name == "VBF":
@@ -249,40 +210,23 @@ for primary_process_name, tree_name in Tree_dict.items():
 
         # ax1.grid()
         ax1.set_xlim(RMIN, RMAX)
-        ax1.set_ylim(0, 1.7*max(np.sum(hist1, axis=0).max(), np.sum(hist2, axis=0).max()))
+        ax1.set_xlabel(XLABLE, fontsize=24)
+        # hist1 = Signal 
+        # hist2 = Bkg
+        max_bin_value = max(np.max(hist1, axis=1).max(), np.sum(hist2, axis=0).max())
+        ax1.set_ylim(0, 1.5 * max_bin_value)
 
-        # ax1.annotate(rf"L=137.2 fb$^{{-1}}$, SF={sf:.2f}", xy=(1, 1.01), xycoords='axes fraction', fontsize=18, ha="right")
-        ax1.annotate(rf"L=137.2 fb$^{{-1}}$, SF={sf:.2f}", xy=(1, 1.01), xycoords='axes fraction', fontsize=18, ha="right")
+        ax1.annotate(rf"L=62.3 fb$^{{-1}}$", xy=(1, 1.01), xycoords='axes fraction', fontsize=16, ha="right")
         ax1.annotate(r"$\mathbf{CMS}\ \text{Preliminary}$",xy=(0, 1.01),xycoords='axes fraction',fontsize=22,ha="left")
-
-        data_sum, bkg_sum = np.where(np.sum(hist1, axis=0) == 0, 1e-8, np.sum(hist1, axis=0)), np.where(np.sum(hist2, axis=0) == 0, 1e-8, np.sum(hist2, axis=0))
-        ratio = hist1[0]/bkg_sum
-        ratio_err = hist1_err/data_sum
-        err = hist2_err/bkg_sum
-
-        mask = (ratio > 0) & (ratio < 2)
-        # ax2.errorbar(points[mask], ratio[mask], yerr=ratio_err[mask], xerr=((bins[1:] - bins[:-1]) / 2)[mask], fmt="o", color="black", markersize=7, linewidth=3)
-        ax2.errorbar(points[mask], ratio[mask], yerr=ratio_err[mask], xerr=((bin_edges[1:] - bin_edges[:-1]) / 2)[mask], fmt="o", color="black", markersize=7, linewidth=3)
-        # ax2.bar(points, 2 * err, bottom=1 - err, color="#ffedcd", width=(RMAX-RMIN)/BINS, label="Bkg Uncertainty")
-        ax2.bar(points, 2 * err, bottom=1 - err, color="#CCCCCC", width=(RMAX-RMIN)/BINS, label="Bkg Uncertainty")
-        # ax2.bar(points, 2 * err, bottom=1 - err, color="none", hatch="///", width=(RMAX-RMIN)/BINS, label="Bkg Uncertainty", edgecolor="black")
-        ax2.set_xlim(RMIN, RMAX)
-        ax2.set_ylim(0, 2)
-        ax2.set_ylabel(r"$\frac{\text{Data}}{\text{MC}}$", fontsize=28, rotation=90)
-        ax2.yaxis.set_label_coords(-0.08, 0.72)
-        ax2.axhline(1, color="black", linestyle="--")
-        ax2.set_yticks(np.arange(0, 2.1, 0.5))
-        ax2.set_yticklabels([f"{int(i)}" if i == 1 else f"{i}" if i in [0.5, 1.5] else "" for i in np.arange(0, 2.1, 0.5)])
-
-        ax2.set_xlabel(XLABLE, fontsize=24)
-
+        
         plt.tight_layout()
-        if os.path.exists(f"pic/run2/dataVbkg_{primary_process_name}") == False:
-            os.makedirs(f"pic/run2/dataVbkg_{primary_process_name}")
+        if os.path.exists(f"pic/run3/sigVbkg_{primary_process_name}") == False:
+            os.makedirs(f"pic/run3/sigVbkg_{primary_process_name}")
         
         if primary_process_name == "ggF":
-            plt.savefig(f"pic/run2/dataVbkg_{primary_process_name}/{name_dict_ggF[VAR]}.pdf")
+            plt.savefig(f"pic/run3/sigVbkg_{primary_process_name}/{name_dict_ggF[VAR]}.pdf")
         elif primary_process_name == "VBF":
-            plt.savefig(f"pic/run2/dataVbkg_{primary_process_name}/{name_dict_VBF[VAR]}.pdf")
+            plt.savefig(f"pic/run3/sigVbkg_{primary_process_name}/{name_dict_VBF[VAR]}.pdf")
         
+        plt.close(fig)  # 关闭当前 figure
         plt.clf()

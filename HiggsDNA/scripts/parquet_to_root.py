@@ -347,61 +347,61 @@ def decorate(data):
 
     if data.shape[0] == 0: return data
 
-    # data['HZ_relM'] = data.H_mass / data.Z_mass
-    # data['H_relpt'] = data.H_pt / data.H_mass
-    # data['Z_relpt'] = data.Z_pt / data.H_mass
-    # data['Z_lead_lepton_relpt'] = data.Z_lead_lepton_pt / data.H_mass
-    # data['Z_sublead_lepton_relpt'] = data.Z_sublead_lepton_pt / data.H_mass
-    # data['gamma_relpt'] = data.gamma_pt / data.H_mass
-    # data['jet_1_relpt'] = data.jet_1_pt / data.H_mass
-    # data['jet_2_relpt'] = data.jet_2_pt / data.H_mass
-    # data['MET_relpt'] = data.MET_pt / data.H_mass
-    # data['gamma_ptRelErr'] = data.apply(lambda x:compute_gamma_relEerror(x), axis=1)
-    # data['G_ECM'] = data.apply(lambda x:compute_G_ECM(x), axis=1)
-    # data['Z_ECM'] = data.apply(lambda x:compute_Z_ECM(x), axis=1)
-    # data['Z_rapCM'] = data.apply(lambda x:compute_Z_rapCM(x), axis=1)
-    # data['l_rapCM'] = data.apply(lambda x:compute_l_rapCM(x), axis=1)
-    # data['HZ_deltaRap'] = data.apply(lambda x:compute_HZ_deltaRap(x), axis=1)
-    # data['l_cosProdAngle'] = data.apply(lambda x:compute_l_prodAngle(x), axis=1)
-    # data['Z_cos_theta'] = data.apply(lambda x:compute_Z_prodAngle(x), axis=1)
-    # data['ll_deltaR'] = data.apply(lambda x:compute_ll_deltaR(x), axis=1)
-    # data['leadLG_deltaR'] = data.apply(lambda x:compute_leadLG_deltaR(x), axis=1)
-    # data['ZG_deltaR'] = data.apply(lambda x:compute_ZG_deltaR(x), axis=1)
-    # data['subleadLG_deltaR'] = data.apply(lambda x:compute_subleadLG_deltaR(x), axis=1)
-    # data['H_deltaphi'] = data.apply(lambda x: compute_Delta_Phi(x, 'H_phi'), axis=1)
-    # data['Z_deltaphi'] = data.apply(lambda x: compute_Delta_Phi(x, 'Z_phi'), axis=1)
-    # data['Z_lead_lepton_deltaphi'] = data.apply(lambda x: compute_Delta_Phi(x, 'Z_lead_lepton_phi'), axis=1)
-    # data['Z_sublead_lepton_deltaphi'] = data.apply(lambda x: compute_Delta_Phi(x, 'Z_sublead_lepton_phi'), axis=1)
-    # for i in np.arange(1,5):
-    #     data['jet_%d_deltaphi' %i] = data.apply(lambda x: compute_Delta_Phi(x, "jet", min_jet=i), axis=1)
-    #     data['jet%dG_deltaR' %i] = data.apply(lambda x: compute_Delta_R(x, min_jet=i), axis=1)
-    # data['additional_lepton_1_deltaphi'] = data.apply(lambda x: compute_Delta_Phi(x, 'additional_lepton_1_phi', min_jet=0), axis=1)
-    # data['additional_lepton_2_deltaphi'] = data.apply(lambda x: compute_Delta_Phi(x, 'additional_lepton_2_phi', min_jet=0), axis=1) 
-    # data['MET_deltaphi'] = data.apply(lambda x: compute_Delta_Phi(x, 'MET_phi'), axis=1)
-    # data['weight'] = data.weight_central
-    # data['mass_jj'] = data.apply(lambda x: compute_mass_jj(x), axis=1)
-    # data['H_ptt'] = data.apply(lambda x: compute_H_ptt(x), axis=1)
-    # data['H_al'] = data.apply(lambda x: compute_H_al(x), axis=1)
-    # data['H_bt'] = data.apply(lambda x: compute_H_bt(x), axis=1)
-    # data['lep_cos_theta'] = data.apply(lambda x: compute_l_costheta(x), axis=1)
-    # data['lep_phi'] = data.apply(lambda x: compute_l_phi(x), axis=1)
-    # data['l1g_deltaR'] = data.apply(lambda x: compute_dR1lg(x), axis=1) 
-    # data['l2g_deltaR'] = data.apply(lambda x: compute_dR2lg(x), axis=1)
-    # data['delta_eta_jj'] = data.apply(lambda x: compute_delta_eta_jj(x), axis=1)
-    # data['delta_phi_jj'] = data.apply(lambda x: compute_delta_phi_jj(x), axis=1)
-    # data['delta_phi_zgjj'] = data.apply(lambda x: compute_delta_phi_zg_jj(x), axis=1)
-    # data['photon_zeppenfeld'] = data.apply(lambda x: compute_photon_zeppenfeld(x), axis=1)
-    # data['H_zeppenfeld'] = data.apply(lambda x: compute_H_zeppenfeld(x), axis=1)
-    # data['pt_balance'] = data.apply(lambda x: compute_pt_balance(x), axis=1)
-    # data['pt_balance_0j'] = data.apply(lambda x: compute_pt_balance_0j(x), axis=1)
-    # data['pt_balance_1j'] = data.apply(lambda x: compute_pt_balance_1j(x), axis=1)
-    # data['is_center'] = data.apply(lambda x: compute_is_center(x), axis=1)
-    # #data[['Jets_QGscore_Lead', 'Jets_QGflag_Lead', 'Jets_QGscore_Sub', 'Jets_QGflag_Sub']] = data.apply(lambda x: compute_QG(x), axis=1, result_type='expand')
+    data['HZ_relM'] = data.H_mass / data.Z_mass
+    data['H_relpt'] = data.H_pt / data.H_mass
+    data['Z_relpt'] = data.Z_pt / data.H_mass
+    data['Z_lead_lepton_relpt'] = data.Z_lead_lepton_pt / data.H_mass
+    data['Z_sublead_lepton_relpt'] = data.Z_sublead_lepton_pt / data.H_mass
+    data['gamma_relpt'] = data.gamma_pt / data.H_mass
+    data['jet_1_relpt'] = data.jet_1_pt / data.H_mass
+    data['jet_2_relpt'] = data.jet_2_pt / data.H_mass
+    data['MET_relpt'] = data.MET_pt / data.H_mass
+    data['gamma_ptRelErr'] = data.apply(lambda x:compute_gamma_relEerror(x), axis=1)
+    data['G_ECM'] = data.apply(lambda x:compute_G_ECM(x), axis=1)
+    data['Z_ECM'] = data.apply(lambda x:compute_Z_ECM(x), axis=1)
+    data['Z_rapCM'] = data.apply(lambda x:compute_Z_rapCM(x), axis=1)
+    data['l_rapCM'] = data.apply(lambda x:compute_l_rapCM(x), axis=1)
+    data['HZ_deltaRap'] = data.apply(lambda x:compute_HZ_deltaRap(x), axis=1)
+    data['l_cosProdAngle'] = data.apply(lambda x:compute_l_prodAngle(x), axis=1)
+    data['Z_cos_theta'] = data.apply(lambda x:compute_Z_prodAngle(x), axis=1)
+    data['ll_deltaR'] = data.apply(lambda x:compute_ll_deltaR(x), axis=1)
+    data['leadLG_deltaR'] = data.apply(lambda x:compute_leadLG_deltaR(x), axis=1)
+    data['ZG_deltaR'] = data.apply(lambda x:compute_ZG_deltaR(x), axis=1)
+    data['subleadLG_deltaR'] = data.apply(lambda x:compute_subleadLG_deltaR(x), axis=1)
+    data['H_deltaphi'] = data.apply(lambda x: compute_Delta_Phi(x, 'H_phi'), axis=1)
+    data['Z_deltaphi'] = data.apply(lambda x: compute_Delta_Phi(x, 'Z_phi'), axis=1)
+    data['Z_lead_lepton_deltaphi'] = data.apply(lambda x: compute_Delta_Phi(x, 'Z_lead_lepton_phi'), axis=1)
+    data['Z_sublead_lepton_deltaphi'] = data.apply(lambda x: compute_Delta_Phi(x, 'Z_sublead_lepton_phi'), axis=1)
+    for i in np.arange(1,5):
+        data['jet_%d_deltaphi' %i] = data.apply(lambda x: compute_Delta_Phi(x, "jet", min_jet=i), axis=1)
+        data['jet%dG_deltaR' %i] = data.apply(lambda x: compute_Delta_R(x, min_jet=i), axis=1)
+    data['additional_lepton_1_deltaphi'] = data.apply(lambda x: compute_Delta_Phi(x, 'additional_lepton_1_phi', min_jet=0), axis=1)
+    data['additional_lepton_2_deltaphi'] = data.apply(lambda x: compute_Delta_Phi(x, 'additional_lepton_2_phi', min_jet=0), axis=1) 
+    data['MET_deltaphi'] = data.apply(lambda x: compute_Delta_Phi(x, 'MET_phi'), axis=1)
+    data['weight'] = data.weight_central
+    data['mass_jj'] = data.apply(lambda x: compute_mass_jj(x), axis=1)
+    data['H_ptt'] = data.apply(lambda x: compute_H_ptt(x), axis=1)
+    data['H_al'] = data.apply(lambda x: compute_H_al(x), axis=1)
+    data['H_bt'] = data.apply(lambda x: compute_H_bt(x), axis=1)
+    data['lep_cos_theta'] = data.apply(lambda x: compute_l_costheta(x), axis=1)
+    data['lep_phi'] = data.apply(lambda x: compute_l_phi(x), axis=1)
+    data['l1g_deltaR'] = data.apply(lambda x: compute_dR1lg(x), axis=1) 
+    data['l2g_deltaR'] = data.apply(lambda x: compute_dR2lg(x), axis=1)
+    data['delta_eta_jj'] = data.apply(lambda x: compute_delta_eta_jj(x), axis=1)
+    data['delta_phi_jj'] = data.apply(lambda x: compute_delta_phi_jj(x), axis=1)
+    data['delta_phi_zgjj'] = data.apply(lambda x: compute_delta_phi_zg_jj(x), axis=1)
+    data['photon_zeppenfeld'] = data.apply(lambda x: compute_photon_zeppenfeld(x), axis=1)
+    data['H_zeppenfeld'] = data.apply(lambda x: compute_H_zeppenfeld(x), axis=1)
+    data['pt_balance'] = data.apply(lambda x: compute_pt_balance(x), axis=1)
+    data['pt_balance_0j'] = data.apply(lambda x: compute_pt_balance_0j(x), axis=1)
+    data['pt_balance_1j'] = data.apply(lambda x: compute_pt_balance_1j(x), axis=1)
+    data['is_center'] = data.apply(lambda x: compute_is_center(x), axis=1)
+    #data[['Jets_QGscore_Lead', 'Jets_QGflag_Lead', 'Jets_QGscore_Sub', 'Jets_QGflag_Sub']] = data.apply(lambda x: compute_QG(x), axis=1, result_type='expand')
 
-    # #data.rename(columns={'Muons_Minv_MuMu_Paper': 'm_mumu', 'Muons_Minv_MuMu_VH': 'm_mumu_VH', 'EventInfo_EventNumber': 'eventNumber', 'Jets_jetMultip': 'n_j'}, inplace=True)
-    # #data.drop(['PassesttHSelection', 'PassesVHSelection', 'GlobalWeight', 'SampleOverlapWeight', 'EventWeight_MCCleaning_5'], axis=1, inplace=True)
-    # data = data.astype(float)
-    # data = data.astype({'is_center': int, 'Z_lead_lepton_charge': int, 'Z_lead_lepton_id': int, 'Z_sublead_lepton_charge': int, 'Z_sublead_lepton_id': int, "n_jets": int, "n_leptons": int, "n_electrons": int, "n_muons": int, 'event': int})
+    #data.rename(columns={'Muons_Minv_MuMu_Paper': 'm_mumu', 'Muons_Minv_MuMu_VH': 'm_mumu_VH', 'EventInfo_EventNumber': 'eventNumber', 'Jets_jetMultip': 'n_j'}, inplace=True)
+    #data.drop(['PassesttHSelection', 'PassesVHSelection', 'GlobalWeight', 'SampleOverlapWeight', 'EventWeight_MCCleaning_5'], axis=1, inplace=True)
+    data = data.astype(float)
+    data = data.astype({'is_center': int, 'Z_lead_lepton_charge': int, 'Z_lead_lepton_id': int, 'Z_sublead_lepton_charge': int, 'Z_sublead_lepton_id': int, "n_jets": int, "n_leptons": int, "n_electrons": int, "n_muons": int, 'event': int})
 
     return data
     

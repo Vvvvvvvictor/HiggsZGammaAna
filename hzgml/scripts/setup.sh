@@ -2,7 +2,7 @@
 # import ROOT
 source /cvmfs/sft.cern.ch/lcg/views/LCG_102/x86_64-centos9-gcc11-opt/setup.sh
 source /cvmfs/sft.cern.ch/lcg/releases/LCG_102/ROOT/6.26.04/x86_64-centos9-gcc11-opt/bin/thisroot.sh
-source /eos/user/${USER::1}/$USER/hzgmlenv/bin/activate
+source /eos/user/${USER::1}/$USER/HZgamma/Machine_Learning/hzg-pku-hzgml/bin/activate
 
 export PATH="`pwd`:${PATH}"
 export PYTHONPATH="`pwd`:${PYTHONPATH}"

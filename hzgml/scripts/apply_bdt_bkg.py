@@ -16,10 +16,10 @@ def get_args():
     """Parse command-line arguments."""
     parser = ArgumentParser(description='Apply BDT signal correction to data')
     parser.add_argument('-c', '--config', default='data/training_config_BDT.json', help='Path to the training config file')
-    parser.add_argument('-i', '--inputFolder', default='/eos/home-j/jiehan/root/skimmed_ntuples_run2/', help='Path to the input folder')
+    parser.add_argument('-i', '--inputFolder', default='/eos/home-p/pelai/HZgamma/Root_Dataset/run2/NanoV9/Mix_Sig_WO_Systematic/', help='Path to the input folder')
     parser.add_argument('-m', '--modelFolder', default='models', help='Path to the model folder')
-    parser.add_argument('-o', '--outputFolder', default='/eos/home-j/jiehan/root/fitting_bkg', help='Path to the output folder')
-    parser.add_argument('-s', '--catSplitFolder', default='/eos/home-j/jiehan/root/outputs/test/significances', help='Path to the category split folder')
+    parser.add_argument('-o', '--outputFolder', default='/eos/home-p/pelai/HZgamma/bdt_root_dataset/fitting_bkg/run2', help='Path to the output folder')
+    parser.add_argument('-s', '--catSplitFolder', default='/eos/home-p/pelai/HZgamma/bdt_root_dataset/outputs/test/run2/significance/', help='Path to the category split folder')
     return parser.parse_args()
 
 class BDTApplicator:

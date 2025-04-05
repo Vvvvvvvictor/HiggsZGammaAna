@@ -1,0 +1,26 @@
+# HTCondor submit file: optimize_hyper.sub
+executable = optimize_hyper_run.sh
+output = info/optimize_hyper_$(ClusterId)_$(ProcId).out
+error = info/optimize_hyper_$(ClusterId)_$(ProcId).err
+log = info/optimize_hyper_$(ClusterId).log
+request_cpus = 2
+request_memory = 8GB
+request_disk = 4GB
++JobFlavour = "workday"
+
+arguments = 0 zero_to_one_jet
+queue 1
+arguments = 1 zero_to_one_jet
+queue 1
+arguments = 2 zero_to_one_jet
+queue 1
+arguments = 3 zero_to_one_jet
+queue 1
+arguments = 0 two_jet
+queue 1
+arguments = 1 two_jet
+queue 1
+arguments = 2 two_jet
+queue 1
+arguments = 3 two_jet
+queue 1

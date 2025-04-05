@@ -7,28 +7,31 @@ import time
 
 start_time = time.time()
 
-# eos_path = '/eos/home-p/pelai/HZgamma/Parquet/NanoV9/run2/Sig_MC/'
-# log_path = '/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/HiggsDNA/eos_logs/Sig_MC/'
 
 # Specify the output file path
-output_file = "syn_list/cut_yields_output_Bkg_MC_run2.txt"
+output_file = "syn_list/cut_yields_output_Data_run2.txt"
+# output_file = "syn_list/cut_yields_output_Data_run3.txt"
 
 eos_path = '/eos/home-p/pelai/HZgamma/Parquet/NanoV9/run2/'
-log_path = '/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/HiggsDNA/synchronization/eos_logs/'
+log_path = './eos_log/run2/eos_logs/Data'
 # Reading log files from eos is too slow
- 
-# dataset_type = 'Data'
-# dataset_names = ["Data"]
-# dataset_years = ["2016preVFP", "2016postVFP", "2017", "2018"] #"2016preVFP", "2016postVFP", "2017", "2018", "2023preBPix"
+
+dataset_type = 'Data'
+dataset_names = ["Data"]
+dataset_years = ["2016preVFP", "2016postVFP", "2017", "2018"] #"2016preVFP", "2016postVFP", "2017", "2018", "2023preBPix"
+# dataset_years = ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"] #"2022preEE", "2022postEE", "2023preBPix", "2023postBPix"
+
+# eos_path = '/eos/home-p/pelai/HZgamma/Parquet/NanoV9/run2/Sig_MC/'
+# log_path = '/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/HiggsDNA/eos_logs/Sig_MC/'
 
 # dataset_type = 'signal'
 # dataset_type = 'WI_Systematic'
 # dataset_names = ["ggH_M125"] #"ggH", "VBFH", "ZH", "ttH", "WplusH", "WminusH" "ggH_M125", "VBFH_M125", "ZH_M125", "ttH_M125", "WplusH_M125", "WminusH_M125"
 # dataset_years = ["2017"]#"2016preVFP", "2016postVFP", "2017", "2018", "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"
 
-dataset_type = 'Bkg_MC'
-dataset_names = ["DYJetsToLL", "ZGToLLG"] # "DYJetsToLL", "EWKZ2J", "ZG2JToG2L2J" "ZGToLLG" "Data_SingleMuon", "Data_DoubleMuon", "Data_SingleElectron", "Data_DoubleEG"
-dataset_years = ["2016preVFP", "2016postVFP", "2017", "2018"] #"2016preVFP", "2016postVFP", "2017", "2018"]
+# dataset_type = 'bkgmc'
+# dataset_names = ["DYJetsToLL"] # "DYJetsToLL", "EWKZ2J", "ZG2JToG2L2J" "ZGToLLG" "Data_SingleMuon", "Data_DoubleMuon", "Data_SingleElectron", "Data_DoubleEG"
+# dataset_years = ["2017"] #"2016preVFP", "2016postVFP", "2017", "2018"]
 
 cutflow_type = ['zgammas','zgammas_ele','zgammas_mu','zgammas_w','zgammas_ele_w','zgammas_mu_w']
 type_num = len(cutflow_type)
@@ -142,20 +145,19 @@ for dataset in dataset_names:
                                 yields_dict[cut_type] = {}  # Initialize as an empty dictionary
 
                             # Ensure `cut` exists and accumulates yields
-                                                        # Ensure `cut` exists and accumulates yields
                             if cut in yields_dict[cut_type]:
                                 # print(f"🔄 Updating existing cut: {cut} (Previous: {yields_dict[cut_type][cut]}, Adding: {yields})")
-                                if 'w' in cut:
-                                    yields_dict[cut_type][cut] += yields*weight  # ✅ Accumulate the value
-                                else:
-                                    yields_dict[cut_type][cut] += yields  # ✅ Accumulate the value
+                                yields_dict[cut_type][cut] += yields  # ✅ Accumulate the value
                             else:
                                 # print(f"🆕 Adding new cut: {cut} with initial value {yields}")
                                 yields_dict[cut_type][cut] = yields  # ✅ Initialize the first time
+                            
+                        # else:
+                            # 🔍 Debugging output for missing matches
+                            # print(f"❌ No match for line: {repr(line)}")
             f.close()
 
         # Output BEFORE replacement
-        print(f"\n📌 Years {year}\n")
         print("\n📌 Final Stored Data:")
         for cut_type, cuts in yields_dict.items():
             print(f"Cut Type: {cut_type}")
@@ -180,8 +182,7 @@ for dataset in dataset_names:
         with open(output_file, 'a') as f:
             # Output BEFORE replacement
             f.write(f"\n📌 Years {year}\n")
-            f.write("reading: {}{}/{}_{}/merged_nominal.parquet".format(eos_path, dataset_type, dataset, year))
-
+            
             f.write("\n📌 Final Stored Data (Before Replacement):\n")
             for cut_type_key, cuts in yields_dict.items():
                 f.write(f"Cut Type: {cut_type_key}\n")

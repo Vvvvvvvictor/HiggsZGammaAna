@@ -22,9 +22,9 @@ def getArgs():
     """Get arguments from command line."""
     parser = ArgumentParser()
     parser.add_argument('-c', '--config', action='store', nargs=2, default=['data/training_config_BDT.json', 'data/apply_config_BDT.json'], help='Region to process')
-    parser.add_argument('-i', '--inputFolder', action='store', default='/eos/home-j/jiehan/root/skimmed_ntuples_run2', help='directory of training inputs')
+    parser.add_argument('-i', '--inputFolder', action='store', default='/eos/home-p/pelai/HZgamma/Root_Dataset/run2/NanoV9/Mix_Sig_WO_Systematic', help='directory of training inputs')
     parser.add_argument('-m', '--modelFolder', action='store', default='models', help='directory of BDT models')
-    parser.add_argument('-o', '--outputFolder', action='store', default='/eos/home-j/jiehan/root/outputs/test', help='directory for outputs')
+    parser.add_argument('-o', '--outputFolder', action='store', default='/eos/home-p/pelai/HZgamma/bdt_root_dataset/run2/outputs/test', help='directory for outputs')
     parser.add_argument('-r', '--region', action='store', choices=['two_jet', 'one_jet', 'zero_jet', 'zero_to_one_jet', 'VH_ttH', 'all_jet'], default='zero_jet', help='Region to process')
     parser.add_argument('-cat', '--category', action='store', nargs='+', help='apply only for specific categories')
 
@@ -61,7 +61,6 @@ class ApplyXGBHandler(object):
 
         self.train_variables = {}
         self.randomIndex = 'eventNumber'
-
         self.models = {}
         self.observables = []
         self.preselections = []
@@ -82,6 +81,7 @@ class ApplyXGBHandler(object):
             # read from the common settings
             config = configs["common"]
             for member in config.keys():
+                # put "observables": ["H_mass", "event", "weight", "n_jets"] from json into self.observables
                 if member in member_variables:
                     setattr(self, member, config[member])
 
@@ -185,6 +185,7 @@ class ApplyXGBHandler(object):
                     bst = xgb.Booster()
                     bst.load_model('%s/BDT_%s_%d.h5'%(self._modelFolder, model, i))
                     self.m_models[model].append(bst)
+                    
                     del bst
 
     def loadTransformer(self):

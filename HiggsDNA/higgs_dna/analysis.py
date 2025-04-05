@@ -103,11 +103,14 @@ def run_analysis(config):
         sample = sample
     )
     events = systematics_producer.produce_weights(events)
+    
+    ##### Create a TagSequence object to apply a series of tagger selections to a sample.
+    ##### where zgamma_tagger_run2 enters
     tag_sequence = TagSequence(
         name = config["name"],
         tag_list = config["tag_sequence"],
         sample = sample,
-        output_dir=config["output_dir"])
+        output_dir = config["output_dir"])
     job_summary["outputs"] = {}
     job_summary["n_events_selected"] = {}
     t_elapsed_syst = 0.
@@ -549,7 +552,8 @@ class AnalysisManager():
 
         for file in files:
             try:
-                f = uproot.open(file, timeout = 300, num_workers=1)
+                # f = uproot.open(file, timeout = 300, num_workers=1)
+                f = uproot.open(file, timeout=600, num_workers=1, xrootd_handler_kwargs={"verbose": True})
             except Exception:
                 if (os.system(f"xrdcp '{file}' '/tmp/{os.getpid()}/{os.path.basename(file)}'")):
                     raise RuntimeError("xrdcp failed")
