@@ -29,26 +29,25 @@ data = ["Data"]
 if not os.path.exists("/afs/cern.ch/user/p/pelai/HZgamma/HiggsZGammaAna/plot_python/pic/run2/two_jet/"):
     os.makedirs("/afs/cern.ch/user/p/pelai/HZgamma/HiggsZGammaAna/plot_python/pic/run2/two_jet/")
 
-# boundaries = [0,1]
-print(boundaries)
+folder = "test"  # 可以改为 "test" 以切换文件夹
 
 for i in range(len(boundaries)-1):
     bkg_hist = []
     for bkg in backgrounds:
-        hist, bins = get_hist(f"/eos/home-p/pelai/HZgamma/bdt_root_dataset/run2/outputs/test/two_jet/{bkg}.root", "two_jet", "H_mass", boundaries[i:], [80, 100, 180])
+        hist, bins = get_hist(f"/eos/user/j/jiehan/root/outputs/{folder}/two_jet/{bkg}.root", "two_jet", "H_mass", boundaries[i:], [80, 100, 180])
         bkg_hist.append(hist)
         
     sig_hist = np.zeros(len(bins)-1)
-    VBF_hist, bins = get_hist(f"/eos/home-p/pelai/HZgamma/bdt_root_dataset/run2/outputs/test/two_jet/VBF_M125.root", "two_jet", "H_mass", boundaries[i:], [80, 100, 180])
+    VBF_hist, bins = get_hist(f"/eos/user/j/jiehan/root/outputs/{folder}/two_jet/VBF_M125.root", "two_jet", "H_mass", boundaries[i:], [80, 100, 180])
     # sig_err_hist = np.zeros(len(bins)-1)
     for sig in signal:
-        hist, bins = get_hist(f"/eos/home-p/pelai/HZgamma/bdt_root_dataset/run2/outputs/test/two_jet/{sig}.root", "two_jet", "H_mass", boundaries[i:], [80, 100, 180])
+        hist, bins = get_hist(f"/eos/user/j/jiehan/root/outputs/{folder}/two_jet/{sig}.root", "two_jet", "H_mass", boundaries[i:], [80, 100, 180])
         sig_hist += hist
-        # sig_err_hist += get_err_hist(f"/eos/user/j/jiehan/root/outputs/test/two_jet/{sig}.root", "two_jet", "H_mass", boundaries[i:], [80, 100, 180])[0]
+        # sig_err_hist += get_err_hist(f"/eos/user/j/jiehan/root/outputs/{folder}/two_jet/{sig}.root", "two_jet", "H_mass", boundaries[i:], [80, 100, 180])[0]
         
     data_hist = np.zeros(len(bins)-1)
     for dat in data:
-        hist, bins = get_hist(f"/eos/home-p/pelai/HZgamma/bdt_root_dataset/run2/outputs/test/two_jet/{dat}.root", "two_jet", "H_mass", boundaries[i:], [80, 100, 180])
+        hist, bins = get_hist(f"/eos/user/j/jiehan/root/outputs/{folder}/two_jet/{dat}.root", "two_jet", "H_mass", boundaries[i:], [80, 100, 180])
         data_hist += hist
 
     sf = np.sum(data_hist) / np.sum(bkg_hist)

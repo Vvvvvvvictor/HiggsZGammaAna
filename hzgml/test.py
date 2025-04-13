@@ -17,13 +17,22 @@ from pdb import set_trace
 # plt.colorbar()
 # plt.savefig('two_jet.png')
 
-# ==================================
-# Test yields in categories
-# ==================================
+# # ==================================
+# # Test yields in categories
+# # ==================================
 # cats = ['zero_to_one_jet', "two_jet", "VH", "ZH", "ttH_had", "ttH_lep"]
-# years = ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"]
+# # years = ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"]
+# years = ["2016preVFP", "2016postVFP", "2017", "2018"]
+# cats_yields = {'zero_to_one_jet': 0, "two_jet": 0, "VH": 0, "ZH": 0, "ttH_had": 0, "ttH_lep": 0}
 # for year in years:
-#     data = uproot.open(f"/eos/home-j/jiehan/root/skimmed_ntuples_run3/Data/{year}.root")
+#     data = uproot.open(f"/eos/home-j/jiehan/root/skimmed_ntuples_run2/ggH_M125/{year}.root")
+#     for cat in cats:
+#         cat_data = data[cat].arrays(['weight', 'H_mass'], library='pd').query('H_mass > 120 & H_mass < 130')
+#         cats_yields[cat] += cat_data['weight'].sum()
+# print(cats_yields)
+
+# for year in years:
+#     data = uproot.open(f"/eos/home-j/jiehan/root/skimmed_ntuples_run2/ggH_M125/{year}.root")
 #     data_inc = data["inclusive"].arrays(['z_mumu', 'z_ee', 'H_mass'], library='pd').query('H_mass > 100')
 #     print(f'Year {year} inclusive z_mumu: {data_inc["z_mumu"].sum()}, z_ee: {data_inc["z_ee"].sum()}')
 #     for cat in cats:
@@ -99,7 +108,8 @@ years = ['2017']
 types = ["mumu", "ee"]
 for year in years:
     # data = uproot.open(f"/eos/home-j/jiehan/root/cutflow/ggH_M125/{year}.root")
-    data = pd.read_parquet(f"/eos/home-j/jiehan/parquet/nanov9/signal/ggH_M125_{year}/merged_nominal.parquet")
+    data = pd.read_parquet(f"/eos/home-j/jiehan/parquet/nanov9/cutflow/ggH_M125_{year}/merged_nominal.parquet")
+    print(data.columns)
     for cat in cats:
         # 加入所有满足这个格式的变量 'weight*central'
         variables = ['H_mass', 'z_mumu', 'z_ee']
@@ -119,7 +129,11 @@ for year in years:
             print(f'{year} {cat} {t} prefire weight: {weight.sum()}')
             weight = weight * temp["weight_pu_reweight_sf_central"]
             print(f'{year} {cat} {t} pileup weight: {weight.sum()}')
+<<<<<<< HEAD
             weight = weight * temp["weight_btag_wp_sf_SelectedJet_central"]
+=======
+            weight = weight * temp["weight_btag_deepjet_wp_sf_SelectedJet_central"]
+>>>>>>> 9efb80236a581d2da20b7a2dba44083cdb9e5052
             print(f'{year} {cat} {t} btag weight: {weight.sum()}')
             weight = weight * temp["weight_electron_wplid_sf_SelectedElectron_central"]
             print(f'{year} {cat} {t} ele id weight: {weight.sum()}')

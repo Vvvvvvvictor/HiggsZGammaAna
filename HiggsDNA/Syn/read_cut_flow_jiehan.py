@@ -51,7 +51,7 @@ for dataset in dataset_names:
             print(data["weight_central"].to_numpy().astype('float64'), data["weight_central_no_lumi"].to_numpy().astype('float64'))
             print("{}{}/{}_{}/merged_nominal.parquet".format(eos_path, dataset_type, dataset, year))
             if 'weight_central_initial' in data.keys():
-                weight = data['weight_central'].to_numpy().astype('float64')[1]/data['weight_central_initial'].to_numpy().astype('float64')[1]
+                weight = data['weight_central'].to_numpy().astype('float64').sum()/data['weight_central_initial'].to_numpy().astype('float64').sum()
             else:
                 weight = 1
                 print("No weight exists, set it as 1.")

@@ -75,7 +75,7 @@ def btag_deepjet_wp_sf(events, year, central_only, input_collection):
     jet_abs_eta = numpy.clip(
         awkward.to_numpy(abs(jets_flattened.eta)),
         0.0,
-        2.49999 # SFs only valid up to eta 2.5
+        2.39999 # SFs only valid up to eta 2.5
     )
     jet_pt = numpy.clip(
         awkward.to_numpy(jets_flattened.pt),
@@ -128,7 +128,7 @@ def btag_deepjet_wp_sf(events, year, central_only, input_collection):
     for var in variations.keys():
         # Set SFs = 1 for jets which are not applicable (pt <= 20 or |eta| >= 2.5)
         variations[var] = awkward.where(
-                (jets.pt <= 20.0) | (abs(jets.eta) >= 2.5),
+                (jets.pt <= 20.0) | (abs(jets.eta) >= 2.4),
                 awkward.ones_like(variations[var]),
                 variations[var]
         )
@@ -137,18 +137,9 @@ def btag_deepjet_wp_sf(events, year, central_only, input_collection):
         (var.replace("up_", "") + "_up") if "up" in var else (var.replace("down_", "") + "_down") if "down" in var else var: val
         for var, val in variations.items()
     }
-
     return swapped_variations
-    # return variations
 
-def btag_deepjet_reshape_sf(events, year, central_only, input_collection):
-    """
-    See:
-        - https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/BTV_bjets_Run2_UL/
-        - https://gitlab.cern.ch/cms-nanoAOD/jsonpog-integration/-/blob/master/examples/btvExample.py
-
-    Note: application of SFs should not change the overall normalization of a sample (before any b-tagging selection) and each sample should be adjusted by an overall weight derived in a phase space with no requirements on b-jets such that the normalization is unchanged. TODO: link BTV TWiki that describes this.
-    """
+def btag_deepjet_mujet_sf(events, year, central_only, input_collection, working_point ="M"):
     required_fields = [
         (input_collection, "eta"), (input_collection, "pt"), (input_collection, "hadronFlavour"), (input_collection, "btagDeepFlavB") 
     ]

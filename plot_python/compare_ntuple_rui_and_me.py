@@ -34,6 +34,10 @@ config_dict = {
     "n_jets": {"range": (2, 6, 5), "title": "n_jets", "match_var": "njet"}
 }
 
+for i in config_dict.keys():
+    print(f"{config_dict[i]['match_var']} to {i}")
+exit()
+
 var_map = {
     "H_mass": "lly_m",
     "weight": "w_lumiXyear",
