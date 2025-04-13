@@ -8,8 +8,8 @@ from pdb import set_trace
 plt.style.use(hep.style.CMS)
 
 Tree_dict = {"ggF": "zero_to_one_jet", "VBF": "two_jet"}
-name_dict_ggF = {"H_relpt": "1_Higgs_Relative_pT", "gamma_mvaID": "2_Photon_ID_MVA", "gamma_ptRelErr": "3_Photon_Energy_Resolution", "l1g_deltaR": "4_dR_Lep1_gamma", "l2g_deltaR": "5_dR_Lep2_gamma", "Z_cos_theta": "6_cosTheta", "lep_cos_theta": "7_costheta", "lep_phi": "8_phi", "Z_lead_lepton_eta": "9_eta_Lep1", "Z_sublead_lepton_eta": "10_eta_Lep2", "gamma_eta": "11_eta_gamma", "jet_1_eta": "jet_1_eta", "jet_2_eta": "jet_2_eta"}
-name_dict_VBF = {"H_relpt": "1_Higgs_Relative_pT", "gamma_mvaID": "2_Photon_ID_MVA", "gamma_ptRelErr": "3_Photon_Energy_Resolution", "l1g_deltaR": "4_dR_Lep1_gamma", "l2g_deltaR": "5_dR_Lep2_gamma", "Z_cos_theta": "6_cosTheta", "lep_cos_theta": "7_costheta", "lep_phi": "8_phi", "photon_zeppenfeld": "9_gamma_Zeppenfeld", "jet1G_deltaR": "10_dR_Jet1_gamma", "jet2G_deltaR": "11_dR_Jet2_gamma", "Z_lead_lepton_eta": "12_eta_Lep1", "Z_sublead_lepton_eta": "13_eta_Lep2", "gamma_eta": "14_eta_gamma", "delta_eta_jj": "15_dEta_Jet1_Jet2", "delta_phi_jj": "16_dPhi_Jet1_Jet2", "jet_1_pt": "17_Jet1_pt", "jet_2_pt": "18_Jet2_pt", "pt_balance": "19_System_pT_Balance", "delta_phi_zgjj": "20_dPhi_jj_llgamma", "jet_1_eta": "jet_1_eta", "jet_2_eta": "jet_2_eta"}
+name_dict_ggF = {"H_relpt": "1_Higgs_Relative_pT", "gamma_mvaID": "2_Photon_ID_MVA", "gamma_ptRelErr": "3_Photon_Energy_Resolution", "l1g_deltaR": "4_dR_Lep1_gamma", "l2g_deltaR": "5_dR_Lep2_gamma", "Z_cos_theta": "6_cosTheta", "lep_cos_theta": "7_costheta", "lep_phi": "8_phi", "Z_lead_lepton_eta": "9_eta_Lep1", "Z_sublead_lepton_eta": "10_eta_Lep2", "gamma_eta": "11_eta_gamma", "jet_1_eta": "jet_1_eta", "jet_2_eta": "jet_2_eta", "n_jets": "n_jets"}
+name_dict_VBF = {"H_relpt": "1_Higgs_Relative_pT", "gamma_mvaID": "2_Photon_ID_MVA", "gamma_ptRelErr": "3_Photon_Energy_Resolution", "l1g_deltaR": "4_dR_Lep1_gamma", "l2g_deltaR": "5_dR_Lep2_gamma", "Z_cos_theta": "6_cosTheta", "lep_cos_theta": "7_costheta", "lep_phi": "8_phi", "photon_zeppenfeld": "9_gamma_Zeppenfeld", "jet1G_deltaR": "10_dR_Jet1_gamma", "jet2G_deltaR": "11_dR_Jet2_gamma", "Z_lead_lepton_eta": "12_eta_Lep1", "Z_sublead_lepton_eta": "13_eta_Lep2", "gamma_eta": "14_eta_gamma", "delta_eta_jj": "15_dEta_Jet1_Jet2", "delta_phi_jj": "16_dPhi_Jet1_Jet2", "jet_1_pt": "17_Jet1_pt", "jet_2_pt": "18_Jet2_pt", "pt_balance": "19_System_pT_Balance", "delta_phi_zgjj": "20_dPhi_jj_llgamma", "jet_1_eta": "jet_1_eta", "jet_2_eta": "jet_2_eta", "n_jets": "n_jets"}
 
 for primary_process_name, tree_name in Tree_dict.items(): 
         # "mass_jj": {"range": (0, 300), "title": r"$m_{jj}(GeV/c^{2})$"},
@@ -51,7 +51,9 @@ for primary_process_name, tree_name in Tree_dict.items():
         #jet eta1
         "jet_1_eta": {"range": (-5, 5), "bins": 50, "title": r"$\eta(Jet1)$"},
         #jet eta2
-        "jet_2_eta": {"range": (-5, 5), "bins": 50, "title": r"$\eta(Jet2)$"}
+        "jet_2_eta": {"range": (-5, 5), "bins": 50, "title": r"$\eta(Jet2)$"},
+        #njet
+        "n_jets": {"range": (0, 6), "bins": 6, "title": "Number of Jet(s)"}
         }
 
     elif primary_process_name == "VBF":     
@@ -101,7 +103,9 @@ for primary_process_name, tree_name in Tree_dict.items():
         #jet eta1
         "jet_1_eta": {"range": (-5, 5), "bins": 50, "title": r"$\eta(Jet1)$"},
         #jet eta2
-        "jet_2_eta": {"range": (-5, 5), "bins": 50, "title": r"$\eta(Jet2)$"}
+        "jet_2_eta": {"range": (-5, 5), "bins": 50, "title": r"$\eta(Jet2)$"},
+        #njet
+        "n_jets": {"range": (0, 6), "bins": 6, "title": "Number of Jet(s)"}
         }
 
     # inclusive, zero_jet, one_jet, zero_to_one_jet, two_jet, VH_ttH, VH, ZH, ttH_had, ttH_lep
@@ -109,13 +113,13 @@ for primary_process_name, tree_name in Tree_dict.items():
     TREE = tree_name
     WEIGHT = "weight"
     PATH = "/eos/home-p/pelai/HZgamma/Root_Dataset/run3/NanoV12/"
+    # PATH = "/eos/home-p/pelai/HZgamma/Root_Dataset/run3/NanoV12/"
     # PATH = "/eos/user/j/jiehan/root/skimmed_ntuples_run2/"
 
     data = {"data": ["Data"]}
     # bkg = {r"Z$+\gamma$": ["ZGToLLG"], "Z+Fake Photon": ["DYJetsToLL", "EWKZ2J"], r"VBSZ+$\gamma$": ["ZG2JToG2L2J"], r"t$\bar{t}$": ["TT"], r"t$\gamma$/t$\bar{t}\gamma$": ["TTGJets", "TGJets"], "multiboson": ["WW", "WZ", "ZZ"], r"t$\bar{t}$+X": ["ttZJets", "ttWJets"]}
     # bkg = {"Multiboson": ["WW", "WZ", "ZZ"], r"t$\bar{t}$+X": ["ttZJets", "ttWJets"], r"VBS Z+$\gamma$": ["ZG2JToG2L2J"], r"t$\gamma$/t$\bar{t}\gamma$": ["TTGJets", "TGJets"], r"t$\bar{t}$": ["TT"], r"Z$+\gamma$": ["DYGto2LG"], "Z+Fake Photon": ["DYJetsToLL"]}
-    # bkg = {"Multiboson": ["WW", "WZ", "ZZ"], r"t$\bar{t}$": ["TT", "TTtoLNu2Q"], r"VBS Z+$\gamma$": ["ZG2JToG2L2J"], r"Z$+\gamma$": ["DYGto2LG"], "Z+Fake Photon": ["DYJetsToLL"]}
-    bkg = {r"Z$+\gamma$": ["DYGto2LG"]}
+    bkg = {"Multiboson": ["WW", "WZ", "ZZ"], r"t$\bar{t}$": ["TT", "TTtoLNu2Q"], r"VBS Z+$\gamma$": ["ZG2JToG2L2J"], r"Z$+\gamma$": ["DYGto2LG"], "Z+Fake Photon": ["DYJetsToLL"]}
     color_dict = {r"Z$+\gamma$": "#3f90da", "Z+Fake Photon": "#ffa90e", r"VBS Z+$\gamma$": "#92dadd", r"t$\bar{t}$": "#e76300", r"t$\gamma$/t$\bar{t}\gamma$": "#bd1f01", "Multiboson": "#832db6", r"t$\bar{t}$+X": "#94a4a2"}
 
     def convert_root_to_hist(file_dict, selection=""):
@@ -126,8 +130,8 @@ for primary_process_name, tree_name in Tree_dict.items():
         for file in file_dict.values():
             type_hist = np.zeros(BINS)
             for f in file:
-                # for year in ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"]:
-                for year in ["2022preEE", "2022postEE"]:
+                for year in ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"]:
+                # for year in ["2022preEE", "2022postEE"]:
                     print("Reading", PATH + f  + "/" + year + ".root:" + TREE, "...")
                     if "H_mass" not in VAR:
                         try:
@@ -286,6 +290,13 @@ for primary_process_name, tree_name in Tree_dict.items():
         ax2.set_xlabel(XLABLE, fontsize=24)
 
         plt.tight_layout()
+        # if os.path.exists(f"pic/run3/dataVbkg_{primary_process_name}") == False:
+        #     os.makedirs(f"pic/run3/dataVbkg_{primary_process_name}")
+        # if primary_process_name == "ggF":
+        #     plt.savefig(f"pic/run3/dataVbkg_{primary_process_name}/{name_dict_ggF[VAR]}.pdf")
+        # elif primary_process_name == "VBF":
+        #     plt.savefig(f"pic/run3/dataVbkg_{primary_process_name}/{name_dict_VBF[VAR]}.pdf")
+        
         if os.path.exists(f"pic/run3/dataVbkg_{primary_process_name}") == False:
             os.makedirs(f"pic/run3/dataVbkg_{primary_process_name}")
         if primary_process_name == "ggF":

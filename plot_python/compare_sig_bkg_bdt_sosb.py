@@ -197,4 +197,4 @@ print("Finish adding CMS word")
 print("========================")
 
 c1.Draw()
-c1.SaveAs("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/sig_bkg_{}_{}.png".format(channel, var))
+c1.SaveAs("/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/plot_python/pic/run2/two_jet/sig_bkg_{}_{}.png".format(channel, var))

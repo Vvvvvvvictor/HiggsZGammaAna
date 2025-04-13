@@ -14,7 +14,7 @@ x_label = r"$m_{\ell\ell\gamma}$[GeV]"
 x_range = (100, 180, 80)
 slice_var = "H_ptt"
 
-filePath = "/eos/home-j/jiehan/root/outputs/test/zero_to_one_jet/"
+filePath = "/eos/home-p/pelai/HZgamma/bdt_root_dataset/run2/outputs/test/zero_to_one_jet/"
 bkgmc_names = ["ZGToLLG", "DYJetsToLL", "ZG2JToG2L2J"]
 
 bkgmc_data = pd.DataFrame()
@@ -40,5 +40,5 @@ for i, point in enumerate(slice_points):
     ax.set_xlabel(x_label)
     ax.set_ylabel("Events")
     ax.set_title(f"Slice in {slice_var} from {point:.2f} to {slice_points[i+1]:.2f}")
-    plt.savefig(f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/{slice_var}_{point:.2f}-{slice_points[i+1]:.2f}.png")
+    plt.savefig(f"/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/plot_python/pic/run2/{slice_var}_{point:.2f}-{slice_points[i+1]:.2f}.png")
     plt.close()

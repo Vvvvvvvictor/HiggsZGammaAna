@@ -799,7 +799,9 @@ def main():
 
         #xgb_model.setParams({'eval_metric': ['auc', 'logloss']}, i)
         xgb_model.set_early_stopping_rounds(20)
+
         xgb_model.prepareData(i)
+
         if args.optuna:
             try:
                 xgb_model.optunaHP(i)
@@ -808,9 +810,8 @@ def main():
             continue
 
         xgb_model.trainModel(i)
-        
-        xgb_model.testModel(i)
 
+        xgb_model.testModel(i)
         print("param: %s, Val AUC: %f" % xgb_model.getAUC(i))
         print("Train significance: %f +/- %f, " % xgb_model.getSignificance(i,'train'), "Val significance: %f +/- %f" % xgb_model.getSignificance(i))
 
@@ -818,7 +819,6 @@ def main():
         if args.importance:
             xgb_model.plotFeaturesImportance(i, type='weight')
             xgb_model.plotFeaturesImportance(i, type='gain')
-
         if args.roc:
             xgb_model.plotROC(i)
 

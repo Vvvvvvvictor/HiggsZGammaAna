@@ -53,7 +53,7 @@ echo "Shielded parameter is: $S . Added variables is: $A ."
 # python scripts/apply_bdt.py -r one_jet
 
 # 4. Categorization_1D, ggF
-python scripts/categorization_1D.py -r zero_to_one_jet -b 4 --floatB --minN 10 -es "fullSimrw" > condor/info/categorize_zero_to_one_jet.log
+# python scripts/categorization_1D.py -r zero_to_one_jet -b 4 --floatB --minN 10 -es "fullSimrw" > condor/info/categorize_zero_to_one_jet.log
 # python scripts/categorization_1D.py -r zero_jet -b 4 --minN 10 --floatB -es "fullSimrw"
 # python scripts/categorization_1D.py -r one_jet -b 4 --minN 10 --floatB -es "fullSimrw"
 # for ncat in {2..7};do
@@ -61,10 +61,11 @@ python scripts/categorization_1D.py -r zero_to_one_jet -b 4 --floatB --minN 10 -
 # done
 
 # 4. Categorization_1D, VBF
-python scripts/categorization_1D.py -r two_jet -b 4 --floatB --minN 10 -es "fullSimrw" > condor/info/categorize_two_jet.log
+# python scripts/categorization_1D.py -r two_jet -b 4 --floatB --minN 10 -es "fullSimrw" > condor/info/categorize_two_jet.log
 
-# python ../plot_python/plot_cats_hmass_dis.py
-# python ../plot_python/compare_two_var_slice.py
+python ../plot_python/plot_cats_hmass_dis.py
+python ../plot_python/compare_two_var_slice.py
+python ../plot_python/compare_4fold.py
 
 # cd ../plot_python
 # python find_2D_best_boundaries.py

@@ -21,33 +21,34 @@ def get_err_hist(file_name, tree_name, var_name, bin_boundaries, ranges):
     data = data[var_name]
     return np.histogram(data, weights=weight**2, range=ranges[1:], bins=ranges[0])
 
-boundaries = read_config("/eos/home-j/jiehan/root/outputs/test/significances/bin_boundaries_1D_two_jet.txt")
+boundaries = read_config("/eos/home-p/pelai/HZgamma/bdt_root_dataset/run2/outputs/test/significances/bin_boundaries_1D_two_jet.txt")
 backgrounds = ["ZGToLLG", "DYJetsToLL", "ZG2JToG2L2J"]
 signal = ["ggH_M125", "VBF_M125", "ZH_M125", "WplusH_M125", "WminusH_M125", "ttH_M125"]
 data = ["Data"]
 
-if not os.path.exists("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/two_jet/"):
-    os.makedirs("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/two_jet/")
+if not os.path.exists("/afs/cern.ch/user/p/pelai/HZgamma/HiggsZGammaAna/plot_python/pic/run2/two_jet/"):
+    os.makedirs("/afs/cern.ch/user/p/pelai/HZgamma/HiggsZGammaAna/plot_python/pic/run2/two_jet/")
 
-boundaries = [0,1]
+# boundaries = [0,1]
+print(boundaries)
 
 for i in range(len(boundaries)-1):
     bkg_hist = []
     for bkg in backgrounds:
-        hist, bins = get_hist(f"/eos/user/j/jiehan/root/outputs/test/two_jet/{bkg}.root", "two_jet", "H_mass", boundaries[i:], [80, 100, 180])
+        hist, bins = get_hist(f"/eos/home-p/pelai/HZgamma/bdt_root_dataset/run2/outputs/test/two_jet/{bkg}.root", "two_jet", "H_mass", boundaries[i:], [80, 100, 180])
         bkg_hist.append(hist)
         
     sig_hist = np.zeros(len(bins)-1)
-    VBF_hist, bins = get_hist(f"/eos/user/j/jiehan/root/outputs/test/two_jet/VBF_M125.root", "two_jet", "H_mass", boundaries[i:], [80, 100, 180])
+    VBF_hist, bins = get_hist(f"/eos/home-p/pelai/HZgamma/bdt_root_dataset/run2/outputs/test/two_jet/VBF_M125.root", "two_jet", "H_mass", boundaries[i:], [80, 100, 180])
     # sig_err_hist = np.zeros(len(bins)-1)
     for sig in signal:
-        hist, bins = get_hist(f"/eos/user/j/jiehan/root/outputs/test/two_jet/{sig}.root", "two_jet", "H_mass", boundaries[i:], [80, 100, 180])
+        hist, bins = get_hist(f"/eos/home-p/pelai/HZgamma/bdt_root_dataset/run2/outputs/test/two_jet/{sig}.root", "two_jet", "H_mass", boundaries[i:], [80, 100, 180])
         sig_hist += hist
         # sig_err_hist += get_err_hist(f"/eos/user/j/jiehan/root/outputs/test/two_jet/{sig}.root", "two_jet", "H_mass", boundaries[i:], [80, 100, 180])[0]
         
     data_hist = np.zeros(len(bins)-1)
     for dat in data:
-        hist, bins = get_hist(f"/eos/user/j/jiehan/root/outputs/test/two_jet/{dat}.root", "two_jet", "H_mass", boundaries[i:], [80, 100, 180])
+        hist, bins = get_hist(f"/eos/home-p/pelai/HZgamma/bdt_root_dataset/run2/outputs/test/two_jet/{dat}.root", "two_jet", "H_mass", boundaries[i:], [80, 100, 180])
         data_hist += hist
 
     sf = np.sum(data_hist) / np.sum(bkg_hist)
@@ -64,8 +65,8 @@ for i in range(len(boundaries)-1):
     ax.set_ylim(0, max(np.sum(bkg_hist, axis=0).max(), data_hist.max()) * 1.1)
     ax.set_xlabel("Higgs Mass [GeV]")
     ax.set_ylabel("Events")
-    # ax.title.set_text(f"Events in category {i} of VBF channel")
-    ax.title.set_text(f"All events in VBF channel")
+    ax.title.set_text(f"Events in category {i} of VBF channel")
+    # ax.title.set_text(f"All events in VBF channel")
     ax.legend()
-    plt.savefig(f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/two_jet/hmass_dis_all.png")
+    plt.savefig(f"/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/plot_python/pic/run2/two_jet/hmass_dis_bin{i}.png")
     plt.clf()
