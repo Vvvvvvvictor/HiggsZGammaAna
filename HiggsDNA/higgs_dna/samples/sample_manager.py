@@ -20,9 +20,9 @@ class SampleManager():
     """
     def __init__(self, sample_list, years, catalog = "metadata/samples_catalog.json"):
         self.sample_list = sample_list
+        print("catalog: ", catalog)
         if not isinstance(self.sample_list, list):
             self.sample_list = [self.sample_list]
-
         self.years = years
         if not isinstance(self.years, list):
             self.years = [self.years]
@@ -39,10 +39,9 @@ class SampleManager():
     def get_samples(self):
         if self.loaded_samples:
             return self.data
-
         samples = []
         # Loop through each sample
-        logger.info("[SampleManager : get_samples] Fetching input files for %d samples." % (len(self.sample_list)))
+
         for s_idx, sample in enumerate(tqdm(self.sample_list)):
             if sample not in self.catalog.keys():
                 logger.exception("[SampleManager : get_samples] Could not find sample '%s' in samples catalog." % (sample))
@@ -85,13 +84,6 @@ class SampleManager():
                     continue
 
                 self.samples[sample][year] = {}
-
-                # Multiple ways the user can specify files:
-                #   0. Directory with wildcards
-                #   1. Hard-coded list (local or xrd format)
-                #   2a. Single directory (local or xrd format)
-                #   2b. List of directories (local or xrd format)
-                #   3a/b. DAS dataset name 
 
                 grabbed_files = False
 
@@ -140,7 +132,7 @@ class SampleManager():
                     grabbed_files = True
 
                 files = sorted(files, key = lambda x : x.name)
-
+                files = files[1:] # remove first file (usually the smallest one)
                 logger.debug("[SampleManager : get_samples] For sample '%s', year '%s', found %d input files:" % (sample, year, len(files)))
                 if len(files) < 50: # don't print out if more than 50
                     for file in files:
@@ -183,14 +175,12 @@ class SampleManager():
                         )
                 )
                 self.process_id_map[sample] = s_idx
-
         self.data = samples
         self.loaded_samples = True
 
         self.update_catalog(samples)
 
         return samples
-
 
     def update_catalog(self, samples):
         """

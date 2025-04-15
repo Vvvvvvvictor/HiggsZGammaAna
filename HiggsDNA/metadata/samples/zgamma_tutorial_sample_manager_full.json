@@ -1,4 +1,24 @@
 {
+    "test": {
+        "xs": 48.58,
+        "bf": 0.000154793142,
+        "fpo": 1,
+        "files": {
+            "2017": [
+                "/eos/project/h/htozg-dy-privatemc/shsong/Customized/HZgMCUL17/Run2017HZG/RunIISummer20UL17NanoAODv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250316_174203/"
+            ]
+        }
+    },
+    "test2": {
+        "xs": 48.58,
+        "bf": 0.000154793142,
+        "fpo": 1,
+        "files": {
+            "2017": [
+                "/eos/project/h/htozg-dy-privatemc/shsong/Customized/HZgMCUL17/Run2017HZG/RunIISummer20UL17NanoAODv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250316_174203/"
+            ]
+        }
+    },
     "ggH_mix": {
         "xs": 48.58,
         "bf": 0.000154793142,
@@ -87,7 +107,6 @@
                 "root://xrootd-cms.infn.it//store/mc/RunIISummer20UL16NanoAODv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_v17_ext1-v1/2820000/69737E99-A65A-8148-A8B2-477F2BD981CB.root"
             ],
             "2017": [
-                "root://xrootd-cms.infn.it//store/mc/RunIISummer20UL17NanoAODv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/93B37B9F-16D5-6F4F-B920-3B9C682CA8A8.root",
                 "root://xrootd-cms.infn.it//store/mc/RunIISummer20UL17NanoAODv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/AED2B035-3C41-E044-92B7-5A908898EE0F.root",
                 "root://xrootd-cms.infn.it//store/mc/RunIISummer20UL17NanoAODv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/E3D30224-C63D-CC48-9259-B0BE9FED9BB1.root",
                 "root://xrootd-cms.infn.it//store/mc/RunIISummer20UL17NanoAODv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/E794DDC9-6560-064E-B36C-4E0D9DEF8556.root",

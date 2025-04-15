@@ -1,4 +1,21 @@
-{
+{"test":
+{"xs":48.58,
+"bf":0.000154793142,
+"fpo":1,
+"files":{
+"2017":
+["/eos/project/h/htozg-dy-privatemc/shsong/Customized/HZgMCUL17/Run2017HZG/RunIISummer20UL17NanoAODv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250316_174203/"]
+}
+},
+"test2":
+{"xs":48.58,
+"bf":0.000154793142,
+"fpo":1,
+"files":{
+"2017":
+["/eos/project/h/htozg-dy-privatemc/shsong/Customized/HZgMCUL17/Run2017HZG/RunIISummer20UL17NanoAODv9/GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8/250316_174203/"]
+}
+},
     "ggH_mix": {
         "xs": 48.58,
         "bf": 0.000154793142,
