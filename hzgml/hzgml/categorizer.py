@@ -62,7 +62,6 @@ class pyTH1(object):
         self.BinWidth = np.array([])
 
         for i in range(1, hist.GetSize()-1):
-
             self.BinContent = np.append(self.BinContent, hist.GetBinContent(i))
             self.BinError = np.append(self.BinError, hist.GetBinError(i))
             self.BinLowEdge = np.append(self.BinLowEdge, hist.GetBinLowEdge(i))
@@ -431,7 +430,7 @@ class categorizer(object):
         if br != nbin: h_right.Delete()
         htemp.Delete()
 
-    def fit(self, bl, br, nbin, minN=5, floatB=False, earlystop=-1, pbar=False):
+    def fit(self, bl, br, nbin, minN=5, minSB=10, floatB=False, earlystop=-1, pbar=False):
 
         if nbin == 1:
 
@@ -442,7 +441,7 @@ class categorizer(object):
             # temp_nbkg = nbkg
             if self.reweight and nbkg != 0:
                 if self.h_bkg_rw_den.Integral(bl, br) == 0: print("what!!!", bl, br)
-                if self.h_bkg_rw_den.Integral(bl, br) < 5*minN or self.h_bkg_rw_num.Integral(bl, br) < 5*minN: return -1, -1, -1
+                if self.h_bkg_rw_den.Integral(bl, br) < minSB or self.h_bkg_rw_num.Integral(bl, br) < minSB: return -1, -1, -1
                 nbkg, dbkg = nbkg*self.h_bkg_rw_num.Integral(bl, br)/self.h_bkg_rw_den.Integral(bl, br), dbkg*self.h_bkg_rw_num.Integral(bl, br)/self.h_bkg_rw_den.Integral(bl, br)
                 
             if nbkg < minN: return -1, -1, -1
@@ -463,9 +462,9 @@ class categorizer(object):
  
             for b in (range(bl, br+1) if not pbar else tqdm(range(bl, br+1), ncols=70)):
 
-                b1, z1, u1 = self.fit(bl, b-1, N1, minN=minN, floatB=floatB, earlystop=earlystop)
+                b1, z1, u1 = self.fit(bl, b-1, N1, minN=minN, minSB=minSB, floatB=floatB, earlystop=earlystop)
                 if b1 == -1: continue
-                b2, z2, u2 = self.fit(b, br, N2, minN=minN, earlystop=earlystop)
+                b2, z2, u2 = self.fit(b, br, N2, minN=minN, minSB=minSB, earlystop=earlystop)
                 if b2 == -1: break
 
                 z = sqrt(z1**2 + z2**2)

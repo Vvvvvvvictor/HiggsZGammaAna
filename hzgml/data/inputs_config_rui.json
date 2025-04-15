@@ -1,5 +1,7 @@
-{"sample_list": {"DYJetsToLL":   ["ggfvbf_ntuples_DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_2016APV201620172018"],
-                 "ZGToLLG":      ["ggfvbf_ntuples_ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8_2016APV201620172018"],
-                 "ZG2JToG2L2J":  ["ggfvbf_ntuples_ZGamma2JToGamma2L2J_EWK_MLL-50_MJJ-120_TuneCP5_13TeV-madgraph-pythia8_2016APV201620172018"],
-                 "VBF_M125":     ["ggfvbf_ntuples_VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8_2016APV201620172018"],
-                 "ggH_M125":     ["ggfvbf_ntuples_GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8_2016APV201620172018"]}}
+{"sample_list": {"DYJetsToLL":   ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"],
+                 "ZGToLLG":      ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"],
+                 "EWKZ2J":       ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"],
+                 "VBF_M125":     ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"],
+                 "ggH_M125":     ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"],
+                 "Data":         ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"]}}
+

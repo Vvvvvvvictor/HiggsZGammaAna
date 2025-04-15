@@ -100,41 +100,41 @@ from pdb import set_trace
 #     if d2 not in data1:
 #         print(d2, end='')
 
-# =====================================
-# Get weight with syst
-# =====================================
-cats = ["inclusive"]
-years = ['2017']
-types = ["mumu", "ee"]
-for year in years:
-    # data = uproot.open(f"/eos/home-j/jiehan/root/cutflow/ggH_M125/{year}.root")
-    data = pd.read_parquet(f"/eos/home-j/jiehan/parquet/nanov9/cutflow/ggH_M125_{year}/merged_nominal.parquet")
-    print(data.columns)
-    for cat in cats:
-        # 加入所有满足这个格式的变量 'weight*central'
-        variables = ['H_mass', 'z_mumu', 'z_ee']
-        # for i in data[cat].keys():
-        #     if i.startswith('weight') and i.endswith('central'):
-        #         variables.append(i)
-        # cat_data = data[cat].arrays(variables, library='pd')
-        if cat == "inclusive":
-            cat_data = data
-        else:
-            exit()
-        for t in types:
-            temp = cat_data.query(f'z_{t} > 0')
-            weight = temp["weight_central"]
-            print(f'{year} {cat} {t} lumi weight: {weight.sum()}')
-            weight = weight * temp["weight_L1_prefiring_sf_central"]
-            print(f'{year} {cat} {t} prefire weight: {weight.sum()}')
-            weight = weight * temp["weight_pu_reweight_sf_central"]
-            print(f'{year} {cat} {t} pileup weight: {weight.sum()}')
-            weight = weight * temp["weight_btag_deepjet_wp_sf_SelectedJet_central"]
-            print(f'{year} {cat} {t} btag weight: {weight.sum()}')
-            weight = weight * temp["weight_electron_wplid_sf_SelectedElectron_central"]
-            print(f'{year} {cat} {t} ele id weight: {weight.sum()}')
-            weight = weight * temp["weight_muon_looseid_sf_SelectedMuon_central"]
-            print(f'{year} {cat} {t} muon id weight: {weight.sum()}')
+# # =====================================
+# # Get weight with syst
+# # =====================================
+# cats = ["inclusive"]
+# years = ['2017']
+# types = ["mumu", "ee"]
+# for year in years:
+#     # data = uproot.open(f"/eos/home-j/jiehan/root/cutflow/ggH_M125/{year}.root")
+#     data = pd.read_parquet(f"/eos/home-j/jiehan/parquet/nanov9/cutflow/ggH_M125_{year}/merged_nominal.parquet")
+#     print(data.columns)
+#     for cat in cats:
+#         # 加入所有满足这个格式的变量 'weight*central'
+#         variables = ['H_mass', 'z_mumu', 'z_ee']
+#         # for i in data[cat].keys():
+#         #     if i.startswith('weight') and i.endswith('central'):
+#         #         variables.append(i)
+#         # cat_data = data[cat].arrays(variables, library='pd')
+#         if cat == "inclusive":
+#             cat_data = data
+#         else:
+#             exit()
+#         for t in types:
+#             temp = cat_data.query(f'z_{t} > 0')
+#             weight = temp["weight_central"]
+#             print(f'{year} {cat} {t} lumi weight: {weight.sum()}')
+#             weight = weight * temp["weight_L1_prefiring_sf_central"]
+#             print(f'{year} {cat} {t} prefire weight: {weight.sum()}')
+#             weight = weight * temp["weight_pu_reweight_sf_central"]
+#             print(f'{year} {cat} {t} pileup weight: {weight.sum()}')
+#             weight = weight * temp["weight_btag_deepjet_wp_sf_SelectedJet_central"]
+#             print(f'{year} {cat} {t} btag weight: {weight.sum()}')
+#             weight = weight * temp["weight_electron_wplid_sf_SelectedElectron_central"]
+#             print(f'{year} {cat} {t} ele id weight: {weight.sum()}')
+#             weight = weight * temp["weight_muon_looseid_sf_SelectedMuon_central"]
+#             print(f'{year} {cat} {t} muon id weight: {weight.sum()}')
 
 # =====================================
 # Have a look at the hgg data
@@ -164,3 +164,53 @@ for year in years:
 #         print(f'{year} data {cat} weight: {data["weight"].sum()}')
 #         cat_sum += data["weight"].sum()
 #     print(f'{cat} total weight: {cat_sum}\n')
+
+
+# # =====================================
+# # Check ntuples
+# # =====================================
+
+# path = "/eos/home-p/pelai/HZgamma/Root_Dataset/run3/NanoV12"
+# data_name = ["Data"]
+# bkg_name = ["DYGto2LG_10to50", "DYGto2LG_50to100", "DYJetsToLL", "ZG2JToG2L2J", "TT"]
+# years = ["2022preEE", "2022postEE"]
+
+# data, bkg = pd.DataFrame(), pd.DataFrame()
+# for year in years:
+#     for name in data_name:
+#         temp = uproot.open(f"{path}/{name}/{year}.root")['two_jet'].arrays(library='pd')
+#         data = pd.concat([data, temp])
+#     for name in bkg_name:
+#         temp = uproot.open(f"{path}/{name}/{year}.root")['two_jet'].arrays(library='pd')
+#         bkg = pd.concat([bkg, temp])
+
+# print(r"$n_{jets} \geq 2$ and $n_{b-jets} = 0$ and $n_{mu} = 2")
+# selection = "n_muons==2"
+# print(f"sf: {data.query(selection)['weight'].sum() / bkg.query(selection)['weight'].sum()}")
+# selection = "(mass_jj>400) & (delta_eta_jj>2.5)"
+# print(r"After applying $m_{jj} > 400$ GeV and $\Delta\eta_{jj} > 2.5$")
+# print(f"sf: {data.query(selection)['weight'].sum() / bkg.query(selection)['weight'].sum()}")
+# print(r"After applying $p_{T}^{j1} > 35$ GeV and $p_{T}^{j2} > 25$ GeV")
+# selection += " & (jet_1_pt>35) & (jet_2_pt>25)"
+# print(f"sf: {data.query(selection)['weight'].sum() / bkg.query(selection)['weight'].sum()}")
+
+# =================================
+# Check the data
+# =================================
+path = "/eos/home-j/jiehan/root/fitting_signal/"
+years = ["2016preVFP", "2016postVFP", "2017", "2018"]
+samples = ["ggH", "VBF", "ZH", "WH", "ttH"]
+cats = ["VBF0", "VBF1", "VBF2", "VBF3"]
+
+for cat in cats:
+    yields = 0
+    for sample in samples:
+        for year in years:
+            for flav in ('ele', 'mu'):
+                # print(f"{path}/{sample}_M125_{year}/output_{sample}_M125.root")
+                data = uproot.open(f"{path}/{sample}_M125_{year}/output_{sample}_M125.root")[f"DiphotonTree/{sample}_125_{flav}_13TeV_{cat}"].arrays(['weight'], library='pd')
+                signal = data['weight'].sum()
+                count = data['weight'].count()
+                print(f'{year} {sample} {cat} {flav} yields: {signal:.3f}({count})')
+                yields += data['weight'].sum()
+    print(f'{cat} yields: {yields}\n')

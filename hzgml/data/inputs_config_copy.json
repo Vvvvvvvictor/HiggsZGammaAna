@@ -5,6 +5,7 @@
                  "ggH_M125":     ["2016preVFP", "2016postVFP", "2017", "2018"],
                  "Data":         ["2016preVFP", "2016postVFP", "2017", "2018"],
                  "ZG2JToG2L2J":  ["2016preVFP", "2016postVFP", "2017", "2018"],
+                 "WGToLNuG":     ["2016preVFP", "2016postVFP", "2017", "2018"],
                  "TTGJets":      ["2016preVFP", "2016postVFP", "2017", "2018"],
                  "TGJets":       ["2016preVFP", "2016postVFP", "2017", "2018"],
                  "ttZJets":      ["2016preVFP", "2016postVFP", "2017", "2018"],

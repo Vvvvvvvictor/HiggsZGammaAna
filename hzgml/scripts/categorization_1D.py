@@ -32,6 +32,7 @@ def getArgs():
     parser.add_argument('-b', '--nbin', type = int, default = 10, choices = [1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16], help = 'number of BDT bins.')
     parser.add_argument('--skip', action = 'store_true', default = False, help = 'skip the hadd part')
     parser.add_argument('--minN', type = int, default = 10, help = 'minimum number of events in mass window')
+    parser.add_argument('--minSB', type = int, default = 10, help = 'minimum number of signal and background events')
     parser.add_argument('-v', '--variable', action = 'store', choices = ['bdt', 'NN'], default = 'bdt', help = 'MVA variable to use')
     #parser.add_argument('--val', action = 'store_true', default = False, help = 'se validation samples for categroization')
     parser.add_argument('-t', '--transform', type = bool, default = True, help = 'use the transform scores for categroization')
@@ -128,7 +129,7 @@ def gettingsig(input_path, region, variable, boundaries, transform, estimate):
 
     return z, abs(u), yields
 
-def categorizing(input_path, region, variable, sigs, bkgs, nscan, minN, transform, nbin, floatB, n_fold, fold, earlystop, estimate):
+def categorizing(input_path, region, variable, sigs, bkgs, nscan, minN, transform, nbin, floatB, n_fold, fold, earlystop, minSB=10, estimate='fullSimrw'):
 
     f_sig = TFile('%s/%s/sig.root' % (input_path, region))
     t_sig = f_sig.Get(region)
@@ -213,7 +214,7 @@ def categorizing(input_path, region, variable, sigs, bkgs, nscan, minN, transfor
 
 #################################################################################################
         
-    bmax, zmax, umax = cgz.fit(1, nscan, nbin, minN=minN, floatB=floatB, earlystop=earlystop, pbar=True)
+    bmax, zmax, umax = cgz.fit(1, nscan, nbin, minN=minN, minSB=minSB, floatB=floatB, earlystop=earlystop, pbar=True)
     umax = umax / zmax if zmax != 0 else 0
     print(bmax)
     boundaries = bmax
@@ -237,11 +238,11 @@ def main():
 
     input_path = args.input + '/val'
 
-    sigs = ['ggH_M125','VBF_M125','WminusH_M125','WplusH_M125','ZH_M125','ttH_M125']
+    sigs = ['ggH_M125','VBF_M125'] #,'WminusH_M125','WplusH_M125','ZH_M125','ttH_M125']
     # sigs = ['ggH','VBF','WminusH','WplusH','ZH','ttH']
 
     # bkgs = ['data_fake', 'mc_med', 'mc_true']
-    bkgs = ["ZGToLLG", "DYJetsToLL", "EWKZ2J", "ZG2JToG2L2J", "TT", "TTGJets", "TGJets", "WW", "WZ", "ZZ", "WWG", "WZG", "ZZG", "ttZJets", "ttWJets"]
+    bkgs = ["ZGToLLG", "DYJetsToLL", "EWKZ2J"] #, "ZG2JToG2L2J", "TT", "TTGJets", "TGJets", "WW", "WZ", "ZZ", "WWG", "WZG", "ZZG", "ttZJets", "ttWJets"]
     if args.floatB and args.nbin == 16:
         print('ERROR: With floatB option, the maximun nbin is 15!!')
         quit()
@@ -271,7 +272,7 @@ def main():
     boundaries_values=[]
     smaxs = []
     for j in range(n_fold):
-        bound, bound_value, smax = categorizing(input_path, region, variable, sigs, bkgs, nscan, args.minN, args.transform, args.nbin if not args.floatB else args.nbin + 1, args.floatB, n_fold, j, args.earlystop, estimate=args.estimate)
+        bound, bound_value, smax = categorizing(input_path, region, variable, sigs, bkgs, nscan, args.minN, args.transform, args.nbin if not args.floatB else args.nbin + 1, args.floatB, n_fold, j, args.earlystop, minSB=args.minSB, estimate=args.estimate)
         boundaries.append(bound)
         boundaries_values.append(bound_value)
         smaxs.append(smax)
@@ -305,6 +306,7 @@ def main():
     outs['floatB'] = args.floatB
     outs['nfold'] = n_fold
     outs['minN'] = args.minN
+    outs['minSB'] = args.minSB
     outs['fine_tuned'] = False
     outs['variable'] = variable
     outs['estimate'] = args.estimate
@@ -329,7 +331,7 @@ def main():
         json.dump(outs, json_file, indent=4)
         # for i in list(yields['z']):
         #     json_file.write('{:.4f}\n'.format(i))
-        json_file.write('\n{:.4f}'.format(s))
+        # json_file.write('\n{:.4f}'.format(s))
 
     return
 

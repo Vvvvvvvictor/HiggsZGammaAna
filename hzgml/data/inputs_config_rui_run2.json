@@ -1,0 +1,6 @@
+{"sample_list": {"DYJetsToLL":   ["2016preVFP", "2016postVFP", "2017", "2018"],
+                 "ZGToLLG":      ["2016preVFP", "2016postVFP", "2017", "2018"],
+                 "EWKZ2J":       ["2016preVFP", "2016postVFP", "2017", "2018"],
+                 "VBF_M125":     ["2016preVFP", "2016postVFP", "2017", "2018"],
+                 "ggH_M125":     ["2016preVFP", "2016postVFP", "2017", "2018"],
+                 "Data":         ["2016preVFP", "2016postVFP", "2017", "2018"]}}
