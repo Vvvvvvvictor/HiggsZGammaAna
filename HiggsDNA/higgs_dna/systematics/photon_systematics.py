@@ -390,3 +390,72 @@ def photon_mc_smear(events, r9, loc):
 
     return variations
 
+photon_scale_FILE = {"2022" : "jsonpog-integration/POG/EGM/2022_Summer22/photonSS_EtDependent.json",
+    "2022EE" : "jsonpog-integration/POG/EGM/2022_Summer22EE/photonSS_EtDependent.json",
+    "2023" : "jsonpog-integration/POG/EGM/2023_Summer23/photonSS_EtDependent.json",
+    "2023BPix" : "jsonpog-integration/POG/EGM/2023_Summer23BPix/photonSS_EtDependent.json"
+}
+def photon_scale_run3(events, year, central_only, input_collection, working_point = "none"):
+
+    required_fields = [
+        (input_collection, "eta"), (input_collection, "pt"), (input_collection, "r9"),(input_collection, "run"),(input_collection,"seedGain")
+    ]
+
+    missing_fields = awkward_utils.missing_fields(events, required_fields)
+
+    evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(photon_scale_FILE[year]))
+
+    muons = events[input_collection]
+
+    # Flatten muons then convert to numpy for compatibility with correctionlib
+    n_muons = awkward.num(muons)
+    muons_flattened = awkward.flatten(muons)
+
+    muon_eta = numpy.clip(
+        awkward.to_numpy(muons_flattened.eta),
+        -2.39999,
+        2.39999 # SFs only valid up to eta 2.5
+    )
+
+    muon_pt = numpy.clip(
+        awkward.to_numpy(muons_flattened.pt),
+        5.0, # SFs only valid for pT >= 10.0
+        499.999 # and pT < 500.
+    )
+
+    # Calculate SF and syst
+    variations = {}
+    # sf = evaluator["Muon_LooseID_MCeff"].evalv(
+    #         "effmc",
+    #         abs(muon_eta),
+    #         muon_pt
+    # )
+    sf = evaluator["sf_pass"].evalv(
+            muon_pt,
+            muon_eta
+    )
+    variations["central"] = awkward.unflatten(sf, n_muons)
+
+    if not central_only:
+        # syst_var = "systmc"
+        # syst = evaluator["Muon_LooseID_MCeff"].evalv(
+        #     syst_var,
+        #     abs(muon_eta),
+        #     muon_pt
+        #     )
+        syst = evaluator["unc_pass"].evalv(
+            muon_pt,
+            muon_eta
+            )
+        variations["up"] = awkward.unflatten(syst+sf, n_muons)
+        variations["down"] = awkward.unflatten(sf-syst, n_muons)
+
+    for var in variations.keys():
+        # Set SFs = 1 for leptons which are not applicable
+        variations[var] = awkward.where(
+                (muons.pt < 5.0) | (muons.pt >= 500.0) | (abs(muons.eta) >= 2.4),
+                awkward.ones_like(variations[var], dtype=float),
+                variations[var]
+        )
+
+    return variations

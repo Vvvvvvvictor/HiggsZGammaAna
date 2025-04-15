@@ -129,7 +129,7 @@ class Job():
         self.config["output_name"] = self.output_name
         self.config["summary_file"] = self.summary_file
         self.config["files"] = [file.name for file in self.inputs]
-        self.config["skimmed_files"] = ["/eos/project/h/htozg-dy-privatemc/HiggsDNA_skimmed/"+file.name.split("/")[-1].split(".")[0]+"skimmed.root" for file in self.inputs]
+        self.config["skimmed_files"] = ["/eos/project/h/htozg-dy-privatemc/HiggsDNA_skimmed/"+self.config['sample']['name']+"/"+file.name.split("/")[-1].split(".")[0]+"skimmed.root" for file in self.inputs]
         if os.path.exists(self.config_file):
             logger.warning("[Job : write_config] Overwriting existing config file '%s'." % (self.config_file))
         with open(self.config_file, "w") as f_out:
