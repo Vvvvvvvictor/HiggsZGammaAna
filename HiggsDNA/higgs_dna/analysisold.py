@@ -313,6 +313,7 @@ class AnalysisManager():
                 logger.warning("[AnalysisManager : update_samples] Sample list was provided through the config as '%s', but was also specified from the command line as '%s', which is the version we will use." % (str(self.samples["sample_list"]), str(samples)))
                 self.samples["sample_list"] = samples
 
+
     def modify_jobs(self):
         """
         Modify the behavior of ``JobsManager`` and ``Task`` instances based on new values given through kwargs.
@@ -386,7 +387,6 @@ class AnalysisManager():
         start = time.time()
 
         # Load samples
-        logger.debug("[AnalysisManager : run] Loading samples.")
         self.samples = self.sample_manager.get_samples()
         self.save()
 
@@ -540,45 +540,10 @@ class AnalysisManager():
         sum_weights = 0
 
         files = config["files"]
-        skimmed_files = config["skimmed_files"]
         branches = config["branches"]
         is_data = config["sample"]["is_data"]
         year = config["sample"]["year"]
-        if not is_data:
-            for skimmed_file in skimmed_files:
-                try:
-                    f = uproot.open(skimmed_file, timeout = 300, num_workers=1)
-                except Exception:
-                    if (os.system(f"xrdcp '{skimmed_file}' '/tmp/{os.getpid()}/{os.path.basename(skimmed_file)}'")):
-                        raise RuntimeError("xrdcp failed")
-                    f = uproot.open(f'/tmp/{os.getpid()}/{os.path.basename(skimmed_file)}',timeout = 300, num_workers=1)
-                tree = f["Events"]
-                if "Generator_weight" in tree.keys():
-                    sum_genWeight = numpy.sum(tree["Generator_weight"])
-                    sum_weights += sum_genWeight #FIXME: use genWeight or Generator_weight
-                    logger.debug("[AnalysisManager : GeneratorWeightSum] Sum of Generator_weight: {}".format(sum_genWeight))
-                    unique_values = numpy.unique(tree["Generator_weight"])
-                    for i, value in enumerate(unique_values):
-                        unique_counts = numpy.sum(tree["Generator_weight"] == value)
-                        logger.debug("[AnalysisManager : GeneratorWeight] Unique values of Generator_weight: {}, numbers: {}".format(value, unique_counts))
-                if is_data:
-                    duplicated_sample_remover = DuplicatedSamplesTagger(is_data=is_data)
-                    duplicated_remove_cut = duplicated_sample_remover.calculate_selection(skimmed_file, tree)
 
-                    trimmed_branches = [x for x in branches if x in tree.keys()]
-                    events_skimmed_file = tree.arrays(trimmed_branches, library = "ak", how = "zip")
-
-                    events_skimmed_file = events_skimmed_file[duplicated_remove_cut]
-                else:
-                    mc_overlap_remover = MCOverlapTagger(is_data=is_data, year=year)
-                    overlap_cut = mc_overlap_remover.overlap_selection(skimmed_file, tree)
-
-                    trimmed_branches = [x for x in branches if x in tree.keys()]
-                    events_skimmed_file = tree.arrays(trimmed_branches, library = "ak", how = "zip") 
-                    events_skimmed_file = events_skimmed_file[overlap_cut]
-                f.close()
-                logger.debug("[AnalysisManager : Load events_skimmed_file] Sample type: %s" % events_skimmed_file.type)
-                
         for file in files:
             try:
                 f = uproot.open(file, timeout = 300, num_workers=1)
@@ -639,32 +604,7 @@ class AnalysisManager():
                 events_file = tree.arrays(trimmed_branches, library = "ak", how = "zip") #TODO: There is a bug here.
 
                 events_file = events_file[overlap_cut]
-                if not is_data:
 
-                    # add muon sys
-                    events_keys_muon = events_file.Muon.fields  
-                    skimmed_keys_muon = events_skimmed_file.Muon.fields
-                    extra_keys = [key for key in skimmed_keys_muon if key not in events_keys_muon] 
-                    for key in extra_keys:
-                        events_file['Muon'] = awkward.with_field(events_file['Muon'], events_skimmed_file['Muon'][key], key)
-                    # add photon sys
-                    events_keys_photon = events_file.Photon.fields  
-                    skimmed_keys_photon = events_skimmed_file.Photon.fields
-                    extra_keys = [key for key in skimmed_keys_photon if key not in events_keys_photon] 
-                    for key in extra_keys:
-                        events_file['Photon'] = awkward.with_field(events_file['Photon'], events_skimmed_file['Photon'][key], key)
-                    events_keys_jet = events_file.Jet.fields
-                    skimmed_keys_jet = events_skimmed_file.Jet.fields
-                    extra_keys = [key for key in skimmed_keys_jet if key not in events_keys_jet]
-                    for key in extra_keys:
-                        events_file['Jet'] = awkward.with_field(events_file['Jet'], events_skimmed_file['Jet'][key], key)      
-                    # add MET sys
-                    events_keys_other = events_file.fields
-                    skimmed_keys_other = events_skimmed_file.fields
-                    extra_keys = [key for key in skimmed_keys_other if key not in events_keys_other]
-                    for key in extra_keys:
-                        events_file = awkward.with_field(events_file, events_skimmed_file[key], key)
-                    
             f.close()
             
             # # FIXME: DANGEROUS!
