@@ -114,8 +114,14 @@ def create_templates(input_folder, output_folder):
     # BDT score boundaries and categories
     # Boundaries are given as: inf, 0.518, 0.402, 0.083, -inf
     # We reverse them to go from lowest to highest for easier processing
-    bdt_boundaries = [-float('inf'), 0.083, 0.402, 0.518, float('inf')]
+    bdt_boundaries = [-float('inf'), 0.083, 0.286, 0.489, float('inf')]
     category_names = ["VBF0", "VBF1", "VBF2", "VBF3"]
+    x_ranges = {
+        "VBF0": [105, 170],
+        "VBF1": [100, 165],
+        "VBF2": [95, 161],
+        "VBF3": [95, 160]
+    }
     # category_names_run3 = ["VBF01", "VBF11", "VBF21", "VBF31"]
     
     # Histogram parameters
@@ -134,16 +140,14 @@ def create_templates(input_folder, output_folder):
         sstFile = ROOT.TFile("/eos/user/j/jiehan/root/input_finalfit/sst_vbf_hist_nodrop.root", "READ")
         hists = []
         name_map = {
-            "vbf1": "VBF3",
-            "vbf2": "VBF2",
+            "vbf4": "VBF0",
             "vbf3": "VBF1",
-            "vbf4": "VBF0"
+            "vbf2": "VBF2",
+            "vbf1": "VBF3",
         }
         for name in name_map.keys():
-            if name == "vbf4":
-                xmin = 100
-            elif name == "vbf3" or name == "vbf2" or name == "vbf1":
-                xmin = 95
+            xmin, xmax = x_ranges[name_map[name]]
+            xbin = int((xmax - xmin) * 4)
             new_hist = ROOT.TH1D(f"bkg_all_{name_map[name]}", f"bkg_all_{name_map[name]}", 4*(xmax-xmin), xmin, xmax)
             new_hist.Sumw2()
             hist = sstFile.Get(f"{name}_dy_sm")
@@ -164,6 +168,8 @@ def create_templates(input_folder, output_folder):
         # Process each BDT category
         for cat_idx in range(len(category_names)):
             cat_name = category_names[cat_idx] #if run_name == "run2" else category_names_run3[cat_idx]
+            xmin, xmax = x_ranges[cat_name]
+            xbin = int((xmax - xmin) * 4)
             bdt_min = bdt_boundaries[cat_idx]
             bdt_max = bdt_boundaries[cat_idx + 1]
             
@@ -193,7 +199,7 @@ def create_templates(input_folder, output_folder):
 
             # Create signal histogram
             hist_name = f"sig_{run_name}_{cat_name}"
-            sig_hist = ROOT.TH1D(hist_name, hist_name, 2*xbin, xmin, xmax)
+            sig_hist = ROOT.TH1D(hist_name, hist_name, xbin, xmin, xmax)
             sig_hist.Sumw2()
             
             # Process signal samples

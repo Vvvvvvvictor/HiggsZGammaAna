@@ -23,13 +23,13 @@ def parse_arguments():
     parser.add_argument('--input-dir', type=str, default='/eos/project/h/htozg-dy-privatemc/rzou/bdt/VBF_input/',
                         help='Directory of input files')
     parser.add_argument('--output-dir', type=str, 
-                        default='/eos/user/j/jiehan/root/skimmed_ntuples_rui_run3/',
+                        default='/eos/user/j/jiehan/root/skimmed_ntuples_rui_run2/',
                         help='Directory to save output files')
     parser.add_argument('--dry-run', action='store_true',
                         help='If set, only list files without processing them')
     parser.add_argument('--recover', action='store_true',
                         help='Attempt to recover corrupted files')
-    parser.add_argument('--years', type=str, nargs='+', default=["2022", "2022EE", "2023", "2023BPix"],
+    parser.add_argument('--years', type=str, nargs='+', default=["2016", "2016APV", "2017", "2018"],
                         help='List of years to process (default: "2016", "2016APV", "2017", "2018", "2022", "2022EE", "2023", "2023BPix")')
     return parser.parse_args()
 
@@ -45,7 +45,10 @@ def main():
         "SM2": "ZGToLLG2",
         "data": "Data",
         "GGF": "ggH_M125",
-        "VBF": "VBF_M125"
+        "VBF": "VBF_M125",
+        "WH": "WH_M125",
+        "ZH": "ZH_M125",
+        "ttH": "ttH_M125"
     }
     
     # Map tree names based on process
@@ -56,7 +59,10 @@ def main():
         "SM2": "TreeB",
         "data": "TreeB",
         "GGF": "TreeS",
-        "VBF": "TreeS"
+        "VBF": "TreeS",
+        "WH": "TreeS",
+        "ZH": "TreeS",
+        "ttH": "TreeS"
     }
     
     # Year mapping for output file naming
@@ -81,6 +87,7 @@ def main():
         # "llphoton_dijet_balance": "pt_balance",
         # "cosTheta": "Z_cos_theta",
 
+        "llphoton_refit_pTt": "H_ptt",
         "pt_mass_refit": "H_relpt",
         "llphoton_refit_m": "H_mass",
         "ll_refit_m": "Z_mass",

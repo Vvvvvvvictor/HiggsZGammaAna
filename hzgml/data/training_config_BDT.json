@@ -15,10 +15,10 @@
               "randomIndex": "event", "weight": "weight"
               },
 "two_jet":  {"+train_signal": [],
-              "+preselections": ["n_jets >= 2", "H_mass >= 100", "H_mass <= 180"],
+              "+preselections": ["n_jets >= 2", "H_mass >= 120", "H_mass <= 130"],
               "inputTree": "two_jet",
-              "+train_variables": ["H_relpt", "delta_phi_zgjj",
-                                "delta_eta_jj", "pt_balance",
+              "+train_variables": ["H_relpt", "delta_phi_zgjj", "mass_jj",
+                                "delta_eta_jj", "pt_balance", "n_jets",
                                 "delta_phi_jj", "photon_zeppenfeld", 
                                 "jet1G_deltaR", "jet2G_deltaR",
                                 "jet_1_pt", "jet_2_pt"],

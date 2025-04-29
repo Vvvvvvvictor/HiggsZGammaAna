@@ -6,7 +6,7 @@ import os
 plt.style.use(hep.style.CMS)
 
 # 定义输出目录
-output_dir = "/eos/home-j/jiehan/root/outputs_rui_run2/"
+output_dir = "/eos/home-j/jiehan/root/outputs/"
 
 # 添加颜色字典
 color_dict = {r"Z$+\gamma$": "#3f90da", "Z+Fake Photon": "#ffa90e", r"VBSZ+$\gamma$": "#92dadd", 
@@ -45,24 +45,26 @@ if not os.path.exists("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_py
     os.makedirs("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/two_jet/")
 
 folder = "test"  # 可以改为 "test" 以切换文件夹
+if boundaries[0] > 0.01:
+    boundaries.insert(0, 0)
 
 for i in range(len(boundaries)-1):
     bkg_hist = []
     for bkg in backgrounds:
-        hist, bins = get_hist(f"{output_dir}{folder}/two_jet/{bkg}.root", "two_jet", "H_mass", boundaries[i:], [80, 100, 180])
+        hist, bins = get_hist(f"{output_dir}{folder}/two_jet/{bkg}.root", "two_jet", "H_mass", boundaries[i:], [85, 95, 180])
         bkg_hist.append(hist)
         
     sig_hist = np.zeros(len(bins)-1)
-    VBF_hist, bins = get_hist(f"{output_dir}{folder}/two_jet/VBF_M125.root", "two_jet", "H_mass", boundaries[i:], [80, 100, 180])
+    VBF_hist, bins = get_hist(f"{output_dir}{folder}/two_jet/VBF_M125.root", "two_jet", "H_mass", boundaries[i:], [85, 95, 180])
     # sig_err_hist = np.zeros(len(bins)-1)
     for sig in signal:
-        hist, bins = get_hist(f"{output_dir}{folder}/two_jet/{sig}.root", "two_jet", "H_mass", boundaries[i:], [80, 100, 180])
+        hist, bins = get_hist(f"{output_dir}{folder}/two_jet/{sig}.root", "two_jet", "H_mass", boundaries[i:], [85, 95, 180])
         sig_hist += hist
-        # sig_err_hist += get_err_hist(f"{output_dir}{folder}/two_jet/{sig}.root", "two_jet", "H_mass", boundaries[i:], [80, 100, 180])[0]
+        # sig_err_hist += get_err_hist(f"{output_dir}{folder}/two_jet/{sig}.root", "two_jet", "H_mass", boundaries[i:], [85, 95, 180])[0]
         
     data_hist = np.zeros(len(bins)-1)
     for dat in data:
-        hist, bins = get_hist(f"{output_dir}{folder}/two_jet/{dat}.root", "two_jet", "H_mass", boundaries[i:], [80, 100, 180])
+        hist, bins = get_hist(f"{output_dir}{folder}/two_jet/{dat}.root", "two_jet", "H_mass", boundaries[i:], [85, 95, 180])
         data_hist += hist
 
     sf = np.sum(data_hist) / np.sum(bkg_hist)
@@ -78,7 +80,7 @@ for i in range(len(boundaries)-1):
     ax.errorbar(mask, data_hist_masked, yerr=np.sqrt(data_hist_masked), fmt="o", label="data", color="black")
     ax.plot((bins[:-1] + bins[1:]) / 2, VBF_hist, label="VBF", color="yellow", linestyle="--", linewidth=2)
     ax.plot((bins[:-1] + bins[1:]) / 2, sig_hist, label="signal", color="red", linewidth=3)
-    ax.set_xlim(100, 180)
+    ax.set_xlim(95, 180)
     ax.set_ylim(0, max(np.sum(bkg_hist, axis=0).max(), data_hist.max()) * 1.1)
     ax.set_xlabel("Higgs Mass [GeV]")
     ax.set_ylabel("Events")
