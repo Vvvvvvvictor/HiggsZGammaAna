@@ -17,7 +17,11 @@ muon_ID_SF_FILE = {
     "2016preVFP" : "higgs_dna/systematics/data/2016preVFP_UL/muid_2016_2016APV.json",
     "2016postVFP" : "higgs_dna/systematics/data/2016postVFP_UL/muid_2016_2016APV.json",
     "2017" : "higgs_dna/systematics/data/2017_UL/muid_2017.json",
-    "2018" : "higgs_dna/systematics/data/2018_UL/muid_2018.json"
+    "2018" : "higgs_dna/systematics/data/2018_UL/muid_2018.json",
+    "2022preEE" : "higgs_dna/systematics/data/2018_UL/muid_2018.json", #FIXME
+    "2022postEE" : "higgs_dna/systematics/data/2018_UL/muid_2018.json", #FIXME
+    "2023preBPix" : "higgs_dna/systematics/data/2018_UL/muid_2018.json", #FIXME
+    "2023postBPix" : "higgs_dna/systematics/data/2018_UL/muid_2018.json", #FIXME
 }
 
 muon_ID_SF = {
@@ -25,7 +29,11 @@ muon_ID_SF = {
     "2016preVFP" : "2016preVFP",
     "2016postVFP" : "2016postVFP",
     "2017" : "2017",
-    "2018" : "2018"
+    "2018" : "2018",
+    "2022preEE" : "2018", #FIXME
+    "2022postEE" : "2018", #FIXME
+    "2023preBPix" : "2018", #FIXME
+    "2023postBPix" : "2018", #FIXME
 }
 
 def muon_LooseID_sf(events, year, central_only, input_collection, working_point = "none"):
@@ -99,7 +107,11 @@ ELECTRON_ID_SF_FILE = {
     "2016preVFP" : "higgs_dna/systematics/data/2016preVFP_UL/hzg_elid_2016APV_scalefactors.json",
     "2016postVFP" : "higgs_dna/systematics/data/2016postVFP_UL/hzg_elid_2016_scalefactors.json",
     "2017" : "higgs_dna/systematics/data/2017_UL/hzg_elid_2017_scalefactors.json",
-    "2018" : "higgs_dna/systematics/data/2018_UL/hzg_elid_2018_scalefactors.json"
+    "2018" : "higgs_dna/systematics/data/2018_UL/hzg_elid_2018_scalefactors.json",
+    "2022preEE" : "higgs_dna/systematics/data/2018_UL/hzg_elid_2018_scalefactors.json", #FIXME
+    "2022postEE" : "higgs_dna/systematics/data/2018_UL/hzg_elid_2018_scalefactors.json", #FIXME
+    "2023preBPix" : "higgs_dna/systematics/data/2018_UL/hzg_elid_2018_scalefactors.json", #FIXME
+    "2023postBPix" : "higgs_dna/systematics/data/2018_UL/hzg_elid_2018_scalefactors.json", #FIXME
 }
 
 ELECTRON_ID_SF = {
@@ -107,7 +119,11 @@ ELECTRON_ID_SF = {
     "2016preVFP" : "2016preVFP",
     "2016postVFP" : "2016postVFP",
     "2017" : "2017",
-    "2018" : "2018"
+    "2018" : "2018",
+    "2022preEE" : "2018", #FIXME
+    "2022postEE" : "2018", #FIXME
+    "2023preBPix" : "2018", #FIXME
+    "2023postBPix" : "2018", #FIXME
 }
 
 def electron_WPL_sf(events, year, central_only, input_collection, working_point = "none"):

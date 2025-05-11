@@ -20,7 +20,11 @@ PHOTON_ID_SF_FILE = {
     "2016preVFP" : "higgs_dna/systematics/data/2016preVFP_UL/photon_wp80mceff_2016.json",
     "2016postVFP" : "higgs_dna/systematics/data/2016postVFP_UL/photon_wp80mceff_2016APV.json",
     "2017" : "higgs_dna/systematics/data/2017_UL/photon_wp80mceff_2017.json",
-    "2018" : "higgs_dna/systematics/data/2018_UL/photon_wp80mceff_2018.json"
+    "2018" : "higgs_dna/systematics/data/2018_UL/photon_wp80mceff_2018.json",
+    "2022preEE" : "higgs_dna/systematics/data/2018_UL/photon_wp80mceff_2018.json",
+    "2022postEE" : "higgs_dna/systematics/data/2018_UL/photon_wp80mceff_2018.json",
+    "2023preBPix" : "higgs_dna/systematics/data/2018_UL/photon_wp80mceff_2018.json",
+    "2023postBPix" : "higgs_dna/systematics/data/2018_UL/photon_wp80mceff_2018.json",
 }
 
 PHOTON_ID_SF = {
@@ -28,7 +32,11 @@ PHOTON_ID_SF = {
     "2016preVFP" : "2016preVFP",
     "2016postVFP" : "2016postVFP",
     "2017" : "2017",
-    "2018" : "2018"
+    "2018" : "2018",
+    "2022preEE" : "2018",
+    "2022postEE" : "2018",
+    "2023preBPix" : "2018",
+    "2023postBPix" : "2018",
 }
 
 def photon_id_sf(events, year, central_only, input_collection, working_point = "none"):
@@ -167,7 +175,11 @@ photon_electron_veto_sf_bins = {
     "2016preVFP" : PHOTON_ELECTRON_VETO_SF_2016,
     "2016postVFP" : PHOTON_ELECTRON_VETO_SF_2016,
     "2017" : PHOTON_ELECTRON_VETO_SF_2017,
-    "2018" : PHOTON_ELECTRON_VETO_SF_2018
+    "2018" : PHOTON_ELECTRON_VETO_SF_2018,
+    "2022preEE" : PHOTON_ELECTRON_VETO_SF_2018, #FIXME
+    "2022postEE" : PHOTON_ELECTRON_VETO_SF_2018, #FIXME
+    "2023preBPix" : PHOTON_ELECTRON_VETO_SF_2018, #FIXME
+    "2023postBPix" : PHOTON_ELECTRON_VETO_SF_2018 #FIXME
 }
 
 def photon_electron_veto_sf(events, central_only, year):
@@ -206,14 +218,22 @@ lead_trigger_sf_bins = {
     "2016preVFP" : LEAD_TRIGGER_SF_2016,
     "2016postVFP" : LEAD_TRIGGER_SF_2016,
     "2017" : LEAD_TRIGGER_SF_2017,
-    "2018" : LEAD_TRIGGER_SF_2018
+    "2018" : LEAD_TRIGGER_SF_2018,
+    "2022preEE" : LEAD_TRIGGER_SF_2018, #FIXME
+    "2022postEE" : LEAD_TRIGGER_SF_2018, #FIXME
+    "2023preBPix" : LEAD_TRIGGER_SF_2018, #FIXME
+    "2023postBPix" : LEAD_TRIGGER_SF_2018 #FIXME
 }
 sublead_trigger_sf_bins = {
     "2016" : SUBLEAD_TRIGGER_SF_2016,
     "2016preVFP" : SUBLEAD_TRIGGER_SF_2016,
     "2016postVFP" : SUBLEAD_TRIGGER_SF_2016,
     "2017" : SUBLEAD_TRIGGER_SF_2017,
-    "2018" : SUBLEAD_TRIGGER_SF_2018 
+    "2018" : SUBLEAD_TRIGGER_SF_2018, 
+    "2022preEE" : SUBLEAD_TRIGGER_SF_2018, #FIXME
+    "2022postEE" : SUBLEAD_TRIGGER_SF_2018, #FIXME
+    "2023preBPix" : SUBLEAD_TRIGGER_SF_2018, #FIXME
+    "2023postBPix" : SUBLEAD_TRIGGER_SF_2018 #FIXME
 }
 
 def trigger_sf(events, central_only, year):
@@ -266,7 +286,11 @@ fnuf_bins = {
     "2016preVFP" : FNUF_2016,
     "2016postVFP" : FNUF_2016,
     "2017" : FNUF_2017,
-    "2018" : FNUF_2018
+    "2018" : FNUF_2018,
+    "2022preEE" : FNUF_2018,
+    "2022postEE" : FNUF_2018,
+    "2023preBPix" : FNUF_2018,
+    "2023postBPix" : FNUF_2018,
 }
 
 def fnuf_unc(events, year, nominal_only, modify_nominal, loc = "all"):
@@ -317,7 +341,11 @@ material_bins = {
     "2016preVFP" : MATERIAL_2016,
     "2016postVFP" : MATERIAL_2016,
     "2017" : MATERIAL_2017,
-    "2018" : MATERIAL_2018
+    "2018" : MATERIAL_2018,
+    "2022preEE" : MATERIAL_2018,
+    "2022postEE" : MATERIAL_2018,
+    "2023preBPix" : MATERIAL_2018,
+    "2023postBPix" : MATERIAL_2018
 }
 
 def material_unc(events, year, nominal_only, modify_nominal, loc = "all"):
@@ -390,10 +418,10 @@ def photon_mc_smear(events, r9, loc):
 
     return variations
 
-photon_scale_FILE = {"2022" : "jsonpog-integration/POG/EGM/2022_Summer22/photonSS_EtDependent.json",
-    "2022EE" : "jsonpog-integration/POG/EGM/2022_Summer22EE/photonSS_EtDependent.json",
-    "2023" : "jsonpog-integration/POG/EGM/2023_Summer23/photonSS_EtDependent.json",
-    "2023BPix" : "jsonpog-integration/POG/EGM/2023_Summer23BPix/photonSS_EtDependent.json"
+photon_scale_FILE = {"2022preEE" : "jsonpog-integration/POG/EGM/2022_Summer22/photonSS_EtDependent.json",
+    "2022postEE" : "jsonpog-integration/POG/EGM/2022_Summer22EE/photonSS_EtDependent.json",
+    "2023preBPix" : "jsonpog-integration/POG/EGM/2023_Summer23/photonSS_EtDependent.json",
+    "2023postBPix" : "jsonpog-integration/POG/EGM/2023_Summer23BPix/photonSS_EtDependent.json"
 }
 def photon_scale_run3(events, year, central_only, input_collection, working_point = "none"):
 

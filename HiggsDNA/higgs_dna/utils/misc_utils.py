@@ -129,12 +129,14 @@ def update_dict(original, new):
 
     updated = copy.deepcopy(original)
 
-    for key, value in original.items():
-        if key in new.keys():
-            if isinstance(value, dict):
-                updated[key] = update_dict(value, new[key])
-            else:
-                updated[key] = new[key]
+    # Update with all keys from new, including those not in original
+    for key, value in new.items():
+        if key in updated and isinstance(updated[key], dict):
+            # Recursively update nested dictionaries
+            updated[key] = update_dict(updated[key], value)
+        else:
+            # Update or add the key
+            updated[key] = value
 
     return updated
 

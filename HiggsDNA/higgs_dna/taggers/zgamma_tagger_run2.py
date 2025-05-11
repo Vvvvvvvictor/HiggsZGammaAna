@@ -100,6 +100,10 @@ DEFAULT_OPTIONS = {
         "dr_photons" : 0.4,
         "dr_electrons" : 0.4,
         "dr_muons" : 0.4,
+        "jets_horn" : {
+            "pt" : 50.0,
+            "eta" : [2.5, 3.0]
+        }
     },
     "btag_med": {
         "2016preVFP": 0.2598,

@@ -30,6 +30,7 @@ def select_jets(jets, options, clean, year, name = "none", tagger = None):
     """
 
     """
+    # Replace DEFAULT_JETS to the jet selection in zgamma_tagger_run2
     options = misc_utils.update_dict(
         original = DEFAULT_JETS,
         new = options
@@ -38,6 +39,18 @@ def select_jets(jets, options, clean, year, name = "none", tagger = None):
     tagger_name = "none" if tagger is None else tagger.name 
 
     standard_cuts = object_selections.select_objects(jets, options, clean, name, tagger)
+
+    # Pei-Zhu, Jet Horn 
+    jets_horn_year = {"2017", "2018", "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"}
+    if year in jets_horn_year and "jets_horn" in options:
+        horn_eta_min, horn_eta_max = options["jets_horn"]["eta"]
+        horn_pt_threshold = options["jets_horn"]["pt"]
+        # Identify jets to exclude: 2.5 < |eta| < 3.0 and pt < 40.0
+        horn_exclusion = (abs(jets.eta) > horn_eta_min) & (abs(jets.eta) < horn_eta_max) & (jets.pt < horn_pt_threshold)
+        # Apply the exclusion by inverting it
+        standard_cuts = standard_cuts & ~horn_exclusion
+        logger.info(f"Excluding jets with {horn_eta_min} < |eta| < {horn_eta_max} and pt < {horn_pt_threshold} "
+                    f"for era {year}")
 
     # TODO: jet ID
     if options["looseID"]:

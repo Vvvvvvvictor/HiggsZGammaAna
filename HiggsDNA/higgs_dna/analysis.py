@@ -11,6 +11,7 @@ import uproot
 import awkward
 
 import logging
+import orjson
 # logger = logging.getLogger(__name__)
 from higgs_dna.utils.logger_utils import simple_logger
 logger = simple_logger(__name__)
@@ -164,10 +165,12 @@ def run_analysis(config):
     # Dump json summary
     if condor:
       with open(config["summary_file"].split("/")[-1], "w") as f_out:
-        json.dump(job_summary, f_out, sort_keys = True, indent = 4)
+        # json.dump(job_summary, f_out, sort_keys = True, indent = 4)
+        f_out.write(orjson.dumps(job_summary, option=orjson.OPT_SERIALIZE_NUMPY).decode("utf-8"))    
     else:
       with open(config["summary_file"], "w") as f_out:
-        json.dump(job_summary, f_out, sort_keys = True, indent = 4)
+        # json.dump(job_summary, f_out, sort_keys = True, indent = 4)
+        f_out.write(orjson.dumps(job_summary, option=orjson.OPT_SERIALIZE_NUMPY).decode("utf-8"))
     return job_summary
 
 class AnalysisManager():
@@ -637,8 +640,10 @@ class AnalysisManager():
                 # for array in tree.iterate(trimmed_branches, library="ak", how='zip', step_size=100000):
                 #     event_file.concatenate(array)
                 events_file = tree.arrays(trimmed_branches, library = "ak", how = "zip") #TODO: There is a bug here.
-
+                
+                # commented by Pei-Zhu
                 events_file = events_file[overlap_cut]
+
                 if not is_data:
 
                     # add muon sys
@@ -648,11 +653,13 @@ class AnalysisManager():
                     for key in extra_keys:
                         events_file['Muon'] = awkward.with_field(events_file['Muon'], events_skimmed_file['Muon'][key], key)
                     # add photon sys
-                    events_keys_photon = events_file.Photon.fields  
-                    skimmed_keys_photon = events_skimmed_file.Photon.fields
-                    extra_keys = [key for key in skimmed_keys_photon if key not in events_keys_photon] 
-                    for key in extra_keys:
-                        events_file['Photon'] = awkward.with_field(events_file['Photon'], events_skimmed_file['Photon'][key], key)
+                    if (int(year[:4]) < 2020):
+                        events_keys_photon = events_file.Photon.fields  
+                        skimmed_keys_photon = events_skimmed_file.Photon.fields
+                        extra_keys = [key for key in skimmed_keys_photon if key not in events_keys_photon] 
+                        for key in extra_keys:
+                            events_file['Photon'] = awkward.with_field(events_file['Photon'], events_skimmed_file['Photon'][key], key)
+                    # add jets sys
                     events_keys_jet = events_file.Jet.fields
                     skimmed_keys_jet = events_skimmed_file.Jet.fields
                     extra_keys = [key for key in skimmed_keys_jet if key not in events_keys_jet]

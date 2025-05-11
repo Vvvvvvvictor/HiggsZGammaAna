@@ -30,7 +30,11 @@ JET_VETO_MAP_FILE = {
     "2016preVFP" : "higgs_dna/systematics/data/2016preVFP_UL/jetvetomaps.json",
     "2016postVFP" : "higgs_dna/systematics/data/2016postVFP_UL/jetvetomaps.json",
     "2017" : "higgs_dna/systematics/data/2017_UL/jetvetomaps.json",
-    "2018" : "higgs_dna/systematics/data/2018_UL/jetvetomaps.json"
+    "2018" : "higgs_dna/systematics/data/2018_UL/jetvetomaps.json",
+    "2022preEE" : "higgs_dna/systematics/data/2018_UL/jetvetomaps.json",
+    "2022postEE" : "higgs_dna/systematics/data/2018_UL/jetvetomaps.json",
+    "2023preBPix" : "higgs_dna/systematics/data/2018_UL/jetvetomaps.json",
+    "2023postBPix" : "higgs_dna/systematics/data/2018_UL/jetvetomaps.json",
 }
 
 BTAG_MCEFF_FILE = {
@@ -38,7 +42,11 @@ BTAG_MCEFF_FILE = {
     "2016preVFP" : "higgs_dna/systematics/data/2016preVFP_UL/btag_mceff.json", 
     "2016postVFP" : "higgs_dna/systematics/data/2016postVFP_UL/btag_mceff.json", 
     "2017" : "higgs_dna/systematics/data/2017_UL/btag_mceff.json",
-    "2018" : "higgs_dna/systematics/data/2018_UL/btag_mceff.json"
+    "2018" : "higgs_dna/systematics/data/2018_UL/btag_mceff.json",
+    "2022preEE" : "higgs_dna/systematics/data/2022preEE_UL/btag_mceff.json",
+    "2022postEE" : "higgs_dna/systematics/data/2022postEE_UL/btag_mceff.json",
+    "2023preBPix" : "higgs_dna/systematics/data/2023preBPix_UL/btag_mceff.json",
+    "2023postBPix" : "higgs_dna/systematics/data/2023postBPix_UL/btag_mceff.json"
 }
 
 BTAG_RESHAPE_SF_FILE = {
@@ -46,7 +54,11 @@ BTAG_RESHAPE_SF_FILE = {
     "2016preVFP" : "higgs_dna/systematics/data/2016preVFP_UL/btagging.json", 
     "2016postVFP" : "higgs_dna/systematics/data/2016postVFP_UL/btagging.json", 
     "2017" : "higgs_dna/systematics/data/2017_UL/btagging.json",
-    "2018" : "higgs_dna/systematics/data/2018_UL/btagging.json"
+    "2018" : "higgs_dna/systematics/data/2018_UL/btagging.json",
+    "2022preEE" : "higgs_dna/systematics/data/2018_UL/btagging.json", #FIXME
+    "2022postEE" : "higgs_dna/systematics/data/2018_UL/btagging.json", #FIXME
+    "2023preBPix" : "higgs_dna/systematics/data/2018_UL/btagging.json", #FIXME
+    "2023postBPix" : "higgs_dna/systematics/data/2018_UL/btagging.json", #FIXME
 }
 
 DEEPJET_RESHAPE_SF = {
@@ -54,7 +66,11 @@ DEEPJET_RESHAPE_SF = {
     "2016preVFP" : "deepJet_shape",
     "2016postVFP" : "deepJet_shape",
     "2017" : "deepJet_shape",
-    "2018" : "deepJet_shape"
+    "2018" : "deepJet_shape",
+    "2022preEE" : "deepJet_shape", #FIXME
+    "2022postEE" : "deepJet_shape", #FIXME
+    "2023preBPix" : "deepJet_shape", #FIXME
+    "2023postBPix" : "deepJet_shape", #FIXME
 }
 
 DEEPJET_VARIATIONS = { # b, c, light

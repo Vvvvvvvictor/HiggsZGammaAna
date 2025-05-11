@@ -12,14 +12,22 @@ PU_REWEIGHTING_FILE = {
     "2016preVFP" : "jsonpog-integration/POG/LUM/2016preVFP_UL/puWeights.json",
     "2016postVFP" : "jsonpog-integration/POG/LUM/2016postVFP_UL/puWeights.json",
     "2017" : "jsonpog-integration/POG/LUM/2017_UL/puWeights.json",
-    "2018" : "jsonpog-integration/POG/LUM/2018_UL/puWeights.json"
+    "2018" : "jsonpog-integration/POG/LUM/2018_UL/puWeights.json",
+    "2022preEE" : "jsonpog-integration/POG/LUM/2018_UL/puWeights.json",
+    "2022postEE" : "jsonpog-integration/POG/LUM/2018_UL/puWeights.json",
+    "2023preBPix" : "jsonpog-integration/POG/LUM/2018_UL/puWeights.json",
+    "2023postBPix" : "jsonpog-integration/POG/LUM/2018_UL/puWeights.json"
 }
 
 PU_CAMPAIGN = {
     "2016preVFP" : "Collisions16_UltraLegacy_goldenJSON",
     "2016postVFP" : "Collisions16_UltraLegacy_goldenJSON",
     "2017" : "Collisions17_UltraLegacy_goldenJSON",
-    "2018" : "Collisions18_UltraLegacy_goldenJSON"
+    "2018" : "Collisions18_UltraLegacy_goldenJSON",
+    "2022preEE" : "Collisions18_UltraLegacy_goldenJSON",
+    "2022postEE" : "Collisions18_UltraLegacy_goldenJSON",
+    "2023preBPix" : "Collisions18_UltraLegacy_goldenJSON",
+    "2023postBPix" : "Collisions18_UltraLegacy_goldenJSON",
 }
 
 def pu_reweight_sf(events, year, central_only):
