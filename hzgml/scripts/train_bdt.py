@@ -349,6 +349,14 @@ class XGBoostHandler(object):
 
         data = data[sorted(data.columns)]
 
+        # Replace values less than -900 with np.nan for correlation calculation
+        # This modification is local to the 'data' DataFrame in this function
+        for col_name in data.columns:
+            # Ensure the column is numeric before attempting comparison and assignment
+            if pd.api.types.is_numeric_dtype(data[col_name]):
+            # Use .loc for safe assignment to avoid SettingWithCopyWarning
+                data.loc[data[col_name] < -900, col_name] = np.nan
+
         data = data.corr() * 100
         # data = data.dropna(axis=0, how='all').dropna(axis=1, how='all')
 
@@ -488,7 +496,7 @@ class XGBoostHandler(object):
         evals_result = {}
         eval_result_history = []
         try:
-            self.m_bst[fold] = xgb.train(param, self.m_dTrain[fold], self.numRound, evals=evallist, early_stopping_rounds=self.early_stopping_rounds, evals_result=evals_result, verbose_eval=False)
+            self.m_bst[fold] = xgb.train(param, self.m_dTrain[fold], self.numRound, evals=evallist, early_stopping_rounds=self.early_stopping_rounds, evals_result=evals_result, verbose_eval=True)
         except KeyboardInterrupt:
             print('Finishing on SIGINT.')
 

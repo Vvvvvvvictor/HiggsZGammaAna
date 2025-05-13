@@ -247,7 +247,6 @@ def main():
         print('ERROR: With floatB option, the maximun nbin is 15!!')
         quit()
 
-
     region = args.region
 
     nscan=args.nscan

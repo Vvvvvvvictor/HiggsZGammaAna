@@ -125,7 +125,7 @@ def create_templates(input_folder, output_folder):
     # category_names_run3 = ["VBF01", "VBF11", "VBF21", "VBF31"]
     
     # Histogram parameters
-    xmin, xmax, xbin = 95, 170, 300
+    xmin, xmax, xbin = 95, 180, 300
     channel = "two_jet"
     
     # Process each run separately
@@ -146,7 +146,7 @@ def create_templates(input_folder, output_folder):
             "vbf1": "VBF3",
         }
         for name in name_map.keys():
-            xmin, xmax = x_ranges[name_map[name]]
+            # xmin, xmax = x_ranges[name_map[name]]
             xbin = int((xmax - xmin) * 4)
             new_hist = ROOT.TH1D(f"bkg_all_{name_map[name]}", f"bkg_all_{name_map[name]}", 4*(xmax-xmin), xmin, xmax)
             new_hist.Sumw2()
@@ -168,7 +168,7 @@ def create_templates(input_folder, output_folder):
         # Process each BDT category
         for cat_idx in range(len(category_names)):
             cat_name = category_names[cat_idx] #if run_name == "run2" else category_names_run3[cat_idx]
-            xmin, xmax = x_ranges[cat_name]
+            # xmin, xmax = x_ranges[cat_name]
             xbin = int((xmax - xmin) * 4)
             bdt_min = bdt_boundaries[cat_idx]
             bdt_max = bdt_boundaries[cat_idx + 1]

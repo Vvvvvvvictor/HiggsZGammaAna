@@ -3,7 +3,4 @@
                  "EWKZ2J":       ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"],
                  "VBF_M125":     ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"],
                  "ggH_M125":     ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"],
-                 "Data":         ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"],
-                 "ttH_M125":     ["2016preVFP", "2016postVFP", "2017", "2018"],
-                 "ZH_M125":      ["2016preVFP", "2016postVFP", "2017", "2018"],
-                 "WH_M125": ["2016preVFP", "2016postVFP", "2017", "2018"]}}
+                 "Data":         ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"]}}

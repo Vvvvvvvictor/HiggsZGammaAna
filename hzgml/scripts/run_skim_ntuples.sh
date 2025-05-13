@@ -1,14 +1,14 @@
 #!/bin/bash                                                                                                                                                                       
 echo "==============STARTED=============="
 
-input="/eos/user/j/jiehan/parquet/nanov9/"
+input="/eos/user/j/jiehan/parquet/cutflow_ggf_var/"
 target="/eos/home-j/jiehan/root/skimmed_ntuples_run2/"
 # input="/eos/user/j/jiehan/parquet/nanov12/"
 # target="/eos/home-j/jiehan/root/skimmed_ntuples_run3/"
 # target="./"
 
 # years=(2016preVFP 2016postVFP 2017 2018 2022preEE 2022postEE 2023preBPix 2023postBPix)
-years=(2016preVFP 2016postVFP 2017 2018)
+years=(2017)
 # years=(2022preEE 2022postEE 2023preBPix 2023postBPix)
 systs=("FNUF" "Material" "Scale" "Smearing" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt")
 # systs=("FNUF" "Material" "Scale" "Smearing" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt")
@@ -97,7 +97,7 @@ process_sample_syst() {
 # samples=(ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125 ggH_M120 VBFH_M120 WplusH_M120 WminusH_M120 ZH_M120 ttH_M120 ggH_M130 VBFH_M130 WplusH_M130 WminusH_M130 ZH_M130 ttH_M130 ggH_mix VBF_mix ggH VBF WplusH WminusH ZH ttH)
 
 samples=(ggH_M125) 
-type="signal"
+type=""
 for sample in "${samples[@]}"; do
     mkdir -p "$target${sample}/"
     # 存储后台任务的进程ID列表
@@ -124,19 +124,19 @@ done
 #     done
 # done
 
-# 处理 bkgmc 样本
+# # 处理 bkgmc 样本
 
-# samples=(ZGToLLG DYJetsToLL WGToLNuG ZG2JToG2L2J EWKZ2J TT TTGJets TGJets ttWJets ttZJets WW WZ ZZ DYGto2LG_10to50 DYGto2LG_50to100)
-samples=(ZGToLLG DYJetsToLL ZG2JToG2L2J)
-type="bkgmc"
-for sample in "${samples[@]}"; do
-    mkdir -p "$target$sample"
-    # 存储后台任务的进程ID列表
-    pid_list=()
+# # samples=(ZGToLLG DYJetsToLL WGToLNuG ZG2JToG2L2J EWKZ2J TT TTGJets TGJets ttWJets ttZJets WW WZ ZZ DYGto2LG_10to50 DYGto2LG_50to100)
+# samples=(ZGToLLG DYJetsToLL ZG2JToG2L2J)
+# type="bkgmc"
+# for sample in "${samples[@]}"; do
+#     mkdir -p "$target$sample"
+#     # 存储后台任务的进程ID列表
+#     pid_list=()
 
-    # 调用函数处理样本数据
-    process_sample "$sample" "$type"
-done
+#     # 调用函数处理样本数据
+#     process_sample "$sample" "$type"
+# done
 
 # # 处理 data 样本
 

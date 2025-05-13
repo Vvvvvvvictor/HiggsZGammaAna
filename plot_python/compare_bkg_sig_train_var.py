@@ -13,18 +13,22 @@ config_dict = {
     # "gamma_relpt": {"range": (0.1, 1), "title": r"${p_T^{\gamma}\cdot c}/{m_{ll\gamma}}$"},
     # "pt_balance_0j": {"range": (0, 1), "title": r"$Zeppenfeld_{\gamma}(0j)$"},
     # "H_mass": {"range": (100, 180), "title": r"$m_{ll\gamma}(GeV/c^{2})$"},
+    # "H_ptt": {"range": (0, 160), "title": r"$p_{T_{t}}^{ll\gamma}$"},
+    # "jet_1_btagDeepFlavB": {"range": (0, 0.1), "title": "j1 btag"},
+    # "jet_2_btagDeepFlavB": {"range": (0, 0.15), "title": "j2 btag"},
+    # "HZ_deltaRap": {"range": (-0.7, 0.7), "title": r"$\Delta y(ll,ll\gamma)$"},
+
+    "n_jets": {"range": (0, 6), "bins": 6, "title": r"$N_{jets}$"},
+    "llphoton_hmiss_photon_dphi": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi_{ll\gamma}$"},
     "delta_eta_jj": {"range": (0, 8), "bins": 40, "title": r"$\Delta\eta_{jj}$"},
     "delta_phi_jj": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi_{jj}$"},
     "delta_phi_zgjj": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi_{ll\gamma,jj}$"},
     "gamma_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta_{\gamma}$"},
     "gamma_mvaID": {"range": (0.14, 1), "bins": 43, "title": "photon MVA"},
-    # "H_ptt": {"range": (0, 160), "title": r"$p_{T_{t}}^{ll\gamma}$"},
     "jet_1_pt": {"range": (30, 330), "bins": 50, "title": r"$p_{T_{j1}}(GeV/c)$"},
     "jet_2_pt": {"range": (30, 150), "bins": 50, "title": r"$p_{T_{j2}}(GeV/c)$"},
     "jet1G_deltaR": {"range": (0.4, 6.4), "bins": 40, "title": r"$\Delta R(\gamma,j1)$"},
     "jet2G_deltaR": {"range": (0.4, 6.4), "bins": 40, "title": r"$\Delta R(\gamma,j2)$"},
-    # "jet_1_btagDeepFlavB": {"range": (0, 0.1), "title": "j1 btag"},
-    # "jet_2_btagDeepFlavB": {"range": (0, 0.15), "title": "j2 btag"},
     "l1g_deltaR": {"range": (0.3, 4.3), "bins": 40, "title": r"max($\Delta R(l,\gamma)$)"},
     "l2g_deltaR": {"range": (0.3, 3.3), "bins": 40, "title": r"min($\Delta R(l,\gamma)$)"},
     "lep_cos_theta": {"range": (-1, 1), "bins": 40, "title": r"$\cos\theta$"},
@@ -35,16 +39,19 @@ config_dict = {
     "Z_lead_lepton_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta_{l1}$"},
     "Z_sublead_lepton_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta_{l2}$"},
     "H_relpt": {"range": (0, 3), "bins": 50, "title": r"${p_{T_{ll\gamma}}\cdot c}/{m_{ll\gamma}}$"},
-    "gamma_ptRelErr": {"range": (0.01, 0.11), "bins": 50, "title": r"$\sigma_{p_T^{\gamma}}/p_T^{\gamma}$"},
-    # "HZ_deltaRap": {"range": (-0.7, 0.7), "title": r"$\Delta y(ll,ll\gamma)$"}
+    "gamma_ptRelErr": {"range": (0.01, 0.11), "bins": 50, "title": r"$\sigma_{p_T^{\gamma}}/p_T^{\gamma}$"}
 }
 
-TREE = "two_jet"
+TREE = "all_jet"
 WEIGHT = "weight"
-PATH = "/eos/user/j/jiehan/root/skimmed_ntuples_run2/"
+PATH = "/eos/user/j/jiehan/root/skimmed_ntuples_rui_new/"
 
 sig = {"sig": ["ggH_M125", "VBF_M125"], "ggH": ["ggH_M125"], "VBF": ["VBF_M125"]}
-bkg = {r"Z$+\gamma$": ["ZGToLLG"], "Z+Fake Photon": ["DYJetsToLL", "EWKZ2J"], r"VBSZ+$\gamma$": ["ZG2JToG2L2J"], r"t$\bar{t}$": ["TT"], r"t$\gamma$/t$\bar{t}\gamma$": ["TTGJets", "TGJets"], "multiboson": ["WW", "WZ", "ZZ", "WWG", "WZG", "ZZG"], r"t$\bar{t}$+X": ["ttZJets", "ttWJets"]}
+bkg = {r"Z$+\gamma$": ["ZGToLLG"], 
+        "Z+Fake Photon": ["DYJetsToLL"], #, "EWKZ2J"], 
+        r"VBSZ+$\gamma$": ["EWKZ2J"], #"ZG2JToG2L2J"], 
+        # r"t$\bar{t}$": ["TT"], r"t$\gamma$/t$\bar{t}\gamma$": ["TTGJets", "TGJets"], "multiboson": ["WW", "WZ", "ZZ", "WWG", "WZG", "ZZG"], r"t$\bar{t}$+X": ["ttZJets", "ttWJets"]
+        }
 color_dict = {r"Z$+\gamma$": "#3f90da", "Z+Fake Photon": "#ffa90e", r"VBSZ+$\gamma$": "#92dadd", r"t$\bar{t}$": "#e76300", r"t$\gamma$/t$\bar{t}\gamma$": "#bd1f01", "multiboson": "#832db6", r"t$\bar{t}$+X": "#94a4a2", "data": "black", "sig": "red", "ggH": "magenta", "VBF": "green"}
 
 def convert_root_to_hist(file_dict, selection=None):
@@ -54,7 +61,7 @@ def convert_root_to_hist(file_dict, selection=None):
     for file in file_dict.values():
         type_hist = np.zeros(BINS)
         for f in file:
-            for year in ["2016preVFP", "2016postVFP", "2017", "2018"]:
+            for year in ["2016preVFP", "2016postVFP", "2017", "2018", "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"]:
                 print("Reading", PATH+f+"/"+year+f".root:{TREE}", "...")
                 if "H_mass" not in VAR:
                     try:
@@ -71,11 +78,11 @@ def convert_root_to_hist(file_dict, selection=None):
                 hist, _ = np.histogram(samples["H_mass"], bins=80, range=[100, 180], weights=samples[WEIGHT])
                 mass_hist = mass_hist + hist
                 hist, bins = np.histogram(samples[VAR], bins=BINS, range=[RMIN, RMAX], weights=samples[WEIGHT])
-                hist[0] += np.sum(samples[WEIGHT][samples[VAR] < RMIN])
+                hist[0] += np.sum(samples[WEIGHT][(samples[VAR] < RMIN) & (samples[VAR] > -900)])
                 hist[-1] += np.sum(samples[WEIGHT][samples[VAR] > RMAX])
                 type_hist = type_hist + hist
                 hist, _ = np.histogram(samples[VAR], bins=BINS, range=[RMIN, RMAX], weights=samples[WEIGHT]**2)
-                hist[0] += np.sum(samples[WEIGHT][samples[VAR] < RMIN])**2
+                hist[0] += np.sum(samples[WEIGHT][(samples[VAR] < RMIN) & (samples[VAR] > -900)])**2
                 hist[-1] += np.sum(samples[WEIGHT][samples[VAR] > RMAX])**2
                 error = error + hist
         hists.append(type_hist)
@@ -92,8 +99,8 @@ for var in config_dict:
     
     print("\n\n", VAR, RMIN, RMAX, "\n\n")
 
-    hist2, hist2_err, bins, mass2_hist = convert_root_to_hist(bkg, selection="(H_mass>100) & (H_mass<180)")
-    hist1, hist1_err, _, mass1_hist = convert_root_to_hist(sig, selection="(H_mass>100) & (H_mass<180)")
+    hist2, hist2_err, bins, mass2_hist = convert_root_to_hist(bkg, selection="(H_mass>120) & (H_mass<130)")
+    hist1, hist1_err, _, mass1_hist = convert_root_to_hist(sig, selection="(H_mass>120) & (H_mass<130)")
 
     sig_yields = [np.sum(i) for i in hist1]
     bkg_yields = [np.sum(i) for i in hist2]
@@ -126,7 +133,7 @@ for var in config_dict:
     ax1.grid()
     ax1.set_xlim(RMIN, RMAX)
     ax1.set_ylim(0, 1.6*max(hist1[0].max(), np.sum(hist2, axis=0).max()))
-    ax1.annotate(rf"L=137.2 fb$^{{-1}}$", xy=(1, 1.01), xycoords='axes fraction', fontsize=16, ha="right")
+    ax1.annotate(rf"L=137.61 fb$^{{-1}}$(13TeV)+62.32 fb$^{{-1}}$(13.6TeV)", xy=(1, 1.01), xycoords='axes fraction', fontsize=16, ha="right")
     ax1.set_xlabel(XLABLE, fontsize=24)
 
     plt.tight_layout()

@@ -67,41 +67,39 @@ def gettingsig(region, variable, boundaries_VBF, boundaries, transform, estimate
 
     for category in ['sig', 'VBF', 'ggH', "data_sid", "bkgmc_sid", "bkgmc_cen"]:
 
-        # for data in tqdm(read_root(f'/eos/home-j/jiehan/root/outputs/{region}/{"bkgmc" if "bkgmc" in category else "data" if "data" in category else category}.root', key='test', columns=[f"{variable}_score{'_t' if transform else ''}", f"{variable}_score_VBF{'_t' if transform else ''}", 'H_mass', 'weight', 'event'], chunksize=500000), desc=f'Loading {category}', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
-
         # Construct the file path
-        file_path = f'/eos/home-j/jiehan/root/outputs/{region}/{"bkgmc" if "bkgmc" in category else "Data" if "data" in category else category}.root'
+        file_path = f'/eos/home-j/jiehan/root/outputs/test/{region}/{"bkgmc" if "bkgmc" in category else "Data" if "data" in category else "VBF_M125" if category == "VBF" else "ggH_M125" if category == "ggH" else category}.root'
 
         # Open the ROOT file
         with uproot.open(file_path) as f:
             # Specify the TTree name (assuming it's called 'test')
-            tree = f["test"]
+            tree = f[region]
 
             # Specify the columns you want to read
             columns = [
                 f"{variable}_score{'_t' if transform else ''}",
-                f"{variable}_score_VBF{'_t' if transform else ''}",
+                f"vbf_score{'_t' if transform else ''}",
                 "H_mass",
                 "weight",
                 "event",
             ]
 
             # Read the data in chunks
-            for data in tqdm(tree.iterate(columns, step_size=500000), desc=f"Loading {category}", bar_format="{desc}: {percentage:3.0f}%|{bar:20}{r_bar}"):
+            for data in tqdm(tree.iterate(columns, library='pd', step_size=500000), desc=f"Loading {category}", bar_format="{desc}: {percentage:3.0f}%|{bar:20}{r_bar}"):
     
                 if 'sid' in category:
-                    data = data[(data.H_mass >= 100) & (data.H_mass <= 180) & ((data.H_mass < 122) | (data.H_mass > 128))]
+                    data = data[(data.H_mass >= 100) & (data.H_mass <= 180) & ((data.H_mass < 120) | (data.H_mass > 130))]
                     data['w'] = data.weight
 
                 else:
-                    data = data[(data.H_mass >= 122) & (data.H_mass <= 128)]
+                    data = data[(data.H_mass >= 120) & (data.H_mass <= 130)]
                     data['w'] = data.weight
         
                 for i in range(len(boundaries)):
         
                     data_s = data[data.event % len(boundaries) == i]
         
-                    data_ss = data_s[data_s[f"{variable}_score_VBF{'_t' if transform else ''}"] < boundaries_VBF[i][0]]
+                    data_ss = data_s[data_s[f"vbf_score{'_t' if transform else ''}"] < boundaries_VBF[i][0]]
         
                     for j in range(len(boundaries[i])):
         
@@ -115,8 +113,8 @@ def gettingsig(region, variable, boundaries_VBF, boundaries, transform, estimate
         
                     for j in range(len(boundaries_VBF[i])):
         
-                        data_ss = data_s[data_s[f"{variable}_score_VBF{'_t' if transform else ''}"] >= boundaries_VBF[i][j]]
-                        if j != len(boundaries_VBF[i]) - 1: data_ss = data_ss[data_ss[f"{variable}_score_VBF{'_t' if transform else ''}"] < boundaries_VBF[i][j+1]]
+                        data_ss = data_s[data_s[f"vbf_score{'_t' if transform else ''}"] >= boundaries_VBF[i][j]]
+                        if j != len(boundaries_VBF[i]) - 1: data_ss = data_ss[data_ss[f"vbf_score{'_t' if transform else ''}"] < boundaries_VBF[i][j+1]]
         
                         yields[category][j + len(boundaries[i])] += sum(data_ss.w)
                         yields[category+'_err'][j + len(boundaries[i])] = np.sqrt(yields[category+'_err'][j]**2 + sum(data_ss.w**2))
@@ -163,39 +161,39 @@ def projectionY(hist, x1, x2, histname, ybin=100, y1=0, y2=1):
 def categorizing(region, variable, sigs, bkgs, nscan, nscanvbf, minN, transform, nbin, nvbf, floatB, n_fold, fold, earlystop, estimate):
 
     # get inputs
-    f_sig = TFile('/eos/home-j/jiehan/root/outputs/%s/sig.root' % (region))
-    t_sig = f_sig.Get('test')
+    f_sig = TFile('/eos/home-j/jiehan/root/outputs/test/%s/sig.root' % (region))
+    t_sig = f_sig.Get(region)
 
     if estimate in ["fullSim", "fullSimrw"]:
-        f_bkgmc = TFile('/eos/home-j/jiehan/root/outputs/%s/bkgmc.root' % (region))
-        t_bkgmc = f_bkgmc.Get('test')
+        f_bkgmc = TFile('/eos/home-j/jiehan/root/outputs/test/%s/bkgmc.root' % (region))
+        t_bkgmc = f_bkgmc.Get(region)
     if estimate in ["fullSimrw", "data_sid"]:
-        f_data_sid = TFile('/eos/home-j/jiehan/root/outputs/%s/Data.root' % (region))
-        t_data_sid = f_data_sid.Get('test')
+        f_data_sid = TFile('/eos/home-j/jiehan/root/outputs/test/%s/Data.root' % (region))
+        t_data_sid = f_data_sid.Get(region)
 
     # filling signal histograms
     h_sig_raw = TH2F('h_sig_raw', 'h_sig_raw', nscanvbf, 0., 1., nscan, 0., 1.) 
     h_sig=TH1F('h_sig','h_sig',nscanvbf,0,1)
 
-    t_sig.Draw(f"{variable}_score{'_t' if transform else ''}:{variable}_score_VBF{'_t' if transform else ''}>>h_sig_raw", "weight*%f*((H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
-    t_sig.Draw(f"{variable}_score_VBF{'_t' if transform else ''}>>h_sig", "weight*%f*((H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1,n_fold,fold if n_fold != 1 else 1))
+    t_sig.Draw(f"{variable}_score{'_t' if transform else ''}:vbf_score{'_t' if transform else ''}>>h_sig_raw", "weight*%f*((H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
+    t_sig.Draw(f"vbf_score{'_t' if transform else ''}>>h_sig", "weight*%f*((H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1,n_fold,fold if n_fold != 1 else 1))
 
     # filling bkg histograms
     if estimate in ["fullSim", "fullSimrw"]:
         h_bkgmc_cen_raw = TH2F('h_bkgmc_cen_raw', 'h_bkgmc_cen_raw', nscanvbf, 0., 1., nscan, 0., 1.)
         h_bkgmc_cen = TH1F('h_bkgmc_cen', 'h_bkgmc_cen', nscanvbf, 0., 1.)
-        t_bkgmc.Draw(f"{variable}_score{'_t' if transform else ''}:{variable}_score_VBF{'_t' if transform else ''}>>h_bkgmc_cen_raw", "weight*%f*((H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
-        t_bkgmc.Draw(f"{variable}_score_VBF{'_t' if transform else ''}>>h_bkgmc_cen", "weight*%f*((H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
+        t_bkgmc.Draw(f"{variable}_score{'_t' if transform else ''}:vbf_score{'_t' if transform else ''}>>h_bkgmc_cen_raw", "weight*%f*((H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
+        t_bkgmc.Draw(f"vbf_score{'_t' if transform else ''}>>h_bkgmc_cen", "weight*%f*((H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
     if estimate in ["fullSimrw"]:
         h_bkgmc_sid_raw = TH2F('h_bkgmc_sid_raw', 'h_bkgmc_sid_raw', nscanvbf, 0., 1., nscan, 0., 1.)
         h_bkgmc_sid = TH1F('h_bkgmc_sid', 'h_bkgmc_sid', nscanvbf, 0., 1.)
-        t_bkgmc.Draw(f"{variable}_score{'_t' if transform else ''}:{variable}_score_VBF{'_t' if transform else ''}>>h_bkgmc_sid_raw", "weight*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
-        t_bkgmc.Draw(f"{variable}_score_VBF{'_t' if transform else ''}>>h_bkgmc_sid", "weight*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
+        t_bkgmc.Draw(f"{variable}_score{'_t' if transform else ''}:vbf_score{'_t' if transform else ''}>>h_bkgmc_sid_raw", "weight*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
+        t_bkgmc.Draw(f"vbf_score{'_t' if transform else ''}>>h_bkgmc_sid", "weight*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
     if estimate in ["fullSimrw", "data_sid"]:
         h_data_sid_raw = TH2F('h_data_sid_raw', 'h_data_sid_raw', nscanvbf, 0., 1., nscan, 0., 1.)
         h_data_sid = TH1F('h_data_sid', 'h_data_sid', nscanvbf, 0., 1.)
-        t_data_sid.Draw(f"{variable}_score{'_t' if transform else ''}:{variable}_score_VBF{'_t' if transform else ''}>>h_data_sid_raw", "weight*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
-        t_data_sid.Draw(f"{variable}_score_VBF{'_t' if transform else ''}>>h_data_sid", "weight*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
+        t_data_sid.Draw(f"{variable}_score{'_t' if transform else ''}:vbf_score{'_t' if transform else ''}>>h_data_sid_raw", "weight*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
+        t_data_sid.Draw(f"vbf_score{'_t' if transform else ''}>>h_data_sid", "weight*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=122&&H_mass<=128)&&(event%%%d!=%d))"%(n_fold/(n_fold-1.) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
 
     fitboundary = 0.5
     fitboundary_g = 0.5
@@ -212,7 +210,7 @@ def categorizing(region, variable, sigs, bkgs, nscan, nscanvbf, minN, transform,
     zmax, boundaries_VBF, boundaries = 0, -1, -1
     for vb in tqdm(range(5, 95), ncols=90):
 
-        boundaries_VBF, zv = cgz.fit(vb, nscanvbf, nvbf, minN=minN, earlystop=earlystop)
+        boundaries_VBF, zv, uv = cgz.fit(vb, nscanvbf, nvbf, minN=minN, earlystop=earlystop)
         if boundaries_VBF == -1: break 
 
         h_sig_g = projectionY(h_sig_raw, 1, vb-1, f"h_sig_g_{vb}", nscan, 0, 1)
@@ -237,7 +235,7 @@ def categorizing(region, variable, sigs, bkgs, nscan, nscanvbf, minN, transform,
         if estimate in ["fullSim", "fullSimrw"]: h_bkgmc_cen_g.Delete()
 
         cgz_g.smooth(int(fitboundary_g * nscan + 1), nscan)
-        boundaries, zg = cgz_g.fit(1, nscan, nbin, minN=minN, floatB=floatB, earlystop=earlystop)
+        boundaries, zg, ug = cgz_g.fit(1, nscan, nbin, minN=minN, floatB=floatB, earlystop=earlystop)
         if boundaries == -1: continue
  
         z = sqrt(zv**2 + zg**2)
@@ -314,9 +312,9 @@ def main():
     args=getArgs()
     shield = args.shield
 
-    sigs = ['ggH','VBF','WminusH','WplusH','ZH','ttH']
+    sigs = ['ggH_M125','VBF_M125'] #,'WminusH','WplusH','ZH','ttH']
 
-    bkgs = ["ZGToLLG", "DYJetsToLL", "WGToLNuG", "EWKZ2J", "ZG2JToG2L2J", "TT", "TTGJets", "TGJets", "ttWJets", "ttZJets", "WW", "WZ", "ZZ"]
+    bkgs = ["ZGToLLG", "DYJetsToLL", "EWKZ2J"] #, "WGToLNuG", "ZG2JToG2L2J", "TT", "TTGJets", "TGJets", "ttWJets", "ttZJets", "WW", "WZ", "ZZ"]
 
     region = args.region
 
@@ -325,14 +323,14 @@ def main():
     if not args.skip:
         siglist=''
         for sig in sigs:
-            if os.path.isfile('/eos/home-j/jiehan/root/outputs/%s/%s.root'% (region,sig)): siglist+=' /eos/home-j/jiehan/root/outputs/%s/%s.root'% (region,sig)
-        os.system("hadd -f /eos/home-j/jiehan/root/outputs/%s/sig.root"%(region)+siglist)
+            if os.path.isfile('/eos/home-j/jiehan/root/outputs/test/%s/%s.root'% (region,sig)): siglist+=' /eos/home-j/jiehan/root/outputs/test/%s/%s.root'% (region,sig)
+        os.system("hadd -f /eos/home-j/jiehan/root/outputs/test/%s/sig.root"%(region)+siglist)
 
     if not args.skip:
         bkglist=''
         for bkg in bkgs:
-            if os.path.isfile('/eos/home-j/jiehan/root/outputs/%s/%s.root'% (region,bkg)): bkglist+=' /eos/home-j/jiehan/root/outputs/%s/%s.root'% (region,bkg)
-        os.system("hadd -f /eos/home-j/jiehan/root/outputs/%s/bkgmc.root"%(region)+bkglist)
+            if os.path.isfile('/eos/home-j/jiehan/root/outputs/test/%s/%s.root'% (region,bkg)): bkglist+=' /eos/home-j/jiehan/root/outputs/test/%s/%s.root'% (region,bkg)
+        os.system("hadd -f /eos/home-j/jiehan/root/outputs/test/%s/bkgmc.root"%(region)+bkglist)
 
     nscan=args.nscan
     nscanvbf = args.nscanvbf
@@ -387,7 +385,7 @@ def main():
         os.makedirs("significances/%s"%region)
     '''
 
-    with open('/eos/home-j/jiehan/root/outputs/significances/%d_%s_2D_%d_%d.json' % (shield+1, region, args.vbf, args.nbin), 'w') as json_file:
+    with open('/eos/home-j/jiehan/root/outputs/test/significances/%d_%s_2D_%d_%d.json' % (shield+1, region, args.vbf, args.nbin), 'w') as json_file:
         # json.dump(outs, json_file) 
         for i in list(yields['z']):
             json_file.write('\n{:.4f}'.format(i))

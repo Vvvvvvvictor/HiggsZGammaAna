@@ -36,13 +36,13 @@ def get_err_hist(file_name, tree_name, var_name, bin_boundaries, ranges):
     data = data[var_name]
     return np.histogram(data, weights=weight**2, range=ranges[1:], bins=ranges[0])
 
-boundaries = read_config(f"{output_dir}test/significances/bin_boundaries_1D_two_jet.txt")
+boundaries = read_config(f"{output_dir}test/significances/bin_boundaries_1D_all_jet.txt")
 backgrounds = ["ZGToLLG", "DYJetsToLL", "EWKZ2J"]
 signal = ["ggH_M125", "VBF_M125"] #, "ZH_M125", "WplusH_M125", "WminusH_M125", "ttH_M125"]
 data = ["Data"]
 
-if not os.path.exists("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/two_jet/"):
-    os.makedirs("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/two_jet/")
+if not os.path.exists("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/all_jet/"):
+    os.makedirs("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/all_jet/")
 
 folder = "test"  # 可以改为 "test" 以切换文件夹
 if boundaries[0] > 0.01:
@@ -51,20 +51,20 @@ if boundaries[0] > 0.01:
 for i in range(len(boundaries)-1):
     bkg_hist = []
     for bkg in backgrounds:
-        hist, bins = get_hist(f"{output_dir}{folder}/two_jet/{bkg}.root", "two_jet", "H_mass", boundaries[i:], [85, 95, 180])
+        hist, bins = get_hist(f"{output_dir}{folder}/all_jet/{bkg}.root", "all_jet", "H_mass", boundaries[i:], [85, 95, 180])
         bkg_hist.append(hist)
         
     sig_hist = np.zeros(len(bins)-1)
-    VBF_hist, bins = get_hist(f"{output_dir}{folder}/two_jet/VBF_M125.root", "two_jet", "H_mass", boundaries[i:], [85, 95, 180])
+    VBF_hist, bins = get_hist(f"{output_dir}{folder}/all_jet/VBF_M125.root", "all_jet", "H_mass", boundaries[i:], [85, 95, 180])
     # sig_err_hist = np.zeros(len(bins)-1)
     for sig in signal:
-        hist, bins = get_hist(f"{output_dir}{folder}/two_jet/{sig}.root", "two_jet", "H_mass", boundaries[i:], [85, 95, 180])
+        hist, bins = get_hist(f"{output_dir}{folder}/all_jet/{sig}.root", "all_jet", "H_mass", boundaries[i:], [85, 95, 180])
         sig_hist += hist
-        # sig_err_hist += get_err_hist(f"{output_dir}{folder}/two_jet/{sig}.root", "two_jet", "H_mass", boundaries[i:], [85, 95, 180])[0]
+        # sig_err_hist += get_err_hist(f"{output_dir}{folder}/all_jet/{sig}.root", "all_jet", "H_mass", boundaries[i:], [85, 95, 180])[0]
         
     data_hist = np.zeros(len(bins)-1)
     for dat in data:
-        hist, bins = get_hist(f"{output_dir}{folder}/two_jet/{dat}.root", "two_jet", "H_mass", boundaries[i:], [85, 95, 180])
+        hist, bins = get_hist(f"{output_dir}{folder}/all_jet/{dat}.root", "all_jet", "H_mass", boundaries[i:], [85, 95, 180])
         data_hist += hist
 
     sf = np.sum(data_hist) / np.sum(bkg_hist)
@@ -87,6 +87,6 @@ for i in range(len(boundaries)-1):
     ax.title.set_text(f"Events in category {i} of VBF channel")
     # ax.title.set_text(f"All events in VBF channel")
     ax.legend()
-    # plt.savefig(f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/two_jet/hmass_dis_all.png")
-    plt.savefig(f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/two_jet/hmass_dis_{i}.png")
+    # plt.savefig(f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/all_jet/hmass_dis_all.png")
+    plt.savefig(f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/all_jet/hmass_dis_{i}.png")
     plt.clf()

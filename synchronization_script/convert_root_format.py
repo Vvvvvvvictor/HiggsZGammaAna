@@ -123,22 +123,22 @@ def process_data_files(converter, output_folder, input_folder):
                 
                 # Add new dZ branch filled with 0.0
                 data['dZ'] = 0.0
-                data = data.query('(CMS_hgg_mass > 95) & (CMS_hgg_mass < 170)')
+                data = data.query('(CMS_hgg_mass > 95) & (CMS_hgg_mass < 180)')
                 
                 # Split data by BDT categories and lepton types
                 data_splits, lepton_splits = converter.split_by_categories(data)
                 
                 # Write categories to output file - both original split and lepton split
                 for i, split_data in enumerate(data_splits):
-                    if region == 'VBF':
-                        if i == 0:
-                            split_data = split_data.query('CMS_hgg_mass > 105 & CMS_hgg_mass < 170')
-                        elif i == 1:
-                            split_data = split_data.query('CMS_hgg_mass > 100 & CMS_hgg_mass < 165')
-                        elif i == 2:
-                            split_data = split_data.query('CMS_hgg_mass > 95 & CMS_hgg_mass < 161')
-                        elif i == 3:
-                            split_data = split_data.query('CMS_hgg_mass > 95 & CMS_hgg_mass < 160')
+                    # if region == 'VBF':
+                    #     if i == 0:
+                    #         split_data = split_data.query('CMS_hgg_mass > 105 & CMS_hgg_mass < 170')
+                    #     elif i == 1:
+                    #         split_data = split_data.query('CMS_hgg_mass > 100 & CMS_hgg_mass < 165')
+                    #     elif i == 2:
+                    #         split_data = split_data.query('CMS_hgg_mass > 95 & CMS_hgg_mass < 161')
+                    #     elif i == 3:
+                    #         split_data = split_data.query('CMS_hgg_mass > 95 & CMS_hgg_mass < 160')
                     logging.info(f"Number of events in {region}{i}: {len(split_data)}")
                     outfile[f'DiphotonTree/Data_13TeV_{region}{i}'] = split_data
     

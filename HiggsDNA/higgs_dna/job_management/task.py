@@ -182,7 +182,7 @@ class Task():
         else:
             self.summarize()
             return
-
+        logger.info("[Task : process] Task '%s' : %d/%d (%.2f percent) of jobs completed/retired, which is >= the minimum job completion fraction for this task (%.2f percent). Marking task as complete." % (self.name, self.n_completed_jobs + self.n_retired_jobs, len(self.jobs), 100. * self.completion_or_retired_frac, 100. * self.min_completion_frac))
         # Clean up: kill any idle or running jobs
         n_killed = 0
         jobs_to_kill = [job for job in self.jobs if (job.status == "idle" or job.status == "running")]
@@ -190,15 +190,12 @@ class Task():
             logger.debug("[Task : process] Task '%s' : since Task is COMPLETED, we are killing job '%s' with status '%s'" % (self.name, job.name_full, job.status))
             job.kill()
             job.status = "retired"
-
         jobs_to_retire = [job for job in self.jobs if not job.status == "completed"]
         for job in jobs_to_retire:
             job.force_retirement = True
-
         if n_killed > 0:
             logger.info("[Task : process] Task '%s' : since Task is COMPLETED, we killed all idle and running jobs (%d jobs killed)" % (self.name, n_killed))
         self.complete = True
-
         self.summarize()
         return
 
@@ -265,7 +262,6 @@ class Task():
             if job.processed: # don't record metadata twice
                 continue
 
-
             # Try to open json summary file for the job
             # Wrapped in a try-except to avoid errors where the file exists but has not finished copying from the remote job
             copied = False
@@ -276,7 +272,6 @@ class Task():
                         copied = True
                 except:
                     os.system("sleep 0.1s")
-
             self.phys_summary["n_events_initial"] += job_info["n_events"]
             if not self.config["sample"]["is_data"]:
                 self.phys_summary["sum_weights"] += job_info["sum_weights"]
