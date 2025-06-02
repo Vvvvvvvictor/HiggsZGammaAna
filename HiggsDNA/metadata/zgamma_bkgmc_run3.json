@@ -181,10 +181,10 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "DYJetsToLL"
+            "DYGto2LG_10to50", "DYGto2LG_50to100"
         ],
         "years": [
-            "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"
+            "2022preEE", "2022postEE"
         ]
     },
     "variables_of_interest": [
