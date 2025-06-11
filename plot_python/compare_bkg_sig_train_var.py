@@ -8,7 +8,6 @@ from pdb import set_trace
 plt.style.use(hep.style.CMS)
 
 config_dict = {
-    # "mass_jj": {"range": (0, 300), "title": r"$m_{jj}(GeV/c^{2})$"},
     # "Z_relpt": {"range": (0, 1), "title": r"${p_T^{ll}\cdot c}/{m_{ll\gamma}}$"},
     # "gamma_relpt": {"range": (0.1, 1), "title": r"${p_T^{\gamma}\cdot c}/{m_{ll\gamma}}$"},
     # "pt_balance_0j": {"range": (0, 1), "title": r"$Zeppenfeld_{\gamma}(0j)$"},
@@ -18,31 +17,32 @@ config_dict = {
     # "jet_2_btagDeepFlavB": {"range": (0, 0.15), "title": "j2 btag"},
     # "HZ_deltaRap": {"range": (-0.7, 0.7), "title": r"$\Delta y(ll,ll\gamma)$"},
 
-    "n_jets": {"range": (0, 6), "bins": 6, "title": r"$N_{jets}$"},
-    "llphoton_hmiss_photon_dphi": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi_{ll\gamma}$"},
-    "delta_eta_jj": {"range": (0, 8), "bins": 40, "title": r"$\Delta\eta_{jj}$"},
-    "delta_phi_jj": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi_{jj}$"},
-    "delta_phi_zgjj": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi_{ll\gamma,jj}$"},
-    "gamma_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta_{\gamma}$"},
-    "gamma_mvaID": {"range": (0.14, 1), "bins": 43, "title": "photon MVA"},
-    "jet_1_pt": {"range": (30, 330), "bins": 50, "title": r"$p_{T_{j1}}(GeV/c)$"},
-    "jet_2_pt": {"range": (30, 150), "bins": 50, "title": r"$p_{T_{j2}}(GeV/c)$"},
-    "jet1G_deltaR": {"range": (0.4, 6.4), "bins": 40, "title": r"$\Delta R(\gamma,j1)$"},
-    "jet2G_deltaR": {"range": (0.4, 6.4), "bins": 40, "title": r"$\Delta R(\gamma,j2)$"},
-    "l1g_deltaR": {"range": (0.3, 4.3), "bins": 40, "title": r"max($\Delta R(l,\gamma)$)"},
-    "l2g_deltaR": {"range": (0.3, 3.3), "bins": 40, "title": r"min($\Delta R(l,\gamma)$)"},
-    "lep_cos_theta": {"range": (-1, 1), "bins": 40, "title": r"$\cos\theta$"},
-    "lep_phi": {"range": (-3.2, 3.2), "bins": 40, "title": r"$\phi$"},
-    "photon_zeppenfeld": {"range": (0, 5), "bins": 50, "title": "Zeppenfeld $\gamma$"},
-    "pt_balance": {"range": (0, 1), "bins": 50, "title": "system balance"},
-    "Z_cos_theta": {"range": (-1, 1), "bins": 50, "title": r"$\cos\Theta$"},
-    "Z_lead_lepton_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta_{l1}$"},
-    "Z_sublead_lepton_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta_{l2}$"},
-    "H_relpt": {"range": (0, 3), "bins": 50, "title": r"${p_{T_{ll\gamma}}\cdot c}/{m_{ll\gamma}}$"},
-    "gamma_ptRelErr": {"range": (0.01, 0.11), "bins": 50, "title": r"$\sigma_{p_T^{\gamma}}/p_T^{\gamma}$"}
+    "mass_jj": {"range": (0, 200), "bins": 50, "title": r"$m_{j}(GeV/c^{2})$"},
+    # "n_jets": {"range": (0, 2), "bins": 2, "title": r"$N_{jets}$"},
+    # "llphoton_hmiss_photon_dphi": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi(ll\gamma jets, photon)$"},
+    "delta_eta_jj": {"range": (0, 8), "bins": 40, "title": r"$\Delta\eta_{j}$"},
+    "delta_phi_jj": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi_{j}$"},
+    "delta_phi_zgjj": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi_{ll\gamma,j}$"},
+    # "gamma_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta_{\gamma}$"},
+    # "gamma_mvaID": {"range": (0.14, 1), "bins": 43, "title": "photon MVA"},
+    # "jet_1_pt": {"range": (30, 330), "bins": 50, "title": r"$p_{T_{j1}}(GeV/c)$"},
+    # # "jet_2_pt": {"range": (30, 150), "bins": 50, "title": r"$p_{T_{j2}}(GeV/c)$"},
+    # "jet1G_deltaR": {"range": (0.4, 6.4), "bins": 40, "title": r"$\Delta R(\gamma,j1)$"},
+    # # "jet2G_deltaR": {"range": (0.4, 6.4), "bins": 40, "title": r"$\Delta R(\gamma,j2)$"},
+    # "l1g_deltaR": {"range": (0.3, 4.3), "bins": 40, "title": r"max($\Delta R(l,\gamma)$)"},
+    # "l2g_deltaR": {"range": (0.3, 3.3), "bins": 40, "title": r"min($\Delta R(l,\gamma)$)"},
+    # "lep_cos_theta": {"range": (-1, 1), "bins": 40, "title": r"$\cos\theta$"},
+    # "lep_phi": {"range": (-3.2, 3.2), "bins": 40, "title": r"$\phi$"},
+    # "photon_zeppenfeld": {"range": (0, 5), "bins": 50, "title": "Zeppenfeld $\gamma$"},
+    # "pt_balance": {"range": (0, 1), "bins": 50, "title": "system balance"},
+    # "Z_cos_theta": {"range": (-1, 1), "bins": 50, "title": r"$\cos\Theta$"},
+    # "Z_lead_lepton_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta_{l1}$"},
+    # "Z_sublead_lepton_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta_{l2}$"},
+    # "H_relpt": {"range": (0, 3), "bins": 50, "title": r"${p_{T_{ll\gamma}}\cdot c}/{m_{ll\gamma}}$"},
+    # "gamma_ptRelErr": {"range": (0.01, 0.11), "bins": 50, "title": r"$\sigma_{p_T^{\gamma}}/p_T^{\gamma}$"}
 }
 
-TREE = "all_jet"
+TREE = "zero_to_one_jet"
 WEIGHT = "weight"
 PATH = "/eos/user/j/jiehan/root/skimmed_ntuples_rui_new/"
 
@@ -79,11 +79,11 @@ def convert_root_to_hist(file_dict, selection=None):
                 mass_hist = mass_hist + hist
                 hist, bins = np.histogram(samples[VAR], bins=BINS, range=[RMIN, RMAX], weights=samples[WEIGHT])
                 hist[0] += np.sum(samples[WEIGHT][(samples[VAR] < RMIN) & (samples[VAR] > -900)])
-                hist[-1] += np.sum(samples[WEIGHT][samples[VAR] > RMAX])
+                hist[-1] += np.sum(samples[WEIGHT][(samples[VAR] > RMAX) & (samples[VAR] < 900)])
                 type_hist = type_hist + hist
                 hist, _ = np.histogram(samples[VAR], bins=BINS, range=[RMIN, RMAX], weights=samples[WEIGHT]**2)
                 hist[0] += np.sum(samples[WEIGHT][(samples[VAR] < RMIN) & (samples[VAR] > -900)])**2
-                hist[-1] += np.sum(samples[WEIGHT][samples[VAR] > RMAX])**2
+                hist[-1] += np.sum(samples[WEIGHT][(samples[VAR] > RMAX) & (samples[VAR] < 900)])**2
                 error = error + hist
         hists.append(type_hist)
     return hists, np.sqrt(error), bins, mass_hist
@@ -98,9 +98,10 @@ for var in config_dict:
     BINS = config_dict[VAR]["bins"]
     
     print("\n\n", VAR, RMIN, RMAX, "\n\n")
-
-    hist2, hist2_err, bins, mass2_hist = convert_root_to_hist(bkg, selection="(H_mass>120) & (H_mass<130)")
-    hist1, hist1_err, _, mass1_hist = convert_root_to_hist(sig, selection="(H_mass>120) & (H_mass<130)")
+    
+    selection = "(H_mass>120) & (H_mass<130)"
+    hist2, hist2_err, bins, mass2_hist = convert_root_to_hist(bkg, selection=selection)
+    hist1, hist1_err, _, mass1_hist = convert_root_to_hist(sig, selection=selection)
 
     sig_yields = [np.sum(i) for i in hist1]
     bkg_yields = [np.sum(i) for i in hist2]

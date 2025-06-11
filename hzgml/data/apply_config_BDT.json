@@ -4,5 +4,5 @@
  "zero_jet": {"#+preselections": ["n_jets == 0"], "models": {"zero_jet": "bdt_score"}},
  "one_jet":  {"#+preselections": ["n_jets == 1"], "models": {"one_jet": "bdt_score"}},
  "two_jet":  {"#+preselections": ["n_jets >= 2"], "models": {"two_jet": "bdt_score"}}, 
- "all_jet":  {"#+preselections": [], "models": {"all_jet": "bdt_score", "VBF": "vbf_score", "two_jet": "bdt_2j_score"}}
+ "all_jet":  {"#+preselections": ["n_jets >= 2"], "models": {"all_jet": "bdt_score", "VBF": "vbf_score", "two_jet": "bdt_2j_score"}}
 }

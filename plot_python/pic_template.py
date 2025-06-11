@@ -164,11 +164,15 @@ def get_S_over_sqrtB(hist_s, hist_b, ratio, yrange=None):
         
         maximum = 0
         # Avoid division by zero
-        if b_bin_content > 0 and b_bin_content_err / b_bin_content < 5:
-            ssqrtoverb = s_bin_content / (b_bin_content ** 0.5)
+        if b_bin_content > 0: # and b_bin_content_err / b_bin_content < 5:
+            # ssqrtoverb = s_bin_content / (b_bin_content ** 0.5)
+            n_tot = s_bin_content + b_bin_content
+            ssqrtoverb = np.sqrt(2*(n_tot*np.log(n_tot/b_bin_content)-s_bin_content))
             if ssqrtoverb > maximum:
                 maximum = ssqrtoverb
-            ssqrtoverb_err = ((s_bin_content_err / b_bin_content ** 0.5) ** 2 + (s_bin_content * b_bin_content_err / b_bin_content ** 1.5 / 2) ** 2) ** 0.5
+            # ssqrtoverb_err = ((s_bin_content_err / b_bin_content ** 0.5) ** 2 + (s_bin_content * b_bin_content_err / b_bin_content ** 1.5 / 2) ** 2) ** 0.5
+            ssqrtoverb_err = np.sqrt((np.log(n_tot/b_bin_content)*s_bin_content_err)**2 + ((np.log(n_tot/b_bin_content) - (s_bin_content/b_bin_content))*b_bin_content_err)**2)
+            print(f"significance: {ssqrtoverb}, error: {ssqrtoverb_err}")
             hist_sosb.SetBinContent(i, ssqrtoverb)
             hist_sosb.SetBinError(i, ssqrtoverb_err)
     

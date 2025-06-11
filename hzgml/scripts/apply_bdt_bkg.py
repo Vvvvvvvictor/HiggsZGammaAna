@@ -93,9 +93,10 @@ class BDTApplicator:
 def process_files(applicators, output_folder, input_folder):
     """Process input files and write the results to output ROOT files."""
     region_map = {
-        # 'zero_to_one_jet': 'ggH', 'two_jet': 'VBF',
+        'zero_to_one_jet': 'ggH', 'two_jet': 'VBF',
         # 'VH': 'VHlep', 'ZH': 'ZHinv', 'ttH_had': 'ttHh', 'ttH_lep': 'ttHl'
-        'two_jet': 'VBF'
+        # 'two_jet': 'VBF'
+        # 'all_jet': 'Incl'
     }
     syst_variations = [
         "nominal", "FNUF_up", "FNUF_down", "Material_up", "Material_down",
@@ -104,7 +105,7 @@ def process_files(applicators, output_folder, input_folder):
         "MET_Unclustered_up", "MET_Unclustered_down", "Muon_pt_up", "Muon_pt_down"
     ]
     procductions = ['Data']
-    years = ['2016preVFP', '2016postVFP', '2017', '2018']
+    years = ['2016preVFP', '2016postVFP', '2017', '2018', '2022preEE', '2022postEE', '2023preBPix', '2023postBPix']
 
     # Create all necessary directories in one go
     os.makedirs(output_folder, exist_ok=True)
@@ -131,12 +132,13 @@ def process_files(applicators, output_folder, input_folder):
                         data = data.rename(columns={"H_mass": "CMS_hgg_mass"})
                         outfile[f'DiphotonTree/Data_13TeV_{region_map[channel]}'] = data
     if not os.path.exists(f"{output_folder}/Data"): os.makedirs(f"{output_folder}/Data", exist_ok=True)
-    os.system(f"hadd -f {output_folder}/Data/output_Data_Run2.root {output_folder}/Data_*/output_{proc}_*.root")
+    os.system(f"hadd -f {output_folder}/Data/output_Data_all.root {output_folder}/Data_*/output_{proc}_*.root")
 
 if __name__ == "__main__":
     args = get_args()
     applicators = {
         'zero_to_one_jet': BDTApplicator('zero_to_one_jet', args),
-        'two_jet': BDTApplicator('two_jet', args)
+        'two_jet': BDTApplicator('two_jet', args),
+        'all_jet': BDTApplicator('all_jet', args)
     }
     process_files(applicators, args.outputFolder, args.inputFolder)

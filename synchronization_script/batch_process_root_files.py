@@ -221,15 +221,23 @@ def main():
 
                     # Convert data to an Array
                     ak_array = ak.Array(new_data)
-                    print(f"ak_array event count before VBF selection: {len(ak_array)}")
+                    print(f"ak_array event count before lepton selection: {len(ak_array)}")
 
-                    # Add VBF channel selection
-                    ak_array = ak_array[((ak_array["n_jets"] >= 2) & (ak_array["nbdfm"] == 0)) | ((ak_array["n_jets"] < 2) & (ak_array["met"] < 90))]
-                    print(f"ak_array event count after VBF selection: {len(ak_array)}")
+                    ak_array = ak_array[ak_array["nel"] + ak_array["nmu"] == 2]
                     
                     # Write to new file with tree named "all_jet"
                     with uproot.recreate(output_path) as out:
+                        ak_array = ak_array[((ak_array["n_jets"] >= 2) & (ak_array["nbdfm"] == 0)) | ((ak_array["n_jets"] < 2) & (ak_array["met"] < 90))]
+                        print(f"ak_array event count after all_jet selection: {len(ak_array)}")
                         out["all_jet"] = ak_array
+
+                        ak_array_vbf = ak_array[ak_array["n_jets"] >= 2]
+                        print(f"ak_array_vbf event count after VBF selection: {len(ak_array_vbf)}")
+                        out["two_jet"] = ak_array_vbf
+
+                        ak_array_ggf = ak_array[ak_array["n_jets"] < 2]
+                        print(f"ak_array_ggf event count after GGF selection: {len(ak_array_ggf)}")
+                        out["zero_to_one_jet"] = ak_array_ggf
                     
                     logging.info(f"Successfully processed: {file_path} -> {output_path}")
                     stats["success"] += 1

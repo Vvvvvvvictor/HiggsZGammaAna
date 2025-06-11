@@ -666,10 +666,10 @@ def main():
         json.dump(config, f, indent=2)
     
     # ----- Plot the score distributions -----
-    plt.figure(figsize=(12, 6))
+    plt.figure(figsize=(18, 6))
     
     # VBF-enriched region
-    ax1 = plt.subplot(1, 2, 1)
+    ax1 = plt.subplot(1, 3, 1)
     sig_hist, bins = np.histogram(
         vbf_region_sig.query(f"H_mass > {MASS_WINDOW[0]} & H_mass < {MASS_WINDOW[1]}")[score_2j_col], 
         bins=50, range=(0, 1), 
@@ -698,9 +698,38 @@ def main():
     plt.title("VBF-enriched Region")
     plt.legend()
     plt.grid(alpha=0.3)
+
+    # VBF enriched region samples BDT score distribution
+    ax2 = plt.subplot(1, 3, 2)
+    # Create histograms for VBF-enriched signal and background samples
+    vbf_sig_hist, vbf_bins = np.histogram(
+        vbf_region_sig.query(f"H_mass > {MASS_WINDOW[0]} & H_mass < {MASS_WINDOW[1]}")[score_col], 
+        bins=50, range=(0, 1), 
+        weights=vbf_region_sig.query(f"H_mass > {MASS_WINDOW[0]} & H_mass < {MASS_WINDOW[1]}")["weight"]
+    )
+    vbf_sig_hist = vbf_sig_hist / np.sum(vbf_sig_hist) if np.sum(vbf_sig_hist) > 0 else vbf_sig_hist
+    
+    vbf_bkg_hist, _ = np.histogram(
+        vbf_region_bkg.query(f"H_mass > {MASS_WINDOW[0]} & H_mass < {MASS_WINDOW[1]}")[score_col], 
+        bins=vbf_bins, range=(0, 1), 
+        weights=vbf_region_bkg.query(f"H_mass > {MASS_WINDOW[0]} & H_mass < {MASS_WINDOW[1]}")["weight"]
+    )
+    vbf_bkg_hist = vbf_bkg_hist / np.sum(vbf_bkg_hist) if np.sum(vbf_bkg_hist) > 0 else vbf_bkg_hist
+    
+    vbf_centers = (vbf_bins[:-1] + vbf_bins[1:]) / 2
+    vbf_width = vbf_bins[1] - vbf_bins[0]
+    
+    plt.bar(vbf_centers, vbf_sig_hist, width=vbf_width, alpha=0.5, label="Signal", color="blue")
+    plt.bar(vbf_centers, vbf_bkg_hist, width=vbf_width, alpha=0.5, label="Background", color="red")
+    
+    plt.xlabel(score_col)
+    plt.ylabel("Normalized Events")
+    plt.title("VBF-enriched Samples")
+    plt.legend()
+    plt.grid(alpha=0.3)
     
     # Remaining region
-    ax2 = plt.subplot(1, 2, 2)
+    ax3 = plt.subplot(1, 3, 3)
     sig_hist, bins = np.histogram(
         remaining_sig.query(f"H_mass > {MASS_WINDOW[0]} & H_mass < {MASS_WINDOW[1]}")[score_col], 
         bins=50, range=(0, 1), 
@@ -768,7 +797,7 @@ def main():
     # Function to plot H_mass distribution for a category
     def plot_category_mass_distribution(category_name, category_query, output_filename):
         # Create figure
-        fig, ax = plt.subplots(figsize=(10, 8))
+        fig, ax = plt.subplots(figsize=(10, 10))
         
         # Prepare data for plotting
         bkg_hists = []
