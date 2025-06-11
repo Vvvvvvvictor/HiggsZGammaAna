@@ -2,6 +2,7 @@ import os
 import json
 import uproot
 import pandas as pd
+import numpy as np
 import xgboost as xgb
 import pickle
 from argparse import ArgumentParser
@@ -91,18 +92,20 @@ class BDTApplicator:
 def process_files(applicators, output_folder, input_folder):
     """Process input files and write the results to output ROOT files."""
     region_map = {
-        # 'zero_to_one_jet': 'ggH', 'two_jet': 'VBF',
+        'zero_to_one_jet': 'ggH', 'two_jet': 'VBF',
         # 'VH': 'VHlep', 'ZH': 'ZHinv', 'ttH_had': 'ttHh', 'ttH_lep': 'ttHl'
-        'two_jet': 'VBF'
+        # 'two_jet': 'VBF'
+        # 'all_jet': 'Incl'
     }
     syst_variations = [
-        "nominal", "FNUF_up", "FNUF_down", "Material_up", "Material_down",
-        "Scale_up", "Scale_down", "Smearing_up", "Smearing_down", "JER_up", 
-        "JER_down", "JES_up", "JES_down", "MET_JES_up", "MET_JES_down",
-        "MET_Unclustered_up", "MET_Unclustered_down", "Muon_pt_up", "Muon_pt_down"
+        "nominal", 
+        # "FNUF_up", "FNUF_down", "Material_up", "Material_down",
+        # "Scale_up", "Scale_down", "Smearing_up", "Smearing_down", "JER_up", 
+        # "JER_down", "JES_up", "JES_down", "MET_JES_up", "MET_JES_down",
+        # "MET_Unclustered_up", "MET_Unclustered_down", "Muon_pt_up", "Muon_pt_down"
     ]
-    procductions = ['ggH_M125', 'VBF_M125', 'WplusH_M125', 'WminusH_M125', 'ZH_M125', 'ttH_M125'] # 'ggH_M125', 'VBF_M125', 'WplusH_M125', 'WminusH_M125', 'ZH_M125', 'ttH_M125'
-    years = ['2016preVFP', '2016postVFP', '2017', '2018']
+    procductions = ['ggH_M125', 'VBF_M125']#, 'WplusH_M125', 'WminusH_M125', 'ZH_M125', 'ttH_M125'] # 'ggH_M125', 'VBF_M125', 'WplusH_M125', 'WminusH_M125', 'ZH_M125', 'ttH_M125'
+    years = ['2016preVFP', '2016postVFP', '2017', '2018', '2022preEE', '2022postEE', '2023preBPix', '2023postBPix']
 
     # Create all necessary directories in one go
     os.makedirs(output_folder, exist_ok=True)
@@ -126,26 +129,31 @@ def process_files(applicators, output_folder, input_folder):
                     syst_name = f'_{syst_type}{syst_uod}01sigma'
                 with uproot.open(input_path) as infile:
                     for channel in region_map.keys():
-                        data = infile[channel].arrays(library='pd')
-                        data.columns = [col.replace('up', 'Up').replace('down', 'Down') for col in data.columns]
-                        if channel in applicators:
-                            applicator = applicators[channel]
-                            data_splits = applicator.apply_bdt(data)
-                            for i, split_data in enumerate(data_splits):
-                                logging.info(f"Number of events in {region_map[channel]}{i}{syst_name}: {len(split_data)}")
-                                split_data = split_data.rename(columns={"H_mass": "CMS_hgg_mass"})
-                                tree_name = f'{proc_name}_13TeV_{region_map[channel]}{i}{syst_name}'
-                                outfile[f'DiphotonTree/{tree_name}'] = split_data
-                        else:
-                            logging.info(f"Number of events in {region_map[channel]}{syst_name}: {len(data)}")
-                            data = data.rename(columns={"H_mass": "CMS_hgg_mass"})
-                            tree_name = f'{proc_name}_13TeV_{region_map[channel]}{syst_name}'
-                            outfile[f'DiphotonTree/{tree_name}'] = data
+                        all_data = infile[channel].arrays(library='pd')
+                        all_data.columns = [col.replace('up', 'Up').replace('down', 'Down') for col in all_data.columns]
+                        if 'dZ' not in all_data.columns:
+                            all_data['dZ'] = np.zeros(len(all_data))
+                        for lep in ['ele', 'mu']:
+                            data = all_data.query('nel==2' if lep == 'ele' else 'nmu==2')
+                            if channel in applicators:
+                                applicator = applicators[channel]
+                                data_splits = applicator.apply_bdt(data)
+                                for i, split_data in enumerate(data_splits):
+                                    logging.info(f"Number of events in {region_map[channel]}{i}{syst_name}: {len(split_data)}")
+                                    split_data = split_data.rename(columns={"H_mass": "CMS_hgg_mass"})
+                                    tree_name = f'{proc_name}_{lep}_13TeV_{region_map[channel]}{i}{syst_name}'
+                                    outfile[f'DiphotonTree/{tree_name}'] = split_data
+                            else:
+                                logging.info(f"Number of events in {region_map[channel]}{syst_name}: {len(data)}")
+                                data = data.rename(columns={"H_mass": "CMS_hgg_mass"})
+                                tree_name = f'{proc_name}_{lep}_13TeV_{region_map[channel]}{syst_name}'
+                                outfile[f'DiphotonTree/{tree_name}'] = data
 
 if __name__ == "__main__":
     args = get_args()
     applicators = {
         'zero_to_one_jet': BDTApplicator('zero_to_one_jet', args),
-        'two_jet': BDTApplicator('two_jet', args)
+        'two_jet': BDTApplicator('two_jet', args),
+        'all_jet': BDTApplicator('all_jet', args)
     }
     process_files(applicators, args.outputFolder, args.inputFolder)

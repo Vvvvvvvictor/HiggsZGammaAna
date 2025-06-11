@@ -68,21 +68,120 @@ from pdb import set_trace
     #         for i in range(len(temp)):
     #             f.write(f'{int(temp["run"][i])} {int(temp["luminosityBlock"][i])} {int(temp["event"][i])}\n')
 
-# # ==================================
-# # Show MET_pt and n_b_jets
-# # ==================================
-# years = ['2016preVFP'] #, '2016postVFP', '2017', '2018']
-# for year in years:
-#     data = uproot.open(f"/eos/home-j/jiehan/root/skimmed_ntuples_run2/Data/{year}.root")['inclusive'].arrays(['MET_pt', 'n_b_jets', 'n_jets'], library='pd')
-#     data = data.query('n_jets < 2')
-#     hist, _ = np.histogram(data['MET_pt'], bins=20, range=(0, 200))
-#     for i, h in enumerate(hist):
-#         print(f'{year} MET_pt {i*10}-{(i+1)*10}: {h}')
+# ==================================
+# Show MET_pt and n_b_jets
+# ==================================
+years = ['2016preVFP'] #, '2016postVFP', '2017', '2018']
+for year in years:
+    data = uproot.open(f"/eos/home-j/jiehan/root/skimmed_ntuples_run2/Data/{year}.root")['inclusive'].arrays(['MET_pt', 'n_b_jets', 'n_jets'], library='pd')
+    data = data.query('n_jets < 2')
+    hist, _ = np.histogram(data['MET_pt'], bins=20, range=(0, 200))
+    for i, h in enumerate(hist):
+        print(f'{year} MET_pt {i*10}-{(i+1)*10}: {h}')
+
+# =====================================
+# Generate Event Count Table for ggH M125 2017
+# =====================================
+print("\nEvent Count Table for ggH M125 2017 (Electron Channel)")
+print("======================================================================")
+
+file_path = "/eos/home-j/jiehan/root/skimmed_ntuples_run2/ggH_M125/2017.root"
+tree_name = "inclusive"
+
+# Define all columns that will be used to speed up loading
+columns_to_load = [
+    'z_ee', 'n_iso_photons', 'Z_mass', 'gamma_pt', 'H_mass',
+    'Z_cos_theta', 'lep_cos_theta', 'lep_phi', 'gamma_mvaID',
+    'l1g_deltaR', 'l2g_deltaR', 'H_relpt', 'gamma_ptRelErr',
+    'Z_lead_lepton_eta', 'Z_sublead_lepton_eta', 'weight_central', # Add weight for potential weighted counts
+    'Z_lead_lepton_deltaphi', 'Z_sublead_lepton_deltaphi', 'gamma_eta'
+]
+
+try:
+    df_full = uproot.open(file_path)[tree_name].arrays(columns_to_load, library='pd')
+except Exception as e:
+    print(f"Error loading file: {e}")
+    df_full = pd.DataFrame() # Empty dataframe to avoid further errors
+
+if not df_full.empty:
+    # Helper function to print rows in the desired format
+    def print_row(label, count_or_df, is_weighted=False):
+        count = 0
+        if isinstance(count_or_df, pd.DataFrame):
+            if is_weighted and 'weight_central' in count_or_df.columns:
+                count = count_or_df['weight_central'].sum()
+            else:
+                count = len(count_or_df)
+        else:
+            count = count_or_df
+        
+        # Format count to match example (integer or float if weighted)
+        count_str = f"{count:.0f}" if not is_weighted or count == int(count) else f"{count:.2f}"
+        print(f"{label.ljust(60)} & {count_str}")
+
+    # Apply selections sequentially
+    df = df_full.copy()
+
+    df = df[df['z_ee'] > 0]  # Z_ee channel
+    print_row(r"$Z_ee channel$", df)
+
+    baseline_df = df.copy()
+    print_row("Event filters (baseline for subsequent)", baseline_df)
+
+    # # Cuts relative to baseline
+    # print_row(r"baseline + cosTheta>0", baseline_df[baseline_df['Z_cos_theta'] > 0])
+    # print_row(r"baseline + cosTheta>0.5", baseline_df[baseline_df['Z_cos_theta'] > 0.5])
+    
+    # print_row(r"baseline + costheta>0", baseline_df[baseline_df['lep_cos_theta'] > 0])
+    # print_row(r"baseline + costheta>0.5", baseline_df[baseline_df['lep_cos_theta'] > 0.5])
+
+    # print_row(r"baseline + phi (psi)>0", baseline_df[baseline_df['lep_phi'] > 0])
+    # print_row(r"baseline + phi (psi)>0.5", baseline_df[baseline_df['lep_phi'] > 0.5])
+
+    # print_row(r"baseline + Photonmva>0.6", baseline_df[baseline_df['gamma_mvaID'] > 0.6])
+    # print_row(r"baseline + Photonmva>0.75", baseline_df[baseline_df['gamma_mvaID'] > 0.75])
+
+    # print_row(r"baseline + mindR>1", baseline_df[baseline_df['l2g_deltaR'] > 1]) # l2g_deltaR is min(dR(l,g))
+    # print_row(r"baseline + mindR>1.2", baseline_df[baseline_df['l2g_deltaR'] > 1.2])
+
+    # print_row(r"baseline + maxdR>1.5", baseline_df[baseline_df['l1g_deltaR'] > 1.5]) # l1g_deltaR is max(dR(l,g))
+    # print_row(r"baseline + maxdR>2", baseline_df[baseline_df['l1g_deltaR'] > 2])
+    
+    # # Ensure H_mass is not zero for H_relpt calculation if not already filtered
+    # temp_df_ptmass = baseline_df[baseline_df['H_mass'] != 0]
+    # print_row(r"baseline + pT mass>0.25", temp_df_ptmass[temp_df_ptmass['H_relpt'] > 0.25])
+    # print_row(r"baseline + pT mass>0.5", temp_df_ptmass[temp_df_ptmass['H_relpt'] > 0.5])
+
+    # print_row(r"baseline + $\gamma$ resolution>0.02", baseline_df[baseline_df['gamma_ptRelErr'] > 0.02])
+    # print_row(r"baseline + $\gamma$ resolution>0.05", baseline_df[baseline_df['gamma_ptRelErr'] > 0.05])
+
+    # print_row(r"baseline + lead lep $\eta$>0", baseline_df[baseline_df['Z_lead_lepton_eta'] > 0])
+    # print_row(r"baseline + lead lep $\eta$>0.5", baseline_df[baseline_df['Z_lead_lepton_eta'] > 0.5])
+
+    # print_row(r"baseline + sublead lep $\eta$>0", baseline_df[baseline_df['Z_sublead_lepton_eta'] > 0])
+    # print_row(r"baseline + sublead lep $\eta$>0.5", baseline_df[baseline_df['Z_sublead_lepton_eta'] > 0.5])
+
+
+    print_row(r"baseline + lead lepton $\eta$>1", baseline_df[baseline_df['Z_lead_lepton_eta'] > 1])
+    print_row(r"baseline + lead lepton $\eta$>2", baseline_df[baseline_df['Z_lead_lepton_eta'] > 2])
+
+    print_row(r"baseline + sublead lepton $\eta$>1", baseline_df[baseline_df['Z_sublead_lepton_eta'] > 1])
+    print_row(r"baseline + sublead lepton $\eta$>2", baseline_df[baseline_df['Z_sublead_lepton_eta'] > 2])
+
+    print_row(r"baseline + photon $\eta$>1", baseline_df[baseline_df['gamma_eta'] > 1])
+    print_row(r"baseline + photon $\eta$>2", baseline_df[baseline_df['gamma_eta'] > 2])
+
+    print_row(r"baseline + lead lep photon dphi>1", baseline_df[baseline_df['Z_sublead_lepton_deltaphi'] > 1])
+    print_row(r"baseline + lead lep photon dphi>2", baseline_df[baseline_df['Z_sublead_lepton_deltaphi'] > 2])
+
+    print_row(r"baseline + sublead lep photon dphi>1", baseline_df[baseline_df['Z_lead_lepton_deltaphi'] > 1])
+    print_row(r"baseline + sublead lep photon dphi>2", baseline_df[baseline_df['Z_lead_lepton_deltaphi'] > 2])
+
+print("======================================================================")
 
 # =====================================
 # Compare two log file
 # =====================================
-
 # with open('2022preEE_two_jet_ele.txt', 'r') as f:
 #     data1 = f.readlines()
 # with open('daje.txt', 'r') as f:
@@ -194,23 +293,23 @@ from pdb import set_trace
 # selection += " & (jet_1_pt>35) & (jet_2_pt>25)"
 # print(f"sf: {data.query(selection)['weight'].sum() / bkg.query(selection)['weight'].sum()}")
 
-# =================================
-# Check the data
-# =================================
-path = "/eos/home-j/jiehan/root/fitting_signal/"
-years = ["2016preVFP", "2016postVFP", "2017", "2018"]
-samples = ["ggH", "VBF", "ZH", "WH", "ttH"]
-cats = ["VBF0", "VBF1", "VBF2", "VBF3"]
+# # =================================
+# # Check the data
+# # =================================
+# path = "/eos/home-j/jiehan/root/fitting_signal/"
+# years = ["2016preVFP", "2016postVFP", "2017", "2018"]
+# samples = ["ggH", "VBF", "ZH", "WH", "ttH"]
+# cats = ["VBF0", "VBF1", "VBF2", "VBF3"]
 
-for cat in cats:
-    yields = 0
-    for sample in samples:
-        for year in years:
-            for flav in ('ele', 'mu'):
-                # print(f"{path}/{sample}_M125_{year}/output_{sample}_M125.root")
-                data = uproot.open(f"{path}/{sample}_M125_{year}/output_{sample}_M125.root")[f"DiphotonTree/{sample}_125_{flav}_13TeV_{cat}"].arrays(['weight'], library='pd')
-                signal = data['weight'].sum()
-                count = data['weight'].count()
-                print(f'{year} {sample} {cat} {flav} yields: {signal:.3f}({count})')
-                yields += data['weight'].sum()
-    print(f'{cat} yields: {yields}\n')
+# for cat in cats:
+#     yields = 0
+#     for sample in samples:
+#         for year in years:
+#             for flav in ('ele', 'mu'):
+#                 # print(f"{path}/{sample}_M125_{year}/output_{sample}_M125.root")
+#                 data = uproot.open(f"{path}/{sample}_M125_{year}/output_{sample}_M125.root")[f"DiphotonTree/{sample}_125_{flav}_13TeV_{cat}"].arrays(['weight'], library='pd')
+#                 signal = data['weight'].sum()
+#                 count = data['weight'].count()
+#                 print(f'{year} {sample} {cat} {flav} yields: {signal:.3f}({count})')
+#                 yields += data['weight'].sum()
+#     print(f'{cat} yields: {yields}\n')

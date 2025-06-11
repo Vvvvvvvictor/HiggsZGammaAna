@@ -685,7 +685,7 @@ class AnalysisManager():
 
         events = awkward.concatenate(events)
 
-        return events, sum_weights
+        return events, float(sum_weights)
 
 
     @staticmethod

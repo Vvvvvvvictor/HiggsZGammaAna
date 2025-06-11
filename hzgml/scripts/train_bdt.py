@@ -8,6 +8,8 @@ import uproot
 import pickle
 from sklearn.metrics import roc_curve, auc, confusion_matrix, roc_auc_score
 from sklearn.preprocessing import StandardScaler, QuantileTransformer
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.utils.validation import check_array, check_is_fitted
 import xgboost as xgb
 from tabulate import tabulate
 import matplotlib.pyplot as plt
@@ -15,6 +17,8 @@ from tqdm import tqdm
 from pdb import set_trace
 import ROOT
 ROOT.gErrorIgnoreLevel = ROOT.kError + 1
+
+from weighted_quantile_transformer import WeightedQuantileTransformer # New import
 
 def getArgs():
     """Get arguments from command line."""
@@ -104,6 +108,8 @@ class XGBoostHandler(object):
         self.m_score_test_sig = {}
         self.m_score_test_bkg = {}
         self.m_tsf = {}
+        self.m_test_sig_w = {} # New: For storing test signal weights
+        self.m_test_bkg_w = {} # New: For storing test background weights
 
         self.inputTree = 'inclusive'
         self.train_signal = []
@@ -349,6 +355,14 @@ class XGBoostHandler(object):
 
         data = data[sorted(data.columns)]
 
+        # Replace values less than -900 with np.nan for correlation calculation
+        # This modification is local to the 'data' DataFrame in this function
+        for col_name in data.columns:
+            # Ensure the column is numeric before attempting comparison and assignment
+            if pd.api.types.is_numeric_dtype(data[col_name]):
+            # Use .loc for safe assignment to avoid SettingWithCopyWarning
+                data.loc[data[col_name] < -900, col_name] = np.nan
+
         data = data.corr() * 100
         # data = data.dropna(axis=0, how='all').dropna(axis=1, how='all')
 
@@ -460,6 +474,11 @@ class XGBoostHandler(object):
         self.m_val_wt[fold][self.m_val_wt[fold] < 0] = 0
         self.m_test_wt[fold] = pd.concat([test_sig_wt, test_bkg_wt]).to_numpy()
         self.m_test_wt[fold][self.m_test_wt[fold] < 0] = 0
+        
+        # Store weights for test signal and background separately for transformScore
+        self.m_test_sig_w[fold] = test_sig[self.weight].values.flatten()
+        self.m_test_bkg_w[fold] = test_bkg[self.weight].values.flatten()
+
 
         # setup the truth labels
         print('XGB INFO: Signal labeled as one; background labeled as zero.')
@@ -666,13 +685,25 @@ class XGBoostHandler(object):
 
         print(f'XGB INFO: transforming scores based on {sample}')
         # transform the scores
-        self.m_tsf[fold] = QuantileTransformer(n_quantiles=1000, output_distribution='uniform', subsample=1000000000, random_state=0)
-        #plt.hist(score_test_sig, bins='auto')
-        #plt.show()
-        if sample == 'sig': self.m_tsf[fold].fit(self.m_score_test_sig[fold].reshape(-1, 1))
-        elif sample == 'bkg': self.m_tsf[fold].fit(self.m_score_test_bkg[fold].reshape(-1, 1))
-        #score_test_sig_t=tsf.transform(self.m_score_test_sig[fold].reshape(-1, 1)).reshape(-1)
-        #plt.hist(score_test_sig_t, bins='auto')
+        # Use the new WeightedQuantileTransformer
+        self.m_tsf[fold] = WeightedQuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=0)
+        
+        if sample == 'sig':
+            scores_to_fit = self.m_score_test_sig[fold].reshape(-1, 1)
+            weights_for_fit = self.m_test_sig_w[fold]
+            self.m_tsf[fold].fit(scores_to_fit, sample_weight=weights_for_fit)
+        elif sample == 'bkg':
+            scores_to_fit = self.m_score_test_bkg[fold].reshape(-1, 1)
+            weights_for_fit = self.m_test_bkg_w[fold]
+            self.m_tsf[fold].fit(scores_to_fit, sample_weight=weights_for_fit)
+        
+        # The following lines for plotting transformed scores can be uncommented if needed for debugging
+        score_test_sig_t=self.m_tsf[fold].transform(self.m_score_test_sig[fold].reshape(-1, 1)).reshape(-1)
+        plt.hist(score_test_sig_t, weights=self.m_test_sig_w[fold] if sample=='sig' else None) # Example of weighted histogram
+        if os.path.isdir('plots/score_transform') is False:
+            os.makedirs('plots/score_transform')
+        plt.savefig('plots/score_transform/%d_BDT_%s_%d_%s_weighted.png' % (self._shield+1, self._region, fold, sample))
+        plt.clf() # Clear figure if shown or saved in loop
         #plt.show()
 
     def save(self, fold=0):

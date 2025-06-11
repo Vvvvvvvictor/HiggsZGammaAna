@@ -20,16 +20,16 @@ logging.basicConfig(
 def parse_arguments():
     """Parse command line arguments"""
     parser = argparse.ArgumentParser(description='Batch process VBF input ROOT files')
-    parser.add_argument('--input-dir', type=str, default='/eos/project/h/htozg-dy-privatemc/rzou/bdt/VBF_input/',
+    parser.add_argument('--input-dir', type=str, default='/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_input_new/',# BDT_input_new/',
                         help='Directory of input files')
     parser.add_argument('--output-dir', type=str, 
-                        default='/eos/user/j/jiehan/root/skimmed_ntuples_rui_run3/',
+                        default='/eos/user/j/jiehan/root/skimmed_ntuples_rui_new/',
                         help='Directory to save output files')
     parser.add_argument('--dry-run', action='store_true',
                         help='If set, only list files without processing them')
     parser.add_argument('--recover', action='store_true',
                         help='Attempt to recover corrupted files')
-    parser.add_argument('--years', type=str, nargs='+', default=["2022", "2022EE", "2023", "2023BPix"],
+    parser.add_argument('--years', type=str, nargs='+', default=["2016", "2016APV", "2017", "2018", "2022", "2022EE", "2023", "2023BPix"],
                         help='List of years to process (default: "2016", "2016APV", "2017", "2018", "2022", "2022EE", "2023", "2023BPix")')
     return parser.parse_args()
 
@@ -45,7 +45,10 @@ def main():
         "SM2": "ZGToLLG2",
         "data": "Data",
         "GGF": "ggH_M125",
-        "VBF": "VBF_M125"
+        "VBF": "VBF_M125",
+        "WH": "WH_M125",
+        "ZH": "ZH_M125",
+        "ttH": "ttH_M125"
     }
     
     # Map tree names based on process
@@ -56,7 +59,10 @@ def main():
         "SM2": "TreeB",
         "data": "TreeB",
         "GGF": "TreeS",
-        "VBF": "TreeS"
+        "VBF": "TreeS",
+        "WH": "TreeS",
+        "ZH": "TreeS",
+        "ttH": "TreeS"
     }
     
     # Year mapping for output file naming
@@ -67,6 +73,18 @@ def main():
         "2022EE": "2022postEE", 
         "2023": "2023preBPix",
         "2023BPix": "2023postBPix"
+    }
+
+    # Define year to integer mapping
+    year_to_int_mapping = {
+        "2016preVFP": 0,
+        "2016postVFP": 1,
+        "2017": 2,
+        "2018": 3,
+        "2022preEE": 4,
+        "2022postEE": 5,
+        "2023preBPix": 6,
+        "2023postBPix": 7
     }
     
     # Branch renaming mapping
@@ -81,6 +99,7 @@ def main():
         # "llphoton_dijet_balance": "pt_balance",
         # "cosTheta": "Z_cos_theta",
 
+        "llphoton_refit_pTt": "H_ptt",
         "pt_mass_refit": "H_relpt",
         "llphoton_refit_m": "H_mass",
         "ll_refit_m": "Z_mass",
@@ -114,11 +133,11 @@ def main():
     }
     
     # Find all matching files
-    input_files = glob.glob(os.path.join(args.input_dir, "*_*_pinnacles_fixed.root"))
+    input_files = glob.glob(os.path.join(args.input_dir, "*_*_pinnacles_all.root"))
     logging.info(f"Found {len(input_files)} files")
     
     # 修改正则表达式以匹配更多年份格式，包括2022EE和2023BPix等特殊年份
-    pattern = re.compile(r'([^_]+)_((?:2016APV)|(?:2022EE)|(?:2023BPix)|[0-9]{4})_pinnacles_fixed\.root')
+    pattern = re.compile(r'([^_]+)_((?:2016APV)|(?:2022EE)|(?:2023BPix)|[0-9]{4})_pinnacles_all\.root')
     
     # Statistics for processing results
     stats = {"success": 0, "skipped": 0, "recovered": 0, "failed": 0}
@@ -165,7 +184,7 @@ def main():
         output_path = os.path.join(output_dir, f"{year}.root")
         
         if args.dry_run:
-            logging.info(f"Will process: {file_path} -> {output_path} (Tree: {tree_name} -> two_jet)")
+            logging.info(f"Will process: {file_path} -> {output_path} (Tree: {tree_name} -> all_jet)")
             continue
             
         try:
@@ -196,18 +215,29 @@ def main():
                             # Retain branches that do not require renaming
                             new_data[old_name] = data[old_name]
                     
+                    # Get the integer value for the current year
+                    year_int_value = year_to_int_mapping.get(year, -1) # Default to -1 if year not in map
+                    new_data["year"] = np.full(len(data), year_int_value, dtype=np.int32)
+
                     # Convert data to an Array
                     ak_array = ak.Array(new_data)
-                    print(f"ak_array event count before VBF selection: {len(ak_array)}")
+                    print(f"ak_array event count before lepton selection: {len(ak_array)}")
 
-                    # Add VBF channel selection
-                    print(f"ak_array event count after njets selection: {len(ak_array[ak_array['n_jets'] >= 2])}")
-                    ak_array = ak_array[(ak_array["n_jets"] >= 2) & (ak_array["nbdfm"] == 0)]
-                    print(f"ak_array event count after VBF selection: {len(ak_array)}")
+                    ak_array = ak_array[ak_array["nel"] + ak_array["nmu"] == 2]
                     
-                    # Write to new file with tree named "two_jet"
+                    # Write to new file with tree named "all_jet"
                     with uproot.recreate(output_path) as out:
-                        out["two_jet"] = ak_array
+                        ak_array = ak_array[((ak_array["n_jets"] >= 2) & (ak_array["nbdfm"] == 0)) | ((ak_array["n_jets"] < 2) & (ak_array["met"] < 90))]
+                        print(f"ak_array event count after all_jet selection: {len(ak_array)}")
+                        out["all_jet"] = ak_array
+
+                        ak_array_vbf = ak_array[ak_array["n_jets"] >= 2]
+                        print(f"ak_array_vbf event count after VBF selection: {len(ak_array_vbf)}")
+                        out["two_jet"] = ak_array_vbf
+
+                        ak_array_ggf = ak_array[ak_array["n_jets"] < 2]
+                        print(f"ak_array_ggf event count after GGF selection: {len(ak_array_ggf)}")
+                        out["zero_to_one_jet"] = ak_array_ggf
                     
                     logging.info(f"Successfully processed: {file_path} -> {output_path}")
                     stats["success"] += 1
@@ -240,3 +270,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# rm ZGToLLG/2022preEE.root; hadd ZGToLLG/2022preEE.root ZGToLLG1/2022preEE.root ZGToLLG2/2022preEE.root
+# rm ZGToLLG/2022postEE.root; hadd ZGToLLG/2022postEE.root ZGToLLG1/2022postEE.root ZGToLLG2/2022postEE.root

@@ -17,11 +17,11 @@ from pdb import set_trace
 from tqdm import tqdm
 
 # General settings
-TUNING_HYPERPARAMER = True
-USE_STORED_PARAMS = True
-USE_STORED_MODEL = False
+TUNING_HYPERPARAMER = False
+USE_STORED_PARAMS = False
+USE_STORED_MODEL = True
 CATEGORIZATION = True
-APPLY_BDT = True
+APPLY_BDT = False
 FLOATB = True
 REWEIGHT = True
 TRANSFORM = True
@@ -49,9 +49,9 @@ def accuracy_score(y_true, y_pred, weights, H_mass):
     return np.sqrt(significance)
 
 # Example data input from user
-filepath = "/eos/user/j/jiehan/root/outputs/two_jet"
-bkg_names = ["ZGToLLG", "DYJetsToLL", "EWKZ2J", "ZG2JToG2L2J", "WGToLNuG", "TT", "TTGJets", "TGJets", "WW", "WZ", "ZZ", "ttZJets", "ttWJets"]
-sig_names = ["ggH_M125", "VBF_M125", "ZH_M125", "WplusH_M125", "WminusH_M125", "ZH_M125", "ttH_M125"]
+filepath = "/eos/user/j/jiehan/root/outputs/test/all_jet"
+bkg_names = ["ZGToLLG", "DYJetsToLL", "EWKZ2J"] #, "ZG2JToG2L2J", "WGToLNuG", "TT", "TTGJets", "TGJets", "WW", "WZ", "ZZ", "ttZJets", "ttWJets"
+sig_names = ["ggH_M125", "VBF_M125"] #, "ZH_M125", "WplusH_M125", "WminusH_M125", "ZH_M125", "ttH_M125"
 data_names = ["Data"]
 
 print("Loading data...")
@@ -59,19 +59,19 @@ print("Loading data...")
 # Load background data
 bkg_data = pd.DataFrame()
 for bkg in bkg_names:
-    bkg_data = pd.concat([bkg_data, uproot.open(f"{filepath}/{bkg}.root")["two_jet"].arrays(["bdt_score", "vbf_score", "weight", "H_mass", "event"], library="pd").query("H_mass > 100 & H_mass < 180")], ignore_index=True)
+    bkg_data = pd.concat([bkg_data, uproot.open(f"{filepath}/{bkg}.root")["all_jet"].arrays(["bdt_score", "vbf_score", "weight", "H_mass", "event"], library="pd").query("H_mass > 100 & H_mass < 180")], ignore_index=True)
 bkg_data["label"] = 0
 
 # Load signal data
 sig_data = pd.DataFrame()
 for sig in sig_names:
-    sig_data = pd.concat([sig_data, uproot.open(f"{filepath}/{sig}.root")["two_jet"].arrays(["bdt_score", "vbf_score", "weight", "H_mass","event"], library="pd").query("H_mass > 100 & H_mass < 180")], ignore_index=True)
+    sig_data = pd.concat([sig_data, uproot.open(f"{filepath}/{sig}.root")["all_jet"].arrays(["bdt_score", "vbf_score", "weight", "H_mass","event"], library="pd").query("H_mass > 100 & H_mass < 180")], ignore_index=True)
 sig_data["label"] = 1
 
 # Load data data
 data_data = pd.DataFrame()
 for data in data_names:
-    data_data = pd.concat([data_data, uproot.open(f"{filepath}/{data}.root")["two_jet"].arrays(["bdt_score", "vbf_score", "weight", "H_mass", "event"], library="pd").query("(H_mass > 100 & H_mass < 120) | (H_mass > 130 & H_mass < 180)")], ignore_index=True)
+    data_data = pd.concat([data_data, uproot.open(f"{filepath}/{data}.root")["all_jet"].arrays(["bdt_score", "vbf_score", "weight", "H_mass", "event"], library="pd").query("(H_mass > 100 & H_mass < 120) | (H_mass > 130 & H_mass < 180)")], ignore_index=True)
 
 print("Preparing data for BDT training...")
 
@@ -240,7 +240,7 @@ for i in range(4):
         pkl.dump(xgb, open(f"models/xgb_models_{i}.pkl", "wb"))
     
     xgbs.append(xgb)
-    plot_feature_importance(xgb, ['Dijet', 'VBF'], i)
+    plot_feature_importance(xgb, ['all_jet', 'VBF'], i)
     plot_auc(y_train[i], xgb.predict_proba(X_train[i])[:, 1], weights_train[i], y_val[i], xgb.predict_proba(X_val[i])[:, 1], weights_val[i], y_test[i], xgb.predict_proba(X_test[i])[:, 1], weights_raw_test[i], i)
     
     # Transform the score
@@ -421,21 +421,21 @@ with uproot.recreate("output_with_categories.root") as f:
     
 if APPLY_BDT:
     def apply_bdt(xgbs, name, boundaries, input_dir, output_dir):
-        data = uproot.open(f"{input_dir}/{name}.root")["two_jet"].arrays(library="pd").query("H_mass > 100 & H_mass < 180")
-        data.rename(columns={"bdt_score_t": "two_jet_score_t", "bdt_score": "two_jet_score"}, inplace=True)
+        data = uproot.open(f"{input_dir}/{name}.root")["all_jet"].arrays(library="pd").query("H_mass > 100 & H_mass < 180")
+        data.rename(columns={"bdt_score_t": "all_jet_score_t", "bdt_score": "all_jet_score"}, inplace=True)
         data_o = pd.DataFrame()
         for i in range(4):
             data_cat= data.query(f"event % 314159 % 4 == {i}")
-            X = np.vstack((data_cat["two_jet_score"], data_cat["vbf_score"])).T
+            X = np.vstack((data_cat["all_jet_score"], data_cat["vbf_score"])).T
             data_cat["bdt_score"] = xgbs[i].predict_proba(X)[:, 1]
             data_cat["bdt_score_t"] = tfers[i].transform(data_cat["bdt_score"].values.reshape(-1, 1)).flatten()
             data_o = pd.concat([data_o, data_cat], ignore_index=True)
         data_o["category"] = np.digitize(data_o["bdt_score_t"], boundaries) - 1
         with uproot.recreate(f"{output_dir}/{name}.root") as f:
-            f["two_jet"] = data_o
+            f["all_jet"] = data_o
         
-    input_dir = "/eos/user/j/jiehan/root/outputs/two_jet"
-    output_dir = "/eos/user/j/jiehan/root/outputs/two_jet_2D_categories"
+    input_dir = "/eos/user/j/jiehan/root/outputs/test/all_jet"
+    output_dir = "/eos/user/j/jiehan/root/outputs/test/all_jet_2D_categories"
     if os.path.exists(output_dir) == False:
         os.mkdir(output_dir)
     for bkg in bkg_names:

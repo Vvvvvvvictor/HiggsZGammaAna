@@ -238,7 +238,7 @@ def main():
 
     input_path = args.input + '/val'
 
-    sigs = ['ggH_M125','VBF_M125'] #,'WminusH_M125','WplusH_M125','ZH_M125','ttH_M125']
+    sigs = ['ggH_M125','VBF_M125'] #,'WminusH_M125','WplusH_M125','ZH_M125','ttH_M125', 'WH_M125']
     # sigs = ['ggH','VBF','WminusH','WplusH','ZH','ttH']
 
     # bkgs = ['data_fake', 'mc_med', 'mc_true']
@@ -246,7 +246,6 @@ def main():
     if args.floatB and args.nbin == 16:
         print('ERROR: With floatB option, the maximun nbin is 15!!')
         quit()
-
 
     region = args.region
 

@@ -1,8 +1,13 @@
 #!/bin/bash                                                                                                                                                                       
 echo "==============STARTED=============="
 
+<<<<<<< HEAD
 # input="/eos/user/j/jiehan/parquet/nanov9/"
 # target="/eos/home-j/jiehan/root/skimmed_ntuples_run2/"
+=======
+input="/eos/user/j/jiehan/parquet/cutflow_ggf_var/"
+target="/eos/home-j/jiehan/root/skimmed_ntuples_run2/"
+>>>>>>> hejiehan
 # input="/eos/user/j/jiehan/parquet/nanov12/"
 # target="/eos/home-j/jiehan/root/skimmed_ntuples_run3/"
 # target="./"
@@ -17,10 +22,15 @@ target="/eos/home-p/pelai/HZgamma/Root_Dataset/run3_jetsmear_pt50/NanoV12/"
 
 
 # years=(2016preVFP 2016postVFP 2017 2018 2022preEE 2022postEE 2023preBPix 2023postBPix)
+<<<<<<< HEAD
 # years=(2016preVFP 2016postVFP 2017 2018)
 years=(2022preEE 2022postEE 2023preBPix 2023postBPix)
 # years=(2022preEE 2022postEE)
 # years=(2023preBPix 2023postBPix)
+=======
+years=(2017)
+# years=(2022preEE 2022postEE 2023preBPix 2023postBPix)
+>>>>>>> hejiehan
 systs=("FNUF" "Material" "Scale" "Smearing" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt")
 # systs=("FNUF" "Material" "Scale" "Smearing" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt")
 

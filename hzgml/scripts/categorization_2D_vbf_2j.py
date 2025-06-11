@@ -30,7 +30,7 @@ def getArgs():
     """Get arguments from command line."""
     parser = ArgumentParser()
     parser.add_argument('-r', '--region', action = 'store', choices = ['all_jet', 'two_jet', 'one_jet', 'zero_jet'], default = 'two_jet', help = 'Region to process')
-    parser.add_argument('-i', '--input', action = 'store', default = '/eos/home-j/jiehan/root/outputs', help = 'Path of root file for categorization')
+    parser.add_argument('-i', '--input', action = 'store', default = '/eos/home-j/jiehan/root/outputs/test', help = 'Path of root file for categorization')
     parser.add_argument('-va', '--variable', action = 'store', choices = ['bdt', 'NN'], default = 'bdt', help = 'MVA variable to use')
     parser.add_argument('-n', '--nscan', type = int, default = 100, help='number of scan.')
     parser.add_argument('--nscanvbf', type = int, default = 100, help='number of scan.')
@@ -40,7 +40,7 @@ def getArgs():
     parser.add_argument('--minN', type = float, default = 5, help = 'minimum number of events in mass window')
     #parser.add_argument('--val', action = 'store_true', default = False, help = 'use validation samples for categroization')
     parser.add_argument('-t', '--transform', action = 'store_true', default = True, help = 'use the transform scores for categroization')
-    parser.add_argument('--transform_vbf', action = 'store_true', default = False, help = 'use the transform VBF scores for categroization')
+    parser.add_argument('--transform_vbf', action = 'store_true', default = True, help = 'use the transform VBF scores for categroization')
     parser.add_argument('--floatB', action = 'store_true', default = False, help = 'Floting last boundary')
     parser.add_argument('-es', '--estimate', action = 'store', choices = ['fullSim', 'fullSimrw', 'data_sid'], default = 'fullSimrw', help = 'Method to estimate significance')
     parser.add_argument('-f', '--nfold', type = int, default = 1, help='number of folds.')
@@ -71,14 +71,12 @@ def gettingsig(input_path, region, variable, vb, boundaries_VBF, boundaries, tra
 
     for category in ['sig', 'VBF', 'ggH', "data_sid", "bkgmc_sid", "bkgmc_cen", "sig_tot"]:
 
-        # for data in tqdm(read_root(f'{input_path}/{region}/{"bkgmc" if "bkgmc" in category else "data" if "data" in category else category}.root', key='test', columns=[f"{variable}_score{'_t' if transform else ''}", f"{variable}_score_VBF{'_t' if transform else ''}", 'H_mass', 'weight', 'event'], chunksize=500000), desc=f'Loading {category}', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
-
         # Construct the file path
-        file_path = f'{input_path}/{region}/{"bkgmc" if "bkgmc" in category else "data" if "data" in category else "sig" if "sig" in category else category}.root'
+        file_path = f'{input_path}/{region}/{"bkgmc" if "bkgmc" in category else "Data" if "data" in category else "sig" if "sig" in category else "VBF_M125" if "VBF" in category else "ggH_M125" if "ggH" in category else category}.root'
 
         # Open the ROOT file
         with uproot.open(file_path) as f:
-            # Specify the TTree name (assuming it's called 'test')
+            # Specify the TTree name (assuming it's called region)
             tree = f["test"]
 
             # Specify the columns you want to read
@@ -91,7 +89,7 @@ def gettingsig(input_path, region, variable, vb, boundaries_VBF, boundaries, tra
             ]
 
             # Read the data in chunks
-            for data in tqdm(tree.iterate(columns, step_size=500000), desc=f"Loading {category}", bar_format="{desc}: {percentage:3.0f}%|{bar:20}{r_bar}"):
+            for data in tqdm(tree.iterate(columns, library='pd', step_size=500000), desc=f"Loading {category}", bar_format="{desc}: {percentage:3.0f}%|{bar:20}{r_bar}"):
     
                 if 'sid' in category:
                     data = data[(data.H_mass >= 100) & (data.H_mass <= 180) & ((data.H_mass < 120) | (data.H_mass > 130))]
@@ -174,14 +172,14 @@ def categorizing(input_path, region, variable, sigs, bkgs, nscan, nscanvbf, minN
 
     # get inputs
     f_sig = TFile('%s/%s/sig.root' % (input_path, region))
-    t_sig = f_sig.Get('test')
+    t_sig = f_sig.Get(region)
 
     if estimate in ["fullSim", "fullSimrw"]:
         f_bkgmc = TFile('%s/%s/bkgmc.root' % (input_path, region))
-        t_bkgmc = f_bkgmc.Get('test')
+        t_bkgmc = f_bkgmc.Get(region)
     if estimate in ["fullSimrw", "data_sid"]:
-        f_data_sid = TFile('%s/%s/data.root' % (input_path, region))
-        t_data_sid = f_data_sid.Get('test')
+        f_data_sid = TFile('%s/%s/Data.root' % (input_path, region))
+        t_data_sid = f_data_sid.Get(region)
 
     # filling signal histograms
     h_sig_raw = TH2F('h_sig_raw', 'h_sig_raw', nscanvbf, 0., 1., nscan, 0., 1.) 
@@ -343,9 +341,9 @@ def main():
     shield = args.shield
     input_path = args.input
 
-    sigs = ['ggH','VBF','WminusH','WplusH','ZH','ttH']
+    sigs = ['ggH_M125','VBF_M125'] #,'WminusH','WplusH','ZH','ttH']
 
-    bkgs = ["ZGToLLG", "DYJetsToLL", "EWKZ2J", "ZG2JToG2L2J", "WGToLNuG", "TT", "TTGJets", "TGJets", "WW", "WZ", "ZZ", "ttZJets", "ttWJets"]
+    bkgs = ["ZGToLLG", "DYJetsToLL", "EWKZ2J"] #, "ZG2JToG2L2J", "WGToLNuG", "TT", "TTGJets", "TGJets", "WW", "WZ", "ZZ", "ttZJets", "ttWJets"]
 
     region = args.region
 

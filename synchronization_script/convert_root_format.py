@@ -46,7 +46,7 @@ def map_sample_name(sample):
 class DataConverter:
     def __init__(self):
         """Initialize the Data Converter with category boundaries."""
-        self.cat_boundaries = [-float('inf'), 0.083, 0.402, 0.518, float('inf')]
+        self.cat_boundaries = [-float('inf'), 0.083, 0.286, 0.489, float('inf')]
         self.bdt_branch = 'BDT_score_2j'
         self.lepton_branch = 'll_lepid'
         
@@ -123,18 +123,22 @@ def process_data_files(converter, output_folder, input_folder):
                 
                 # Add new dZ branch filled with 0.0
                 data['dZ'] = 0.0
-                data = data.query('(CMS_hgg_mass > 95) & (CMS_hgg_mass < 170)')
+                data = data.query('(CMS_hgg_mass > 95) & (CMS_hgg_mass < 180)')
                 
                 # Split data by BDT categories and lepton types
                 data_splits, lepton_splits = converter.split_by_categories(data)
                 
                 # Write categories to output file - both original split and lepton split
                 for i, split_data in enumerate(data_splits):
-                    if region == 'VBF':
-                        if i == 0:
-                            split_data = split_data.query('CMS_hgg_mass > 100')
-                        elif i == 1 or i == 2 or i == 3:
-                            split_data = split_data.query('CMS_hgg_mass > 95')
+                    # if region == 'VBF':
+                    #     if i == 0:
+                    #         split_data = split_data.query('CMS_hgg_mass > 105 & CMS_hgg_mass < 170')
+                    #     elif i == 1:
+                    #         split_data = split_data.query('CMS_hgg_mass > 100 & CMS_hgg_mass < 165')
+                    #     elif i == 2:
+                    #         split_data = split_data.query('CMS_hgg_mass > 95 & CMS_hgg_mass < 161')
+                    #     elif i == 3:
+                    #         split_data = split_data.query('CMS_hgg_mass > 95 & CMS_hgg_mass < 160')
                     logging.info(f"Number of events in {region}{i}: {len(split_data)}")
                     outfile[f'DiphotonTree/Data_13TeV_{region}{i}'] = split_data
     

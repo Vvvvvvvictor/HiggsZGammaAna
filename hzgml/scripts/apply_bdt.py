@@ -18,6 +18,8 @@ import ROOT
 ROOT.gErrorIgnoreLevel = ROOT.kError + 1
 pd.options.mode.chained_assignment = None
 
+from weighted_quantile_transformer import WeightedQuantileTransformer # New import
+
 def getArgs():
     """Get arguments from command line."""
     parser = ArgumentParser()
@@ -307,6 +309,16 @@ def main():
     for category in sample_list:
         if args.category and category not in args.category: continue
         xgb.applyBDT(category, shift=1)
+
+    xgb.setOutputFolder(args.outputFolder.replace('test', 'train1'))
+    for category in sample_list:
+        if args.category and category not in args.category: continue
+        xgb.applyBDT(category, shift=2)
+
+    xgb.setOutputFolder(args.outputFolder.replace('test', 'train2'))
+    for category in sample_list:
+        if args.category and category not in args.category: continue
+        xgb.applyBDT(category, shift=3)
         
     return
 
