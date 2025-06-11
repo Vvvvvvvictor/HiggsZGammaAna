@@ -29,7 +29,7 @@
                          ]
             },
 "two_jet":  {"+train_signal": [],
-              "+preselections": ["n_jets >= 2", "H_mass >= 95", "H_mass <= 180"],
+              "+preselections": ["n_jets >= 2", "H_mass >= 120", "H_mass <= 130"],
               "inputTree": "two_jet",
               "+train_variables": ["H_relpt", "delta_phi_zgjj", "mass_jj",
                                 "delta_eta_jj", "pt_balance", "n_jets",
