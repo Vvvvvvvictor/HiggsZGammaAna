@@ -57,21 +57,21 @@ echo "Shielded parameter is: $S . Added variables is: $A ."
 # for fold in {0..3};do
 # python scripts/train_bdt.py -r all_jet --optuna --n-calls 100 --continue-optuna 0 --optuna_metric "sqrt_eval_auc_minus_train_auc" --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --fold 0 #$fold
 # done
-# python scripts/train_bdt.py -r all_jet --save --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --hyperparams_path "models/optuna_all_jet"
+python scripts/train_bdt.py -r all_jet --save --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --hyperparams_path "models/optuna_all_jet_0602"
 # # python scripts/train_bdt.py -r two_jet --save --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new"
 # # python scripts/train_bdt.py -r VBF --save --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new"
 # # python scripts/train_bdt.py -r VBF --save --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" #--hyperparams_path "models/optuna_ggf_vbf"
-# python scripts/apply_bdt.py -r all_jet --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --outputFolder "/eos/home-j/jiehan/root/outputs/test"
+python scripts/apply_bdt.py -r all_jet --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --outputFolder "/eos/home-j/jiehan/root/outputs/test"
 # for i in 5 6 7 8 9;
 # do
 #     python scripts/categorization_1D.py -r all_jet -b $i --minSB 20 --minN 4 -es "fullSimrw" --input "/eos/home-j/jiehan/root/outputs" #--floatB
 # done
-# python scripts/categorization_1D.py -r all_jet -b 8 --minSB 20 --minN 4 -es "fullSimrw" --input "/eos/home-j/jiehan/root/outputs" #--floatB
+python scripts/categorization_1D.py -r all_jet -b 8 --minSB 20 --minN 4 -es "fullSimrw" --input "/eos/home-j/jiehan/root/outputs" #--floatB
 # python scripts/calculate_fold_significance.py
 # # python scripts/categorization_2D.py -r all_jet -b 6 -v 3 --minN 2 -es "fullSimrw"
 
-python ../plot_python/plot_cats_hmass_dis.py --channel "two_jet"
-python ../plot_python/plot_cats_hmass_dis.py --channel "zero_to_one_jet"
+# python ../plot_python/plot_cats_hmass_dis.py --channel "two_jet"
+# python ../plot_python/plot_cats_hmass_dis.py --channel "zero_to_one_jet"
 python ../plot_python/plot_cats_hmass_dis.py --channel "all_jet"
 # python ../plot_python/compare_sig_bkg_bdt_sosb.py 
 

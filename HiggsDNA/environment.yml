@@ -22,6 +22,7 @@ dependencies:
   - uproot
   - vector
   - xrootd
+  - orjson
   - pip:
     - correctionlib
     - pydantic

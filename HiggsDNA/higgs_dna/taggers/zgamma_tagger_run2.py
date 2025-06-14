@@ -309,18 +309,6 @@ class ZGammaTaggerRun2(Tagger):
                 name = "Photon",
                 data = events.Photon[photon_selection],
         )
-        FSRphoton_selection = self.select_FSRphotons(
-                FSRphotons = events.FsrPhoton,
-                electrons = electrons,
-                photons = photons,
-                options = self.options["FSRphotons"]
-        )
-        FSRphotons = awkward_utils.add_field(
-            events = events,
-            name = "SelectedFSRPhotons",
-            data = events.FsrPhoton[FSRphoton_selection]
-        )
-        FSRphotons = awkward.with_field(FSRphotons, awkward.ones_like(FSRphotons.pt) * 0.0, "mass")
 
         if "2017" in self.year or "2018" in self.year:
             year = self.year[:4]
@@ -382,15 +370,7 @@ class ZGammaTaggerRun2(Tagger):
         photons = awkward.Array(photons, with_name = "Momentum4D")
         electrons = awkward.Array(electrons, with_name = "Momentum4D")
         muons = awkward.Array(muons, with_name = "Momentum4D")
-        FSRphotons = awkward.Array(FSRphotons, with_name = "Momentum4D")
 
-        awkward_utils.add_object_fields(
-                events = events,
-                name = "gamma_fsr",
-                objects = FSRphotons,
-                n_objects = 2,
-                dummy_value = DUMMY_VALUE
-            )
 
         ee_pairs = awkward.combinations(electrons, 2, fields = ["LeadLepton", "SubleadLepton"])
         os_cut = (ee_pairs.LeadLepton.charge * ee_pairs.SubleadLepton.charge) == -1
@@ -637,6 +617,31 @@ class ZGammaTaggerRun2(Tagger):
                     awkward.fill_none(z_cand.SubleadLepton[field], DUMMY_VALUE)
             )
 
+        FSRphoton_selection = self.select_FSRphotons(
+                FSRphotons = events.FsrPhoton,
+                electrons = electrons,
+                photons = photons,
+                z_cand = z_cand,
+                options = self.options["FSRphotons"]
+        )
+        FSRphotons = awkward_utils.add_field(
+            events = events,
+            name = "SelectedFSRPhotons",
+            data = events.FsrPhoton[FSRphoton_selection]
+        )
+        FSRphotons = awkward.with_field(FSRphotons, awkward.ones_like(FSRphotons.pt) * 0.0, "mass")        
+        FSRphotons = awkward.Array(FSRphotons, with_name = "Momentum4D")
+        awkward_utils.add_object_fields(
+                events = events,
+                name = "gamma_fsr",
+                objects = FSRphotons,
+                n_objects = 1,
+                dummy_value = DUMMY_VALUE
+            )
+        awkward_utils.add_field(events, "n_fsr", awkward.num(FSRphotons), overwrite=True)
+        logger.debug(f"Number of FSR photons: {awkward.num(FSRphotons)}")
+        logger.debug(f"Total number of FSR photons: {sum(awkward.num(FSRphotons)>0)}")
+
         # Make gamma candidate-level cuts
         has_gamma_cand = (awkward.num(photons) >= 1) #& (events.n_iso_photons == 0) # only for dy samples
         gamma_cand = awkward.firsts(photons)
@@ -702,8 +707,8 @@ class ZGammaTaggerRun2(Tagger):
 
         event_filter = (events.Flag_goodVertices & 
                         events.Flag_globalSuperTightHalo2016Filter & 
-                        events.Flag_HBHENoiseFilter & 
-                        events.Flag_HBHENoiseIsoFilter & 
+                        ((awkward.num(events.Photon) >= 0) if "202" in self.year else events.Flag_HBHENoiseFilter) & 
+                        ((awkward.num(events.Photon) >= 0) if "202" in self.year else events.Flag_HBHENoiseIsoFilter) & 
                         events.Flag_EcalDeadCellTriggerPrimitiveFilter & 
                         events.Flag_BadPFMuonFilter & 
                         events.Flag_BadPFMuonDzFilter & 
@@ -804,64 +809,12 @@ class ZGammaTaggerRun2(Tagger):
         #     cut_type = "zgammas_unweighted"
         # )
 
-
         elapsed_time = time.time() - start
         logger.debug("[ZGammaTagger] %s, syst variation : %s, total time to execute select_zgammas: %.6f s" % (self.name, self.current_syst, elapsed_time))
 
         #dummy_cut =  awkward.num(events.Photon) >= 0
         return all_cuts, events 
 
-
-    # def select_fake_and_medium_photons(self, events, photons):
-    #     # | pt | scEta | H over EM | sigma ieie | Isoch | IsoNeu | Isopho | 
-    #     # listed from the right side
-    #     mask1 = 0b10101010101010  # full medium ID
-    #     mask2 = 0b00101010101010  # remove Isopho
-    #     mask3 = 0b10001010101010  # remove IsoNeu
-    #     mask4 = 0b10100010101010  # remove Isoch 
-    #     mask5 = 0b10101000101010  # remove sigma ieie
-    #     mask6 = 0b10100000101010  # remove the Isoch and sigma ieie
-
-    #     # photons = photons[photons.pixelSeed]
-    #     bitmap = photons.vidNestedWPBitmap
-
-    #     # select medium and control photons
-    #     # after adding the photons that pass the full ID, add the photons that pass the inverted ID
-    #     # select control photons that don't pass the full ID but pass ID that one of cut inverted, which means this cut is inverted
-    #     # also the fake photon enriched region
-    #     # use photon_selection to identified the type of events
-    #     medium_and_control_cut = ((bitmap & mask1) == mask1) | ((bitmap & (mask2 + (3<<12))) == mask2) | ((bitmap & (mask3 + (3<<10))) == mask3) | ((bitmap & (mask4 + (3<<8))) == mask4) | ((bitmap & mask6) == mask6)
-    #     selected_medium_or_control_photons = photons[medium_and_control_cut] # append the medium and control photons
-
-    #     pass_selection1 = awkward.num(selected_medium_or_control_photons) >= 1  # select medium and control photons without fake photon
-    #     awkward_utils.add_field(events, "pass_selection1", pass_selection1)  # has selected medium and control photons
-
-    #     med_cand = awkward.firsts(selected_medium_or_control_photons) #similar to the gamma_cand
-
-    #     bitmap = med_cand.vidNestedWPBitmap 
-    #     photon_selection = (
-    #         (((bitmap & mask1) == mask1) << 0) + 
-    #         (((bitmap & (mask2 + (3<<12))) == mask2) << 1) + 
-    #         ((((bitmap & (mask3 + (3<<10)))) == mask3) << 2) + 
-    #         (((bitmap & (mask4 + (3<<8))) == mask4) << 3) + 
-    #         (((bitmap & (mask5 + (3<<6))) == mask5) << 4) + 
-    #         (((bitmap & mask5) == mask5) << 5) + 
-    #         ((((bitmap & mask6) == mask6) & ((bitmap & mask5) != mask5)) << 6)
-    #     )
-    #     awkward_utils.add_field(events, "photon_selection", awkward.fill_none(photon_selection, -1))
-    #     #pass_selection1 && photon_selection==1 or 5 or 7 -> build ture template from MC and data template from data
-    #     #pass_selection1 && photon_selection==4 or 6 or 8  && chiso side band -> build fake tempalte from data
-    #     #pass_selection1 && ((photon_selection!=1 && photon_selection==2) || (!1 && ==3) || (!1 && ==4) || (!=1 && ==5)) -> build non-prompt photon sample from data
-
-    #     awkward_utils.add_field(events, "photon_is_barrel", awkward.fill_none(med_cand.isScEtaEB, -1))
-    #     awkward_utils.add_field(events, "photon_is_endcap", awkward.fill_none(med_cand.isScEtaEE, -1))
-    #     for field in ["pt", "eta", "phi", "sieie"]:
-    #         awkward_utils.add_field(
-    #             events,
-    #             "photon_%s" % field,
-    #             awkward.fill_none(getattr(med_cand, field), DUMMY_VALUE)
-    #         )
-    #     awkward_utils.add_field(events, "photon_chiso",  awkward.fill_none(med_cand.pfRelIso03_chg, DUMMY_VALUE))
     
     def calculate_gen_info(self, zgammas, options):
         """
@@ -969,17 +922,48 @@ class ZGammaTaggerRun2(Tagger):
 
         return all_cuts
 
-    def select_FSRphotons(self, FSRphotons, electrons, photons, options):
+    def select_FSRphotons(self, FSRphotons, electrons, photons, z_cand, options):
+        # Basic kinematic cuts: pt > 2 GeV and |eta| < 2.4
         FSR_pt_cut = FSRphotons.pt > options["pt"]
         FSR_eta_cut = abs(FSRphotons.eta) < options["eta"]
-
         FSR_iso_cut = FSRphotons.relIso03 < options["iso"]
         FSR_dROverEt2_cut = FSRphotons.dROverEt2 < options["dROverEt2"]
         
+        # Clean from electrons and photons - remove FSR photons too close to electrons or photons
         FSRphoton_clean = object_selections.delta_R(FSRphotons, electrons, 0.001) & object_selections.delta_R(FSRphotons, photons, 0.001)
+        
+        # Require ΔR > 0.2 from highest pt photon
+        highest_pt_photon = photons[awkward.argmax(photons.pt, axis=1, keepdims=True)]
+        FSR_photon_separation = object_selections.delta_R(FSRphotons, highest_pt_photon, 0.2)
+        
+        # Apply lepton-type specific selections
+        is_muon_channel = awkward.fill_none(z_cand.LeadLepton.id == 13, False)
+        # is_electron_channel = awkward.fill_none(abs(z_cand.LeadLepton.id) == 11, False)
+        
+        FSR_all_cuts = FSR_pt_cut & FSR_eta_cut & FSR_iso_cut & FSR_dROverEt2_cut & FSRphoton_clean & FSR_photon_separation & is_muon_channel
+        
+        # For multiple FSR photons, select the one with smallest ΔR/ET²
+        # This follows the criteria: for events with multiple FSR photons passing criteria 
+        # for the same lepton, choose FSR photon with smallest ΔR(lepton,γ)/E²ₜ,γ
+        best_fsr_idx = awkward.argmin(
+            awkward.where(FSR_all_cuts, FSRphotons.dROverEt2, float('inf')), 
+            axis=1, 
+            keepdims=True
+        )
+        
+        # Create final selection mask: only one FSR photon per event
+        event_range = awkward.local_index(FSRphotons.pt, axis=1)
+        best_fsr_mask = (event_range == best_fsr_idx)
+        all_cut = best_fsr_mask & FSR_all_cuts
 
-        FSR_all_cuts = FSR_pt_cut & FSR_eta_cut & FSR_iso_cut & FSR_dROverEt2_cut & FSRphoton_clean
+        self.register_cuts(
+            names = ["FSR_pt", "FSR_eta", "FSR_iso", "FSR_dROverEt2", "FSR_clean", "FSR_separation", "FSR_all_cuts", "best_fsr_mask", "all"],
+            results = [FSR_pt_cut, FSR_eta_cut, FSR_iso_cut, FSR_dROverEt2_cut, FSRphoton_clean, FSR_photon_separation, FSR_all_cuts, best_fsr_mask, all_cut],
+            cut_type = "FSRphotons"
+        )
 
+        FSR_all_cuts = awkward.fill_none(FSR_all_cuts, False) & awkward.fill_none(best_fsr_mask, False)
+        
         return FSR_all_cuts
 
 # Below is an example of how the diphoton preselection could be performed with an explicit loop (C++ style) 

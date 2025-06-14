@@ -1,20 +1,15 @@
 #!/bin/bash                                                                                                                                                                       
 echo "==============STARTED=============="
 
-<<<<<<< HEAD
-# input="/eos/user/j/jiehan/parquet/nanov9/"
-# target="/eos/home-j/jiehan/root/skimmed_ntuples_run2/"
-=======
-input="/eos/user/j/jiehan/parquet/cutflow_ggf_var/"
-target="/eos/home-j/jiehan/root/skimmed_ntuples_run2/"
->>>>>>> hejiehan
+input="/eos/user/j/jiehan/parquet/"
+target="/eos/home-j/jiehan/root/skimmed_ntuples_run3/"
 # input="/eos/user/j/jiehan/parquet/nanov12/"
 # target="/eos/home-j/jiehan/root/skimmed_ntuples_run3/"
 # target="./"
 
 # Run3
-input="/eos/home-p/pelai/HZgamma/Parquet/NanoV12/run3_jetsmear_pt50/"
-target="/eos/home-p/pelai/HZgamma/Root_Dataset/run3_jetsmear_pt50/NanoV12/"
+# input="/eos/home-p/pelai/HZgamma/Parquet/NanoV12/run3_jetsmear_pt50/"
+# target="/eos/home-p/pelai/HZgamma/Root_Dataset/run3_jetsmear_pt50/NanoV12/"
 
 # Run2
 # input="/eos/home-p/pelai/HZgamma/Parquet/NanoV9/run2/"
@@ -22,16 +17,10 @@ target="/eos/home-p/pelai/HZgamma/Root_Dataset/run3_jetsmear_pt50/NanoV12/"
 
 
 # years=(2016preVFP 2016postVFP 2017 2018 2022preEE 2022postEE 2023preBPix 2023postBPix)
-<<<<<<< HEAD
 # years=(2016preVFP 2016postVFP 2017 2018)
-years=(2022preEE 2022postEE 2023preBPix 2023postBPix)
+years=(2022preEE)
 # years=(2022preEE 2022postEE)
 # years=(2023preBPix 2023postBPix)
-=======
-years=(2017)
-# years=(2022preEE 2022postEE 2023preBPix 2023postBPix)
->>>>>>> hejiehan
-systs=("FNUF" "Material" "Scale" "Smearing" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt")
 # systs=("FNUF" "Material" "Scale" "Smearing" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt")
 
 # 函数定义：执行命令并处理错误
@@ -63,7 +52,7 @@ process_sample() {
     fi
     
     for year in "${years[@]}"; do
-        command="python /afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py "
+        command="python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py "
         command+="-i ${input}${type}/${sample}_${year}/merged_${corr}.parquet "
         if [ "$type" = "Data" ]; then
             command+="-o ${target}Data/${year}.root"
@@ -95,7 +84,7 @@ process_sample_syst() {
     
     for syst in "${systs[@]}"; do
         corr="${syst}_${uod}"
-        command="python /afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py "
+        command="python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py "
         command+="-i ${input}${type}/${sample}_${year}/merged_${corr}.parquet "
         command+="-o ${target}${sample}_${syst}_${uod}/${year}.root"
         
@@ -170,22 +159,22 @@ process_sample_syst() {
 # samples=(ZGToLLG DYJetsToLL WGToLNuG ZG2JToG2L2J EWKZ2J TT TTGJets TGJets ttWJets ttZJets WW WZ ZZ DYGto2LG_10to50 DYGto2LG_50to100)
 # samples=(DYGto2LG_10to50 DYGto2LG_50to100)
 # samples=(DYGto2LG_10to100)
-# samples=(DYJetsToLL)
-# type="Bkg_MC"
-# for sample in "${samples[@]}"; do
-#     mkdir -p "$target$sample"
-#     # 存储后台任务的进程ID列表
-#     pid_list=()
+samples=(DYJetsToLL)
+type="test"
+for sample in "${samples[@]}"; do
+    mkdir -p "$target$sample"
+    # 存储后台任务的进程ID列表
+    pid_list=()
 
-#     # 调用函数处理样本数据
-#     process_sample "$sample" "$type"
-# done
+    # 调用函数处理样本数据
+    process_sample "$sample" "$type"
+done
 
 # samples=(ZGToLLG DYJetsToLL WGToLNuG ZG2JToG2L2J EWKZ2J TT TTGJets TGJets ttWJets ttZJets WW WZ ZZ DYGto2LG_10to50 DYGto2LG_50to100)
 # samples=(DYGto2LG_10to50 DYGto2LG_50to100)
 # samples=(DYGto2LG_10to100)
 # samples=(DYJetsToLL)
-# type="Bkg_MC"
+# type="test"
 # for sample in "${samples[@]}"; do
 #     for sf in "down"; do #  "up" "down"
 #         for syst in "${systs[@]}"; do
@@ -201,18 +190,18 @@ process_sample_syst() {
 #     done
 # done
 
-# # 处理 data 样本
+# # # 处理 data 样本
 
-samples=(Data)
-type="Data"
-for sample in "${samples[@]}"; do
-    mkdir -p "$target$sample"
-    # 存储后台任务的进程ID列表
-    pid_list=()
+# samples=(Data)
+# type="Data"
+# for sample in "${samples[@]}"; do
+#     mkdir -p "$target$sample"
+#     # 存储后台任务的进程ID列表
+#     pid_list=()
 
-    # 调用函数处理样本数据
-    process_sample "$sample" "$type"
-done
+#     # 调用函数处理样本数据
+#     process_sample "$sample" "$type"
+# done
 
 # Use fake photon background estimation with data-driven
 

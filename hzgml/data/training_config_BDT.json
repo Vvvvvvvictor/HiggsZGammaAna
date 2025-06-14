@@ -14,7 +14,7 @@
               "mc_preselections": [],
               "randomIndex": "event", "weight": "weight"
               },
-"all_jet":  {"inputTree": "two_jet",
+"all_jet":  {"inputTree": "all_jet",
               "+preselections": ["H_mass >= 120", "H_mass <= 130"],
               "+train_variables": ["H_relpt", "delta_phi_zgjj", "mass_jj",
                                 "delta_eta_jj", "pt_balance", "n_jets",

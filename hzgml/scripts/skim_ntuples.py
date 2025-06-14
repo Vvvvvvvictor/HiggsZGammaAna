@@ -20,6 +20,7 @@ import uproot
 # from root_pandas import *
 from tqdm import tqdm
 import warnings
+from z_refit import apply_z_refit
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -536,15 +537,15 @@ def main():
         'H_pt', 'H_eta', 'H_phi', 'H_mass',
         'Z_pt', 'Z_eta', 'Z_phi', 'Z_mass',
         'Z_lead_lepton_pt', 'Z_lead_lepton_eta', 'Z_lead_lepton_phi', 'Z_lead_lepton_mass',
-        'Z_lead_lepton_charge', 'Z_lead_lepton_id',
+        'Z_lead_lepton_charge', 'Z_lead_lepton_id', 'Z_lead_lepton_ptE_error',
         'Z_sublead_lepton_pt', 'Z_sublead_lepton_eta', 'Z_sublead_lepton_phi', 'Z_sublead_lepton_mass',
-        'Z_sublead_lepton_charge', 'Z_sublead_lepton_id',
+        'Z_sublead_lepton_charge', 'Z_sublead_lepton_id', 'Z_sublead_lepton_ptE_error',
         'gamma_pt', 'gamma_eta', 'gamma_phi', 'gamma_mass',
         'gamma_mvaID', 'gamma_energyErr',
         "gamma_fsr_pt","gamma_fsr_eta","gamma_fsr_phi","gamma_fsr_mass","gamma_fsr_clean",
         'jet_1_pt', 'jet_1_eta', 'jet_1_phi', 'jet_1_mass', 'jet_1_btagDeepFlavB',
         'jet_2_pt', 'jet_2_eta', 'jet_2_phi', 'jet_2_mass', 'jet_2_btagDeepFlavB',
-        'n_jets', 'n_leptons', 'n_electrons', 'n_muons', 'n_iso_photons',
+        'n_jets', 'n_leptons', 'n_electrons', 'n_muons', 'n_iso_photons', 'n_b_jets',
         'MET_pt', 'MET_phi', 
         'weight_central',
         'event'
@@ -564,6 +565,10 @@ def main():
     #data = preprocess(data)
     data = preselect(data) #TODO add cutflow
     data = decorate(data)
+    
+    # Apply Z constraint refit
+    data = apply_z_refit(data)
+    
     final_events += data.shape[0]
     data_zero_jet = data.query("n_jets == 0 & n_leptons == 2 & MET_pt < 90")
     data_one_jet = data.query("n_jets == 1 & n_leptons == 2 & MET_pt < 90")

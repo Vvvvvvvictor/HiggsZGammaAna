@@ -196,7 +196,7 @@ class AnalysisManager():
     :type config: dict or str, optional if and only if you specify an ``output_dir`` that has a pickled ``AnalysisManager`` instance from a previous run
     """
     REQUIRED_FIELDS = ["variables_of_interest", "tag_sequence", "systematics", "samples", "branches"] # these fields **must** be present in config file
-    OVERWRITABLE_FIELDS = ["merge_outputs", "unretire_jobs", "retire_jobs", "reconfigure_jobs", "n_cores", "log-level", "log-file", "short"] # these fields can be safely changed between different runs
+    OVERWRITABLE_FIELDS = ["merge_outputs", "unretire_jobs", "retire_jobs", "reconfigure_jobs", "n_cores", "log-level", "log-file", "short", "with_skimmed"] # these fields can be safely changed between different runs
     # TODO: add functionality for switching between batch_system = "local" and batch_system = "condor" between runs
     DEFAULTS = { # kwargs with default values
             "name" : "my_analysis", # doesn't affect actual code, just for more informative printouts
@@ -212,7 +212,8 @@ class AnalysisManager():
             "unretire_jobs" : False,
             "retire_jobs" : False,
             "reconfigure_jobs" : False,
-            "short" : False # run only 1 job per sample x year
+            "short" : False, # run only 1 job per sample x year
+            "with_skimmed": False # whether to process skimmed files
     }
 
     def __init__(self, output_dir = "output", config = {}, **kwargs):
@@ -457,8 +458,16 @@ class AnalysisManager():
             jsonable_sample = jsonable_sample.__dict__
             config = {
                 "sample" : copy.deepcopy(jsonable_sample),
-                "branches" : task_branches
+                "branches" : task_branches,
+                "with_skimmed": self.with_skimmed # Pass the flag to the task config
             }
+            # Add skimmed_files to task config if with_skimmed is True
+            if self.with_skimmed:
+                config["skimmed_files"] = [f.name for f in sample.skimmed_files] if hasattr(sample, "skimmed_files") and sample.skimmed_files else []
+            else:
+                config["skimmed_files"] = []
+
+
             for x in ["systematics", "tag_sequence", "function", "variables_of_interest"]:
                 config[x] = copy.deepcopy(getattr(self, x))
 
@@ -543,45 +552,59 @@ class AnalysisManager():
         sum_weights = 0
 
         files = config["files"]
-        skimmed_files = config["skimmed_files"]
+        # skimmed_files will be fetched conditionally
         branches = config["branches"]
         is_data = config["sample"]["is_data"]
         year = config["sample"]["year"]
-        if not is_data:
-            for skimmed_file in skimmed_files:
-                try:
-                    f = uproot.open(skimmed_file, timeout = 300, num_workers=1)
-                except Exception:
-                    if (os.system(f"xrdcp '{skimmed_file}' '/tmp/{os.getpid()}/{os.path.basename(skimmed_file)}'")):
-                        raise RuntimeError("xrdcp failed")
-                    f = uproot.open(f'/tmp/{os.getpid()}/{os.path.basename(skimmed_file)}',timeout = 300, num_workers=1)
-                tree = f["Events"]
-                if "Generator_weight" in tree.keys():
-                    sum_genWeight = numpy.sum(tree["Generator_weight"])
-                    sum_weights += sum_genWeight #FIXME: use genWeight or Generator_weight
-                    logger.debug("[AnalysisManager : GeneratorWeightSum] Sum of Generator_weight: {}".format(sum_genWeight))
-                    unique_values = numpy.unique(tree["Generator_weight"])
-                    for i, value in enumerate(unique_values):
-                        unique_counts = numpy.sum(tree["Generator_weight"] == value)
-                        logger.debug("[AnalysisManager : GeneratorWeight] Unique values of Generator_weight: {}, numbers: {}".format(value, unique_counts))
-                if is_data:
-                    duplicated_sample_remover = DuplicatedSamplesTagger(is_data=is_data)
-                    duplicated_remove_cut = duplicated_sample_remover.calculate_selection(skimmed_file, tree)
 
-                    trimmed_branches = [x for x in branches if x in tree.keys()]
-                    events_skimmed_file = tree.arrays(trimmed_branches, library = "ak", how = "zip")
+        with_skimmed = config.get("with_skimmed", False)
+        events_skimmed_file_for_merging = None # Will hold concatenated events from skimmed files
 
-                    events_skimmed_file = events_skimmed_file[duplicated_remove_cut]
-                else:
-                    mc_overlap_remover = MCOverlapTagger(is_data=is_data, year=year)
-                    overlap_cut = mc_overlap_remover.overlap_selection(skimmed_file, tree)
+        if with_skimmed:
+            skimmed_files_paths = config.get("skimmed_files", []) # Get paths, default to empty list
+            if skimmed_files_paths and not is_data: # Process only if paths exist and not data
+                temp_events_skimmed_list = [] # To collect events from each skimmed file
+                for skimmed_file in skimmed_files_paths: # Iterate over the provided paths
+                    try:
+                        f = uproot.open(skimmed_file, timeout = 300, num_workers=1)
+                    except Exception:
+                        if (os.system(f"xrdcp '{skimmed_file}' '/tmp/{os.getpid()}/{os.path.basename(skimmed_file)}'")):
+                            raise RuntimeError("xrdcp failed")
+                        f = uproot.open(f'/tmp/{os.getpid()}/{os.path.basename(skimmed_file)}',timeout = 300, num_workers=1)
+                    tree = f["Events"]
+                    if "Generator_weight" in tree.keys():
+                        sum_genWeight = numpy.sum(tree["Generator_weight"])
+                        sum_weights += sum_genWeight #FIXME: use genWeight or Generator_weight
+                        logger.debug("[AnalysisManager : GeneratorWeightSum] Sum of Generator_weight: {}".format(sum_genWeight))
+                        unique_values = numpy.unique(tree["Generator_weight"])
+                        for i, value in enumerate(unique_values):
+                            unique_counts = numpy.sum(tree["Generator_weight"] == value)
+                            logger.debug("[AnalysisManager : GeneratorWeight] Unique values of Generator_weight: {}, numbers: {}".format(value, unique_counts))
+                    if is_data:
+                        duplicated_sample_remover = DuplicatedSamplesTagger(is_data=is_data)
+                        duplicated_remove_cut = duplicated_sample_remover.calculate_selection(skimmed_file, tree)
 
-                    trimmed_branches = [x for x in branches if x in tree.keys()]
-                    events_skimmed_file = tree.arrays(trimmed_branches, library = "ak", how = "zip") 
-                    events_skimmed_file = events_skimmed_file[overlap_cut]
-                f.close()
-                logger.debug("[AnalysisManager : Load events_skimmed_file] Sample type: %s" % events_skimmed_file.type)
-                
+                        trimmed_branches = [x for x in branches if x in tree.keys()]
+                        events_skimmed_file = tree.arrays(trimmed_branches, library = "ak", how = "zip")
+
+                        events_skimmed_file = events_skimmed_file[duplicated_remove_cut]
+                    else:
+                        mc_overlap_remover = MCOverlapTagger(is_data=is_data, year=year)
+                        overlap_cut = mc_overlap_remover.overlap_selection(skimmed_file, tree)
+
+                        trimmed_branches = [x for x in branches if x in tree.keys()]
+                        events_skimmed_file = tree.arrays(trimmed_branches, library = "ak", how = "zip") 
+                        events_skimmed_file = events_skimmed_file[overlap_cut]
+                    f.close()
+                    logger.debug("[AnalysisManager : Load events_skimmed_file] Sample type for %s: %s" % (skimmed_file, events_skimmed_file.type))
+                    temp_events_skimmed_list.append(events_skimmed_file) # Add processed events to list
+
+                # After processing all skimmed files, if any, concatenate them
+                if temp_events_skimmed_list:
+                    events_skimmed_file_for_merging = awkward.concatenate(temp_events_skimmed_list)
+                    logger.debug("[AnalysisManager : Concatenated skimmed events] Type: %s, Length: %d" % (events_skimmed_file_for_merging.type, len(events_skimmed_file_for_merging)))
+
+            
         for file in files:
             try:
                 f = uproot.open(file, timeout = 300, num_workers=1)
@@ -644,33 +667,33 @@ class AnalysisManager():
                 # commented by Pei-Zhu
                 events_file = events_file[overlap_cut]
 
-                if not is_data:
+                if with_skimmed and not is_data and events_skimmed_file_for_merging is not None:
 
                     # add muon sys
                     events_keys_muon = events_file.Muon.fields  
-                    skimmed_keys_muon = events_skimmed_file.Muon.fields
+                    skimmed_keys_muon = events_skimmed_file_for_merging.Muon.fields
                     extra_keys = [key for key in skimmed_keys_muon if key not in events_keys_muon] 
                     for key in extra_keys:
-                        events_file['Muon'] = awkward.with_field(events_file['Muon'], events_skimmed_file['Muon'][key], key)
+                        events_file['Muon'] = awkward.with_field(events_file['Muon'], events_skimmed_file_for_merging['Muon'][key], key)
                     # add photon sys
                     if (int(year[:4]) < 2020):
                         events_keys_photon = events_file.Photon.fields  
-                        skimmed_keys_photon = events_skimmed_file.Photon.fields
+                        skimmed_keys_photon = events_skimmed_file_for_merging.Photon.fields
                         extra_keys = [key for key in skimmed_keys_photon if key not in events_keys_photon] 
                         for key in extra_keys:
-                            events_file['Photon'] = awkward.with_field(events_file['Photon'], events_skimmed_file['Photon'][key], key)
+                            events_file['Photon'] = awkward.with_field(events_file['Photon'], events_skimmed_file_for_merging['Photon'][key], key)
                     # add jets sys
                     events_keys_jet = events_file.Jet.fields
-                    skimmed_keys_jet = events_skimmed_file.Jet.fields
+                    skimmed_keys_jet = events_skimmed_file_for_merging.Jet.fields
                     extra_keys = [key for key in skimmed_keys_jet if key not in events_keys_jet]
                     for key in extra_keys:
-                        events_file['Jet'] = awkward.with_field(events_file['Jet'], events_skimmed_file['Jet'][key], key)      
+                        events_file['Jet'] = awkward.with_field(events_file['Jet'], events_skimmed_file_for_merging['Jet'][key], key)      
                     # add MET sys
                     events_keys_other = events_file.fields
-                    skimmed_keys_other = events_skimmed_file.fields
+                    skimmed_keys_other = events_skimmed_file_for_merging.fields
                     extra_keys = [key for key in skimmed_keys_other if key not in events_keys_other]
                     for key in extra_keys:
-                        events_file = awkward.with_field(events_file, events_skimmed_file[key], key)
+                        events_file = awkward.with_field(events_file, events_skimmed_file_for_merging[key], key)
                     
             f.close()
             

@@ -108,7 +108,13 @@ def parse_arguments():
         "--no_systematics",
         required=False,
         action="store_true",
-        help="Run without calculating systematic variations, overriding the systematics provided through the config json. Any weight systematics which modify the central event weight will still be calculated (but not their up/down variations).") 
+        help="Run without calculating systematic variations, overriding the systematics provided through the config json. Any weight systematics which modify the central event weight will still be calculated (but not their up/down variations).")
+
+    parser.add_argument(
+        "--with_skimmed",
+        required=False,
+        action="store_true",
+        help="Read and merge skimmed files into events. If not specified, skimmed files will not be processed.")
 
     return parser.parse_args()
 

@@ -27,6 +27,7 @@ SSTest/bkg*
 */model*
 */figs*
 */old*
+ZConstrainRefit
 
 # Byte-compiled / optimized / DLL files
 */__init__.py
