@@ -20,21 +20,6 @@
     ],
     "systematics": {
         "weights": {
-            "electron_veto_sf": {
-                "type": "object",
-                "method": "from_function",
-                "function": {
-                    "module_name": "higgs_dna.systematics.photon_systematics",
-                    "name": "photon_electron_veto_sf"
-                },
-                "modify_central_weight": true,
-                "input_collection": "Photon",
-                "target_collections": [
-                    [
-                        "Photon"
-                    ]
-                ]
-            },
             "pu_reweight_sf": {
                 "type": "event",
                 "method": "from_function",
@@ -47,17 +32,18 @@
                     "Pileup_nTrueInt"
                 ]
             },
-            "btag_deepjet_wp_sf" : {
-                "type" : "object",
-                "method" : "from_function",
-                "function" : {
-                    "module_name" : "higgs_dna.systematics.jet_systematics",
-                    "name" : "btag_deepjet_wp_sf"
+            "electron_hlt_sf": {
+                "type": "object",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.HLT_systematics",
+                    "name": "Ele_HLT_sf"
                 },
-                "modify_central_weight" : true,
-                "input_collection" : "Jet",
-                "target_collections" : ["SelectedJet"],
-                "working_point" : "M"
+                "modify_central_weight": true,
+                "input_collection": "Electron",
+                "target_collections": [
+                    "SelectedElectron"
+                ]
             },
             "electron_wplid_sf": {
                 "type": "object",
@@ -72,6 +58,32 @@
                     "SelectedElectron"
                 ]
             },
+            "electron_iso_sf": {
+                "type": "object",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.lepton_systematics",
+                    "name": "electron_ISO_sf"
+                },
+                "modify_central_weight": false,
+                "input_collection": "Electron",
+                "target_collections": [
+                    "SelectedElectron"
+                ]
+            },
+            "muon_hlt_sf": {
+                "type": "object",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.HLT_systematics",
+                    "name": "Muon_HLT_sf"
+                },
+                "modify_central_weight": true,
+                "input_collection": "Muon",
+                "target_collections": [
+                    "SelectedMuon"
+                ]
+            },
             "muon_looseid_sf": {
                 "type": "object",
                 "method": "from_function",
@@ -84,30 +96,123 @@
                 "target_collections": [
                     "SelectedMuon"
                 ]
+            },
+            "muon_iso_sf": {
+                "type": "object",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.lepton_systematics",
+                    "name": "muon_ISO_sf"
+                },
+                "modify_central_weight": false,
+                "input_collection": "Muon",
+                "target_collections": [
+                    "SelectedMuon"
+                ]
+            },
+            "photon_id_sf": {
+                "type": "object",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.photon_systematics",
+                    "name": "photon_id_sf"
+                },
+                "working_point": "wp80",
+                "modify_central_weight": true,
+                "input_collection": "Photon",
+                "target_collections": [
+                    [
+                        "Photon"
+                    ]
+                ]
+            },
+            "photon_csev_sf": {
+                "type": "object",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.photon_systematics",
+                    "name": "photon_CSEV_sf"
+                },
+                "working_point": "MVA80",
+                "modify_central_weight": true,
+                "input_collection": "Photon",
+                "target_collections": [
+                    [
+                        "Photon"
+                    ]
+                ]
             }
         },
         "independent_collections": {
-            "FNUF": {
-                "method": "from_function",
+            "Scale": {
+                "method": "from_branch",
                 "branch_modified": [
                     "Photon",
                     "pt"
                 ],
-                "function": {
-                    "module_name": "higgs_dna.systematics.photon_systematics",
-                    "name": "fnuf_unc"
+                "branches": {
+                    "up": [
+                        "Photon",
+                        "dEscaleUp"
+                    ],
+                    "down": [
+                        "Photon",
+                        "dEscaleDown"
+                    ]
                 }
             },
-            "Material": {
-                "method": "from_function",
+            "Smearing": {
+                "method": "from_branch",
                 "branch_modified": [
                     "Photon",
                     "pt"
                 ],
-                "function": {
-                    "module_name": "higgs_dna.systematics.photon_systematics",
-                    "name": "material_unc"
+                "branches": {
+                    "up": [
+                        "Photon",
+                        "dEsigmaUp"
+                    ],
+                    "down": [
+                        "Photon",
+                        "dEsigmaDown"
+                    ]
+                },
+                "additive": true
+            },
+            "Ele_Scale": {
+                "method": "from_branch",
+                "branch_modified": [
+                    "Electron",
+                    "pt"
+                ],
+                "branches": {
+                    "up": [
+                        "Electron",
+                        "dEscaleUp"
+                    ],
+                    "down": [
+                        "Electron",
+                        "dEscaleDown"
+                    ]
                 }
+            },
+            "Ele_Smearing": {
+                "method": "from_branch",
+                "branch_modified": [
+                    "Electron",
+                    "pt"
+                ],
+                "branches": {
+                    "up": [
+                        "Electron",
+                        "dEsigmaUp"
+                    ],
+                    "down": [
+                        "Electron",
+                        "dEsigmaDown"
+                    ]
+                },
+                "additive": true
             },
             "JER": {
                 "method": "from_branch",
@@ -181,10 +286,10 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "DYGto2LG_10to50", "DYGto2LG_50to100"
+            "DYJetsToLL"
         ],
         "years": [
-            "2022preEE", "2022postEE"
+            "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"
         ]
     },
     "variables_of_interest": [
@@ -236,20 +341,13 @@
         "gamma_mvaID_WP90",
         "gamma_mvaID_WPL",
         "gamma_e_veto",
-        "gamma_fsr_1_pt",
-        "gamma_fsr_1_eta",
-        "gamma_fsr_1_phi",
-        "gamma_fsr_1_mass",
-        "gamma_fsr_1_relIso03",
-        "gamma_fsr_1_dROverEt2",
-        "gamma_fsr_1_muonIdx",
-        "gamma_fsr_2_pt",
-        "gamma_fsr_2_eta",
-        "gamma_fsr_2_phi",
-        "gamma_fsr_2_mass",
-        "gamma_fsr_2_relIso03",
-        "gamma_fsr_2_dROverEt2",
-        "gamma_fsr_2_muonIdx",
+        "gamma_fsr_pt",
+        "gamma_fsr_eta",
+        "gamma_fsr_phi",
+        "gamma_fsr_mass",
+        "gamma_fsr_relIso03",
+        "gamma_fsr_dROverEt2",
+        "gamma_fsr_muonIdx",
         "jet_1_pt",
         "jet_1_eta",
         "jet_1_phi",
@@ -317,6 +415,7 @@
         "n_electrons",
         "n_muons",
         "n_iso_photons",
+        "n_fsr",
         "MET_pt",
         "MET_phi",
         "regions",
@@ -330,6 +429,7 @@
     "branches": [
         "GenVtx_z",
         "PV_z",
+        "L1PreFiringWeight_Nom",
         "btagWeight_DeepCSVB",
         "btagWeight_CSVV2",
         "genWeight",
@@ -392,6 +492,10 @@
         "Photon_genPartFlav",
         "Photon_mvaID_WP80",
         "Photon_mvaID_WP90",
+        "Photon_x_calo",
+        "Photon_y_calo",
+        "Photon_z_calo",
+        "Photon_seedGain",
         "FsrPhoton_dROverEt2",
         "FsrPhoton_electronIdx",
         "FsrPhoton_eta",
@@ -437,6 +541,7 @@
         "Electron_mvaFall17V2Iso_WP80",
         "Electron_mvaFall17V2Iso_WPL",
         "Electron_energyErr",
+        "Electron_r9",
         "Jet_pt",
         "Jet_eta",
         "Jet_phi",
@@ -462,10 +567,17 @@
         "luminosityBlock",
         "fixedGridRhoAll",
         "Pileup_nTrueInt",
+        "L1PreFiringWeight_Up",
+        "L1PreFiringWeight_Dn",
+        "L1PreFiringWeight_Nom",
         "Muon_corrected_pt",
         "Muon_correctedUp_pt",
         "Muon_correctedDown_pt",
         "LHEScaleWeight_Zero",
+        "Photon_dEsigmaDown",
+        "Photon_dEsigmaUp",
+        "Photon_pt_ScaleUp",
+        "Photon_pt_ScaleDown",
         "Jet_pt_nom",
         "Jet_pt_jerUp",
         "Jet_pt_jerDown",
@@ -494,5 +606,34 @@
         "Flag_BadPFMuonDzFilter",
         "TrigObj_id",
         "TrigObj_filterBits"
-    ]
+    ],
+    "branch_map": {
+        "mc": [
+            [
+                [
+                    "Jet",
+                    "pt"
+                ],
+                [
+                    "Jet",
+                    "pt_nom"
+                ]
+            ],
+            [
+                [
+                    "Muon",
+                    "pt"
+                ],
+                [
+                    "Muon",
+                    "corrected_pt"
+                ]
+            ],
+            [
+                "MET_pt",
+                "MET_T1_pt"
+            ]
+        ],
+        "data": []
+    }
 }

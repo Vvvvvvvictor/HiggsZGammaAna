@@ -535,6 +535,9 @@ class ZGammaTaggerRun2(Tagger):
         awkward_utils.add_field(events, "z_mumu", z_mumu, overwrite=True)
         awkward_utils.add_field(events, "z_ee", z_ee, overwrite=True)
 
+        logger.info(f"Z candidates lead lepton pt: {awkward.flatten(z_cands.LeadLepton.pt[:50])}"
+        f" Z candidates sublead lepton pt: {awkward.flatten(z_cands.SubleadLepton.pt[:50])}")
+        logger.info(f"Z candidates mass: {awkward.flatten(z_cands.ZCand.mass[:50])}")
         mass_cut = (z_cands.ZCand.mass > 80.) & (z_cands.ZCand.mass < 100.)
         # mass_cut = z_cands.ZCand.mass > 50.
         z_cands = z_cands[mass_cut] # OSSF lepton pairs with m_ll > 50.
@@ -789,7 +792,7 @@ class ZGammaTaggerRun2(Tagger):
         #     print(event.run, event.luminosityBlock, event.event, sep=" ")
         # print("!!!end check events tag(inclusive)!!!")
 
-        # checked_cut = z_ee_cut & ee_trigger_pt_cut
+        # checked_cut = z_ee_cut & ele_trigger_pt_cut & has_gamma_cand
         # checked_events = events[checked_cut]
         # print("!!!start check events tag(electron)!!!")
         # for event in checked_events:

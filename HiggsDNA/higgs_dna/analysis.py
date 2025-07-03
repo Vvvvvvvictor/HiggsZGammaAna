@@ -27,6 +27,8 @@ from higgs_dna.constants import NOMINAL_TAG, CENTRAL_WEIGHT, BRANCHES
 from higgs_dna.utils.metis_utils import do_cmd
 from higgs_dna.taggers.duplicated_samples_tagger import DuplicatedSamplesTagger
 from higgs_dna.taggers.mc_overlap_tagger import MCOverlapTagger
+from higgs_dna.systematics.photon_systematics import photon_scale_smear_run3
+from higgs_dna.systematics.lepton_systematics import electron_scale_smear_run3
 
 condor=False
 def run_analysis(config):
@@ -663,9 +665,16 @@ class AnalysisManager():
                 # for array in tree.iterate(trimmed_branches, library="ak", how='zip', step_size=100000):
                 #     event_file.concatenate(array)
                 events_file = tree.arrays(trimmed_branches, library = "ak", how = "zip") #TODO: There is a bug here.
-                
+
                 # commented by Pei-Zhu
                 events_file = events_file[overlap_cut]
+
+                if int(year[:4]) > 2020:
+                    events_file = photon_scale_smear_run3(events_file, year)
+                    events_file = electron_scale_smear_run3(events_file, year)
+
+                    # for field in events_file["Photon"].fields:
+                    #     logger.info("[AnalysisManager : photon_scale_smear_run3] Photon field: %s" % field)
 
                 if with_skimmed and not is_data and events_skimmed_file_for_merging is not None:
 

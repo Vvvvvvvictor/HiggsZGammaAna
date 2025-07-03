@@ -1,0 +1,2510 @@
+{
+  "schema_version": 2,
+  "corrections": [
+    { "name": "test_DeepTau2017v2p1VSjet_pt-dm",
+      "description": "DeepTau2017v2p1VSjet SFs: By default, use the pT-dependent SFs with the 'pt' flag. For analyses with the ditau triggers with offline pT > 40 GeV, use the DM-dependent SFs with flag 'dm'.",
+      "version": 0,
+      "inputs": [
+        { "name": "pt",
+          "type": "real",
+          "description": "Reconstructed tau pT"
+        },
+        { "name": "dm",
+          "type": "int",
+          "description": "Reconstructed tau decay mode: 0, 1, 2, 10, 11"
+        },
+        { "name": "genmatch",
+          "type": "int",
+          "description": "genmatch: 0 or 6 = unmatched or jet, 1 or 3 = electron, 2 or 4 = muon, 5 = real tau"
+        },
+        { "name": "wp",
+          "type": "string",
+          "description": "DeepTau2017v2p1VSjet working point: VVVLoose-VVTight"
+        },
+        { "name": "wp_VSe",
+          "type": "string",
+          "description": "DeepTau2017v2p1VSe working point: VVLoose-Tight"
+        },
+        { "name": "syst",
+          "type": "string",
+          "description": "Systematic variations: 'nom', 'up', 'down'"
+        },
+        { "name": "flag",
+          "type": "string",
+          "description": "Flag: 'pt' = pT-dependent SFs, 'dm' = DM-dependent SFs (pT > 40 GeV)"
+        }
+      ],
+      "output": {
+        "name": "sf",
+        "type": "real",
+        "description": "DeepTau2017v2p1VSjet scale factor"
+      },
+      "data": {
+        "nodetype": "category",
+        "input": "flag",
+        "content": [
+          { "key": "pt",
+            "value": {
+              "nodetype": "category",
+              "input": "genmatch",
+              "content": [
+                { "key": 0, "value": 1.0 },
+                { "key": 1, "value": 1.0 },
+                { "key": 2, "value": 1.0 },
+                { "key": 3, "value": 1.0 },
+                { "key": 4, "value": 1.0 },
+                { "key": 5,
+                  "value": {
+                    "nodetype": "category",
+                    "input": "wp",
+                    "content": [
+                      { "key": "VVVLoose",
+                        "value": {
+                          "nodetype": "category",
+                          "input": "wp_VSe",
+                          "content": [
+                            { "key": "VVLoose",
+                              "value": {
+                                "nodetype": "binning",
+                                "input": "pt",
+                                "edges": [ 20.0, 25.0, 30.0, 35.0, 40.0, 500.0, 1000.0, 2000.0 ],
+                                "content": [
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.06 },
+                                      { "key": "up", "value": 1.1400000000000001 },
+                                      { "key": "down", "value": 0.9800000000000001 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.95 },
+                                      { "key": "up", "value": 1.03 },
+                                      { "key": "down", "value": 0.87 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.09 },
+                                      { "key": "up", "value": 1.1600000000000001 },
+                                      { "key": "down", "value": 1.01 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.97 },
+                                      { "key": "up", "value": 1.04 },
+                                      { "key": "down", "value": 0.89 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.02 },
+                                      { "key": "up", "value": 1.07 },
+                                      { "key": "down", "value": 0.98 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.02 },
+                                      { "key": "up",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "1.02+0.0001*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      },
+                                      { "key": "down",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "1.02-8e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.02 },
+                                      { "key": "up", "value": 1.12 },
+                                      { "key": "down", "value": 0.9400000000000001 }
+                                    ]
+                                  }
+                                ],
+                                "flow": "clamp"
+                              }
+                            },
+                            { "key": "Tight",
+                              "value": {
+                                "nodetype": "binning",
+                                "input": "pt",
+                                "edges": [ 20.0, 25.0, 30.0, 35.0, 40.0, 500.0, 1000.0, 2000.0 ],
+                                "content": [
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.98 },
+                                      { "key": "up", "value": 1.06 },
+                                      { "key": "down", "value": 0.9 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.92 },
+                                      { "key": "up", "value": 0.99 },
+                                      { "key": "down", "value": 0.8500000000000001 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.99 },
+                                      { "key": "up", "value": 1.06 },
+                                      { "key": "down", "value": 0.91 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.95 },
+                                      { "key": "up", "value": 1.01 },
+                                      { "key": "down", "value": 0.8799999999999999 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.97 },
+                                      { "key": "up", "value": 1.01 },
+                                      { "key": "down", "value": 0.9299999999999999 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.97 },
+                                      { "key": "up",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "0.97+8e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      },
+                                      { "key": "down",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "0.97-8e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.97 },
+                                      { "key": "up", "value": 1.05 },
+                                      { "key": "down", "value": 0.89 }
+                                    ]
+                                  }
+                                ],
+                                "flow": "clamp"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      { "key": "VVLoose",
+                        "value": {
+                          "nodetype": "category",
+                          "input": "wp_VSe",
+                          "content": [
+                            { "key": "VVLoose",
+                              "value": {
+                                "nodetype": "binning",
+                                "input": "pt",
+                                "edges": [ 20.0, 25.0, 30.0, 35.0, 40.0, 500.0, 1000.0, 2000.0 ],
+                                "content": [
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.0 },
+                                      { "key": "up", "value": 1.07 },
+                                      { "key": "down", "value": 0.9299999999999999 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.98 },
+                                      { "key": "up", "value": 1.03 },
+                                      { "key": "down", "value": 0.9299999999999999 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.04 },
+                                      { "key": "up", "value": 1.09 },
+                                      { "key": "down", "value": 0.98 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.01 },
+                                      { "key": "up", "value": 1.06 },
+                                      { "key": "down", "value": 0.96 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.02 },
+                                      { "key": "up", "value": 1.06 },
+                                      { "key": "down", "value": 0.98 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.02 },
+                                      { "key": "up",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "1.02+8e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      },
+                                      { "key": "down",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "1.02-8e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.02 },
+                                      { "key": "up", "value": 1.1 },
+                                      { "key": "down", "value": 0.9400000000000001 }
+                                    ]
+                                  }
+                                ],
+                                "flow": "clamp"
+                              }
+                            },
+                            { "key": "Tight",
+                              "value": {
+                                "nodetype": "binning",
+                                "input": "pt",
+                                "edges": [ 20.0, 25.0, 30.0, 35.0, 40.0, 500.0, 1000.0, 2000.0 ],
+                                "content": [
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.94 },
+                                      { "key": "up", "value": 1.01 },
+                                      { "key": "down", "value": 0.8699999999999999 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.93 },
+                                      { "key": "up", "value": 0.9800000000000001 },
+                                      { "key": "down", "value": 0.88 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.99 },
+                                      { "key": "up", "value": 1.04 },
+                                      { "key": "down", "value": 0.9299999999999999 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.97 },
+                                      { "key": "up", "value": 1.03 },
+                                      { "key": "down", "value": 0.88 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.99 },
+                                      { "key": "up", "value": 1.02 },
+                                      { "key": "down", "value": 0.96 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.99 },
+                                      { "key": "up",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "0.99+6e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      },
+                                      { "key": "down",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "0.99-6e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.99 },
+                                      { "key": "up", "value": 1.05 },
+                                      { "key": "down", "value": 0.9299999999999999 }
+                                    ]
+                                  }
+                                ],
+                                "flow": "clamp"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      { "key": "VLoose",
+                        "value": {
+                          "nodetype": "category",
+                          "input": "wp_VSe",
+                          "content": [
+                            { "key": "VVLoose",
+                              "value": {
+                                "nodetype": "binning",
+                                "input": "pt",
+                                "edges": [ 20.0, 25.0, 30.0, 35.0, 40.0, 500.0, 1000.0, 2000.0 ],
+                                "content": [
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.03 },
+                                      { "key": "up", "value": 1.09 },
+                                      { "key": "down", "value": 0.7 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.02 },
+                                      { "key": "up", "value": 1.06 },
+                                      { "key": "down", "value": 0.98 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.02 },
+                                      { "key": "up", "value": 1.06 },
+                                      { "key": "down", "value": 0.98 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.01 },
+                                      { "key": "up", "value": 1.05 },
+                                      { "key": "down", "value": 0.95 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.03 },
+                                      { "key": "up", "value": 1.06 },
+                                      { "key": "down", "value": 1.0 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.03 },
+                                      { "key": "up",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "1.03+6e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      },
+                                      { "key": "down",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "1.03-6e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.03 },
+                                      { "key": "up", "value": 1.09 },
+                                      { "key": "down", "value": 0.97 }
+                                    ]
+                                  }
+                                ],
+                                "flow": "clamp"
+                              }
+                            },
+                            { "key": "Tight",
+                              "value": {
+                                "nodetype": "binning",
+                                "input": "pt",
+                                "edges": [ 20.0, 25.0, 30.0, 35.0, 40.0, 500.0, 1000.0, 2000.0 ],
+                                "content": [
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.97 },
+                                      { "key": "up", "value": 1.03 },
+                                      { "key": "down", "value": 0.9099999999999999 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.97 },
+                                      { "key": "up", "value": 1.01 },
+                                      { "key": "down", "value": 0.9299999999999999 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.98 },
+                                      { "key": "up", "value": 1.01 },
+                                      { "key": "down", "value": 0.94 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.97 },
+                                      { "key": "up", "value": 1.01 },
+                                      { "key": "down", "value": 0.9199999999999999 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.98 },
+                                      { "key": "up", "value": 1.01 },
+                                      { "key": "down", "value": 0.95 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.98 },
+                                      { "key": "up",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "0.98+6e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      },
+                                      { "key": "down",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "0.98-6e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.98 },
+                                      { "key": "up", "value": 1.04 },
+                                      { "key": "down", "value": 0.9199999999999999 }
+                                    ]
+                                  }
+                                ],
+                                "flow": "clamp"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      { "key": "Loose",
+                        "value": {
+                          "nodetype": "category",
+                          "input": "wp_VSe",
+                          "content": [
+                            { "key": "VVLoose",
+                              "value": {
+                                "nodetype": "binning",
+                                "input": "pt",
+                                "edges": [ 20.0, 25.0, 30.0, 35.0, 40.0, 500.0, 1000.0, 2000.0 ],
+                                "content": [
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.05 },
+                                      { "key": "up", "value": 1.09 },
+                                      { "key": "down", "value": 1.01 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.02 },
+                                      { "key": "up", "value": 1.05 },
+                                      { "key": "down", "value": 0.99 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.02 },
+                                      { "key": "up", "value": 1.04 },
+                                      { "key": "down", "value": 1.0 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.99 },
+                                      { "key": "up", "value": 1.02 },
+                                      { "key": "down", "value": 0.96 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.02 },
+                                      { "key": "up", "value": 1.05 },
+                                      { "key": "down", "value": 0.99 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.02 },
+                                      { "key": "up",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "1.02+6e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      },
+                                      { "key": "down",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "1.02-6e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.02 },
+                                      { "key": "up", "value": 1.08 },
+                                      { "key": "down", "value": 0.96 }
+                                    ]
+                                  }
+                                ],
+                                "flow": "clamp"
+                              }
+                            },
+                            { "key": "Tight",
+                              "value": {
+                                "nodetype": "binning",
+                                "input": "pt",
+                                "edges": [ 20.0, 25.0, 30.0, 35.0, 40.0, 500.0, 1000.0, 2000.0 ],
+                                "content": [
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.96 },
+                                      { "key": "up", "value": 1.0 },
+                                      { "key": "down", "value": 0.9099999999999999 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.97 },
+                                      { "key": "up", "value": 1.0 },
+                                      { "key": "down", "value": 0.94 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.97 },
+                                      { "key": "up", "value": 0.99 },
+                                      { "key": "down", "value": 0.95 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.93 },
+                                      { "key": "up", "value": 0.9500000000000001 },
+                                      { "key": "down", "value": 0.9 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.96 },
+                                      { "key": "up", "value": 0.98 },
+                                      { "key": "down", "value": 0.94 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.96 },
+                                      { "key": "up",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "0.96+4e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      },
+                                      { "key": "down",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "0.96-4e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.96 },
+                                      { "key": "up", "value": 1.0 },
+                                      { "key": "down", "value": 0.9199999999999999 }
+                                    ]
+                                  }
+                                ],
+                                "flow": "clamp"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      { "key": "Medium",
+                        "value": {
+                          "nodetype": "category",
+                          "input": "wp_VSe",
+                          "content": [
+                            { "key": "VVLoose",
+                              "value": {
+                                "nodetype": "binning",
+                                "input": "pt",
+                                "edges": [ 20.0, 25.0, 30.0, 35.0, 40.0, 500.0, 1000.0, 2000.0 ],
+                                "content": [
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.03 },
+                                      { "key": "up", "value": 1.07 },
+                                      { "key": "down", "value": 0.99 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.0 },
+                                      { "key": "up", "value": 1.02 },
+                                      { "key": "down", "value": 0.98 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.01 },
+                                      { "key": "up", "value": 1.03 },
+                                      { "key": "down", "value": 0.99 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.98 },
+                                      { "key": "up", "value": 1.0 },
+                                      { "key": "down", "value": 0.96 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.02 },
+                                      { "key": "up", "value": 1.04 },
+                                      { "key": "down", "value": 1.0 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.02 },
+                                      { "key": "up",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "1.02+4e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      },
+                                      { "key": "down",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "1.02-4e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.02 },
+                                      { "key": "up", "value": 1.06 },
+                                      { "key": "down", "value": 0.98 }
+                                    ]
+                                  }
+                                ],
+                                "flow": "clamp"
+                              }
+                            },
+                            { "key": "Tight",
+                              "value": {
+                                "nodetype": "binning",
+                                "input": "pt",
+                                "edges": [ 20.0, 25.0, 30.0, 35.0, 40.0, 500.0, 1000.0, 2000.0 ],
+                                "content": [
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.93 },
+                                      { "key": "up", "value": 0.9700000000000001 },
+                                      { "key": "down", "value": 0.89 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.94 },
+                                      { "key": "up", "value": 0.96 },
+                                      { "key": "down", "value": 0.9199999999999999 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.96 },
+                                      { "key": "up", "value": 0.98 },
+                                      { "key": "down", "value": 0.94 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.93 },
+                                      { "key": "up", "value": 0.9500000000000001 },
+                                      { "key": "down", "value": 0.91 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.94 },
+                                      { "key": "up", "value": 0.96 },
+                                      { "key": "down", "value": 0.9199999999999999 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.94 },
+                                      { "key": "up",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "0.94+4e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      },
+                                      { "key": "down",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "0.94-4e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.94 },
+                                      { "key": "up", "value": 0.98 },
+                                      { "key": "down", "value": 0.8999999999999999 }
+                                    ]
+                                  }
+                                ],
+                                "flow": "clamp"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      { "key": "Tight",
+                        "value": {
+                          "nodetype": "category",
+                          "input": "wp_VSe",
+                          "content": [
+                            { "key": "VVLoose",
+                              "value": {
+                                "nodetype": "binning",
+                                "input": "pt",
+                                "edges": [ 20.0, 25.0, 30.0, 35.0, 40.0, 500.0, 1000.0, 2000.0 ],
+                                "content": [
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 1.03 },
+                                      { "key": "up", "value": 1.06 },
+                                      { "key": "down", "value": 1.0 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.97 },
+                                      { "key": "up", "value": 0.99 },
+                                      { "key": "down", "value": 0.95 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.99 },
+                                      { "key": "up", "value": 1.01 },
+                                      { "key": "down", "value": 0.97 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.95 },
+                                      { "key": "up", "value": 0.97 },
+                                      { "key": "down", "value": 0.9299999999999999 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.98 },
+                                      { "key": "up", "value": 1.0 },
+                                      { "key": "down", "value": 0.96 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.98 },
+                                      { "key": "up",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "0.98+4e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      },
+                                      { "key": "down",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "0.98-4e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.98 },
+                                      { "key": "up", "value": 1.02 },
+                                      { "key": "down", "value": 0.94 }
+                                    ]
+                                  }
+                                ],
+                                "flow": "clamp"
+                              }
+                            },
+                            { "key": "Tight",
+                              "value": {
+                                "nodetype": "binning",
+                                "input": "pt",
+                                "edges": [ 20.0, 25.0, 30.0, 35.0, 40.0, 500.0, 1000.0, 2000.0 ],
+                                "content": [
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.94 },
+                                      { "key": "up", "value": 0.97 },
+                                      { "key": "down", "value": 0.9099999999999999 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.91 },
+                                      { "key": "up", "value": 0.93 },
+                                      { "key": "down", "value": 0.89 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.94 },
+                                      { "key": "up", "value": 0.97 },
+                                      { "key": "down", "value": 0.8999999999999999 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.91 },
+                                      { "key": "up", "value": 0.93 },
+                                      { "key": "down", "value": 0.89 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.91 },
+                                      { "key": "up", "value": 0.93 },
+                                      { "key": "down", "value": 0.89 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.91 },
+                                      { "key": "up",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "0.91+4e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      },
+                                      { "key": "down",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "0.91-4e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.91 },
+                                      { "key": "up", "value": 0.9500000000000001 },
+                                      { "key": "down", "value": 0.87 }
+                                    ]
+                                  }
+                                ],
+                                "flow": "clamp"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      { "key": "VTight",
+                        "value": {
+                          "nodetype": "category",
+                          "input": "wp_VSe",
+                          "content": [
+                            { "key": "VVLoose",
+                              "value": {
+                                "nodetype": "binning",
+                                "input": "pt",
+                                "edges": [ 20.0, 25.0, 30.0, 35.0, 40.0, 500.0, 1000.0, 2000.0 ],
+                                "content": [
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.97 },
+                                      { "key": "up", "value": 1.0 },
+                                      { "key": "down", "value": 0.94 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.95 },
+                                      { "key": "up", "value": 0.97 },
+                                      { "key": "down", "value": 0.9299999999999999 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.97 },
+                                      { "key": "up", "value": 1.0 },
+                                      { "key": "down", "value": 0.9299999999999999 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.93 },
+                                      { "key": "up", "value": 0.9500000000000001 },
+                                      { "key": "down", "value": 0.91 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.97 },
+                                      { "key": "up", "value": 0.99 },
+                                      { "key": "down", "value": 0.95 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.97 },
+                                      { "key": "up",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "0.97+4e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      },
+                                      { "key": "down",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "0.97-4e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.97 },
+                                      { "key": "up", "value": 1.01 },
+                                      { "key": "down", "value": 0.9299999999999999 }
+                                    ]
+                                  }
+                                ],
+                                "flow": "clamp"
+                              }
+                            },
+                            { "key": "Tight",
+                              "value": {
+                                "nodetype": "binning",
+                                "input": "pt",
+                                "edges": [ 20.0, 25.0, 30.0, 35.0, 40.0, 500.0, 1000.0, 2000.0 ],
+                                "content": [
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.94 },
+                                      { "key": "up", "value": 0.97 },
+                                      { "key": "down", "value": 0.9099999999999999 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.91 },
+                                      { "key": "up", "value": 0.93 },
+                                      { "key": "down", "value": 0.89 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.94 },
+                                      { "key": "up", "value": 0.97 },
+                                      { "key": "down", "value": 0.8999999999999999 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.91 },
+                                      { "key": "up", "value": 0.93 },
+                                      { "key": "down", "value": 0.89 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.91 },
+                                      { "key": "up", "value": 0.93 },
+                                      { "key": "down", "value": 0.89 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.91 },
+                                      { "key": "up",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "0.91+4e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      },
+                                      { "key": "down",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "0.91-4e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.91 },
+                                      { "key": "up", "value": 0.9500000000000001 },
+                                      { "key": "down", "value": 0.87 }
+                                    ]
+                                  }
+                                ],
+                                "flow": "clamp"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      { "key": "VVTight",
+                        "value": {
+                          "nodetype": "category",
+                          "input": "wp_VSe",
+                          "content": [
+                            { "key": "VVLoose",
+                              "value": {
+                                "nodetype": "binning",
+                                "input": "pt",
+                                "edges": [ 20.0, 25.0, 30.0, 35.0, 40.0, 500.0, 1000.0, 2000.0 ],
+                                "content": [
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.94 },
+                                      { "key": "up", "value": 0.98 },
+                                      { "key": "down", "value": 0.9099999999999999 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.92 },
+                                      { "key": "up", "value": 0.9400000000000001 },
+                                      { "key": "down", "value": 0.9 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.94 },
+                                      { "key": "up", "value": 0.95 },
+                                      { "key": "down", "value": 0.9299999999999999 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.9 },
+                                      { "key": "up", "value": 0.92 },
+                                      { "key": "down", "value": 0.88 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.94 },
+                                      { "key": "up", "value": 0.96 },
+                                      { "key": "down", "value": 0.9199999999999999 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.94 },
+                                      { "key": "up",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "0.94+4e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      },
+                                      { "key": "down",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "0.94-4e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.94 },
+                                      { "key": "up", "value": 0.98 },
+                                      { "key": "down", "value": 0.8999999999999999 }
+                                    ]
+                                  }
+                                ],
+                                "flow": "clamp"
+                              }
+                            },
+                            { "key": "Tight",
+                              "value": {
+                                "nodetype": "binning",
+                                "input": "pt",
+                                "edges": [ 20.0, 25.0, 30.0, 35.0, 40.0, 500.0, 1000.0, 2000.0 ],
+                                "content": [
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.89 },
+                                      { "key": "up", "value": 0.92 },
+                                      { "key": "down", "value": 0.86 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.87 },
+                                      { "key": "up", "value": 0.89 },
+                                      { "key": "down", "value": 0.85 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.9 },
+                                      { "key": "up", "value": 0.91 },
+                                      { "key": "down", "value": 0.89 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.86 },
+                                      { "key": "up", "value": 0.87 },
+                                      { "key": "down", "value": 0.85 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.9 },
+                                      { "key": "up", "value": 0.92 },
+                                      { "key": "down", "value": 0.88 }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.9 },
+                                      { "key": "up",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "0.9+4e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      },
+                                      { "key": "down",
+                                        "value": {
+                                          "nodetype": "formula",
+                                          "expression": "0.9-4e-05*x",
+                                          "parser": "TFormula",
+                                          "variables": [ "pt" ]
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  { "nodetype": "category",
+                                    "input": "syst",
+                                    "content": [
+                                      { "key": "nom", "value": 0.9 },
+                                      { "key": "up", "value": 0.9400000000000001 },
+                                      { "key": "down", "value": 0.86 }
+                                    ]
+                                  }
+                                ],
+                                "flow": "clamp"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                { "key": 6, "value": 1.0 }
+              ]
+            }
+          },
+          { "key": "dm",
+            "value": {
+              "nodetype": "category",
+              "input": "genmatch",
+              "content": [
+                { "key": 1, "value": 1.0 },
+                { "key": 2, "value": 1.0 },
+                { "key": 3, "value": 1.0 },
+                { "key": 4, "value": 1.0 },
+                { "key": 5,
+                  "value": {
+                    "nodetype": "category",
+                    "input": "wp",
+                    "content": [
+                      { "key": "VVVLoose",
+                        "value": {
+                          "nodetype": "category",
+                          "input": "wp_VSe",
+                          "content": [
+                            { "key": "VVLoose",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.96 },
+                                        { "key": "up", "value": 1.01 },
+                                        { "key": "down", "value": 0.8999999999999999 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.13 },
+                                        { "key": "up", "value": 1.19 },
+                                        { "key": "down", "value": 1.0799999999999998 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 2,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.13 },
+                                        { "key": "up", "value": 1.19 },
+                                        { "key": "down", "value": 1.0799999999999998 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.01 },
+                                        { "key": "up", "value": 1.1 },
+                                        { "key": "down", "value": 0.92 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.01 },
+                                        { "key": "up", "value": 1.1 },
+                                        { "key": "down", "value": 0.92 }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            { "key": "Tight",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.81 },
+                                        { "key": "up", "value": 0.8500000000000001 },
+                                        { "key": "down", "value": 0.77 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.08 },
+                                        { "key": "up", "value": 1.1300000000000001 },
+                                        { "key": "down", "value": 1.02 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 2,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.08 },
+                                        { "key": "up", "value": 1.1300000000000001 },
+                                        { "key": "down", "value": 1.02 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.98 },
+                                        { "key": "up", "value": 1.07 },
+                                        { "key": "down", "value": 0.89 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.98 },
+                                        { "key": "up", "value": 1.07 },
+                                        { "key": "down", "value": 0.89 }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      { "key": "VVLoose",
+                        "value": {
+                          "nodetype": "category",
+                          "input": "wp_VSe",
+                          "content": [
+                            { "key": "VVLoose",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.97 },
+                                        { "key": "up", "value": 1.02 },
+                                        { "key": "down", "value": 0.9199999999999999 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.11 },
+                                        { "key": "up", "value": 1.1600000000000001 },
+                                        { "key": "down", "value": 1.06 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 2,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.11 },
+                                        { "key": "up", "value": 1.1600000000000001 },
+                                        { "key": "down", "value": 1.06 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.05 },
+                                        { "key": "up", "value": 1.11 },
+                                        { "key": "down", "value": 0.99 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.05 },
+                                        { "key": "up", "value": 1.11 },
+                                        { "key": "down", "value": 0.99 }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            { "key": "Tight",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.81 },
+                                        { "key": "up", "value": 0.8500000000000001 },
+                                        { "key": "down", "value": 0.77 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.08 },
+                                        { "key": "up", "value": 1.12 },
+                                        { "key": "down", "value": 1.04 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 2,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.08 },
+                                        { "key": "up", "value": 1.12 },
+                                        { "key": "down", "value": 1.04 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.04 },
+                                        { "key": "up", "value": 1.1 },
+                                        { "key": "down", "value": 0.97 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.04 },
+                                        { "key": "up", "value": 1.1 },
+                                        { "key": "down", "value": 0.97 }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      { "key": "VLoose",
+                        "value": {
+                          "nodetype": "category",
+                          "input": "wp_VSe",
+                          "content": [
+                            { "key": "VVLoose",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.96 },
+                                        { "key": "up", "value": 1.0 },
+                                        { "key": "down", "value": 0.9199999999999999 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.09 },
+                                        { "key": "up", "value": 1.1300000000000001 },
+                                        { "key": "down", "value": 1.05 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 2,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.09 },
+                                        { "key": "up", "value": 1.1300000000000001 },
+                                        { "key": "down", "value": 1.05 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.04 },
+                                        { "key": "up", "value": 1.09 },
+                                        { "key": "down", "value": 0.99 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.04 },
+                                        { "key": "up", "value": 1.09 },
+                                        { "key": "down", "value": 0.99 }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            { "key": "Tight",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.78 },
+                                        { "key": "up", "value": 0.8200000000000001 },
+                                        { "key": "down", "value": 0.74 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.05 },
+                                        { "key": "up", "value": 1.09 },
+                                        { "key": "down", "value": 1.01 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 2,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.05 },
+                                        { "key": "up", "value": 1.09 },
+                                        { "key": "down", "value": 1.01 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.04 },
+                                        { "key": "up", "value": 1.09 },
+                                        { "key": "down", "value": 0.99 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.04 },
+                                        { "key": "up", "value": 1.09 },
+                                        { "key": "down", "value": 0.99 }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      { "key": "Loose",
+                        "value": {
+                          "nodetype": "category",
+                          "input": "wp_VSe",
+                          "content": [
+                            { "key": "VVLoose",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.95 },
+                                        { "key": "up", "value": 0.99 },
+                                        { "key": "down", "value": 0.9099999999999999 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.09 },
+                                        { "key": "up", "value": 1.1300000000000001 },
+                                        { "key": "down", "value": 1.05 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 2,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.09 },
+                                        { "key": "up", "value": 1.1300000000000001 },
+                                        { "key": "down", "value": 1.05 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.02 },
+                                        { "key": "up", "value": 1.06 },
+                                        { "key": "down", "value": 0.99 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.02 },
+                                        { "key": "up", "value": 1.06 },
+                                        { "key": "down", "value": 0.99 }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            { "key": "Tight",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.79 },
+                                        { "key": "up", "value": 0.8300000000000001 },
+                                        { "key": "down", "value": 0.75 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.01 },
+                                        { "key": "up", "value": 1.05 },
+                                        { "key": "down", "value": 0.98 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 2,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.01 },
+                                        { "key": "up", "value": 1.05 },
+                                        { "key": "down", "value": 0.98 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.01 },
+                                        { "key": "up", "value": 1.04 },
+                                        { "key": "down", "value": 0.98 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.01 },
+                                        { "key": "up", "value": 1.04 },
+                                        { "key": "down", "value": 0.98 }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      { "key": "Medium",
+                        "value": {
+                          "nodetype": "category",
+                          "input": "wp_VSe",
+                          "content": [
+                            { "key": "VVLoose",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.95 },
+                                        { "key": "up", "value": 0.98 },
+                                        { "key": "down", "value": 0.9199999999999999 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.09 },
+                                        { "key": "up", "value": 1.12 },
+                                        { "key": "down", "value": 1.06 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 2,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.09 },
+                                        { "key": "up", "value": 1.12 },
+                                        { "key": "down", "value": 1.06 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.99 },
+                                        { "key": "up", "value": 1.02 },
+                                        { "key": "down", "value": 0.96 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.99 },
+                                        { "key": "up", "value": 1.02 },
+                                        { "key": "down", "value": 0.96 }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            { "key": "Tight",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.77 },
+                                        { "key": "up", "value": 0.8 },
+                                        { "key": "down", "value": 0.74 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.0 },
+                                        { "key": "up", "value": 1.03 },
+                                        { "key": "down", "value": 0.97 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 2,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.0 },
+                                        { "key": "up", "value": 1.03 },
+                                        { "key": "down", "value": 0.97 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.98 },
+                                        { "key": "up", "value": 1.01 },
+                                        { "key": "down", "value": 0.95 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.98 },
+                                        { "key": "up", "value": 1.01 },
+                                        { "key": "down", "value": 0.95 }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      { "key": "Tight",
+                        "value": {
+                          "nodetype": "category",
+                          "input": "wp_VSe",
+                          "content": [
+                            { "key": "VVLoose",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.93 },
+                                        { "key": "up", "value": 0.9600000000000001 },
+                                        { "key": "down", "value": 0.9 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.04 },
+                                        { "key": "up", "value": 1.07 },
+                                        { "key": "down", "value": 1.01 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 2,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.04 },
+                                        { "key": "up", "value": 1.07 },
+                                        { "key": "down", "value": 1.01 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.96 },
+                                        { "key": "up", "value": 0.99 },
+                                        { "key": "down", "value": 0.9299999999999999 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.96 },
+                                        { "key": "up", "value": 0.99 },
+                                        { "key": "down", "value": 0.9299999999999999 }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            { "key": "Tight",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.78 },
+                                        { "key": "up", "value": 0.81 },
+                                        { "key": "down", "value": 0.75 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.96 },
+                                        { "key": "up", "value": 0.99 },
+                                        { "key": "down", "value": 0.9299999999999999 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 2,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.96 },
+                                        { "key": "up", "value": 0.99 },
+                                        { "key": "down", "value": 0.9299999999999999 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.95 },
+                                        { "key": "up", "value": 0.98 },
+                                        { "key": "down", "value": 0.9199999999999999 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.95 },
+                                        { "key": "up", "value": 0.98 },
+                                        { "key": "down", "value": 0.9199999999999999 }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      { "key": "VTight",
+                        "value": {
+                          "nodetype": "category",
+                          "input": "wp_VSe",
+                          "content": [
+                            { "key": "VVLoose",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.88 },
+                                        { "key": "up", "value": 0.91 },
+                                        { "key": "down", "value": 0.85 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.02 },
+                                        { "key": "up", "value": 1.05 },
+                                        { "key": "down", "value": 0.99 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 2,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.02 },
+                                        { "key": "up", "value": 1.05 },
+                                        { "key": "down", "value": 0.99 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.96 },
+                                        { "key": "up", "value": 0.99 },
+                                        { "key": "down", "value": 0.9299999999999999 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.96 },
+                                        { "key": "up", "value": 0.99 },
+                                        { "key": "down", "value": 0.9299999999999999 }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            { "key": "Tight",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.76 },
+                                        { "key": "up", "value": 0.79 },
+                                        { "key": "down", "value": 0.73 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.96 },
+                                        { "key": "up", "value": 0.99 },
+                                        { "key": "down", "value": 0.9299999999999999 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 2,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.96 },
+                                        { "key": "up", "value": 0.99 },
+                                        { "key": "down", "value": 0.9299999999999999 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.95 },
+                                        { "key": "up", "value": 0.98 },
+                                        { "key": "down", "value": 0.9199999999999999 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.95 },
+                                        { "key": "up", "value": 0.98 },
+                                        { "key": "down", "value": 0.9199999999999999 }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      { "key": "VVTight",
+                        "value": {
+                          "nodetype": "category",
+                          "input": "wp_VSe",
+                          "content": [
+                            { "key": "VVLoose",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.83 },
+                                        { "key": "up", "value": 0.86 },
+                                        { "key": "down", "value": 0.7999999999999999 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.0 },
+                                        { "key": "up", "value": 1.03 },
+                                        { "key": "down", "value": 0.97 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 2,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 1.0 },
+                                        { "key": "up", "value": 1.03 },
+                                        { "key": "down", "value": 0.97 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.95 },
+                                        { "key": "up", "value": 0.98 },
+                                        { "key": "down", "value": 0.9199999999999999 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.95 },
+                                        { "key": "up", "value": 0.98 },
+                                        { "key": "down", "value": 0.9199999999999999 }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            { "key": "Tight",
+                              "value": {
+                                "nodetype": "category",
+                                "input": "dm",
+                                "content": [
+                                  { "key": 0,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.74 },
+                                        { "key": "up", "value": 0.77 },
+                                        { "key": "down", "value": 0.71 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 1,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.94 },
+                                        { "key": "up", "value": 0.97 },
+                                        { "key": "down", "value": 0.9099999999999999 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 2,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.94 },
+                                        { "key": "up", "value": 0.97 },
+                                        { "key": "down", "value": 0.9099999999999999 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 10,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.94 },
+                                        { "key": "up", "value": 0.97 },
+                                        { "key": "down", "value": 0.9099999999999999 }
+                                      ]
+                                    }
+                                  },
+                                  { "key": 11,
+                                    "value": {
+                                      "nodetype": "category",
+                                      "input": "syst",
+                                      "content": [
+                                        { "key": "nom", "value": 0.94 },
+                                        { "key": "up", "value": 0.97 },
+                                        { "key": "down", "value": 0.9099999999999999 }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                { "key": 6, "value": 1.0 },
+                { "key": 0, "value": 1.0 }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

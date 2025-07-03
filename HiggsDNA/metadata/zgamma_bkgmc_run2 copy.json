@@ -70,12 +70,38 @@
                     "SelectedElectron"
                 ]
             },
+            "electron_iso_sf": {
+                "type": "object",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.lepton_systematics",
+                    "name": "electron_ISO_sf"
+                },
+                "modify_central_weight": true,
+                "input_collection": "Electron",
+                "target_collections": [
+                    "SelectedElectron"
+                ]
+            },
             "muon_looseid_sf": {
                 "type": "object",
                 "method": "from_function",
                 "function": {
                     "module_name": "higgs_dna.systematics.lepton_systematics",
                     "name": "muon_LooseID_sf"
+                },
+                "modify_central_weight": true,
+                "input_collection": "Muon",
+                "target_collections": [
+                    "SelectedMuon"
+                ]
+            },
+            "muon_iso_sf": {
+                "type": "object",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.lepton_systematics",
+                    "name": "muon_ISO_sf"
                 },
                 "modify_central_weight": true,
                 "input_collection": "Muon",

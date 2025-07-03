@@ -241,8 +241,8 @@ class ApplyXGBHandler(object):
                 except Exception as e:
                     print('XGB ERROR: Failed to open file: ', filename)
                     continue
-                for data in file[self._inputTree].iterate(branches, library='pd', step_size=self._chunksize): 
-                # for data in file[self._inputTree].iterate(library='pd', step_size=self._chunksize):
+                # for data in file[self._inputTree].iterate(branches, library='pd', step_size=self._chunksize): 
+                for data in file[self._inputTree].iterate(library='pd', step_size=self._chunksize):
                     data = self.preselect(data)
                     # data = data[data.Z_sublead_lepton_pt >= 15]
                     # if category == "DYJetsToLL":

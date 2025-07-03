@@ -132,7 +132,7 @@ class SampleManager():
                     grabbed_files = True
 
                 files = sorted(files, key = lambda x : x.name)
-                files = files[1:] # remove first file (usually the smallest one)
+                # files = files[1:] # remove first file (usually the smallest one)
                 logger.debug("[SampleManager : get_samples] For sample '%s', year '%s', found %d input files:" % (sample, year, len(files)))
                 if len(files) < 50: # don't print out if more than 50
                     for file in files:
@@ -231,7 +231,8 @@ class SampleManager():
                         size_gb = round(f["size"]*1e-9,2) 
                     )
             )
-
+        for das_file in files:
+            logger.debug("[SampleManager : get_files_from_dasgoclient] Found file: %s, with size %.2f GB and %d events." % (das_file.name, das_file.size_gb, das_file.n_events))
         return files
 
 

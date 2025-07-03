@@ -25,18 +25,6 @@ BATG_MED = {
     "2023postBPix": 0.2435
 }
 
-JET_VETO_MAP_FILE = {
-    "2016" : "higgs_dna/systematics/data/2016postVFP_UL/jetvetomaps.json",
-    "2016preVFP" : "higgs_dna/systematics/data/2016preVFP_UL/jetvetomaps.json",
-    "2016postVFP" : "higgs_dna/systematics/data/2016postVFP_UL/jetvetomaps.json",
-    "2017" : "higgs_dna/systematics/data/2017_UL/jetvetomaps.json",
-    "2018" : "higgs_dna/systematics/data/2018_UL/jetvetomaps.json",
-    "2022preEE" : "higgs_dna/systematics/data/2018_UL/jetvetomaps.json",
-    "2022postEE" : "higgs_dna/systematics/data/2018_UL/jetvetomaps.json",
-    "2023preBPix" : "higgs_dna/systematics/data/2018_UL/jetvetomaps.json",
-    "2023postBPix" : "higgs_dna/systematics/data/2018_UL/jetvetomaps.json",
-}
-
 BTAG_MCEFF_FILE = {
     "2016" : "higgs_dna/systematics/data/2016postVFP_UL/btag_mceff.json",
     "2016preVFP" : "higgs_dna/systematics/data/2016preVFP_UL/btag_mceff.json", 
@@ -50,15 +38,15 @@ BTAG_MCEFF_FILE = {
 }
 
 BTAG_RESHAPE_SF_FILE = {
-    "2016" : "higgs_dna/systematics/data/2016postVFP_UL/btagging.json", 
-    "2016preVFP" : "higgs_dna/systematics/data/2016preVFP_UL/btagging.json", 
-    "2016postVFP" : "higgs_dna/systematics/data/2016postVFP_UL/btagging.json", 
-    "2017" : "higgs_dna/systematics/data/2017_UL/btagging.json",
-    "2018" : "higgs_dna/systematics/data/2018_UL/btagging.json",
-    "2022preEE" : "higgs_dna/systematics/data/2018_UL/btagging.json", #FIXME
-    "2022postEE" : "higgs_dna/systematics/data/2018_UL/btagging.json", #FIXME
-    "2023preBPix" : "higgs_dna/systematics/data/2018_UL/btagging.json", #FIXME
-    "2023postBPix" : "higgs_dna/systematics/data/2018_UL/btagging.json", #FIXME
+    "2016" : "jsonpog-integration/POG/BTV/2016postVFP_UL/btagging.json", 
+    "2016preVFP" : "jsonpog-integration/POG/BTV/2016preVFP_UL/btagging.json", 
+    "2016postVFP" : "jsonpog-integration/POG/BTV/2016postVFP_UL/btagging.json", 
+    "2017" : "jsonpog-integration/POG/BTV/2017_UL/btagging.json",
+    "2018" : "jsonpog-integration/POG/BTV/2018_UL/btagging.json",
+    "2022preEE" : "jsonpog-integration/POG/BTV/2022_Summer22/btagging.json",
+    "2022postEE" : "jsonpog-integration/POG/BTV/2022_Summer22EE/btagging.json",
+    "2023preBPix" : "jsonpog-integration/POG/BTV/2023_Summer23/btagging.json",
+    "2023postBPix" : "jsonpog-integration/POG/BTV/2023_Summer23BPix/btagging.json"
 }
 
 DEEPJET_RESHAPE_SF = {
@@ -113,7 +101,6 @@ def btag_deepjet_wp_sf(events, year, central_only, input_collection):
     missing_fields = awkward_utils.missing_fields(events, required_fields)
 
     evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(BTAG_RESHAPE_SF_FILE[year]))
-    # jet_veto_map_evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(JET_VETO_MAP_FILE[year]))
     jet_mc_eff_evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(BTAG_MCEFF_FILE[year]))
    
     jets = events[input_collection]
@@ -139,26 +126,6 @@ def btag_deepjet_wp_sf(events, year, central_only, input_collection):
         20.0, # SFs only valid for pT > 20.
         999.99999
     )
-    # jet_phi = numpy.clip(
-    #     awkward.to_numpy(jets_flattened.phi),
-    #     -3.1415925,
-    #     3.1415925
-    # )
-
-    # jet_veto_sf = numpy.where(
-    #     jet_veto_map_evaluator["jetvetomap"].evalv(
-    #         "jetvetomap",
-    #         jet_eta,
-    #         jet_phi
-    #     ) > 0,
-    #     0.0,
-    #     1.0
-    # )
-    # jet_veto_sf = numpy.where(
-    #     (abs(jet_eta) >= 5.191) | (abs(jet_phi) >= 3.1415926),
-    #     0.0,
-    #     jet_veto_sf
-    # )
 
     variations_list = ["central"]
     if not central_only:
@@ -169,9 +136,10 @@ def btag_deepjet_wp_sf(events, year, central_only, input_collection):
     central_sf = numpy.ones_like(jet_flavor)
     jet_mc_eff, jet_mc_eff_syst = numpy.ones_like(jet_flavor), numpy.ones_like(jet_flavor)
     for f in [0, 4, 5]:
+        evaluator_key = "deepJet_mujets" if f > 0 else "deepJet_light" if int(year[:4]) > 2020 else "deepJet_incl"
         central_sf = numpy.where(
             jet_flavor == f,
-            evaluator["deepJet_mujets" if f > 0 else "deepJet_incl"].evalv(
+            evaluator[evaluator_key].evalv(
                 "central",
                 "M",
                 numpy.ones_like(jet_flavor) * f,
@@ -203,13 +171,7 @@ def btag_deepjet_wp_sf(events, year, central_only, input_collection):
 
     jet_mc_eff_up = jet_mc_eff + jet_mc_eff_syst
     jet_mc_eff_down = jet_mc_eff - jet_mc_eff_syst
-
-    # central_sf = numpy.where(
-    #     jet_veto_sf == 0,
-    #     1.0,
-    #     central_sf
-    # )
-
+    
     central_sf = numpy.where(
         jet_btag_deepjet > BATG_MED[year],
         central_sf,
@@ -222,11 +184,12 @@ def btag_deepjet_wp_sf(events, year, central_only, input_collection):
         if var == "central":
             continue
         applicable_flavors = DEEPJET_VARIATIONS[var] # the up/down variations are only applicable to specific flavors of jet
-        var_sf = central_sf 
+        var_sf = central_sf
         for f in applicable_flavors:
+            evaluator_key = "deepJet_mujets" if f > 0 else "deepJet_light" if int(year[:4]) > 2020 else "deepJet_incl"
             var_sf = numpy.where(
                 jet_flavor == f,
-                evaluator["deepJet_mujets" if f > 0 else "deepJet_incl"].evalv(
+                evaluator[evaluator_key].evalv(
                     var,
                     "M",
                     numpy.ones_like(jet_flavor) * f,
@@ -235,12 +198,6 @@ def btag_deepjet_wp_sf(events, year, central_only, input_collection):
                 ),
                 var_sf
             )
-
-        # var_sf = numpy.where(
-        #     jet_veto_sf == 0,
-        #     1.0,
-        #     var_sf
-        # )
 
         var_sf = numpy.where(
             jet_btag_deepjet > BATG_MED[year],

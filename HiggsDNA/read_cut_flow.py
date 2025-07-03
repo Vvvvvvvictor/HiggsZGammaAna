@@ -7,17 +7,17 @@ import time
 
 start_time = time.time()
 
-eos_path = '/eos/home-j/jiehan/parquet/nanov9/'
+eos_path = '/eos/home-j/jiehan/parquet/'
 # log_path = '/eos/user/j/jiehan/eos_logs/'
-log_path = '/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/HiggsDNA/eos_logs/'
+log_path = '/eos/user/j/jiehan/parquet/'
 
-dataset_type = 'data'
-dataset_names = ["Data"]
-dataset_years = ["2016preVFP", "2016postVFP", "2017", "2018"] #"2016preVFP", "2016postVFP", "2017", "2018", "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"
+# dataset_type = 'data'
+# dataset_names = ["Data"]
+# dataset_years = ["2016preVFP", "2016postVFP", "2017", "2018"] #"2016preVFP", "2016postVFP", "2017", "2018", "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"
 
-# dataset_type = 'signal'
-# dataset_names = ["ggH_M125"] #"ggH", "VBF", "ZH", "ttH", "WplusH", "WminusH" "ggH_M125", "VBFH_M125", "ZH_M125", "ttH_M125", "WplusH_M125", "WminusH_M125"
-# dataset_years = ["2016preVFP", "2016postVFP", "2017", "2018"]#"2016preVFP", "2016postVFP", "2017", "2018", "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"
+dataset_type = 'cutflow_ggf'
+dataset_names = ["ggH_M125"] #"ggH", "VBF", "ZH", "ttH", "WplusH", "WminusH" "ggH_M125", "VBFH_M125", "ZH_M125", "ttH_M125", "WplusH_M125", "WminusH_M125"
+dataset_years = ["2023postBPix"]#"2016preVFP", "2016postVFP", "2017", "2018", "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"
 
 # dataset_type = 'bkgmc'
 # dataset_names = ["ZGToLLG"] # "DYJetsToLL", "EWKZ2J", "ZG2JToG2L2J" "ZGToLLG" "Data_SingleMuon", "Data_DoubleMuon", "Data_SingleElectron", "Data_DoubleEG" "DYGto2LG_10to100" "DYGto2LG_10to50", "DYGto2LG_50to100"
@@ -68,8 +68,8 @@ for dataset in dataset_names:
                 continue
             for log_file in os.listdir(log_dir): 
                 typei, cuti = 0, 0
-                # if '.log' in log_file:
-                if '.out' not in log_file:
+                if '.log' not in log_file:
+                # if '.out' not in log_file:
                     continue
                 f = open("{}/{}".format(log_dir, log_file), 'r')
                 lines = f.read().split("DEBUG")
@@ -118,6 +118,7 @@ for dataset in dataset_names:
                         temp[cuti] += yields
                     cuti += 1
                 f.close()
+                print("reading finished")
                 break
             if flag:
                 print(log_dir)

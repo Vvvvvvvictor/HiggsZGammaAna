@@ -12,7 +12,7 @@
               "background_preselections": [],
               "data_preselections": ["is_center == 0"],
               "mc_preselections": [],
-              "randomIndex": "event", "weight": "weight"
+              "randomIndex": "event", "weight": "weight_corr"
               },
 "all_jet":  {"inputTree": "all_jet",
               "+preselections": ["H_mass >= 120", "H_mass <= 130"],
@@ -45,8 +45,8 @@
               },
 "zero_to_one_jet": {"+preselections": ["H_mass >= 120", "H_mass <= 130"],
             "inputTree": "zero_to_one_jet",
-            "+train_variables": ["H_relpt", "delta_phi_zgjj", "mass_jj",
-                                "delta_eta_jj", "pt_balance", "n_jets",
+            "+train_variables": ["H_relpt", "delta_phi_zgjj", "jet_1_mass",
+                                "jet_1_eta", "pt_balance", "n_jets",
                                 "delta_phi_jj", "photon_zeppenfeld",
                                 "jet1G_deltaR", "jet_1_pt", "llphoton_hmiss_photon_dphi"
                               ],

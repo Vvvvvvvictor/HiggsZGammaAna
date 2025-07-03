@@ -17,7 +17,7 @@ else:
 
 ##### DeepAK8/ParticleNet tagging
 eta, pt, syst, wp = 2.0,450.,"nom","0p1"
-map_name = "DeepAK8_Top_Nominal"
+map_name = "ParticleNet_Top_Nominal"
 valsf= evaluator[map_name].evaluate(eta, pt, syst, wp)
 print("Example for "+map_name)
 print("The "+syst+" SF for a Jet with pt="+str(pt) + " GeV and eta="+str(eta) + " for a misidentification rate of "+wp+" is "+str(valsf))

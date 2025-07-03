@@ -68,116 +68,116 @@ from pdb import set_trace
     #         for i in range(len(temp)):
     #             f.write(f'{int(temp["run"][i])} {int(temp["luminosityBlock"][i])} {int(temp["event"][i])}\n')
 
-# ==================================
-# Show MET_pt and n_b_jets
-# ==================================
-years = ['2016preVFP'] #, '2016postVFP', '2017', '2018']
-for year in years:
-    data = uproot.open(f"/eos/home-j/jiehan/root/skimmed_ntuples_run2/Data/{year}.root")['inclusive'].arrays(['MET_pt', 'n_b_jets', 'n_jets'], library='pd')
-    data = data.query('n_jets < 2')
-    hist, _ = np.histogram(data['MET_pt'], bins=20, range=(0, 200))
-    for i, h in enumerate(hist):
-        print(f'{year} MET_pt {i*10}-{(i+1)*10}: {h}')
+# # ==================================
+# # Show MET_pt and n_b_jets
+# # ==================================
+# years = ['2016preVFP'] #, '2016postVFP', '2017', '2018']
+# for year in years:
+#     data = uproot.open(f"/eos/home-j/jiehan/root/skimmed_ntuples_run2/Data/{year}.root")['inclusive'].arrays(['MET_pt', 'n_b_jets', 'n_jets'], library='pd')
+#     data = data.query('n_jets < 2')
+#     hist, _ = np.histogram(data['MET_pt'], bins=20, range=(0, 200))
+#     for i, h in enumerate(hist):
+#         print(f'{year} MET_pt {i*10}-{(i+1)*10}: {h}')
 
-# =====================================
-# Generate Event Count Table for ggH M125 2017
-# =====================================
-print("\nEvent Count Table for ggH M125 2017 (Electron Channel)")
-print("======================================================================")
+# # =====================================
+# # Generate Event Count Table for ggH M125 2017
+# # =====================================
+# print("\nEvent Count Table for ggH M125 2017 (Electron Channel)")
+# print("======================================================================")
 
-file_path = "/eos/home-j/jiehan/root/skimmed_ntuples_run2/ggH_M125/2017.root"
-tree_name = "inclusive"
+# file_path = "/eos/home-j/jiehan/root/skimmed_ntuples_run2/ggH_M125/2017.root"
+# tree_name = "inclusive"
 
-# Define all columns that will be used to speed up loading
-columns_to_load = [
-    'z_ee', 'n_iso_photons', 'Z_mass', 'gamma_pt', 'H_mass',
-    'Z_cos_theta', 'lep_cos_theta', 'lep_phi', 'gamma_mvaID',
-    'l1g_deltaR', 'l2g_deltaR', 'H_relpt', 'gamma_ptRelErr',
-    'Z_lead_lepton_eta', 'Z_sublead_lepton_eta', 'weight_central', # Add weight for potential weighted counts
-    'Z_lead_lepton_deltaphi', 'Z_sublead_lepton_deltaphi', 'gamma_eta'
-]
+# # Define all columns that will be used to speed up loading
+# columns_to_load = [
+#     'z_ee', 'n_iso_photons', 'Z_mass', 'gamma_pt', 'H_mass',
+#     'Z_cos_theta', 'lep_cos_theta', 'lep_phi', 'gamma_mvaID',
+#     'l1g_deltaR', 'l2g_deltaR', 'H_relpt', 'gamma_ptRelErr',
+#     'Z_lead_lepton_eta', 'Z_sublead_lepton_eta', 'weight_central', # Add weight for potential weighted counts
+#     'Z_lead_lepton_deltaphi', 'Z_sublead_lepton_deltaphi', 'gamma_eta'
+# ]
 
-try:
-    df_full = uproot.open(file_path)[tree_name].arrays(columns_to_load, library='pd')
-except Exception as e:
-    print(f"Error loading file: {e}")
-    df_full = pd.DataFrame() # Empty dataframe to avoid further errors
+# try:
+#     df_full = uproot.open(file_path)[tree_name].arrays(columns_to_load, library='pd')
+# except Exception as e:
+#     print(f"Error loading file: {e}")
+#     df_full = pd.DataFrame() # Empty dataframe to avoid further errors
 
-if not df_full.empty:
-    # Helper function to print rows in the desired format
-    def print_row(label, count_or_df, is_weighted=False):
-        count = 0
-        if isinstance(count_or_df, pd.DataFrame):
-            if is_weighted and 'weight_central' in count_or_df.columns:
-                count = count_or_df['weight_central'].sum()
-            else:
-                count = len(count_or_df)
-        else:
-            count = count_or_df
+# if not df_full.empty:
+#     # Helper function to print rows in the desired format
+#     def print_row(label, count_or_df, is_weighted=False):
+#         count = 0
+#         if isinstance(count_or_df, pd.DataFrame):
+#             if is_weighted and 'weight_central' in count_or_df.columns:
+#                 count = count_or_df['weight_central'].sum()
+#             else:
+#                 count = len(count_or_df)
+#         else:
+#             count = count_or_df
         
-        # Format count to match example (integer or float if weighted)
-        count_str = f"{count:.0f}" if not is_weighted or count == int(count) else f"{count:.2f}"
-        print(f"{label.ljust(60)} & {count_str}")
+#         # Format count to match example (integer or float if weighted)
+#         count_str = f"{count:.0f}" if not is_weighted or count == int(count) else f"{count:.2f}"
+#         print(f"{label.ljust(60)} & {count_str}")
 
-    # Apply selections sequentially
-    df = df_full.copy()
+#     # Apply selections sequentially
+#     df = df_full.copy()
 
-    df = df[df['z_ee'] > 0]  # Z_ee channel
-    print_row(r"$Z_ee channel$", df)
+#     df = df[df['z_ee'] > 0]  # Z_ee channel
+#     print_row(r"$Z_ee channel$", df)
 
-    baseline_df = df.copy()
-    print_row("Event filters (baseline for subsequent)", baseline_df)
+#     baseline_df = df.copy()
+#     print_row("Event filters (baseline for subsequent)", baseline_df)
 
-    # # Cuts relative to baseline
-    # print_row(r"baseline + cosTheta>0", baseline_df[baseline_df['Z_cos_theta'] > 0])
-    # print_row(r"baseline + cosTheta>0.5", baseline_df[baseline_df['Z_cos_theta'] > 0.5])
+#     # # Cuts relative to baseline
+#     # print_row(r"baseline + cosTheta>0", baseline_df[baseline_df['Z_cos_theta'] > 0])
+#     # print_row(r"baseline + cosTheta>0.5", baseline_df[baseline_df['Z_cos_theta'] > 0.5])
     
-    # print_row(r"baseline + costheta>0", baseline_df[baseline_df['lep_cos_theta'] > 0])
-    # print_row(r"baseline + costheta>0.5", baseline_df[baseline_df['lep_cos_theta'] > 0.5])
+#     # print_row(r"baseline + costheta>0", baseline_df[baseline_df['lep_cos_theta'] > 0])
+#     # print_row(r"baseline + costheta>0.5", baseline_df[baseline_df['lep_cos_theta'] > 0.5])
 
-    # print_row(r"baseline + phi (psi)>0", baseline_df[baseline_df['lep_phi'] > 0])
-    # print_row(r"baseline + phi (psi)>0.5", baseline_df[baseline_df['lep_phi'] > 0.5])
+#     # print_row(r"baseline + phi (psi)>0", baseline_df[baseline_df['lep_phi'] > 0])
+#     # print_row(r"baseline + phi (psi)>0.5", baseline_df[baseline_df['lep_phi'] > 0.5])
 
-    # print_row(r"baseline + Photonmva>0.6", baseline_df[baseline_df['gamma_mvaID'] > 0.6])
-    # print_row(r"baseline + Photonmva>0.75", baseline_df[baseline_df['gamma_mvaID'] > 0.75])
+#     # print_row(r"baseline + Photonmva>0.6", baseline_df[baseline_df['gamma_mvaID'] > 0.6])
+#     # print_row(r"baseline + Photonmva>0.75", baseline_df[baseline_df['gamma_mvaID'] > 0.75])
 
-    # print_row(r"baseline + mindR>1", baseline_df[baseline_df['l2g_deltaR'] > 1]) # l2g_deltaR is min(dR(l,g))
-    # print_row(r"baseline + mindR>1.2", baseline_df[baseline_df['l2g_deltaR'] > 1.2])
+#     # print_row(r"baseline + mindR>1", baseline_df[baseline_df['l2g_deltaR'] > 1]) # l2g_deltaR is min(dR(l,g))
+#     # print_row(r"baseline + mindR>1.2", baseline_df[baseline_df['l2g_deltaR'] > 1.2])
 
-    # print_row(r"baseline + maxdR>1.5", baseline_df[baseline_df['l1g_deltaR'] > 1.5]) # l1g_deltaR is max(dR(l,g))
-    # print_row(r"baseline + maxdR>2", baseline_df[baseline_df['l1g_deltaR'] > 2])
+#     # print_row(r"baseline + maxdR>1.5", baseline_df[baseline_df['l1g_deltaR'] > 1.5]) # l1g_deltaR is max(dR(l,g))
+#     # print_row(r"baseline + maxdR>2", baseline_df[baseline_df['l1g_deltaR'] > 2])
     
-    # # Ensure H_mass is not zero for H_relpt calculation if not already filtered
-    # temp_df_ptmass = baseline_df[baseline_df['H_mass'] != 0]
-    # print_row(r"baseline + pT mass>0.25", temp_df_ptmass[temp_df_ptmass['H_relpt'] > 0.25])
-    # print_row(r"baseline + pT mass>0.5", temp_df_ptmass[temp_df_ptmass['H_relpt'] > 0.5])
+#     # # Ensure H_mass is not zero for H_relpt calculation if not already filtered
+#     # temp_df_ptmass = baseline_df[baseline_df['H_mass'] != 0]
+#     # print_row(r"baseline + pT mass>0.25", temp_df_ptmass[temp_df_ptmass['H_relpt'] > 0.25])
+#     # print_row(r"baseline + pT mass>0.5", temp_df_ptmass[temp_df_ptmass['H_relpt'] > 0.5])
 
-    # print_row(r"baseline + $\gamma$ resolution>0.02", baseline_df[baseline_df['gamma_ptRelErr'] > 0.02])
-    # print_row(r"baseline + $\gamma$ resolution>0.05", baseline_df[baseline_df['gamma_ptRelErr'] > 0.05])
+#     # print_row(r"baseline + $\gamma$ resolution>0.02", baseline_df[baseline_df['gamma_ptRelErr'] > 0.02])
+#     # print_row(r"baseline + $\gamma$ resolution>0.05", baseline_df[baseline_df['gamma_ptRelErr'] > 0.05])
 
-    # print_row(r"baseline + lead lep $\eta$>0", baseline_df[baseline_df['Z_lead_lepton_eta'] > 0])
-    # print_row(r"baseline + lead lep $\eta$>0.5", baseline_df[baseline_df['Z_lead_lepton_eta'] > 0.5])
+#     # print_row(r"baseline + lead lep $\eta$>0", baseline_df[baseline_df['Z_lead_lepton_eta'] > 0])
+#     # print_row(r"baseline + lead lep $\eta$>0.5", baseline_df[baseline_df['Z_lead_lepton_eta'] > 0.5])
 
-    # print_row(r"baseline + sublead lep $\eta$>0", baseline_df[baseline_df['Z_sublead_lepton_eta'] > 0])
-    # print_row(r"baseline + sublead lep $\eta$>0.5", baseline_df[baseline_df['Z_sublead_lepton_eta'] > 0.5])
+#     # print_row(r"baseline + sublead lep $\eta$>0", baseline_df[baseline_df['Z_sublead_lepton_eta'] > 0])
+#     # print_row(r"baseline + sublead lep $\eta$>0.5", baseline_df[baseline_df['Z_sublead_lepton_eta'] > 0.5])
 
 
-    print_row(r"baseline + lead lepton $\eta$>1", baseline_df[baseline_df['Z_lead_lepton_eta'] > 1])
-    print_row(r"baseline + lead lepton $\eta$>2", baseline_df[baseline_df['Z_lead_lepton_eta'] > 2])
+#     print_row(r"baseline + lead lepton $\eta$>1", baseline_df[baseline_df['Z_lead_lepton_eta'] > 1])
+#     print_row(r"baseline + lead lepton $\eta$>2", baseline_df[baseline_df['Z_lead_lepton_eta'] > 2])
 
-    print_row(r"baseline + sublead lepton $\eta$>1", baseline_df[baseline_df['Z_sublead_lepton_eta'] > 1])
-    print_row(r"baseline + sublead lepton $\eta$>2", baseline_df[baseline_df['Z_sublead_lepton_eta'] > 2])
+#     print_row(r"baseline + sublead lepton $\eta$>1", baseline_df[baseline_df['Z_sublead_lepton_eta'] > 1])
+#     print_row(r"baseline + sublead lepton $\eta$>2", baseline_df[baseline_df['Z_sublead_lepton_eta'] > 2])
 
-    print_row(r"baseline + photon $\eta$>1", baseline_df[baseline_df['gamma_eta'] > 1])
-    print_row(r"baseline + photon $\eta$>2", baseline_df[baseline_df['gamma_eta'] > 2])
+#     print_row(r"baseline + photon $\eta$>1", baseline_df[baseline_df['gamma_eta'] > 1])
+#     print_row(r"baseline + photon $\eta$>2", baseline_df[baseline_df['gamma_eta'] > 2])
 
-    print_row(r"baseline + lead lep photon dphi>1", baseline_df[baseline_df['Z_sublead_lepton_deltaphi'] > 1])
-    print_row(r"baseline + lead lep photon dphi>2", baseline_df[baseline_df['Z_sublead_lepton_deltaphi'] > 2])
+#     print_row(r"baseline + lead lep photon dphi>1", baseline_df[baseline_df['Z_sublead_lepton_deltaphi'] > 1])
+#     print_row(r"baseline + lead lep photon dphi>2", baseline_df[baseline_df['Z_sublead_lepton_deltaphi'] > 2])
 
-    print_row(r"baseline + sublead lep photon dphi>1", baseline_df[baseline_df['Z_lead_lepton_deltaphi'] > 1])
-    print_row(r"baseline + sublead lep photon dphi>2", baseline_df[baseline_df['Z_lead_lepton_deltaphi'] > 2])
+#     print_row(r"baseline + sublead lep photon dphi>1", baseline_df[baseline_df['Z_lead_lepton_deltaphi'] > 1])
+#     print_row(r"baseline + sublead lep photon dphi>2", baseline_df[baseline_df['Z_lead_lepton_deltaphi'] > 2])
 
-print("======================================================================")
+# print("======================================================================")
 
 # =====================================
 # Compare two log file
@@ -199,41 +199,65 @@ print("======================================================================")
 #     if d2 not in data1:
 #         print(d2, end='')
 
-# # =====================================
-# # Get weight with syst
-# # =====================================
-# cats = ["inclusive"]
-# years = ['2017']
-# types = ["mumu", "ee"]
-# for year in years:
-#     # data = uproot.open(f"/eos/home-j/jiehan/root/cutflow/ggH_M125/{year}.root")
-#     data = pd.read_parquet(f"/eos/home-j/jiehan/parquet/nanov9/cutflow/ggH_M125_{year}/merged_nominal.parquet")
-#     print(data.columns)
-#     for cat in cats:
-#         # 加入所有满足这个格式的变量 'weight*central'
-#         variables = ['H_mass', 'z_mumu', 'z_ee']
-#         # for i in data[cat].keys():
-#         #     if i.startswith('weight') and i.endswith('central'):
-#         #         variables.append(i)
-#         # cat_data = data[cat].arrays(variables, library='pd')
-#         if cat == "inclusive":
-#             cat_data = data
-#         else:
-#             exit()
-#         for t in types:
-#             temp = cat_data.query(f'z_{t} > 0')
-#             weight = temp["weight_central"]
-#             print(f'{year} {cat} {t} lumi weight: {weight.sum()}')
-#             weight = weight * temp["weight_L1_prefiring_sf_central"]
-#             print(f'{year} {cat} {t} prefire weight: {weight.sum()}')
-#             weight = weight * temp["weight_pu_reweight_sf_central"]
-#             print(f'{year} {cat} {t} pileup weight: {weight.sum()}')
-#             weight = weight * temp["weight_btag_deepjet_wp_sf_SelectedJet_central"]
-#             print(f'{year} {cat} {t} btag weight: {weight.sum()}')
-#             weight = weight * temp["weight_electron_wplid_sf_SelectedElectron_central"]
-#             print(f'{year} {cat} {t} ele id weight: {weight.sum()}')
-#             weight = weight * temp["weight_muon_looseid_sf_SelectedMuon_central"]
-#             print(f'{year} {cat} {t} muon id weight: {weight.sum()}')
+# =====================================
+# Get weight with syst
+# =====================================
+cats = ["inclusive"]
+years = ['2023postBPix']
+types = ["mumu", "ee"]
+for year in years:
+    # data = uproot.open(f"/eos/home-j/jiehan/root/cutflow/ggH_M125/{year}.root")
+    data = pd.read_parquet(f"/eos/home-j/jiehan/parquet/cutflow_ggf/ggH_M125_{year}/merged_nominal.parquet")
+    print(data.columns)
+    for cat in cats:
+        # 加入所有满足这个格式的变量 'weight*central'
+        variables = ['H_mass', 'z_mumu', 'z_ee']
+        # for i in data[cat].keys():
+        #     if i.startswith('weight') and i.endswith('central'):
+        #         variables.append(i)
+        # cat_data = data[cat].arrays(variables, library='pd')
+        if cat == "inclusive":
+            cat_data = data
+        else:
+            exit()
+
+        temp = cat_data
+        weight = temp["weight_central"]
+        print(f'{year} {cat} total events: {len(temp)}')
+        print(f'{year} {cat} lumi weight: {weight.sum()}')
+        print(f'{year} {cat} prefire weight: {weight.sum()}')
+        weight = weight * temp["weight_pu_reweight_sf_central"]
+        print(f'{year} {cat} pileup weight: {weight.sum()}')
+        weight = weight * temp["weight_btag_deepjet_wp_sf_SelectedJet_central"]
+        print(f'{year} {cat} btag weight: {weight.sum()}')
+        weight = weight * temp["weight_electron_iso_sf_SelectedElectron_central"] * temp["weight_electron_reco_sf_SelectedElectron_central"] * temp["weight_electron_wplid_sf_SelectedElectron_central"]
+        print(f'{year} {cat} electron weight: {weight.sum()}')
+        weight = weight * temp["weight_muon_looseid_sf_SelectedMuon_central"] * temp["weight_muon_iso_sf_SelectedMuon_central"] * temp["weight_muon_looseid_sf_SelectedMuon_central"]
+        print(f'{year} {cat} muon weight: {weight.sum()}')
+        weight = weight * temp["weight_photon_csev_sf_Photon_central"] * temp["weight_photon_id_sf_Photon_central"]
+        print(f'{year} {cat} photon weight: {weight.sum()}')
+        weight = weight * temp["weight_electron_hlt_sf_SelectedElectron_central"] * temp["weight_muon_hlt_sf_SelectedMuon_central"]
+        print(f'{year} {cat} hlt weight: {weight.sum()}')
+        print(weight)
+
+        # for t in types:
+        #     temp = cat_data.query(f'z_{t} > 0')
+        #     weight = temp["weight_central"]
+        #     print(f'{year} {cat} {t} total events: {len(temp)}')
+        #     print(f'{year} {cat} {t} lumi weight: {weight.sum()}')
+        #     weight = weight * temp["weight_L1_prefiring_sf_central"]
+        #     print(f'{year} {cat} {t} prefire weight: {weight.sum()}')
+        #     weight = weight * temp["weight_pu_reweight_sf_central"]
+        #     print(f'{year} {cat} {t} pileup weight: {weight.sum()}')
+        #     weight = weight * temp["weight_btag_deepjet_wp_sf_SelectedJet_central"]
+        #     print(f'{year} {cat} {t} btag weight: {weight.sum()}')
+        #     weight = weight * temp["weight_electron_iso_sf_SelectedElectron_central"] * temp["weight_electron_reco_sf_SelectedElectron_central"] * temp["weight_electron_wplid_sf_SelectedElectron_central"]
+        #     print(f'{year} {cat} {t} electron weight: {weight.sum()}')
+        #     weight = weight * temp["weight_muon_looseid_sf_SelectedMuon_central"] * temp["weight_muon_iso_sf_SelectedMuon_central"] * temp["weight_muon_looseid_sf_SelectedMuon_central"]
+        #     print(f'{year} {cat} {t} muon weight: {weight.sum()}')
+        #     weight = weight * temp["weight_photon_csev_sf_Photon_central"] * temp["weight_photon_id_sf_Photon_central"]
+        #     print(f'{year} {cat} {t} photon weight: {weight.sum()}')
+        #     weight = weight * temp["weight_electron_hlt_sf_SelectedElectron_central"] * temp["weight_muon_hlt_sf_SelectedMuon_central"]
 
 # =====================================
 # Have a look at the hgg data

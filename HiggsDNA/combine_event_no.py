@@ -1,12 +1,13 @@
 import os
 import re
 
-for dataset in ["Data_2022preEE"]: #"Data_SingleElectron_2017", "Data_SingleMuon_2017", "Data_DoubleEG_2017", "Data_DoubleMuon_2017"
+for dataset in ["ggH_M125_2023postBPix"]: #"Data_SingleElectron_2017", "Data_SingleMuon_2017", "Data_DoubleEG_2017", "Data_DoubleMuon_2017"
     # Define folder path
     # folder_path = f"/eos/user/j/jiehan/eos_logs/data/{dataset}"
-    folder_path = f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/HiggsDNA/eos_logs/data/{dataset}"
+    # folder_path = f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/HiggsDNA/eos_logs/data/{dataset}"
+    folder_path = f"/eos/user/j/jiehan/parquet/cutflow_ggf/{dataset}"
 
-    for event_type in ["zgammas_ele"]:
+    for event_type in ["electron"]:
         # Define output file path
         output_file = f"/eos/user/j/jiehan/run_lumi_eve_no/{dataset}_{event_type}.txt"
 
@@ -22,7 +23,8 @@ for dataset in ["Data_2022preEE"]: #"Data_SingleElectron_2017", "Data_SingleMuon
                 writed = False
                 for file_name in files:
                     # print(file_name)
-                    if ".out" not in file_name:
+                    if ".log" not in file_name:
+                    # if ".out" not in file_name:
                         continue
                     # Concatenate the file path
                     file_path = os.path.join(root, file_name)

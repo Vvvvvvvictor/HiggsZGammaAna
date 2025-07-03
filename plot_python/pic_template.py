@@ -13,7 +13,7 @@ def read_root_file(file, var=None, tree="inclusive", selections=[]):
     selections: a list of selection(<str>). If there is '&' or '|' in one item, MUST use "()" to enclose each subitem.(exp. '(H_eta>1.5) & (H_pt>10)')
     '''
     print("Reading {}:{}...".format(file, tree))
-    variables = ["weight", "H_mass"]
+    variables = ["weight_corr", "H_mass"]
     if isinstance(var, str):
         variables.append(var)
     else:
@@ -82,7 +82,7 @@ def get_hist(arrays, variable, ratio, name, bins, range, hist=None, selections=[
         arrays = arrays[eval(i)]
     arrays = arrays.reset_index(drop=True)
     for i in trange(0, len(arrays[variable])):
-        hist.Fill(float(arrays[variable][i]), float(arrays['weight'][i])*ratio)
+        hist.Fill(float(arrays[variable][i]), float(arrays['weight_corr'][i])*ratio)
     hist.SetLineWidth(3)
     hist.SetMarkerStyle(0)
     yield_inte = hist.Integral()
@@ -98,7 +98,7 @@ def get_hist_sb(arrays, variable, ratio, name, bins, range, blind_range, hist=No
     for i in trange(0, len(arrays[variable])):
         if (arrays["H_mass"][i]>blind_range[1] and arrays["H_mass"][i]<blind_range[0]):
             continue
-        hist.Fill(float(arrays[variable][i]), float(arrays['weight'][i])*ratio)
+        hist.Fill(float(arrays[variable][i]), float(arrays['weight_corr'][i])*ratio)
     hist.SetLineWidth(3)
     hist.SetMarkerStyle(0)
     yield_inte = hist.Integral()

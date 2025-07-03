@@ -99,6 +99,9 @@ def main():
         # "llphoton_dijet_balance": "pt_balance",
         # "cosTheta": "Z_cos_theta",
 
+        "j1_m": "jet_1_mass",
+        "j1_eta": "jet_1_eta",
+
         "llphoton_refit_pTt": "H_ptt",
         "pt_mass_refit": "H_relpt",
         "llphoton_refit_m": "H_mass",
@@ -133,11 +136,11 @@ def main():
     }
     
     # Find all matching files
-    input_files = glob.glob(os.path.join(args.input_dir, "*_*_pinnacles_all.root"))
+    input_files = glob.glob(os.path.join(args.input_dir, "*_*_pinnacles_all_fixedjet.root"))
     logging.info(f"Found {len(input_files)} files")
     
     # 修改正则表达式以匹配更多年份格式，包括2022EE和2023BPix等特殊年份
-    pattern = re.compile(r'([^_]+)_((?:2016APV)|(?:2022EE)|(?:2023BPix)|[0-9]{4})_pinnacles_all\.root')
+    pattern = re.compile(r'([^_]+)_((?:2016APV)|(?:2022EE)|(?:2023BPix)|[0-9]{4})_pinnacles_all_fixedjet\.root')
     
     # Statistics for processing results
     stats = {"success": 0, "skipped": 0, "recovered": 0, "failed": 0}

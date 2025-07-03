@@ -27,14 +27,14 @@ def read_config(file_name):
         return list(map(float, f.readline().strip().split(" ")))
   
 def get_hist(file_name, tree_name, var_name, bin_boundaries, ranges):
-    data = uproot.open(file_name)[tree_name].arrays([var_name, "weight", "bdt_score_t", "n_jets"], library="pd").query(f"bdt_score_t>{bin_boundaries[0]} & bdt_score_t<{bin_boundaries[1]}")
-    weight = data["weight"]
+    data = uproot.open(file_name)[tree_name].arrays([var_name, "weight_corr", "bdt_score_t", "n_jets"], library="pd").query(f"bdt_score_t>{bin_boundaries[0]} & bdt_score_t<{bin_boundaries[1]}")
+    weight = data["weight_corr"]
     data = data[var_name]
     return np.histogram(data, weights=weight, range=ranges[1:], bins=ranges[0])
 
 def get_err_hist(file_name, tree_name, var_name, bin_boundaries, ranges):
-    data = uproot.open(file_name)[tree_name].arrays([var_name, "weight", "bdt_score_t", "n_jets"], library="pd").query(f"bdt_score_t>{bin_boundaries[0]} & bdt_score_t<{bin_boundaries[1]}")
-    weight = data["weight"]
+    data = uproot.open(file_name)[tree_name].arrays([var_name, "weight_corr", "bdt_score_t", "n_jets"], library="pd").query(f"bdt_score_t>{bin_boundaries[0]} & bdt_score_t<{bin_boundaries[1]}")
+    weight = data["weight_corr"]
     data = data[var_name]
     return np.histogram(data, weights=weight**2, range=ranges[1:], bins=ranges[0])
 

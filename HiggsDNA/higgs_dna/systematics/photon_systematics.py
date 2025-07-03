@@ -16,15 +16,15 @@ from higgs_dna.systematics.utils import systematic_from_bins, ic_systematic_from
 ########################
 
 PHOTON_ID_SF_FILE = {
-    "2016" : "higgs_dna/systematics/data/2016postVFP_UL/photon_wp80mceff_2016.json",
-    "2016preVFP" : "higgs_dna/systematics/data/2016preVFP_UL/photon_wp80mceff_2016.json",
-    "2016postVFP" : "higgs_dna/systematics/data/2016postVFP_UL/photon_wp80mceff_2016APV.json",
-    "2017" : "higgs_dna/systematics/data/2017_UL/photon_wp80mceff_2017.json",
-    "2018" : "higgs_dna/systematics/data/2018_UL/photon_wp80mceff_2018.json",
-    "2022preEE" : "higgs_dna/systematics/data/2018_UL/photon_wp80mceff_2018.json",
-    "2022postEE" : "higgs_dna/systematics/data/2018_UL/photon_wp80mceff_2018.json",
-    "2023preBPix" : "higgs_dna/systematics/data/2018_UL/photon_wp80mceff_2018.json",
-    "2023postBPix" : "higgs_dna/systematics/data/2018_UL/photon_wp80mceff_2018.json",
+    "2016" : ["higgs_dna/systematics/data/2016postVFP_UL/photon.json", "higgs_dna/systematics/data/2016preVFP_UL/hzg_phidvalidate_2016_scalefactors.json"],
+    "2016preVFP" : ["higgs_dna/systematics/data/2016preVFP_UL/photon.json", "higgs_dna/systematics/data/2016preVFP_UL/hzg_phidvalidate_2016APV_scalefactors.json"],
+    "2016postVFP" : ["higgs_dna/systematics/data/2016postVFP_UL/photon.json", "higgs_dna/systematics/data/2016postVFP_UL/hzg_phidvalidate_2016_scalefactors.json"],
+    "2017" : ["higgs_dna/systematics/data/2017_UL/photon.json", "higgs_dna/systematics/data/2017_UL/hzg_phidvalidate_2017_scalefactors.json"],
+    "2018" : ["higgs_dna/systematics/data/2018_UL/photon.json", "higgs_dna/systematics/data/2018_UL/hzg_phidvalidate_2018_scalefactors.json"],
+    "2022preEE" : ["higgs_dna/systematics/data/2022preEE_UL/photon.json", "higgs_dna/systematics/data/2022preEE_UL/hzg_phidvalidate_2022_scalefactors.json"],
+    "2022postEE" : ["higgs_dna/systematics/data/2022postEE_UL/photon.json", "higgs_dna/systematics/data/2022postEE_UL/hzg_phidvalidate_2022EE_scalefactors.json"],
+    "2023preBPix" : ["higgs_dna/systematics/data/2023preBPix_UL/photon.json"],
+    "2023postBPix" : ["higgs_dna/systematics/data/2023postBPix_UL/photon.json"],
 }
 
 PHOTON_ID_SF = {
@@ -33,13 +33,25 @@ PHOTON_ID_SF = {
     "2016postVFP" : "2016postVFP",
     "2017" : "2017",
     "2018" : "2018",
-    "2022preEE" : "2018",
-    "2022postEE" : "2018",
-    "2023preBPix" : "2018",
-    "2023postBPix" : "2018",
+    "2022preEE" : "2022Re-recoBCD",
+    "2022postEE" : "2022Re-recoE+PromptFG",
+    "2023preBPix" : "2023PromptC",
+    "2023postBPix" : "2023PromptD"
 }
 
-def photon_id_sf(events, year, central_only, input_collection, working_point = "none"):
+PHOTON_ID_EVAL = {
+    "2016" : "UL-Photon-ID-SF",
+    "2016preVFP" : "UL-Photon-ID-SF",
+    "2016postVFP" : "UL-Photon-ID-SF",
+    "2017" : "UL-Photon-ID-SF",
+    "2018" : "UL-Photon-ID-SF",
+    "2022preEE" : "Photon-ID-SF",
+    "2022postEE" : "Photon-ID-SF",
+    "2023preBPix" : "Photon-ID-SF",
+    "2023postBPix" : "Photon-ID-SF"
+}
+
+def photon_id_sf(events, year, central_only, input_collection, working_point = "wp80"):
     """
     See:
         - https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/EGM_electron_Run2_UL/EGM_electron_2017_UL.html
@@ -47,12 +59,174 @@ def photon_id_sf(events, year, central_only, input_collection, working_point = "
     """
 
     required_fields = [
-        (input_collection, "eta"), (input_collection, "pt")
+        (input_collection, "eta"), (input_collection, "pt"), (input_collection, "phi")
     ]
 
     missing_fields = awkward_utils.missing_fields(events, required_fields)
 
-    evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(PHOTON_ID_SF_FILE[year]))
+    evaluators = []
+    for file in PHOTON_ID_SF_FILE[year]:
+        evaluators.append(_core.CorrectionSet.from_file(misc_utils.expand_path(file)))
+
+    photons = events[input_collection]
+
+    # Flatten photons then convert to numpy for compatibility with correctionlib
+    n_photons = awkward.num(photons)
+    photons_flattened = awkward.flatten(photons)
+
+    variations_list = []
+
+    evaluator = evaluators[0]
+
+    pho_eta = numpy.clip(
+        awkward.to_numpy(photons_flattened.eta),
+        -2.49999,
+        2.49999 # SFs only valid up to eta 2.5
+    )
+
+    pho_pt = numpy.clip(
+        awkward.to_numpy(photons_flattened.pt),
+        20.0, # SFs only valid for pT >= 20.0
+        499.999 # and pT < 500.
+    )
+
+    pho_phi = numpy.clip(
+        awkward.to_numpy(photons_flattened.phi),
+        -999.0,
+        999.0 # SFs only valid for phi in [-pi, pi]
+    )
+
+    variations = {}
+    if int(year[:4]) < 2023:
+        sf = evaluator[PHOTON_ID_EVAL[year]].evalv(
+                PHOTON_ID_SF[year],
+                "sf",
+                working_point,
+                pho_eta,
+                pho_pt
+        )
+    else:
+        print("Name: ", PHOTON_ID_EVAL[year], ", year: ", PHOTON_ID_SF[year])
+        sf = evaluator[PHOTON_ID_EVAL[year]].evalv(
+                PHOTON_ID_SF[year],
+                "sf",
+                working_point,
+                pho_eta,
+                pho_pt,
+                pho_phi
+        )
+    variations["central"] = awkward.unflatten(sf, n_photons)
+
+    if not central_only:
+        syst_vars = ["sfup", "sfdown"] 
+        for syst_var in syst_vars:
+            if int(year[:4]) < 2023:
+                syst = evaluator[PHOTON_ID_EVAL[year]].evalv(
+                        PHOTON_ID_SF[year],
+                        syst_var,
+                        working_point,
+                        pho_eta,
+                        pho_pt
+                )
+            else:
+                syst = evaluator[PHOTON_ID_EVAL[year]].evalv(
+                        PHOTON_ID_SF[year],
+                        syst_var,
+                        working_point,
+                        pho_eta,
+                        pho_pt,
+                        pho_phi
+                )
+            if "up" in syst_var:
+                syst_var_name = "up"
+            elif "down" in syst_var:
+                syst_var_name = "down"
+            variations[syst_var_name] = awkward.unflatten(syst, n_photons)
+    variations_list.append(variations)
+
+    if len(evaluators) == 2:
+        evaluator = evaluators[1]
+
+        pho_eta = numpy.clip(
+            awkward.to_numpy(photons_flattened.eta),
+            -2.49999,
+            2.49999 # SFs only valid up to eta 2.5
+        )
+
+        pho_pt = numpy.clip(
+            awkward.to_numpy(photons_flattened.pt),
+            15.0, # SFs only valid for pT >= 15.0
+            20.0,
+        )
+
+        variations = {}
+        sf = evaluator["sf_pass"].evalv(
+                pho_pt,
+                pho_eta
+        )
+        variations["central"] = awkward.unflatten(sf, n_photons)
+
+        if not central_only:
+            syst = evaluator["unc_pass"].evalv(
+                    pho_pt,
+                    pho_eta
+            )
+            variations["up"] = awkward.unflatten(sf + syst, n_photons)
+            variations["down"] = awkward.unflatten(sf - syst, n_photons)
+        variations_list.append(variations)
+
+    if len(variations_list) > 1:
+        for var in variations_list[0].keys():
+            variations[var] = awkward.where(
+                (photons.pt < 15.0) | (photons.pt >= 500.0) | (abs(photons.eta) >= 2.5),
+                awkward.ones_like(variations_list[0][var], dtype=float),
+                awkward.where(photons.pt < 20.0, variations_list[1][var], variations_list[0][var])
+            )
+    else:
+        for var in variations_list[0].keys():
+            variations[var] = awkward.where(
+                (photons.pt < 15.0) | (photons.pt >= 500.0) | (abs(photons.eta) >= 2.5),
+                awkward.ones_like(variations_list[0][var], dtype=float),
+                variations_list[0][var]
+            )
+
+    return variations
+
+########################
+#### Photon CSEV SF ####
+########################
+
+PHOTON_CSEV_EVAL = {
+    "2016preVFP" : "UL-Photon-CSEV-SF",
+    "2016postVFP" : "UL-Photon-CSEV-SF",
+    "2017" : "UL-Photon-CSEV-SF",
+    "2018" : "UL-Photon-CSEV-SF",
+    "2022preEE" : "Photon-CSEV-SF",
+    "2022postEE" : "Photon-CSEV-SF",
+    "2023preBPix" : "Photon-CSEV-SF",
+    "2023postBPix" : "Photon-CSEV-SF"
+}
+
+def photon_CSEV_sf(events, year, central_only, input_collection, working_point = "MVA80"):
+    """
+    See:
+        - https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/EGM_electron_Run2_UL/EGM_electron_2017_UL.html
+        - https://gitlab.cern.ch/cms-nanoAOD/jsonpog-integration/-/blob/master/examples/electronExample.py
+    """
+    required_fields = [
+        (input_collection, "eta"), (input_collection, "r9")
+    ]
+    
+    # For Run2, also need isScEtaEB and isScEtaEE fields
+    if int(year[:4]) < 2022:
+        required_fields.extend([
+            (input_collection, "isScEtaEB"), 
+            (input_collection, "isScEtaEE")
+        ])
+
+    missing_fields = awkward_utils.missing_fields(events, required_fields)
+
+    evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(PHOTON_ID_SF_FILE[year][0]))
 
     photons = events[input_collection]
 
@@ -62,37 +236,104 @@ def photon_id_sf(events, year, central_only, input_collection, working_point = "
 
     pho_eta = numpy.clip(
         awkward.to_numpy(photons_flattened.eta),
-        -4.99999,
-        4.99999 # SFs only valid up to eta 2.5
+        -2.49999,
+        2.49999 # SFs only valid up to eta 2.5
     )
 
-    pho_pt = numpy.clip(
-        awkward.to_numpy(photons_flattened.pt),
-        20.0, # SFs only valid for pT >= 20.0
-        499.999 # and pT < 500.
+    pho_r9 = numpy.clip(
+        awkward.to_numpy(photons_flattened.r9),
+        0.0, # SFs only valid for R9 >= 0.0
+        99999.0
     )
 
     # Calculate SF and syst
     variations = {}
-    sf = evaluator["UL-Photon-ID-SF"].evalv(
-            PHOTON_ID_SF[year],
-            "sf",
-            working_point,
-            pho_eta,
-            pho_pt
-    )
+    
+    # Different treatment for Run2 vs Run3
+    if int(year[:4]) < 2022:  # Run2: use CSEV bins with predefined values
+        # Get CSEV SF values from the evaluator
+        csev_correction = evaluator[PHOTON_CSEV_EVAL[year]]
+        
+        # Get SF values for each bin and working point
+        sf_eb_high_r9 = csev_correction.evaluate(PHOTON_ID_SF[year], "sf", working_point, "EBHighR9")
+        sf_eb_low_r9 = csev_correction.evaluate(PHOTON_ID_SF[year], "sf", working_point, "EBLowR9")
+        sf_ee_high_r9 = csev_correction.evaluate(PHOTON_ID_SF[year], "sf", working_point, "EEHighR9")
+        sf_ee_low_r9 = csev_correction.evaluate(PHOTON_ID_SF[year], "sf", working_point, "EELowR9")
+        
+        # Determine which bin each photon belongs to
+        pho_isScEtaEB = photons_flattened.isScEtaEB
+        pho_isScEtaEE = photons_flattened.isScEtaEE
+        
+        # Create masks for each bin (R9 boundary = 0.96)
+        eb_high_r9_mask = pho_isScEtaEB & (photons_flattened.r9 > 0.96)
+        eb_low_r9_mask = pho_isScEtaEB & (photons_flattened.r9 <= 0.96)
+        ee_high_r9_mask = pho_isScEtaEE & (photons_flattened.r9 > 0.96)
+        ee_low_r9_mask = pho_isScEtaEE & (photons_flattened.r9 <= 0.96)
+        
+        # Assign SF values using awkward.where
+        sf = awkward.where(
+            eb_high_r9_mask,
+            sf_eb_high_r9,
+            awkward.where(
+                eb_low_r9_mask,
+                sf_eb_low_r9,
+                awkward.where(
+                    ee_high_r9_mask,
+                    sf_ee_high_r9,
+                    awkward.where(
+                        ee_low_r9_mask,
+                        sf_ee_low_r9,
+                        1.0  # Default value for photons not in any bin
+                    )
+                )
+            )
+        )
+    else:  # Run3: use eta and R9 directly
+        sf = evaluator[PHOTON_CSEV_EVAL[year]].evalv(
+                PHOTON_ID_SF[year],
+                "sf",
+                working_point,
+                pho_eta,
+                pho_r9
+        )
     variations["central"] = awkward.unflatten(sf, n_photons)
 
     if not central_only:
         syst_vars = ["sfup", "sfdown"] 
         for syst_var in syst_vars:
-            syst = evaluator["UL-Photon-ID-SF"].evalv(
-                    PHOTON_ID_SF[year],
-                    syst_var,
-                    working_point,
-                    pho_eta,
-                    pho_pt
-            )
+            if int(year[:4]) < 2022:  # Run2: use CSEV bins with predefined values
+                # Get systematic SF values for each bin
+                syst_eb_high_r9 = csev_correction.evaluate(PHOTON_ID_SF[year], syst_var, working_point, "EBHighR9")
+                syst_eb_low_r9 = csev_correction.evaluate(PHOTON_ID_SF[year], syst_var, working_point, "EBLowR9")
+                syst_ee_high_r9 = csev_correction.evaluate(PHOTON_ID_SF[year], syst_var, working_point, "EEHighR9")
+                syst_ee_low_r9 = csev_correction.evaluate(PHOTON_ID_SF[year], syst_var, working_point, "EELowR9")
+                
+                # Assign systematic SF values using awkward.where
+                syst = awkward.where(
+                    eb_high_r9_mask,
+                    syst_eb_high_r9,
+                    awkward.where(
+                        eb_low_r9_mask,
+                        syst_eb_low_r9,
+                        awkward.where(
+                            ee_high_r9_mask,
+                            syst_ee_high_r9,
+                            awkward.where(
+                                ee_low_r9_mask,
+                                syst_ee_low_r9,
+                                1.0  # Default value
+                            )
+                        )
+                    )
+                )
+            else:  # Run3: use eta and R9 directly
+                syst = evaluator[PHOTON_CSEV_EVAL[year]].evalv(
+                        PHOTON_ID_SF[year],
+                        syst_var,
+                        working_point,
+                        pho_eta,
+                        pho_r9
+                )
             if "up" in syst_var:
                 syst_var_name = "up"
             elif "down" in syst_var:
@@ -102,66 +343,10 @@ def photon_id_sf(events, year, central_only, input_collection, working_point = "
     for var in variations.keys():
         # Set SFs = 1 for leptons which are not applicable
         variations[var] = awkward.where(
-                (photons.pt < 20.0) | (photons.pt >= 500.0) | (abs(photons.eta) >= 2.5),
-                awkward.ones_like(variations[var], dtype=float),
+                (abs(photons.eta) >= 2.5),
+                awkward.ones_like(variations[var]),
                 variations[var]
         )
-
-    return variations
-
-########################
-#### Photon CSEV SF ####
-########################
-
-def photon_CSEV_sf(events, year, central_only, input_collection, working_point = "none", Bin = "none"):
-    """
-    See:
-        - https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/EGM_electron_Run2_UL/EGM_electron_2017_UL.html
-        - https://gitlab.cern.ch/cms-nanoAOD/jsonpog-integration/-/blob/master/examples/electronExample.py
-    """
-
-    evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(PHOTON_ID_SF_FILE[year]))
-
-    photons = events[input_collection]
-
-    # # Flatten photons then convert to numpy for compatibility with correctionlib
-    # n_photons = awkward.num(photons)
-    # photons_flattened = awkward.flatten(photons)
-
-    # Calculate SF and syst
-    variations = {}
-    sf = evaluator["UL-Photon-CSEV-SF"].evalv(
-            PHOTON_ID_SF[year],
-            "sf",
-            working_point,
-            Bin
-    )
-    # variations["central"] = awkward.unflatten(sf, n_photons)
-    variations["central"] = awkward.unflatten(sf, 1)
-
-    if not central_only:
-        syst_vars = ["sfup", "sfdown"] 
-        for syst_var in syst_vars:
-            syst = evaluator["UL-Photon-CSEV-SF"].evalv(
-                    PHOTON_ID_SF[year],
-                    syst_var,
-                    working_point,
-                    Bin
-            )
-            if "up" in syst_var:
-                syst_var_name = "up"
-            elif "down" in syst_var:
-                syst_var_name = "down"
-            # variations[syst_var_name] = awkward.unflatten(syst, n_photons)
-            variations[syst_var_name] = awkward.unflatten(syst, 1)
-
-    # for var in variations.keys():
-    #     # Set SFs = 1 for leptons which are not applicable
-    #     variations[var] = awkward.where(
-    #             (photons.pt < 20.0) | (photons.pt >= 500.0) | (abs(photons.eta) >= 2.5),
-    #             awkward.ones_like(variations[var]),
-    #             variations[var]
-    #     )
 
     return variations
 
@@ -423,67 +608,99 @@ photon_scale_FILE = {"2022preEE" : "jsonpog-integration/POG/EGM/2022_Summer22/ph
     "2023preBPix" : "jsonpog-integration/POG/EGM/2023_Summer23/photonSS_EtDependent.json",
     "2023postBPix" : "jsonpog-integration/POG/EGM/2023_Summer23BPix/photonSS_EtDependent.json"
 }
-def photon_scale_run3(events, year, central_only, input_collection, working_point = "none"):
+
+year_names = {
+    "2022preEE" : "EGMSmearAndSyst_PhoPTsplit_2022preEE",
+    "2022postEE" : "EGMSmearAndSyst_PhoPTsplit_2022postEE",
+    "2023preBPix" : "EGMSmearAndSyst_PhoPTsplit_2023preBPIX",
+    "2023postBPix" : "EGMSmearAndSyst_PhoPTsplit_2023postBPIX"
+}
+
+def photon_scale_smear_run3(events, year):
+    """
+    This function applies photon scale and smear corrections on the photon pt.
+    It returns events with the corrected photon pt values.
+    """
+    logger.info("[Photon Systematics] Applying photon scale and smear corrections for year %s", year)
 
     required_fields = [
-        (input_collection, "eta"), (input_collection, "pt"), (input_collection, "r9"),(input_collection, "run"),(input_collection,"seedGain")
+        ("Photon", "x_calo"), ("Photon", "y_calo"), ("Photon", "z_calo"), ("Photon", "eta"), ("Photon", "pt"), ("Photon", "r9")
     ]
 
     missing_fields = awkward_utils.missing_fields(events, required_fields)
 
     evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(photon_scale_FILE[year]))
 
-    muons = events[input_collection]
+    photons = events["Photon"]
+    n_photons = awkward.num(photons)
+    photons_flattened = awkward.flatten(photons)
 
-    # Flatten muons then convert to numpy for compatibility with correctionlib
-    n_muons = awkward.num(muons)
-    muons_flattened = awkward.flatten(muons)
+    # Calculate eta from calo coordinates
+    # rho = numpy.sqrt(awkward.to_numpy(photons_flattened.x_calo)**2 + awkward.to_numpy(photons_flattened.y_calo)**2)
+    # theta = numpy.arctan(rho / awkward.to_numpy(photons_flattened.z_calo))
+    photons_AbsEta = numpy.abs(awkward.to_numpy(photons_flattened.eta))
 
-    muon_eta = numpy.clip(
-        awkward.to_numpy(muons_flattened.eta),
-        -2.39999,
-        2.39999 # SFs only valid up to eta 2.5
+    photons_pt = awkward.to_numpy(photons_flattened.pt)
+    photons_r9 = awkward.to_numpy(photons_flattened.r9)
+
+    # Apply smear corrections first
+    smear = evaluator[year_names[year]].evalv("smear", photons_pt, photons_r9, photons_AbsEta)
+    rng = numpy.random.default_rng(seed=123)
+    smear_val = awkward.where(
+        (photons_AbsEta > 3.0) | (photons_pt < 20.0),
+        awkward.ones_like(photons_pt, dtype=float),
+        rng.normal(loc=1., scale=numpy.abs(smear))
     )
+    
+    # Apply central smear correction to photon pt
+    corrected_pt = awkward.to_numpy(photons_pt * smear_val)
 
-    muon_pt = numpy.clip(
-        awkward.to_numpy(muons_flattened.pt),
-        5.0, # SFs only valid for pT >= 10.0
-        499.999 # and pT < 500.
-    )
-
-    # Calculate SF and syst
-    variations = {}
-    # sf = evaluator["Muon_LooseID_MCeff"].evalv(
-    #         "effmc",
-    #         abs(muon_eta),
-    #         muon_pt
-    # )
-    sf = evaluator["sf_pass"].evalv(
-            muon_pt,
-            muon_eta
-    )
-    variations["central"] = awkward.unflatten(sf, n_muons)
-
-    if not central_only:
-        # syst_var = "systmc"
-        # syst = evaluator["Muon_LooseID_MCeff"].evalv(
-        #     syst_var,
-        #     abs(muon_eta),
-        #     muon_pt
-        #     )
-        syst = evaluator["unc_pass"].evalv(
-            muon_pt,
-            muon_eta
+    # Calculate smear systematics
+    for syst in ["smear_up", "smear_down"]:
+        smear_syst = evaluator[year_names[year]].evalv(syst, photons_pt, photons_r9, photons_AbsEta)
+        
+        if "up" in syst:
+            smear_up = awkward.unflatten(rng.normal(loc=1., scale=numpy.abs(smear+smear_syst)), n_photons)
+            events["Photon", "dEsigmaUp"] = photons.pt * awkward.where(
+                (abs(photons.eta) > 3.0) | (photons.pt < 20.0),
+                awkward.ones_like(smear_up, dtype=float),
+                smear_up
             )
-        variations["up"] = awkward.unflatten(syst+sf, n_muons)
-        variations["down"] = awkward.unflatten(sf-syst, n_muons)
+        elif "down" in syst:
+            smear_down = awkward.unflatten(rng.normal(loc=1., scale=numpy.abs(smear-smear_syst)), n_photons)
+            events["Photon", "dEsigmaDown"] = photons.pt * awkward.where(
+                (abs(photons.eta) > 3.0) | (photons.pt < 20.0),
+                awkward.ones_like(smear_down, dtype=float),
+                smear_down
+            )
+    
+    print("Photon pt before scale and smear corrections:", photons.pt)
+    events["Photon", "corrected_pt"] = awkward.unflatten(corrected_pt, n_photons)
+    photons = events["Photon"]
 
-    for var in variations.keys():
-        # Set SFs = 1 for leptons which are not applicable
-        variations[var] = awkward.where(
-                (muons.pt < 5.0) | (muons.pt >= 500.0) | (abs(muons.eta) >= 2.4),
-                awkward.ones_like(variations[var], dtype=float),
-                variations[var]
-        )
+    # Calculate scale systematics
+    for syst in ["scale_up", "scale_down"]:
+        scale = evaluator[year_names[year]].evalv(syst, corrected_pt, photons_r9, photons_AbsEta)
+        
+        if "up" in syst:
+            scale_up = awkward.unflatten(scale, n_photons)
+            events["Photon", "dEscaleUp"] = photons.corrected_pt * awkward.where(
+                (abs(photons.eta) > 3.0) | (photons.pt < 20.0),
+                awkward.ones_like(scale_up, dtype=float),
+                scale_up
+            )
+        elif "down" in syst:
+            scale_down = awkward.unflatten(scale, n_photons)
+            events["Photon", "dEscaleDown"] = photons.corrected_pt * awkward.where(
+                (abs(photons.eta) > 3.0) | (photons.pt < 20.0),
+                awkward.ones_like(scale_down, dtype=float),
+                scale_down
+            )
 
-    return variations
+    print("Photon pt after scale and smear corrections:", events["Photon", "corrected_pt"])
+    print("Photon pt Scale Up:", events["Photon", "dEscaleUp"])
+    print("Photon pt Scale Down:", events["Photon", "dEscaleDown"])
+    print("Photon pt Smear Up:", events["Photon", "dEsigmaUp"])
+    print("Photon pt Smear Down:", events["Photon", "dEsigmaDown"])
+
+    return events
