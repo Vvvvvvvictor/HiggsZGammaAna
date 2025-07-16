@@ -106,15 +106,36 @@ def photon_id_sf(events, year, central_only, input_collection, working_point = "
                 pho_pt
         )
     else:
-        print("Name: ", PHOTON_ID_EVAL[year], ", year: ", PHOTON_ID_SF[year])
-        sf = evaluator[PHOTON_ID_EVAL[year]].evalv(
+        # For 2023, need to handle pt < 20 photons separately
+        pho_pt_orig = awkward.to_numpy(photons_flattened.pt)
+        pt_below_20_mask = pho_pt_orig < 20.0
+        
+        # Create separate pt arrays for below/above 20 GeV
+        pho_pt_below_20 = numpy.clip(pho_pt_orig, 15.0, 19.999)
+        pho_pt_above_20 = numpy.clip(pho_pt_orig, 20.0, 499.999)
+        
+        # Calculate SF for pt >= 20
+        sf_above_20 = evaluator[PHOTON_ID_EVAL[year]].evalv(
                 PHOTON_ID_SF[year],
                 "sf",
                 working_point,
                 pho_eta,
-                pho_pt,
+                pho_pt_above_20,
                 pho_phi
         )
+        
+        # Calculate SF for pt < 20 with modified working point
+        sf_below_20 = evaluator[PHOTON_ID_EVAL[year]].evalv(
+                PHOTON_ID_SF[year],
+                "sf",
+                f"{working_point}Below20",
+                pho_eta,
+                pho_pt_below_20,
+                pho_phi
+        )
+        
+        # Combine results based on pt threshold
+        sf = numpy.where(pt_below_20_mask, sf_below_20, sf_above_20)
     variations["central"] = awkward.unflatten(sf, n_photons)
 
     if not central_only:
@@ -129,14 +150,37 @@ def photon_id_sf(events, year, central_only, input_collection, working_point = "
                         pho_pt
                 )
             else:
-                syst = evaluator[PHOTON_ID_EVAL[year]].evalv(
+                # For 2023, need to handle pt < 20 photons separately
+                pho_pt_orig = awkward.to_numpy(photons_flattened.pt)
+                pt_below_20_mask = pho_pt_orig < 20.0
+                
+                # Create separate pt arrays for below/above 20 GeV
+                pho_pt_below_20 = numpy.clip(pho_pt_orig, 15.0, 19.999)
+                pho_pt_above_20 = numpy.clip(pho_pt_orig, 20.0, 499.999)
+                
+                # Calculate syst for pt >= 20
+                syst_above_20 = evaluator[PHOTON_ID_EVAL[year]].evalv(
                         PHOTON_ID_SF[year],
                         syst_var,
                         working_point,
                         pho_eta,
-                        pho_pt,
+                        pho_pt_above_20,
                         pho_phi
                 )
+                
+                # Calculate syst for pt < 20 with modified working point
+                syst_below_20 = evaluator[PHOTON_ID_EVAL[year]].evalv(
+                        PHOTON_ID_SF[year],
+                        syst_var,
+                        f"{working_point}Below20",
+                        pho_eta,
+                        pho_pt_below_20,
+                        pho_phi
+                )
+                
+                # Combine results based on pt threshold
+                syst = numpy.where(pt_below_20_mask, syst_below_20, syst_above_20)
+                
             if "up" in syst_var:
                 syst_var_name = "up"
             elif "down" in syst_var:

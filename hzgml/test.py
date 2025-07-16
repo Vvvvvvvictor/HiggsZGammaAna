@@ -199,6 +199,20 @@ from pdb import set_trace
 #     if d2 not in data1:
 #         print(d2, end='')
 
+# # =====================================
+# # Check weight in specific events
+# # =====================================
+# data = pd.read_parquet("/eos/home-j/jiehan/parquet/cutflow_ggf/ggH_M125_2023postBPix/merged_nominal.parquet")
+# run = [1, 1, 1, 1, 1]
+# lumi = [17, 1, 49, 17, 17]
+# event = [16185, 138, 48333, 16369, 16437]
+# for i in range(len(run)):
+#     temp = data[(data['run'] == run[i]) & (data['luminosityBlock'] == lumi[i]) & (data['event'] == event[i])]
+#     if len(temp) > 0:
+#         print(f'Run: {run[i]}, Lumi: {lumi[i]}, Event: {event[i]}, Weight: {(temp["weight_photon_csev_sf_Photon_central"] * temp["weight_photon_id_sf_Photon_central"]).values[0]}')
+#     else:
+#         print(f'Run: {run[i]}, Lumi: {lumi[i]}, Event: {event[i]} not found in data.')
+        
 # =====================================
 # Get weight with syst
 # =====================================
@@ -208,7 +222,9 @@ types = ["mumu", "ee"]
 for year in years:
     # data = uproot.open(f"/eos/home-j/jiehan/root/cutflow/ggH_M125/{year}.root")
     data = pd.read_parquet(f"/eos/home-j/jiehan/parquet/cutflow_ggf/ggH_M125_{year}/merged_nominal.parquet")
-    print(data.columns)
+    for i in data.columns:
+        if "weight" in i and "central" in i:
+            print(i)
     for cat in cats:
         # 加入所有满足这个格式的变量 'weight*central'
         variables = ['H_mass', 'z_mumu', 'z_ee']
@@ -221,43 +237,57 @@ for year in years:
         else:
             exit()
 
-        temp = cat_data
-        weight = temp["weight_central"]
-        print(f'{year} {cat} total events: {len(temp)}')
-        print(f'{year} {cat} lumi weight: {weight.sum()}')
-        print(f'{year} {cat} prefire weight: {weight.sum()}')
-        weight = weight * temp["weight_pu_reweight_sf_central"]
-        print(f'{year} {cat} pileup weight: {weight.sum()}')
-        weight = weight * temp["weight_btag_deepjet_wp_sf_SelectedJet_central"]
-        print(f'{year} {cat} btag weight: {weight.sum()}')
-        weight = weight * temp["weight_electron_iso_sf_SelectedElectron_central"] * temp["weight_electron_reco_sf_SelectedElectron_central"] * temp["weight_electron_wplid_sf_SelectedElectron_central"]
-        print(f'{year} {cat} electron weight: {weight.sum()}')
-        weight = weight * temp["weight_muon_looseid_sf_SelectedMuon_central"] * temp["weight_muon_iso_sf_SelectedMuon_central"] * temp["weight_muon_looseid_sf_SelectedMuon_central"]
-        print(f'{year} {cat} muon weight: {weight.sum()}')
-        weight = weight * temp["weight_photon_csev_sf_Photon_central"] * temp["weight_photon_id_sf_Photon_central"]
-        print(f'{year} {cat} photon weight: {weight.sum()}')
-        weight = weight * temp["weight_electron_hlt_sf_SelectedElectron_central"] * temp["weight_muon_hlt_sf_SelectedMuon_central"]
-        print(f'{year} {cat} hlt weight: {weight.sum()}')
-        print(weight)
+        # temp = cat_data
+        # weight = temp["weight_central"]
+        # print(f'{year} {cat} total events: {len(temp)}')
+        # print(f'{year} {cat} lumi weight: {weight.sum()}')
+        # print(f'{year} {cat} prefire weight: {weight.sum()}')
+        # weight = weight * temp["weight_pu_reweight_sf_central"]
+        # print(f'{year} {cat} pileup weight: {weight.sum()}')
+        # weight = weight * temp["weight_btag_deepjet_wp_sf_SelectedJet_central"]
+        # print(f'{year} {cat} btag weight: {weight.sum()}')
+        # weight = weight * temp["weight_electron_iso_sf_SelectedElectron_central"] * temp["weight_electron_reco_sf_SelectedElectron_central"] * temp["weight_electron_wplid_sf_SelectedElectron_central"]
+        # print(f'{year} {cat} electron weight: {weight.sum()}')
+        # weight = weight * temp["weight_muon_looseid_sf_SelectedMuon_central"] * temp["weight_muon_iso_sf_SelectedMuon_central"] * temp["weight_muon_looseid_sf_SelectedMuon_central"]
+        # print(f'{year} {cat} muon weight: {weight.sum()}')
+        # weight = weight * temp["weight_photon_csev_sf_Photon_central"] * temp["weight_photon_id_sf_Photon_central"]
+        # print(f'{year} {cat} photon weight: {weight.sum()}')
+        # weight = weight * temp["weight_electron_hlt_sf_SelectedElectron_central"] * temp["weight_muon_hlt_sf_SelectedMuon_central"]
+        # print(f'{year} {cat} hlt weight: {weight.sum()}')
 
-        # for t in types:
-        #     temp = cat_data.query(f'z_{t} > 0')
-        #     weight = temp["weight_central"]
-        #     print(f'{year} {cat} {t} total events: {len(temp)}')
-        #     print(f'{year} {cat} {t} lumi weight: {weight.sum()}')
-        #     weight = weight * temp["weight_L1_prefiring_sf_central"]
-        #     print(f'{year} {cat} {t} prefire weight: {weight.sum()}')
-        #     weight = weight * temp["weight_pu_reweight_sf_central"]
-        #     print(f'{year} {cat} {t} pileup weight: {weight.sum()}')
-        #     weight = weight * temp["weight_btag_deepjet_wp_sf_SelectedJet_central"]
-        #     print(f'{year} {cat} {t} btag weight: {weight.sum()}')
-        #     weight = weight * temp["weight_electron_iso_sf_SelectedElectron_central"] * temp["weight_electron_reco_sf_SelectedElectron_central"] * temp["weight_electron_wplid_sf_SelectedElectron_central"]
-        #     print(f'{year} {cat} {t} electron weight: {weight.sum()}')
-        #     weight = weight * temp["weight_muon_looseid_sf_SelectedMuon_central"] * temp["weight_muon_iso_sf_SelectedMuon_central"] * temp["weight_muon_looseid_sf_SelectedMuon_central"]
-        #     print(f'{year} {cat} {t} muon weight: {weight.sum()}')
-        #     weight = weight * temp["weight_photon_csev_sf_Photon_central"] * temp["weight_photon_id_sf_Photon_central"]
-        #     print(f'{year} {cat} {t} photon weight: {weight.sum()}')
-        #     weight = weight * temp["weight_electron_hlt_sf_SelectedElectron_central"] * temp["weight_muon_hlt_sf_SelectedMuon_central"]
+        for t in types:
+            temp = cat_data.query(f'z_{t} > 0')
+            weight = temp["weight_central"] / 0.96934
+            print(f'{year} {cat} {t} total events: {len(temp)}')
+            print(f'{year} {cat} {t} lumi weight: {weight.sum()}')
+            # weight = weight * temp["weight_L1_prefiring_sf_central"]
+            # print(f'{year} {cat} {t} prefire weight: {weight.sum()}')
+            weight = weight * temp["weight_pu_reweight_sf_central"]
+            print(f'{year} {cat} {t} pileup weight: {weight.sum()}')
+            weight = weight * temp["weight_btag_deepjet_wp_sf_SelectedJet_central"]
+            print(f'{year} {cat} {t} btag weight: {weight.sum()}')
+            
+            # weight = weight * temp["weight_electron_iso_sf_SelectedElectron_central"]
+            # print(f'{year} {cat} {t} electron iso weight: {weight.sum()}')
+            # weight = weight * temp["weight_electron_reco_sf_SelectedElectron_central"]
+            # print(f'{year} {cat} {t} electron reco weight: {weight.sum()}')
+            weight = weight * temp["weight_electron_wplid_sf_SelectedElectron_central"]
+            print(f'{year} {cat} {t} electron wplid weight: {weight.sum()}')
+            weight = weight * temp["weight_electron_wplid_sf_nomatch_SelectedGenNoRecoElectron_central"]
+            print(f'{year} {cat} {t} electron wplid nomatch weight: {weight.sum()}')
+
+            # weight = weight * temp["weight_muon_iso_sf_SelectedMuon_central"]
+            # print(f'{year} {cat} {t} muon iso weight: {weight.sum()}')
+            weight = weight * temp["weight_muon_looseid_sf_SelectedMuon_central"]
+            print(f'{year} {cat} {t} muon looseid weight: {weight.sum()}')
+            weight = weight * temp["weight_muon_looseid_sf_nomatch_SelectedGenNoRecoMuon_central"]
+            print(f'{year} {cat} {t} muon looseid nomatch weight: {weight.sum()}')
+
+            # weight = weight * temp["weight_photon_id_sf_Photon_central"] * temp["weight_photon_csev_sf_Photon_central"]
+            # print(f'{year} {cat} {t} photon weight: {weight.sum()}')
+            
+            weight = weight * temp["weight_hlt_sf_central"]
+            print(f'{year} {cat} {t} hlt weight: {weight.sum()}')
 
 # =====================================
 # Have a look at the hgg data
@@ -337,3 +367,43 @@ for year in years:
 #                 print(f'{year} {sample} {cat} {flav} yields: {signal:.3f}({count})')
 #                 yields += data['weight'].sum()
 #     print(f'{cat} yields: {yields}\n')
+
+# # =====================================
+# # Plot weight distributions
+# # =====================================
+# cats = ["inclusive"]
+# years = ['2023postBPix']
+# types = ["mumu", "ee"]
+# for year in years:
+#     # data = uproot.open(f"/eos/home-j/jiehan/root/cutflow/ggH_M125/{year}.root")
+#     data = pd.read_parquet(f"/eos/home-j/jiehan/parquet/cutflow_ggf/ggH_M125_{year}/merged_nominal.parquet")
+
+#     fig, ax = plt.subplots(1, 1, figsize=(10, 10))
+#     for year in years:
+#         for cat in cats:
+#             # 加入所有满足这个格式的变量 'weight*central'
+#             variables = ['H_mass', 'z_mumu', 'z_ee']
+#             # for i in data[cat].keys():
+#             #     if i.startswith('weight') and i.endswith('central'):
+#             #         variables.append(i)
+#             # cat_data = data[cat].arrays(variables, library='pd')
+#             if cat == "inclusive":
+#                 cat_data = data
+#             else:
+#                 exit()
+
+#             for t in types:
+#                 temp = cat_data.query(f'z_{t} > 0')
+#                 # temp["weight_photon_csev_sf_Photon_central"] * temp["weight_photon_id_sf_Photon_central"]
+#                 weight = temp["weight_pu_reweight_sf_central"]
+#                 hist = np.histogram(weight, bins=1000, range=(0, 10), density=True)
+#                 # Only plot if histogram values are non-zero
+#                 non_zero_mask = hist[0] > 0
+#                 if non_zero_mask.any():
+#                     ax.scatter(hist[1][:-1][non_zero_mask], hist[0][non_zero_mask], label=f'{t}', marker='o', linestyle='-')
+
+#     ax.set_xlabel('Weight')
+#     ax.set_ylabel('Density')
+#     ax.set_title('Weight Distributions')
+#     ax.legend()
+#     plt.savefig('weight_distributions.png')

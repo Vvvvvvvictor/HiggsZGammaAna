@@ -213,6 +213,7 @@ class WeightSystematic(Systematic):
                     name = tuple((variation[0], "weight" + "_" + self.name + "_" + variation[1])) 
                     self.branches[variation[1]] = name
                 logger.debug("[WeightSystematic : produce] WeightSystematic: %s, adding field %s to events array" % (self.name, name))
+                print(values)
                 awkward_utils.add_field(events, name, values)
 
         for variation, branch in self.branches.items():

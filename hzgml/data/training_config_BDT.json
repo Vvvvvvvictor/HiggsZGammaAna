@@ -46,8 +46,7 @@
 "zero_to_one_jet": {"+preselections": ["H_mass >= 120", "H_mass <= 130"],
             "inputTree": "zero_to_one_jet",
             "+train_variables": ["H_relpt", "delta_phi_zgjj", "jet_1_mass",
-                                "jet_1_eta", "pt_balance", "n_jets",
-                                "delta_phi_jj", "photon_zeppenfeld",
+                                "jet_1_eta", "pt_balance", "n_jets", "photon_zeppenfeld",
                                 "jet1G_deltaR", "jet_1_pt", "llphoton_hmiss_photon_dphi"
                               ],
             "params": [{"silent": 1, "eval_metric": ["logloss", "auc"], "grow_policy": "lossguide", "nthread": 4, "objective": "binary:logistic", "tree_method": "hist", "booster": "gbtree"},

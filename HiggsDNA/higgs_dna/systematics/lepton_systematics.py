@@ -2,9 +2,6 @@ import awkward
 import numpy
 
 from correctionlib import _core
-import json
-
-import logging
 # logger = logging.getLogger(__name__)
 from higgs_dna.utils.logger_utils import simple_logger
 logger = simple_logger(__name__)
@@ -34,60 +31,89 @@ def muon_LooseID_sf(events, year, central_only, input_collection):
 
     evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(MUON_ID_SF_FILE[year]))
 
-    muons = events[input_collection]
+    # 1. Handle reconstructed muons
+    reco_muons = events[input_collection]
+    n_reco_muons = awkward.num(reco_muons)
+    reco_muons_flattened = awkward.flatten(reco_muons)
 
-    # Flatten muons then convert to numpy for compatibility with correctionlib
-    n_muons = awkward.num(muons)
-    muons_flattened = awkward.flatten(muons)
-
-    muon_eta = numpy.clip(
-        awkward.to_numpy(muons_flattened.eta),
+    reco_muon_eta = numpy.clip(
+        awkward.to_numpy(reco_muons_flattened.eta),
         -2.39999,
         2.39999 # SFs only valid up to eta 2.5
     )
-
-    muon_pt = numpy.clip(
-        awkward.to_numpy(muons_flattened.pt),
+    reco_muon_pt = numpy.clip(
+        awkward.to_numpy(reco_muons_flattened.pt),
         5.0, # SFs only valid for pT >= 10.0
         499.999 # and pT < 500.
     )
 
-    # Calculate SF and syst
-    variations = {}
-    # sf = evaluator["Muon_LooseID_MCeff"].evalv(
-    #         "effmc",
-    #         abs(muon_eta),
-    #         muon_pt
-    # )
-    sf = evaluator["sf_pass"].evalv(
-            muon_pt,
-            muon_eta
-    )
-    variations["central"] = awkward.unflatten(sf, n_muons)
+    reco_variations = {}
+    sf = evaluator["sf_pass"].evalv(reco_muon_pt, reco_muon_eta)
+    reco_variations["central"] = awkward.unflatten(sf, n_reco_muons)
 
     if not central_only:
-        # syst_var = "systmc"
-        # syst = evaluator["Muon_LooseID_MCeff"].evalv(
-        #     syst_var,
-        #     abs(muon_eta),
-        #     muon_pt
-        #     )
-        syst = evaluator["unc_pass"].evalv(
-            muon_pt,
-            muon_eta
-            )
-        variations["up"] = awkward.unflatten(syst+sf, n_muons)
-        variations["down"] = awkward.unflatten(sf-syst, n_muons)
+        syst = evaluator["unc_pass"].evalv(reco_muon_pt, reco_muon_eta)
+        reco_variations["up"] = awkward.unflatten(syst + sf, n_reco_muons)
+        reco_variations["down"] = awkward.unflatten(sf - syst, n_reco_muons)
 
-    for var in variations.keys():
-        # Set SFs = 1 for leptons which are not applicable
-        variations[var] = awkward.where(
-                (muons.pt < 5.0) | (muons.pt >= 500.0) | (abs(muons.eta) >= 2.4),
-                awkward.ones_like(variations[var], dtype=float),
-                variations[var]
+    for var in reco_variations.keys():
+        reco_variations[var] = awkward.where(
+            (reco_muons.pt < 5.0) | (reco_muons.pt >= 500.0) | (abs(reco_muons.eta) >= 2.4),
+            awkward.ones_like(reco_variations[var], dtype=float),
+            reco_variations[var]
         )
 
-    return variations
+    return reco_variations
+
+
+def muon_LooseID_sf_nomatch(events, year, central_only, input_collection):
+    required_fields = [
+        (input_collection, "eta"), (input_collection, "pt"), (input_collection, "pdgId")
+    ]
+    missing_fields = awkward_utils.missing_fields(events, required_fields)
+    if missing_fields:
+        logger.warning(f"Missing fields for muon_LooseID_sf_nomatch: {missing_fields}")
+        # return None
+
+    evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(MUON_ID_SF_FILE[year]))
+    unmatched_gen_muons = events[input_collection]
+    n_unmatched_gen = awkward.num(unmatched_gen_muons)
+    unmatched_gen_flattened = awkward.flatten(unmatched_gen_muons)
+
+    unmatched_variations = {}
+    if len(unmatched_gen_flattened) > 0:
+        gen_muon_eta = numpy.clip(awkward.to_numpy(unmatched_gen_flattened.eta), -2.39999, 2.39999)
+        gen_muon_pt = numpy.clip(awkward.to_numpy(unmatched_gen_flattened.pt), 5.0, 499.999)
+        sf = evaluator["sf_fail"].evalv(gen_muon_pt, gen_muon_eta)
+        unmatched_variations["central"] = awkward.unflatten(sf, n_unmatched_gen)
+
+        if not central_only:
+            syst = evaluator["unc_fail"].evalv(gen_muon_pt, gen_muon_eta)
+            unmatched_variations["up"] = awkward.unflatten(syst + sf, n_unmatched_gen)
+            unmatched_variations["down"] = awkward.unflatten(sf - syst, n_unmatched_gen)
+
+        for var in unmatched_variations.keys():
+            unmatched_variations[var] = awkward.where(
+                (unmatched_gen_muons.pt < 5.0) | (unmatched_gen_muons.pt >= 500.0) | (abs(unmatched_gen_muons.eta) >= 2.4),
+                awkward.ones_like(unmatched_variations[var], dtype=float),
+                unmatched_variations[var]
+            )
+    else:
+        event_counts = awkward.num(events, axis=0)
+        dummy_event_structure = awkward.ArrayBuilder()
+        for i in range(event_counts):
+            dummy_event_structure.begin_list()
+            dummy_event_structure.end_list()
+        
+        dummy_event_structure = dummy_event_structure.snapshot()
+
+        unmatched_variations = { "central": dummy_event_structure }
+        if not central_only:
+            unmatched_variations["up"] = dummy_event_structure
+            unmatched_variations["down"] = dummy_event_structure
+
+    return unmatched_variations
+
 
 MUON_ISO_SF_FILE = {
     "2016" : ["higgs_dna/systematics/data/2016postVFP_UL/hzg_muiso0p1_2016_efficiencies.json", "higgs_dna/systematics/data/2016postVFP_UL/hzg_muiso0p15_2016_efficiencies.json"],
@@ -236,79 +262,139 @@ def electron_WPL_sf(events, year, central_only, input_collection):
     if year == "2023postBPix":
         evaluator_hole = _core.CorrectionSet.from_file(misc_utils.expand_path(ELECTRON_ID_SF_FILE_HOLE[year]))
 
-    electrons = events[input_collection]
+    # 1. Handle reconstructed electrons
+    reco_electrons = events[input_collection]
+    n_reco_electrons = awkward.num(reco_electrons)
+    reco_electrons_flattened = awkward.flatten(reco_electrons)
 
-    # Flatten electrons then convert to numpy for compatibility with correctionlib
-    n_electrons = awkward.num(electrons)
-    electrons_flattened = awkward.flatten(electrons)
-
-    ele_eta = numpy.clip(
-        awkward.to_numpy(electrons_flattened.eta),
+    reco_ele_eta = numpy.clip(
+        awkward.to_numpy(reco_electrons_flattened.eta),
         -2.49999,
-        2.49999 # SFs only valid up to eta 2.5
-    )
+        2.49999    )
 
-    ele_pt = numpy.clip(
-        awkward.to_numpy(electrons_flattened.pt),
-        7.0, # SFs only valid for pT >= 10.0
-        499.999 # and pT < 500.
-    )
+    reco_ele_pt = numpy.clip(
+        awkward.to_numpy(reco_electrons_flattened.pt),
+        7.0,        499.999    )
     
-    # Get phi for 2023postBPix
-    ele_phi = None
+    reco_ele_phi = None
     if year == "2023postBPix":
-        ele_phi = awkward.to_numpy(electrons_flattened.phi)
+        reco_ele_phi = awkward.to_numpy(reco_electrons_flattened.phi)
 
-    # Calculate SF and syst
-    variations = {}
+    reco_variations = {}
     
     if year == "2023postBPix":
-        # For 2023postBPix, use Hole file for electrons in the hole region
-        # Hole region: -1.566 < eta < 0 and -1.2 < phi < -0.8
-        hole_mask = (ele_eta > -1.566) & (ele_eta < 0) & (ele_phi > -1.2) & (ele_phi < -0.8)
-        
-        # Calculate SF for normal regions
-        sf_normal = evaluator["sf_pass"].evalv(ele_pt, ele_eta)
-        
-        # Calculate SF for hole regions
-        sf_hole = evaluator_hole["sf_pass"].evalv(ele_pt, ele_eta)
-        
-        # Combine SFs based on the hole mask
+        hole_mask = (reco_ele_eta > -1.566) & (reco_ele_eta < 0) & (reco_ele_phi > -1.2) & (reco_ele_phi < -0.8)
+        sf_normal = evaluator["sf_pass"].evalv(reco_ele_pt, reco_ele_eta)
+        sf_hole = evaluator_hole["sf_pass"].evalv(reco_ele_pt, reco_ele_eta)
         sf = numpy.where(hole_mask, sf_hole, sf_normal)
-        
-        variations["central"] = awkward.unflatten(sf, n_electrons)
+        reco_variations["central"] = awkward.unflatten(sf, n_reco_electrons)
 
         if not central_only:
-            # Calculate uncertainties for normal regions
-            syst_normal = evaluator["unc_pass"].evalv(ele_pt, ele_eta)
-            
-            # Calculate uncertainties for hole regions
-            syst_hole = evaluator_hole["unc_pass"].evalv(ele_pt, ele_eta)
-            
-            # Combine uncertainties based on the hole mask
+            syst_normal = evaluator["unc_pass"].evalv(reco_ele_pt, reco_ele_eta)
+            syst_hole = evaluator_hole["unc_pass"].evalv(reco_ele_pt, reco_ele_eta)
             syst = numpy.where(hole_mask, syst_hole, syst_normal)
-            
-            variations["up"] = awkward.unflatten(syst+sf, n_electrons)
-            variations["down"] = awkward.unflatten(sf-syst, n_electrons)
+            reco_variations["up"] = awkward.unflatten(syst + sf, n_reco_electrons)
+            reco_variations["down"] = awkward.unflatten(sf - syst, n_reco_electrons)
     else:
-        # For other years, use the standard approach
-        sf = evaluator["sf_pass"].evalv(ele_pt, ele_eta)
-        variations["central"] = awkward.unflatten(sf, n_electrons)
+        sf = evaluator["sf_pass"].evalv(reco_ele_pt, reco_ele_eta)
+        reco_variations["central"] = awkward.unflatten(sf, n_reco_electrons)
 
         if not central_only:
-            syst = evaluator["unc_pass"].evalv(ele_pt, ele_eta)
-            variations["up"] = awkward.unflatten(syst+sf, n_electrons)
-            variations["down"] = awkward.unflatten(sf-syst, n_electrons)
+            syst = evaluator["unc_pass"].evalv(reco_ele_pt, reco_ele_eta)
+            reco_variations["up"] = awkward.unflatten(syst + sf, n_reco_electrons)
+            reco_variations["down"] = awkward.unflatten(sf - syst, n_reco_electrons)
 
-    for var in variations.keys():
-        # Set SFs = 1 for leptons which are not applicable
-        variations[var] = awkward.where(
-                (electrons.pt < 7.0) | (electrons.pt >= 500.0) | (abs(electrons.eta) >= 2.5),
-                awkward.ones_like(variations[var], dtype=float),
-                variations[var]
+    for var in reco_variations.keys():
+        reco_variations[var] = awkward.where(
+            (reco_electrons.pt < 7.0) | (reco_electrons.pt >= 500.0) | (abs(reco_electrons.eta) >= 2.5),
+            awkward.ones_like(reco_variations[var], dtype=float),
+            reco_variations[var]
         )
 
-    return variations
+    return reco_variations
+
+
+def electron_WPL_sf_nomatch(events, year, central_only, input_collection):
+    """
+    See:
+        - https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/EGM_electron_Run2_UL/EGM_electron_2017_UL.html
+        - https://gitlab.cern.ch/cms-nanoAOD/jsonpog-integration/-/blob/master/examples/electronExample.py
+    """
+
+    required_fields = [
+        (input_collection, "eta"), (input_collection, "pt"), (input_collection, "pdgId")
+    ]
+    
+    # For 2023postBPix, we also need phi to determine which SF file to use
+    if year == "2023postBPix":
+        required_fields.append((input_collection, "phi"))
+
+    missing_fields = awkward_utils.missing_fields(events, required_fields)
+
+    evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(ELECTRON_ID_SF_FILE[year]))
+    
+    # For 2023postBPix, also load the Hole file
+    evaluator_hole = None
+    if year == "2023postBPix":
+        evaluator_hole = _core.CorrectionSet.from_file(misc_utils.expand_path(ELECTRON_ID_SF_FILE_HOLE[year]))
+
+    unmatched_gen_electrons = events[input_collection]
+    n_unmatched_gen = awkward.num(unmatched_gen_electrons)
+    unmatched_gen_flattened = awkward.flatten(unmatched_gen_electrons)
+
+    unmatched_variations = {}
+    if len(unmatched_gen_flattened) > 0:
+        gen_ele_eta = numpy.clip(awkward.to_numpy(unmatched_gen_flattened.eta), -2.49999, 2.49999)
+        gen_ele_pt = numpy.clip(awkward.to_numpy(unmatched_gen_flattened.pt), 7.0, 499.999)
+        
+        gen_ele_phi = None
+        if year == "2023postBPix":
+            gen_ele_phi = awkward.to_numpy(unmatched_gen_flattened.phi)
+
+        if year == "2023postBPix":
+            hole_mask = (gen_ele_eta > -1.566) & (gen_ele_eta < 0) & (gen_ele_phi > -1.2) & (gen_ele_phi < -0.8)
+            sf_normal = evaluator["sf_fail"].evalv(gen_ele_pt, gen_ele_eta)
+            sf_hole = evaluator_hole["sf_fail"].evalv(gen_ele_pt, gen_ele_eta)
+            sf = numpy.where(hole_mask, sf_hole, sf_normal)
+            unmatched_variations["central"] = awkward.unflatten(sf, n_unmatched_gen)
+
+            if not central_only:
+                syst_normal = evaluator["unc_fail"].evalv(gen_ele_pt, gen_ele_eta)
+                syst_hole = evaluator_hole["unc_fail"].evalv(gen_ele_pt, gen_ele_eta)
+                syst = numpy.where(hole_mask, syst_hole, syst_normal)
+                unmatched_variations["up"] = awkward.unflatten(syst + sf, n_unmatched_gen)
+                unmatched_variations["down"] = awkward.unflatten(sf - syst, n_unmatched_gen)
+        else:
+            sf = evaluator["sf_fail"].evalv(gen_ele_pt, gen_ele_eta)
+            unmatched_variations["central"] = awkward.unflatten(sf, n_unmatched_gen)
+
+            if not central_only:
+                syst = evaluator["unc_fail"].evalv(gen_ele_pt, gen_ele_eta)
+                unmatched_variations["up"] = awkward.unflatten(syst + sf, n_unmatched_gen)
+                unmatched_variations["down"] = awkward.unflatten(sf - syst, n_unmatched_gen)
+
+        for var in unmatched_variations.keys():
+            unmatched_variations[var] = awkward.where(
+                (unmatched_gen_electrons.pt < 7.0) | (unmatched_gen_electrons.pt >= 500.0) | (abs(unmatched_gen_electrons.eta) >= 2.5),
+                awkward.ones_like(unmatched_variations[var], dtype=float),
+                unmatched_variations[var]
+            )
+    else:
+        event_counts = awkward.num(events, axis=0)
+        dummy_event_structure = awkward.ArrayBuilder()
+        for i in range(event_counts):
+            dummy_event_structure.begin_list()
+            dummy_event_structure.end_list()
+        
+        dummy_event_structure = dummy_event_structure.snapshot()
+
+        unmatched_variations = { "central": dummy_event_structure }
+        if not central_only:
+            unmatched_variations["up"] = dummy_event_structure
+            unmatched_variations["down"] = dummy_event_structure
+
+    return unmatched_variations
+
 
 ELECTRON_ISO_SF_FILE = {
     "2016" : ["higgs_dna/systematics/data/2016postVFP_UL/hzg_eliso0p1_2016_efficiencies.json", "higgs_dna/systematics/data/2016postVFP_UL/hzg_eliso0p15_2016_efficiencies.json"],
@@ -326,7 +412,7 @@ ELECTRON_ISO_SF_FILE_HOLE = {
     "2023postBPix" : ["higgs_dna/systematics/data/2023postBPix_UL/hzg_eliso0p1_2023BPixHole_efficiencies.json", "higgs_dna/systematics/data/2023postBPix_UL/hzg_eliso0p15_2023BPixHole_efficiencies.json"]
 }
 
-def electron_ISO_sf(events, year, central_only, input_collection, is_data=False):
+def electron_ISO_sf(events, year, central_only, input_collection):
     """
     See:
         - https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/EGM_electron_Run2_UL/EGM_electron_2017_UL.html
@@ -424,14 +510,26 @@ def electron_ISO_sf(events, year, central_only, input_collection, is_data=False)
                 sub_variations["down"] = awkward.unflatten(sf-syst, n_electrons)
         else:
             # For other years, use the standard approach
-            sf_data = evaluator["effdata"].evalv(ele_pt, ele_eta)
-            sf_mc = evaluator["effmc"].evalv(ele_pt, ele_eta)
+            sf_data = evaluator["effdata"].evalv(
+                    ele_pt,
+                    ele_eta
+            )
+            sf_mc = evaluator["effmc"].evalv(
+                    ele_pt,
+                    ele_eta
+            )
             sf = sf_data / sf_mc
             sub_variations["central"] = awkward.unflatten(sf, n_electrons)
 
             if not central_only:
-                syst_data = evaluator["systdata"].evalv(ele_pt, ele_eta)
-                syst_mc = evaluator["systmc"].evalv(ele_pt, ele_eta)
+                syst_data = evaluator["systdata"].evalv(
+                    ele_pt,
+                    ele_eta
+                )
+                syst_mc = evaluator["systmc"].evalv(
+                    ele_pt,
+                    ele_eta
+                )
                 syst = sf * numpy.sqrt(
                     (syst_data / sf_data)**2 + (syst_mc / sf_mc)**2
                 )
@@ -460,7 +558,7 @@ def electron_ISO_sf(events, year, central_only, input_collection, is_data=False)
         # Combine SFs based on the hole mask
         sf = numpy.where(hole_mask, sf_hole, sf_normal)
         sub_variations["central"] = awkward.unflatten(sf, n_electrons)
-        
+
         if not central_only:
             # Calculate uncertainties for normal regions
             syst_data_normal = evaluator["systdata"].evalv(ele_pt, ele_eta)
@@ -478,18 +576,27 @@ def electron_ISO_sf(events, year, central_only, input_collection, is_data=False)
             sub_variations["up"] = awkward.unflatten(syst+sf, n_electrons)
             sub_variations["down"] = awkward.unflatten(sf-syst, n_electrons)
     else:
-        # For other years, use the standard approach
         evaluator = evaluators[1]
-
         sub_variations = {}
-        sf_data = evaluator["effdata"].evalv(ele_pt, ele_eta)
-        sf_mc = evaluator["effmc"].evalv(ele_pt, ele_eta)
+        sf_data = evaluator["effdata"].evalv(
+                ele_pt,
+                ele_eta
+        )
+        sf_mc = evaluator["effmc"].evalv(
+                ele_pt,
+                ele_eta
+        )
         sf = (1-sf_data)/(1-sf_mc)
         sub_variations["central"] = awkward.unflatten(sf, n_electrons)
-
         if not central_only:
-            syst_data = evaluator["systdata"].evalv(ele_pt, ele_eta)
-            syst_mc = evaluator["systmc"].evalv(ele_pt, ele_eta)
+            syst_data = evaluator["systdata"].evalv(
+                ele_pt,
+                ele_eta
+            )
+            syst_mc = evaluator["systmc"].evalv(
+                ele_pt,
+                ele_eta
+            )
             syst = numpy.sqrt((syst_data/(1-sf_mc))**2 + (syst_mc/(1-sf_mc)*sf)**2)
             sub_variations["up"] = awkward.unflatten(syst+sf, n_electrons)
             sub_variations["down"] = awkward.unflatten(sf-syst, n_electrons)
@@ -499,7 +606,7 @@ def electron_ISO_sf(events, year, central_only, input_collection, is_data=False)
     variations = {}
     for var in variations_list[0].keys():
         variations[var] = awkward.where(
-            (electrons.pt < 7) | (electrons.pt >= 500.0) | (abs(electrons.eta) >= 2.5) | (electrons.miniPFRelIso_all >= boundaries[-1]),
+            (electrons.pt < 7.0) | (electrons.pt >= 500.0) | (abs(electrons.eta) >= 2.5) | (electrons.miniPFRelIso_all >= boundaries[-1]),
             awkward.ones_like(variations_list[0][var], dtype=float),
             awkward.where(electrons.miniPFRelIso_all < boundaries[0], variations_list[0][var], awkward.where(electrons.miniPFRelIso_all > boundaries[1], variations_list[2][var], variations_list[1][var]))
         )
@@ -571,9 +678,9 @@ def electron_reco_sf(events, year, central_only, input_collection):
     for var in variations.keys():
         # Set SFs = 1 for leptons which are not applicable
         variations[var] = awkward.where(
-            (electrons.pt < 10.0) | (electrons.pt >= 500.0) | (abs(electrons.eta) >= 2.5),
-            awkward.ones_like(variations[var], dtype=float),
-            variations[var]
+                (electrons.pt < 10.0) | (electrons.pt >= 500.0) | (abs(electrons.eta) >= 2.5),
+                awkward.ones_like(variations[var], dtype=float),
+                variations[var]
         )
 
     return variations
@@ -611,9 +718,10 @@ def electron_scale_smear_run3(events, year):
     missing_fields = awkward_utils.missing_fields(events, required_fields)
 
     if missing_fields:
-        message = "[lepton_systematics : electron_scale_smear_run3] The events array is missing the following fields: %s which are needed as inputs." % (str(missing_fields))
-        logger.exception(message)
-        raise ValueError(message)
+        logger.warning(
+            "[Lepton Systematics] Electron scale and smear corrections will not be applied, because the following fields are missing: %s" % str(missing_fields)
+        )
+        return events
 
     evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(electron_scale_FILE[year]))
 
@@ -627,7 +735,7 @@ def electron_scale_smear_run3(events, year):
 
     # Apply smear corrections first
     smear = evaluator[electron_year_names[year]].evalv("smear", electrons_pt, electrons_r9, electrons_AbsEta)
-    rng = numpy.random.default_rng(seed=123)
+    rng = numpy.random.default_rng(seed=8011)
     smear_val = awkward.where(
         (electrons_AbsEta > 3.0) | (electrons_pt < 20.0),
         awkward.ones_like(electrons_pt, dtype=float),
@@ -640,21 +748,12 @@ def electron_scale_smear_run3(events, year):
     # Calculate smear systematics
     for syst in ["smear_up", "smear_down"]:
         smear_syst = evaluator[electron_year_names[year]].evalv(syst, electrons_pt, electrons_r9, electrons_AbsEta)
-
-        if "up" in syst:
-            smear_up = awkward.unflatten(rng.normal(loc=1., scale=numpy.abs(smear+smear_syst)), n_electrons)
-            events["Electron", "dEsigmaUp"] = electrons.pt * awkward.where(
-                (abs(electrons.eta+electrons.deltaEtaSC) > 3.0) | (electrons.pt < 20.0),
-                awkward.ones_like(smear_up, dtype=float),
-                smear_up
-            )
-        elif "down" in syst:
-            smear_down = awkward.unflatten(rng.normal(loc=1., scale=numpy.abs(smear-smear_syst)), n_electrons)
-            events["Electron", "dEsigmaDown"] = electrons.pt * awkward.where(
-                (abs(electrons.eta+electrons.deltaEtaSC) > 3.0) | (electrons.pt < 20.0),
-                awkward.ones_like(smear_down, dtype=float),
-                smear_down
-            )
+        smear_val_syst = awkward.where(
+            (electrons_AbsEta > 3.0) | (electrons_pt < 20.0),
+            awkward.ones_like(electrons_pt, dtype=float),
+            rng.normal(loc=1., scale=numpy.abs(smear_syst))
+        )
+        events["Electron", "dEsigma" + syst.replace("smear_", "").capitalize()] = awkward.unflatten(corrected_pt * (smear_val_syst - 1), n_electrons)
 
     print("Electron pt before scale correction:", electrons.pt)
     events["Electron", "corrected_pt"] = awkward.unflatten(corrected_pt, n_electrons)
@@ -662,22 +761,8 @@ def electron_scale_smear_run3(events, year):
 
     # Calculate scale systematics
     for syst in ["scale_up", "scale_down"]:
-        scale = evaluator[electron_year_names[year]].evalv(syst, corrected_pt, electrons_r9, electrons_AbsEta)
-        
-        if "up" in syst:
-            scale_up = awkward.unflatten(scale, n_electrons)
-            events["Electron", "dEscaleUp"] = electrons.corrected_pt * awkward.where(
-                (abs(electrons.eta+electrons.deltaEtaSC) > 3.0) | (electrons.pt < 20.0),
-                awkward.ones_like(scale_up, dtype=float),
-                scale_up
-            )
-        elif "down" in syst:
-            scale_down = awkward.unflatten(scale, n_electrons)
-            events["Electron", "dEscaleDown"] = electrons.corrected_pt * awkward.where(
-                (abs(electrons.eta+electrons.deltaEtaSC) > 3.0) | (electrons.pt < 20.0),
-                awkward.ones_like(scale_down, dtype=float),
-                scale_down
-            )
+        scale_syst = evaluator[electron_year_names[year]].evalv(syst, electrons_pt, electrons_r9, electrons_AbsEta)
+        events["Electron", "dEscale" + syst.replace("scale_", "").capitalize()] = awkward.unflatten(corrected_pt * scale_syst, n_electrons)
 
     logger.info("[Lepton Systematics] Electron scale and smear corrections applied successfully")
     print("Electron pt after scale and smear corrections:", events["Electron", "corrected_pt"])

@@ -1,12 +1,20 @@
 import pic_template as pic
 import plotting as plot
 import ROOT
+import argparse
+import sys
 
 COLORS = ["Red", "Blue"]
 
 print("=====================================================================")
 print("Starting to run the tutorial of plotting in Higgs to Z Gamma analysis")
 print("=====================================================================")
+
+# 解析命令行参数
+parser = argparse.ArgumentParser(description='Plot signal vs background BDT distributions')
+parser.add_argument('--channel', type=str, default='two_jet', 
+                    help='Channel to analyze (default: two_jet)')
+args = parser.parse_args()
 
 # 设置要使用的文件夹（"val" 或 "test"）
 folder = "test"  # 可以切换为 "test"
@@ -18,7 +26,7 @@ sig_legend = ["sig", "ggH", "VBF"]
 # path = "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/final_fit/CMSSW_10_2_13/src/flashggFinalFit/InputData/outputs/"
 path = f"/eos/home-j/jiehan/root/outputs/{folder}/"
 # boundaries 文件的路径固定在 test 文件夹中
-channel = "zero_to_one_jet"
+channel = args.channel
 tree = channel
 boundaries_path = f"/eos/home-j/jiehan/root/outputs/test/significances/bin_boundaries_1D_{channel}.txt"
 var = "bdt_score_t"

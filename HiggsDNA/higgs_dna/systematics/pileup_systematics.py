@@ -13,10 +13,10 @@ PU_REWEIGHTING_FILE = {
     "2016postVFP" : "jsonpog-integration/POG/LUM/2016postVFP_UL/puWeights.json",
     "2017" : "jsonpog-integration/POG/LUM/2017_UL/puWeights.json",
     "2018" : "jsonpog-integration/POG/LUM/2018_UL/puWeights.json",
-    "2022preEE" : "jsonpog-integration/POG/LUM/2018_UL/puWeights.json",
-    "2022postEE" : "jsonpog-integration/POG/LUM/2018_UL/puWeights.json",
-    "2023preBPix" : "jsonpog-integration/POG/LUM/2018_UL/puWeights.json",
-    "2023postBPix" : "jsonpog-integration/POG/LUM/2018_UL/puWeights.json"
+    "2022preEE" : "jsonpog-integration/POG/LUM/2022_Summer22/puWeights.json",
+    "2022postEE" : "jsonpog-integration/POG/LUM/2022_Summer22EE/puWeights.json",
+    "2023preBPix" : "jsonpog-integration/POG/LUM/2023_Summer23/puWeights.json",
+    "2023postBPix" : "jsonpog-integration/POG/LUM/2023_Summer23BPix/puWeights.json"
 }
 
 PU_CAMPAIGN = {
@@ -24,10 +24,10 @@ PU_CAMPAIGN = {
     "2016postVFP" : "Collisions16_UltraLegacy_goldenJSON",
     "2017" : "Collisions17_UltraLegacy_goldenJSON",
     "2018" : "Collisions18_UltraLegacy_goldenJSON",
-    "2022preEE" : "Collisions18_UltraLegacy_goldenJSON",
-    "2022postEE" : "Collisions18_UltraLegacy_goldenJSON",
-    "2023preBPix" : "Collisions18_UltraLegacy_goldenJSON",
-    "2023postBPix" : "Collisions18_UltraLegacy_goldenJSON",
+    "2022preEE" : "Collisions2022_355100_357900_eraBCD_GoldenJson",
+    "2022postEE" : "Collisions2022_359022_362760_eraEFG_GoldenJson",
+    "2023preBPix" : "Collisions2023_366403_369802_eraBC_GoldenJson",
+    "2023postBPix" : "Collisions2023_369803_370790_eraD_GoldenJson",
 }
 
 def pu_reweight_sf(events, year, central_only):
@@ -57,5 +57,9 @@ def pu_reweight_sf(events, year, central_only):
                     num_true_interactions,
                     var
             ))
+
+    # Cap variations at 10 to avoid extremely large weights
+    for key in variations:
+        variations[key] = awkward.where(variations[key] > 10, 10, variations[key])
 
     return variations

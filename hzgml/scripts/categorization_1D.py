@@ -35,7 +35,7 @@ def getArgs():
     parser.add_argument('--minSB', type = int, default = 10, help = 'minimum number of signal and background events')
     parser.add_argument('-v', '--variable', action = 'store', choices = ['bdt', 'NN'], default = 'bdt', help = 'MVA variable to use')
     #parser.add_argument('--val', action = 'store_true', default = False, help = 'se validation samples for categroization')
-    parser.add_argument('-t', '--transform', type = bool, default = True, help = 'use the transform scores for categroization')
+    parser.add_argument('-t', '--transform', type = bool, default = False, help = 'use the transform scores for categroization')
     parser.add_argument('--floatB', action = 'store_true', default = False, help = 'Floting last boundary')
     parser.add_argument('-es', '--estimate', action = 'store', choices = ['fullSim', 'fullSimrw', 'data_sid'], default = 'fullSimrw', help = 'Method to estimate significance')
 
@@ -44,6 +44,9 @@ def getArgs():
 
     parser.add_argument('-s', '--shield', action='store', type=int, default=-1, help='Which variables needs to be shielded')
     parser.add_argument('-a', '--add', action='store', type=int, default=-1, help='Which variables needs to be added')
+    
+    parser.add_argument('--score_min', type=float, default=0.0, help='Minimum boundary value for BDT/NN score range')
+    parser.add_argument('--score_max', type=float, default=1.0, help='Maximum boundary value for BDT/NN score range')
 
     return  parser.parse_args()
 
@@ -129,7 +132,7 @@ def gettingsig(input_path, region, variable, boundaries, transform, estimate):
 
     return z, abs(u), yields
 
-def categorizing(input_path, region, variable, sigs, bkgs, nscan, minN, transform, nbin, floatB, n_fold, fold, earlystop, minSB=10, estimate='fullSimrw'):
+def categorizing(input_path, region, variable, sigs, bkgs, nscan, minN, transform, nbin, floatB, n_fold, fold, earlystop, minSB=10, estimate='fullSimrw', score_min=0.0, score_max=1.0):
 
     f_sig = TFile('%s/%s/sig.root' % (input_path, region))
     t_sig = f_sig.Get(region)
@@ -146,20 +149,20 @@ def categorizing(input_path, region, variable, sigs, bkgs, nscan, minN, transfor
 
     # nmass = 10
 
-    # h_sig = TH2F('h_sig','h_sig',nscan,0,1, nmass, 120, 130)
-    # h_bkg = TH2F('h_bkg','h_bkg',nscan,0,1, nmass, 120, 130)
+    # h_sig = TH2F('h_sig','h_sig',nscan,score_min,score_max, nmass, 120, 130)
+    # h_bkg = TH2F('h_bkg','h_bkg',nscan,score_min,score_max, nmass, 120, 130)
 
     # t_sig.Draw(f"H_mass:{variable}_score{'_t' if transform else ''}>>h_sig", "weight_corr*%f*((event%%%d!=%d))"%(n_fold/(n_fold-1) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
 
     # # filling bkg histograms
     # if estimate in ["fullSim", "fullSimrw"]:
-    #     h_bkgmc_cen = TH2F('h_bkgmc_cen', 'h_bkgmc_cen', nscan, 0, 1., nmass, 120, 130)
+    #     h_bkgmc_cen = TH2F('h_bkgmc_cen', 'h_bkgmc_cen', nscan, score_min, score_max, nmass, 120, 130)
     #     t_bkgmc.Draw(f"H_mass:{variable}_score{'_t' if transform else ''}>>h_bkgmc_cen", "weight_corr*%f*((event%%%d!=%d))"%(n_fold/(n_fold-1) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
     # if estimate in ["fullSimrw"]:
-    #     h_bkgmc_sid = TH1F('h_bkgmc_sid', 'h_bkgmc_sid', nscan, 0, 1)
+    #     h_bkgmc_sid = TH1F('h_bkgmc_sid', 'h_bkgmc_sid', nscan, score_min, score_max)
     #     t_bkgmc.Draw(f"{variable}_score{'_t' if transform else ''}>>h_bkgmc_sid", "weight_corr*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=120&&H_mass<=130)&&(event%%%d!=%d))"%(n_fold/(n_fold-1) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
     # if estimate in ["fullSimrw", "data_sid"]:
-    #     h_data_sid = TH1F('h_data_sid', 'h_data_sid', nscan, 0, 1)
+    #     h_data_sid = TH1F('h_data_sid', 'h_data_sid', nscan, score_min, score_max)
     #     t_data_sid.Draw(f"{variable}_score{'_t' if transform else ''}>>h_data_sid", "weight_corr*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=120&&H_mass<=130)&&(event%%%d!=%d))"%(n_fold/(n_fold-1) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
 
     # if estimate == "data_sid":
@@ -180,20 +183,20 @@ def categorizing(input_path, region, variable, sigs, bkgs, nscan, minN, transfor
 
 #################################################################################################  
  
-    h_sig = TH1F('h_sig','h_sig',nscan,0,1.)
-    h_bkg = TH1F('h_bkg','h_bkg',nscan,0,1.)
+    h_sig = TH1F('h_sig','h_sig',nscan,score_min,score_max)
+    h_bkg = TH1F('h_bkg','h_bkg',nscan,score_min,score_max)
 
     t_sig.Draw(f"{variable}_score{'_t' if transform else ''}>>h_sig", "weight_corr*%f*((H_mass>=120&&H_mass<=130)&&(event%%%d!=%d))"%(n_fold/(n_fold-1) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
 
     # filling bkg histograms
     if estimate in ["fullSim", "fullSimrw"]:
-        h_bkgmc_cen = TH1F('h_bkgmc_cen', 'h_bkgmc_cen', nscan, 0, 1.)
+        h_bkgmc_cen = TH1F('h_bkgmc_cen', 'h_bkgmc_cen', nscan, score_min, score_max)
         t_bkgmc.Draw(f"{variable}_score{'_t' if transform else ''}>>h_bkgmc_cen", "weight_corr*%f*((H_mass>=120&&H_mass<=130)&&(event%%%d!=%d))"%(n_fold/(n_fold-1) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
     if estimate in ["fullSimrw"]:
-        h_bkgmc_sid = TH1F('h_bkgmc_sid', 'h_bkgmc_sid', nscan, 0, 1.)
+        h_bkgmc_sid = TH1F('h_bkgmc_sid', 'h_bkgmc_sid', nscan, score_min, score_max)
         t_bkgmc.Draw(f"{variable}_score{'_t' if transform else ''}>>h_bkgmc_sid", "weight_corr*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=120&&H_mass<=130)&&(event%%%d!=%d))"%(n_fold/(n_fold-1) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
     if estimate in ["fullSimrw", "data_sid"]:
-        h_data_sid = TH1F('h_data_sid', 'h_data_sid', nscan, 0, 1.)
+        h_data_sid = TH1F('h_data_sid', 'h_data_sid', nscan, score_min, score_max)
         t_data_sid.Draw(f"{variable}_score{'_t' if transform else ''}>>h_data_sid", "weight_corr*%f*((H_mass>=100&&H_mass<=180)&&!(H_mass>=120&&H_mass<=130)&&(event%%%d!=%d))"%(n_fold/(n_fold-1) if n_fold != 1 else 1, n_fold, fold if n_fold != 1 else 1))
 
     if estimate == "data_sid":
@@ -218,7 +221,7 @@ def categorizing(input_path, region, variable, sigs, bkgs, nscan, minN, transfor
     umax = umax / zmax if zmax != 0 else 0
     print(bmax)
     boundaries = bmax
-    boundaries_values = [np.round((i-1)/nscan, 3) for i in boundaries]
+    boundaries_values = [np.round(score_min + (i-1)*(score_max-score_min)/nscan, 3) for i in boundaries]
     print('=========================================================================')
     print(f'Fold number {fold}')
     print(f'The maximal significance:  {zmax:.5f} +/- {umax:.5f}')
@@ -271,7 +274,7 @@ def main():
     boundaries_values=[]
     smaxs = []
     for j in range(n_fold):
-        bound, bound_value, smax = categorizing(input_path, region, variable, sigs, bkgs, nscan, args.minN, args.transform, args.nbin if not args.floatB else args.nbin + 1, args.floatB, n_fold, j, args.earlystop, minSB=args.minSB, estimate=args.estimate)
+        bound, bound_value, smax = categorizing(input_path, region, variable, sigs, bkgs, nscan, args.minN, args.transform, args.nbin if not args.floatB else args.nbin + 1, args.floatB, n_fold, j, args.earlystop, minSB=args.minSB, estimate=args.estimate, score_min=args.score_min, score_max=args.score_max)
         boundaries.append(bound)
         boundaries_values.append(bound_value)
         smaxs.append(smax)
@@ -309,6 +312,8 @@ def main():
     outs['fine_tuned'] = False
     outs['variable'] = variable
     outs['estimate'] = args.estimate
+    outs['score_min'] = args.score_min
+    outs['score_max'] = args.score_max
     outs.update(yields.to_dict())
 
     print(outs, '\n================================================\n')
@@ -322,7 +327,7 @@ def main():
             # json_file.write('{:d} '.format(len(i)))
             for j in i:
                 json_file.write('{:.2f} '.format(j))
-        json_file.write('1.00\n')
+        json_file.write('{:.2f}\n'.format(args.score_max))
         for i in list(yields['z']):
             json_file.write('{:.4f} '.format(i))
         json_file.write('%.4f %.4f' % (s, u))

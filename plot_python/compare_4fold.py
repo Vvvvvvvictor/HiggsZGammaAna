@@ -1,153 +1,214 @@
 import pic_template as pic
 import plotting as plot
 import ROOT
+import argparse
+import os
 
-COLORS = ["Red", "Blue"]
+ # Parse command line arguments
+parser = argparse.ArgumentParser(description='Plot 4-fold comparison with average curves')
+parser.add_argument('--mode', choices=['test', 'val'], default='test', help='Choose test or val data')
+parser.add_argument('--type', choices=['background', 'signal', 'data'], default='background', help='Choose plot type')
+parser.add_argument('--channel', default='two_jet', help='Channel to plot')
+parser.add_argument('--score_type', default='score_t', help='type of score to plot')
+args = parser.parse_args()
+
+COLORS = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kOrange, ROOT.kViolet, ROOT.kCyan, ROOT.kMagenta, ROOT.kYellow+2]
 
 print("=====================================================================")
 print("Starting to run the tutorial of plotting in Higgs to Z Gamma analysis")
 print("=====================================================================")
 
-# Basic set of picture's content
-ratio = 500
+ # Basic set of picture's content
 bkg_legend = ["bkg"]
 sig_legend = ["sig"]
 fold_legend = ["1^{st}", "2^{nd}", "3^{rd}", "4^{th}"]
 path = "/eos/user/j/jiehan/root/outputs/"
-channel = "two_jet"
-tree = "two_jet"
-var = "bdt_score_t"
-bins = 25
-x_range = (0, 1)
+channel = args.channel
+tree = channel
+score_type = args.score_type
+var = f"bdt_{score_type}"
+bins = 56
+x_range = (-0.06, 1.06)
 x_title = "Transformed BDT score"
 y_title = "Events/{:.2f}".format((x_range[1]-x_range[0])/bins)
+sub_y_title = "Ratio to Aver."
 selections = []
 
-# Dataset list
+ # Dataset list
 sig_file_list = [
-    ["ggH_M125.root", "VBF_M125.root", "WminusH_M125.root", "WplusH_M125.root", "ZH_M125.root", "ttH_M125.root"]
+    ["ggH_M125.root", "VBF_M125.root"] #, "WminusH_M125.root", "WplusH_M125.root", "ZH_M125.root", "ttH_M125.root"]
 ]
 bkg_file_list = [
-    ["ZGToLLG.root", "DYJetsToLL.root", "EWKZ2J.root", "ZG2JToG2L2J.root", "TT.root", "TTGJets.root", "TGJets.root", "WWG.root", "WZG.root", "ZZG.root", "ttZJets.root", "ttWJets.root"]
+    ["ZGToLLG.root", "DYJetsToLL.root", "EWKZ2J.root"] #, "ZG2JToG2L2J.root", "TT.root", "TTGJets.root", "TGJets.root", "WWG.root", "WZG.root", "ZZG.root", "ttZJets.root", "ttWJets.root"]
 ]
 data_file_list = [
     "data.root"
 ]
 
-# Set initial style
+ # Select which file list to use
+if args.type == 'background':
+    file_list = bkg_file_list
+    plot_title = "Background"
+    legend_list = bkg_legend
+elif args.type == 'signal':
+    file_list = sig_file_list
+    plot_title = "Signal"
+    legend_list = sig_legend
+else:  # data
+    file_list = data_file_list
+    plot_title = "Data"
+    legend_list = ["data"]
+
+ # Set initial style
 plot.ModTDRStyle()
-c1 = ROOT.TCanvas("c1", "bkg sig Comparison")
-pad = plot.OnePad()
+c1 = ROOT.TCanvas("c1", "{} Comparison".format(plot_title))
+pads = plot.TwoPadSplit(0.3, 0.005, 0.005)
 
 print("============================")
 print("Finish setting picture style")
 print("============================")
 
-# get hists
-sig_hist_list, bkg_hist_list = [], []
-for i in range(8):
-    path = "/eos/user/j/jiehan/root/outputs/{}/".format("test" if i < 4 else "val")
-    print("Reading from {}".format(path))
-    sig_yields,  bkg_yields = [], []
-    fold_selection = ["event%314159%4 == {}".format(i%4)]
+ # Define color function
+def get_color(i):
+    return COLORS[i % len(COLORS)]
+
+ # Get hists for 4 folds
+hist_list = []
+for i in range(4):
+    path_full = "/eos/user/j/jiehan/root/outputs/{}/".format(args.mode)
+    print("Reading from {}".format(path_full))
+    yields = []
+    fold_selection = ["event%314159%4 == {}".format(i)]
     hist_selections = selections + fold_selection
 
-    bkg_hist = ROOT.TH1D("bkg_mc_{}".format(i),"bkg_mc_{}".format(i),bins,x_range[0],x_range[1])
-    for j, bkg in enumerate(bkg_file_list):
-        if isinstance(bkg, list):
-            for k, sub_bkg in enumerate(bkg):
-                arrays, _ = pic.read_root_file(path+channel+"/"+sub_bkg, var, tree, hist_selections)
-                if k != 0:
-                    file_hist, _, yields = pic.get_hist(arrays, var, 1, "subbkg_{}".format(j), bins, x_range, file_hist)
-                else:
-                    file_hist, _, yields = pic.get_hist(arrays, var, 1, "subbkg_{}".format(j), bins, x_range)
-        else: 
-            arrays, _ = pic.read_file(path+channel+"/"+bkg, var, tree, hist_selections)
-            file_hist, _, yields = pic.get_hist(arrays, var, 1, "subbkg_{}".format(j), bins, x_range)
-        bkg_yields.append(yields)
-        bkg_hist.Add(file_hist)
-    bkg_hist.Scale(1./sum(bkg_yields))
-    plot.Set(bkg_hist, LineWidth=3, MarkerSize=1, MarkerStyle=8, MarkerColor=ROOT.TColor.GetColorDark(i+2))
-    bkg_hist_list.append(bkg_hist)
-
-    # sig_hist = ROOT.TH1D("sig_{}".format(i),"sig_{}".format(i),bins,x_range[0],x_range[1])
-    # for j, sig in enumerate(sig_file_list):
-    #     if isinstance(sig, list):
-    #         for k, sub_sig in enumerate(sig):
-    #             arrays, _ = pic.read_root_file(path+channel+"/"+sub_sig, var, tree, hist_selections)
-    #             if k != 0:
-    #                 file_hist, _, yields = pic.get_hist(arrays, var, 1, "subsig_{}".format(j), bins, x_range, file_hist)
-    #             else:
-    #                 file_hist, _, yields = pic.get_hist(arrays, var, 1, "subsig_{}".format(j), bins, x_range)
-    #     else:
-    #         arrays, _ = pic.read_file(path+channel+"/"+sig, var, 1, tree, hist_selections)
-    #         file_hist, _, yields = pic.get_hist(arrays, var, ratio, "subsig_{}".format(j), bins, x_range)
-    #     sig_yields.append(yields)
-    #     sig_hist.Add(file_hist)
-    # sig_hist.Scale(1./sum(sig_yields))
-    # plot.Set(sig_hist, LineWidth=3, MarkerSize=1, MarkerStyle=8, MarkerColor=ROOT.TColor.GetColorDark(i+2))
-    # sig_hist_list.append(sig_hist)
+    hist = ROOT.TH1D("hist_{}".format(i), "hist_{}".format(i), bins, x_range[0], x_range[1])
     
+    for j, file_item in enumerate(file_list):
+        if isinstance(file_item, list):
+            for k, sub_file in enumerate(file_item):
+                arrays, _ = pic.read_root_file(path_full+channel+"/"+sub_file, var, tree, hist_selections)
+                if k != 0:
+                    file_hist, _, file_yields = pic.get_hist(arrays, var, 1, "subfile_{}".format(j), bins, x_range, file_hist)
+                else:
+                    file_hist, _, file_yields = pic.get_hist(arrays, var, 1, "subfile_{}".format(j), bins, x_range)
+        else: 
+            arrays, _ = pic.read_root_file(path_full+channel+"/"+file_item, var, tree, hist_selections)
+            file_hist, _, file_yields = pic.get_hist(arrays, var, 1, "subfile_{}".format(j), bins, x_range)
+        yields.append(file_yields)
+        hist.Add(file_hist)
+    
+    # Normalize
+    if sum(yields) > 0:
+        hist.Scale(1./sum(yields))
+    
+    plot.Set(hist, LineWidth=2, MarkerSize=0.25, MarkerStyle=20, MarkerColor=get_color(i), LineColor=get_color(i))
+    hist_list.append(hist)
+
+ # Calculate average histogram
+avg_hist = ROOT.TH1D("avg_hist", "avg_hist", bins, x_range[0], x_range[1])
+for bin_idx in range(1, bins + 1):
+    sum_val = 0
+    sum_err2 = 0
+    for hist in hist_list:
+        sum_val += hist.GetBinContent(bin_idx)
+        sum_err2 += hist.GetBinError(bin_idx)**2
+    avg_hist.SetBinContent(bin_idx, sum_val / 4.0)
+    avg_hist.SetBinError(bin_idx, (sum_err2**0.5) / 4.0)
+
+plot.Set(avg_hist, LineWidth=3, MarkerSize=0.5, MarkerStyle=21, MarkerColor=ROOT.kBlack, LineColor=ROOT.kBlack)
+
+ # Calculate chi2 for each fold against the average
+chi2_values = []
+for hist in hist_list:
+    chi2 = hist.Chi2Test(avg_hist, "CHI2")
+    chi2_values.append(chi2)
 
 print("==============================")
 print("Finish reading skimmed ntuples")
 print("==============================")
 
-c1.Update()
-plot.Set(pad[0], Logy=1)
-for bkg_hist in bkg_hist_list:
-    bkg_hist.Draw("E0 E1 X0 same")
-    plot.Set(bkg_hist.GetXaxis(), Title=x_title)
-    plot.Set(bkg_hist.GetYaxis(), Title=y_title)
-# for sig_hist in sig_hist_list:
-#     sig_hist.Draw("E0 E1 X0 same")
-#     plot.Set(sig_hist.GetXaxis(), Title=x_title)
-#     plot.Set(sig_hist.GetYaxis(), Title=y_title)
-# plot.Set(sig_hist, MarkerStyle=1, MarkerSize=3)
+ # Draw main pad
+pads[0].cd()
+# plot.Set(pads[0], Logy=1)
+    
+# 绘制各个fold的直方图
+for i, hist in enumerate(hist_list):
+    hist.Draw("E0 E1 X0 same" if i > 0 else "E0 E1 X0")
+    plot.Set(hist.GetXaxis(), Title="", LabelSize=0)  # Remove x axis title and labels
+    hist.SetMaximum(hist.GetMaximum() * 1.6)  # Set maximum to 1.3 times the histogram's maximum value
+    plot.Set(hist.GetYaxis(), Title=y_title)
 
-pad[0].Update()
-# plot.Set(h_stack, Maximum=1.3*pads[0].GetFrame().GetY2())
+ # Draw average histogram
+avg_hist.Draw("E0 E1 X0 same")
+plot.Set(avg_hist.GetXaxis(), Title="", LabelSize=0)  # Remove x axis title and labels
+plot.Set(avg_hist.GetYaxis(), Title=y_title)
 
-legend = plot.PositionedLegend(0.65, 0.10, 3, 0.015)
-plot.Set(legend, NColumns=3, TextSize=0.03)
-for i in range(8):
-    legend.AddEntry("bkg_mc_{}".format(i), "{} fold: {}".format(fold_legend[i%4], "test" if i < 4 else "val"), "p")
-# for i in range(8):
-    # legend.AddEntry("sig_{}".format(i), "{} fold: {}".format(fold_legend[i%4], "test" if i < 4 else "val"), "p")
-# for i in range(len(sig_hist_list)):
-#     legend.AddEntry("sig_{}".format(i), sig_legend[i]+"x{:.0f}({:.2f})".format(ratio, sig_yields[i]), "l")
-# for i in range(len(bkg_file_list)):
-#     legend.AddEntry("bkg_{}".format(i), bkg_legend[i]+"({:.2f})".format(bkg_yields[i]), "f")
+# Set y-axis minimum to 0 for main pad
+for hist in hist_list:
+    hist.SetMinimum(0)
+avg_hist.SetMinimum(0)
+
+pads[0].Update()
+
+# Create legend with automatic position
+legend = plot.PositionedLegend(0.35, 0.2, 3, 0.015)
+plot.Set(legend, NColumns=1, TextSize=0.04)
+for i in range(4):
+    legend.AddEntry("hist_{}".format(i), "{} fold (#chi^{{2}}: {:.2f})".format(fold_legend[i], chi2_values[i]), "p")
+legend.AddEntry("avg_hist", "Average", "p")
+total_chi2 = sum(chi2_values)
+legend.AddEntry("", "Total #chi^{{2}}: {:.2f}".format(total_chi2), "")
 legend.Draw()
 
 print("========================")
-print("Finish drawing")
+print("Finish drawing main pad")
 print("========================")
 
-# pads[1].cd()
-# rp.Draw("E")
-# # plot.Set(pads[1], Logy=1)
-# line = ROOT.TLine()
-# plot.Set(line, LineStyle=2, LineWidth=2, LineColor=ROOT.kRed)
-# line.DrawLine(0.29, 0, 0.29, 0.26)
-# line.DrawLine(0.57, 0, 0.57, 0.26)
-# line.DrawLine(0.73, 0, 0.73, 0.26)
-# # plot.DrawHorizontalLine(pads[1], line, 1)
-# # plot.Set(rp, MarkerStyle=7, MarkerSize=2)
-# rp.GetXaxis().SetTitle(x_title)
-# rp.GetYaxis().SetTitle(sub_y_title)
-# pads[1].Update()
+ # Draw ratio plot
+pads[1].cd()
+ratio_hists = []
+for i, hist in enumerate(hist_list):
+    ratio_hist = hist.Clone("ratio_{}".format(i))
+    ratio_hist.Divide(avg_hist)
+    plot.Set(ratio_hist, LineWidth=2, MarkerSize=0.25, MarkerStyle=20, MarkerColor=get_color(i), LineColor=get_color(i))
+    ratio_hist.Draw("E0 E1 X0 same" if i > 0 else "E0 E1 X0")
+    ratio_hists.append(ratio_hist)
 
-# print("========================")
-# print("Finish drawing lower pad")
-# print("========================")
+ # Set axis label for ratio plot
+if ratio_hists:
+    plot.Set(ratio_hists[0].GetXaxis(), Title=x_title, LabelSize=0.04)
+    plot.Set(ratio_hists[0].GetYaxis(), Title=sub_y_title)
+    ratio_hists[0].GetYaxis().SetRangeUser(0.4, 1.8)
+    # Ensure ratio plot also starts from a reasonable minimum
+    for ratio_hist in ratio_hists:
+        ratio_hist.SetMinimum(0.5)
 
-plot.DrawCMSLogo(c1, "CMS", "Preliminary", 0, 0., -0.02, 1.2, cmsTextSize=0.55);
-plot.DrawCMSLogo(c1, "137.2 fb^{-1} (13 TeV)", "", 3, 0., -0.02, 1.2, cmsTextSize=0.45);
+ # Draw y=1 horizontal line
+line = ROOT.TLine()
+plot.Set(line, LineStyle=2, LineWidth=2, LineColor=ROOT.kRed)
+line.DrawLine(x_range[0], 1, x_range[1], 1)
+
+pads[1].Update()
+
+print("========================")
+print("Finish drawing lower pad")
+print("========================")
+
+plot.DrawCMSLogo(c1, "CMS", "Preliminary", 0, 0., -0.02, 1.2, cmsTextSize=0.55)
+plot.DrawCMSLogo(c1, "137.61 fb^{-1} (13 TeV) & 62.32 fb^{-1} (13.6 TeV)", "", 3, 0., -0.02, 1.2, cmsTextSize=0.45)
 
 print("========================")
 print("Finish adding CMS word")
 print("========================")
 
 c1.Draw()
-c1.SaveAs("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/4fold_{}_bkg.png".format(channel))
+output_filename = "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/{}/4fold_{}_{}_{}.png".format(score_type, channel, args.mode, args.type)
+
+ # Check and create output directory if needed
+output_dir = os.path.dirname(output_filename)
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
+    print("Created directory: {}".format(output_dir))
+
+c1.SaveAs(output_filename)
+print("Saved plot to: {}".format(output_filename))

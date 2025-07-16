@@ -187,8 +187,8 @@ class ZGammaTaggerRun2(Tagger):
         """
         statusFlags usage: (events.GenPart.statusFlags // numpy.power(2, i)) % 2 == 1
         "statusFlags" is a number with 14 bits. 
-        Filling "1" on corresponding digit when the particle meets one of the 14 conditions, else remaining "0".
-        Echo paticles can meet more than one kind of condition, thus, more than one digit in "statusFlags" is "1".
+        Filling "1" on corresponding digit when the particle meets one of the 14 conditions, else, remaining "0".
+        Echo particles can meet more than one kind of condition, thus, more than one digit in "statusFlags" is "1".
         """
         iso_photons_cut = (events.GenPart.pdgId == 22) & (events.GenPart.pt > 15) & (abs(events.GenPart.eta) < 2.6) & (( (events.GenPart.statusFlags // numpy.power(2, 0)) % 2 == 1 ) | ( (events.GenPart.statusFlags // numpy.power(2, 8)) % 2 == 1 ))
         iso_photons = events.GenPart[iso_photons_cut]
@@ -259,6 +259,48 @@ class ZGammaTaggerRun2(Tagger):
             data = events.Muon[muon_cut]
         )
 
+        # gen mu not reco
+        gen_muons = events.GenPart[(abs(events.GenPart.pdgId) == 13)]
+        reco_muons = events.Muon
+
+        unmatched_gen_mask = awkward.fill_none(object_selections.delta_R(gen_muons, reco_muons, 0.4), True)
+        
+        # reco_gen_muon_indices = reco_muons.genPartIdx
+        # all_gen_muon_indices = awkward.local_index(gen_muons.pt)
+
+        # # For each event, check which of the gen muon indices are not in the list of reco-matched gen muon indices
+        # unmatched_gen_mask = awkward.all(all_gen_muon_indices[:, :, None] != reco_gen_muon_indices[:, None, :], axis=-1)
+        
+        unmatched_gen_muons = gen_muons[unmatched_gen_mask]
+        unmatched_gen_muons = unmatched_gen_muons[unmatched_gen_muons.pt > self.options["muons"]["pt"]]
+
+        unmatched_gen_muons = awkward_utils.add_field(
+            events = events,
+            name = "SelectedGenNoRecoMuon",
+            data = unmatched_gen_muons
+        )
+
+        # gen ele not reco
+        gen_eles = events.GenPart[(abs(events.GenPart.pdgId) == 11)]
+        reco_eles = events.Electron
+
+        unmatched_gen_mask = awkward.fill_none(object_selections.delta_R(gen_eles, reco_eles, 0.4), True)
+        
+        # reco_gen_ele_indices = reco_eles.genPartIdx
+        # all_gen_ele_indices = awkward.local_index(gen_eles.pt)
+
+        # # For each event, check which of the gen electron indices are not in the list of reco-matched gen electron indices
+        # unmatched_gen_mask = awkward.all(all_gen_ele_indices[:, :, None] != reco_gen_ele_indices[:, None, :], axis=-1)
+
+        unmatched_gen_eles = gen_eles[unmatched_gen_mask]
+        unmatched_gen_eles = unmatched_gen_eles[unmatched_gen_eles.pt > self.options["electrons"]["pt"]]
+
+        unmatched_gen_eles = awkward_utils.add_field(
+            events = events,
+            name = "SelectedGenNoRecoElectron",
+            data = unmatched_gen_eles
+        )
+
         # Photons
         photon_selection = self.select_photons(
                 photons = events.Photon,
@@ -310,23 +352,28 @@ class ZGammaTaggerRun2(Tagger):
                 data = events.Photon[photon_selection],
         )
 
-        if "2017" in self.year or "2018" in self.year:
-            year = self.year[:4]
-            b_jet_cut = jets.btagDeepFlavB > self.options["btag_med"][year]
-        else:
-            b_jet_cut = jets.btagDeepFlavB > self.options["btag_med"][self.year]
+        # if "2017" not in self.year and "2018" not in self.year:
+        #     b_jet_cut = jets.btagDeepFlavB > self.options["btag_med"][self.year[:4]]
+        # else:
+        b_jet_cut = jets.btagDeepFlavB > self.options["btag_med"][self.year]
         jets = awkward.with_field(jets, b_jet_cut, "is_med_bjet") 
 
         # Add object fields to events array
-        for objects, name in zip([electrons, muons, jets], ["electron", "muon", "jet"]):
-            awkward_utils.add_object_fields(
-                events = events,
-                name = name,
-                objects = objects,
-                n_objects = 4,
-                dummy_value = DUMMY_VALUE
-            )
-        
+        for objects, name in zip([electrons, muons, jets, unmatched_gen_muons, unmatched_gen_eles], ["electron", "muon", "jet", "gen_no_reco_muon", "gen_no_reco_electron"]):
+            for var in objects.fields:
+                if var in ["charge", "pt", "eta", "phi", "mass", "id", "ptE_error"]:
+                    awkward_utils.add_field(
+                        events,
+                        f"{name}_{var}",
+                        awkward.fill_none(objects[var], DUMMY_VALUE)
+                    )
+                else:
+                    awkward_utils.add_field(
+                        events,
+                        f"{name}_{var}",
+                        awkward.fill_none(objects[var], 0)
+                    )
+
         if not self.is_data:
             dZ = events.GenVtx_z - events.PV_z
             awkward_utils.add_field(events, "dZ", dZ, overwrite=True)
@@ -428,7 +475,7 @@ class ZGammaTaggerRun2(Tagger):
         # 1: passed lower dilepton trigger -> double_ele_trigger_cut = False, single_ele_trigger_cut = True
         # 2: passed upper dilepton trigger -> double_ele_trigger_cut = True, single_ele_trigger_cut = False
         # 3: passed single lepton trigger ->  single_ele_trigger_cut = True
-        # HLT_ele_cat0 = (~double_ele_trigger_cut) & (~single_ele_trigger_cut) 
+        # HLT_ele_cat0 = (~double_ele_trigger_cut) & (~single_ele_trigger_cut)
         # HLT_mu_cat0 = (~double_mu_trigger_cut) & (~single_mu_trigger_cut)
         # HLT_ele_cat1 = (~double_ele_trigger_cut) & single_ele_trigger_cut
         # HLT_mu_cat1 = (~double_mu_trigger_cut) & single_mu_trigger_cut
@@ -495,7 +542,7 @@ class ZGammaTaggerRun2(Tagger):
         #     lep_prob = awkward.zero_like(lepton_pt) 
         #     lep_unc = awkward.zero_like(lepton_pt)
 
-        # def GetTotalProbability(electron_pt,muon_pt, electron_eta,muon_eta, pass_singleel,pass_singlemu,pass_diel,pass_dimu, is_data):
+        # def GetTotalProbability(electron_pt,muon_pt, electron_eta,muon_eta, pass_singleel,pass_singlemu, pass_diel, pass_dimu, is_data):
         #     electron_prob = GetFlavorProbability(electron_pt, electron_eta,pass_singleel, pass_diel, is_data, True)
         #     muon_prob = GetFlavorProbability(muon_pt, muon_eta,pass_singlemu, pass_dimu, is_data, False)
         
@@ -560,43 +607,6 @@ class ZGammaTaggerRun2(Tagger):
         else:
             hem_cut=awkward.num(events.Photon) >= 0 
         events = events[hem_cut]
-        
-        # # Construct di-electron/di-muon pairs
-        # ee_pairs = awkward.combinations(electrons, 2, fields = ["LeadLepton", "SubleadLepton"])
-        # if self.year is not None:
-        #     year = self.year[:4]
-        #     e_cut = ee_pairs.LeadLepton.pt > self.options["lead_ele_pt"][year]
-        # else:
-        #     e_cut = ee_pairs.LeadLepton.pt > 25
-        # ee_cut = (ee_pairs.LeadLepton.pt > 25) & (ee_pairs.SubleadLepton.pt > 15)
-        # ee_pairs = awkward.concatenate([ee_pairs[double_ele_trigger_cut & ee_cut], ee_pairs[single_ele_trigger_cut & e_cut]], axis = 1)
-        # ele_pair_cut = awkward.num(ee_pairs) >= 1
-
-        # mm_pairs = awkward.combinations(muons, 2, fields = ["LeadLepton", "SubleadLepton"])
-        # if self.year is not None:
-        #     year = self.year[:4]
-        #     m_cut = mm_pairs.LeadLepton.pt > self.options["lead_mu_pt"][year]
-        # else:
-        #     m_cut = mm_pairs.LeadLepton.pt > 20
-        # mm_cut = (mm_pairs.LeadLepton.pt > 20) & (mm_pairs.SubleadLepton.pt > 10)
-        # mm_pairs = awkward.concatenate([mm_pairs[double_mu_trigger_cut & mm_cut], mm_pairs[single_mu_trigger_cut & m_cut]], axis = 1)
-        # muon_pair_cut = awkward.num(mm_pairs) >= 1
-
-        # # Concatenate these together
-        # z_cands = awkward.concatenate([ee_pairs, mm_pairs], axis = 1)
-
-        # # Make Z candidate-level cuts
-        # # print('!!!!charge of lead lepton{}, charge of sublead lepton {}, flavour of lepton {}'.format(awkward.flatten(z_cands[os_cut]).LeadLepton.charge, awkward.flatten(z_cands[os_cut]).SubleadLepton.charge, awkward.flatten(z_cands[os_cut]).LeadLepton.id))
-        # os_cut = (z_cands.LeadLepton.charge * z_cands.SubleadLepton.charge) == -1
-        # z_cands = z_cands[os_cut]
-        # os_cut = awkward.num(z_cands) >= 1
-
-        # z_cands["ZCand"] = z_cands.LeadLepton + z_cands.SubleadLepton # these add as 4-vectors since we registered them as "Momentum4D" objects
-        # mass_cut = (z_cands.ZCand.mass > 80.) & (z_cands.ZCand.mass < 100.)
-        # # mass_cut = (z_cands.ZCand.mass > 50.)
-        # z_cands = z_cands[mass_cut] # OSSF lepton pairs with m_ll > 50.
-
-        # z_cands = z_cands[awkward.argsort(abs(z_cands.ZCand.mass - 91.1876), axis = 1)] # take the one with mass closest to mZ
 
         has_z_cand = awkward.num(z_cands) >= 1
         z_cand = awkward.firsts(z_cands)
@@ -792,7 +802,7 @@ class ZGammaTaggerRun2(Tagger):
         #     print(event.run, event.luminosityBlock, event.event, sep=" ")
         # print("!!!end check events tag(inclusive)!!!")
 
-        # checked_cut = z_ee_cut & ele_trigger_pt_cut & has_gamma_cand
+        # checked_cut = z_ee_cut & ele_trigger_pt_cut
         # checked_events = events[checked_cut]
         # print("!!!start check events tag(electron)!!!")
         # for event in checked_events:
@@ -805,12 +815,6 @@ class ZGammaTaggerRun2(Tagger):
         # for event in checked_events:
         #     print(event.run, event.luminosityBlock, event.event, sep=" ")
         # print("!!!end check events tag(muon)!!!")
-
-        # self.register_cuts(
-        #     names = ["has_z_cand", "has_gamma_cand", "sel_h_1", "sel_h_2", "sel_h_3", "all cuts"],
-        #     results = [has_z_cand, has_gamma_cand, sel_h_1, sel_h_2, sel_h_3, all_cuts],
-        #     cut_type = "zgammas_unweighted"
-        # )
 
         elapsed_time = time.time() - start
         logger.debug("[ZGammaTagger] %s, syst variation : %s, total time to execute select_zgammas: %.6f s" % (self.name, self.current_syst, elapsed_time))
