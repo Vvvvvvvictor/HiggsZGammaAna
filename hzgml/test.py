@@ -237,57 +237,40 @@ for year in years:
         else:
             exit()
 
-        # temp = cat_data
-        # weight = temp["weight_central"]
-        # print(f'{year} {cat} total events: {len(temp)}')
-        # print(f'{year} {cat} lumi weight: {weight.sum()}')
-        # print(f'{year} {cat} prefire weight: {weight.sum()}')
-        # weight = weight * temp["weight_pu_reweight_sf_central"]
-        # print(f'{year} {cat} pileup weight: {weight.sum()}')
-        # weight = weight * temp["weight_btag_deepjet_wp_sf_SelectedJet_central"]
-        # print(f'{year} {cat} btag weight: {weight.sum()}')
-        # weight = weight * temp["weight_electron_iso_sf_SelectedElectron_central"] * temp["weight_electron_reco_sf_SelectedElectron_central"] * temp["weight_electron_wplid_sf_SelectedElectron_central"]
-        # print(f'{year} {cat} electron weight: {weight.sum()}')
-        # weight = weight * temp["weight_muon_looseid_sf_SelectedMuon_central"] * temp["weight_muon_iso_sf_SelectedMuon_central"] * temp["weight_muon_looseid_sf_SelectedMuon_central"]
-        # print(f'{year} {cat} muon weight: {weight.sum()}')
-        # weight = weight * temp["weight_photon_csev_sf_Photon_central"] * temp["weight_photon_id_sf_Photon_central"]
-        # print(f'{year} {cat} photon weight: {weight.sum()}')
-        # weight = weight * temp["weight_electron_hlt_sf_SelectedElectron_central"] * temp["weight_muon_hlt_sf_SelectedMuon_central"]
-        # print(f'{year} {cat} hlt weight: {weight.sum()}')
-
         for t in types:
             temp = cat_data.query(f'z_{t} > 0')
             weight = temp["weight_central"] / 0.96934
-            print(f'{year} {cat} {t} total events: {len(temp)}')
-            print(f'{year} {cat} {t} lumi weight: {weight.sum()}')
+            print(f'{year} {cat} {t}')
+            print(f'{"total events:":>35}{len(temp)}')
+            print(f'{"lumi weight:":>35}{weight.sum():.4f}')
             # weight = weight * temp["weight_L1_prefiring_sf_central"]
-            # print(f'{year} {cat} {t} prefire weight: {weight.sum()}')
+            # print(f'{"prefire weight:":>35}{weight.sum():.4f}')
             weight = weight * temp["weight_pu_reweight_sf_central"]
-            print(f'{year} {cat} {t} pileup weight: {weight.sum()}')
+            print(f'{"pileup weight:":>35}{weight.sum():.4f}')
             weight = weight * temp["weight_btag_deepjet_wp_sf_SelectedJet_central"]
-            print(f'{year} {cat} {t} btag weight: {weight.sum()}')
+            print(f'{"btag weight:":>35}{weight.sum():.4f}')
             
             # weight = weight * temp["weight_electron_iso_sf_SelectedElectron_central"]
-            # print(f'{year} {cat} {t} electron iso weight: {weight.sum()}')
+            # print(f'{"electron iso weight:":>35}{weight.sum():.4f}')
             # weight = weight * temp["weight_electron_reco_sf_SelectedElectron_central"]
-            # print(f'{year} {cat} {t} electron reco weight: {weight.sum()}')
+            # print(f'{"electron reco weight:":>35}{weight.sum():.4f}')
             weight = weight * temp["weight_electron_wplid_sf_SelectedElectron_central"]
-            print(f'{year} {cat} {t} electron wplid weight: {weight.sum()}')
+            print(f'{"electron wplid weight:":>35}{weight.sum():.4f}')
             weight = weight * temp["weight_electron_wplid_sf_nomatch_SelectedGenNoRecoElectron_central"]
-            print(f'{year} {cat} {t} electron wplid nomatch weight: {weight.sum()}')
+            print(f'{"electron wplid nomatch weight:":>35}{weight.sum():.4f}')
 
             # weight = weight * temp["weight_muon_iso_sf_SelectedMuon_central"]
-            # print(f'{year} {cat} {t} muon iso weight: {weight.sum()}')
+            # print(f'{"muon iso weight:":>35}{weight.sum():.4f}')
             weight = weight * temp["weight_muon_looseid_sf_SelectedMuon_central"]
-            print(f'{year} {cat} {t} muon looseid weight: {weight.sum()}')
+            print(f'{"muon looseid weight:":>35}{weight.sum():.4f}')
             weight = weight * temp["weight_muon_looseid_sf_nomatch_SelectedGenNoRecoMuon_central"]
-            print(f'{year} {cat} {t} muon looseid nomatch weight: {weight.sum()}')
+            print(f'{"muon looseid nomatch weight:":>35}{weight.sum():.4f}')
 
             # weight = weight * temp["weight_photon_id_sf_Photon_central"] * temp["weight_photon_csev_sf_Photon_central"]
-            # print(f'{year} {cat} {t} photon weight: {weight.sum()}')
+            # print(f'{"photon weight:":>35}{weight.sum():.4f}')
             
             weight = weight * temp["weight_hlt_sf_central"]
-            print(f'{year} {cat} {t} hlt weight: {weight.sum()}')
+            print(f'{"hlt weight:":>35}{weight.sum():.4f}')
 
 # =====================================
 # Have a look at the hgg data
