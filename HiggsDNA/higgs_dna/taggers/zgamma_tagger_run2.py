@@ -235,7 +235,7 @@ class ZGammaTaggerRun2(Tagger):
         electrons = awkward_utils.add_field(
             events = events,
             name = "SelectedElectron",
-            data = events.Electron[electron_cut]
+            data = awkward.Array(events.Electron[electron_cut], with_name="Momentum4D")
         )
         
         # generate the index in the original array and add to electrons
@@ -361,7 +361,7 @@ class ZGammaTaggerRun2(Tagger):
         # Add object fields to events array
         for objects, name in zip([electrons, muons, jets, unmatched_gen_muons, unmatched_gen_eles], ["electron", "muon", "jet", "gen_no_reco_muon", "gen_no_reco_electron"]):
             for var in objects.fields:
-                if var in ["charge", "pt", "eta", "phi", "mass", "id", "ptE_error"]:
+                if var in ["charge", "pt", "eta", "phi", "mass", "id", "ptE_error", "p"]:
                     awkward_utils.add_field(
                         events,
                         f"{name}_{var}",
@@ -594,7 +594,10 @@ class ZGammaTaggerRun2(Tagger):
             hem_run=events.run > 319077        
             # checked 65.15623538907509% events in data could pass this run cut
             hem_jet=awkward.num(events.Jet[(events.Jet.phi>-1.57) & (events.Jet.phi<-0.87) & (events.Jet.eta>-3) & (events.Jet.eta<-1.3)])>0
-            hem_fatjet=awkward.num(events.FatJet[(events.FatJet.phi>-1.57) & (events.FatJet.phi<-0.87) & (events.FatJet.eta>-3) & (events.FatJet.eta<-1.3)])>0
+            if "FatJet" in events.fields:
+                hem_fatjet=awkward.num(events.FatJet[(events.FatJet.phi>-1.57) & (events.FatJet.phi<-0.87) & (events.FatJet.eta>-3) & (events.FatJet.eta<-1.3)])>0
+            else:
+                hem_fatjet = awkward.num(events.Photon) < 0 # dummy all false
             hem_cut=~((hem_run & hem_jet) | (hem_run & hem_fatjet))        
         elif self.year=="2018" and not self.is_data:
             #random number generator from 0 to 1
@@ -602,11 +605,26 @@ class ZGammaTaggerRun2(Tagger):
             events['random'] = numpy.random.rand(len(events))
             hem_run=events.random < fraction
             hem_jet=awkward.num(events.Jet[(events.Jet.phi>-1.57) & (events.Jet.phi<-0.87) & (events.Jet.eta>-3) & (events.Jet.eta<-1.3)])>0
-            hem_fatjet=awkward.num(events.FatJet[(events.FatJet.phi>-1.57) & (events.FatJet.phi<-0.87) & (events.FatJet.eta>-3) & (events.FatJet.eta<-1.3)])>0
+            if "FatJet" in events.fields:
+                hem_fatjet=awkward.num(events.FatJet[(events.FatJet.phi>-1.57) & (events.FatJet.phi<-0.87) & (events.FatJet.eta>-3) & (events.FatJet.eta<-1.3)])>0
+            else:
+                hem_fatjet = awkward.num(events.Photon) < 0 # dummy all false
             hem_cut=~((hem_run & hem_jet) | (hem_run & hem_fatjet))
         else:
             hem_cut=awkward.num(events.Photon) >= 0 
         events = events[hem_cut]
+        z_cands = z_cands[hem_cut]
+        electrons = electrons[hem_cut]
+        photons = photons[hem_cut]
+        muons = muons[hem_cut]
+        z_ee_cut = z_ee_cut[hem_cut]
+        z_mumu_cut = z_mumu_cut[hem_cut]
+        trigger_pt_cut = trigger_pt_cut[hem_cut]
+        ele_trigger_pt_cut = ele_trigger_pt_cut[hem_cut]
+        mu_trigger_pt_cut = mu_trigger_pt_cut[hem_cut]
+        ele_trigger_cut = ele_trigger_cut[hem_cut]
+        mu_trigger_cut = mu_trigger_cut[hem_cut]
+        trigger_cut = trigger_cut[hem_cut]
 
         has_z_cand = awkward.num(z_cands) >= 1
         z_cand = awkward.firsts(z_cands)
