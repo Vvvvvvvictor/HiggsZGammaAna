@@ -279,7 +279,7 @@ def main():
         boundaries_values.append(bound_value)
         smaxs.append(smax)
 
-    # boundaries_values.append([0.00, 0.29, 0.57, 0.73])
+    # boundaries_values.append([0.00, 0.38, 0.71, 0.93])
 
     smax = sum(smaxs)/n_fold
     print('Averaged significance: ', smax)

@@ -271,7 +271,7 @@ class ApplyXGBHandler(object):
                             xgb_basename = self.models[model]
                             data_o[xgb_basename] = scores
                             data_o[xgb_basename+'_t'] = scores_t
-
+                        
                         if out_data.shape[0] != 0:
                             out_data = pd.concat([out_data, data_o], ignore_index=True, sort=False)
                         else:
@@ -279,9 +279,11 @@ class ApplyXGBHandler(object):
 
                 # out_data.to_root(output_path, key='test', mode='a', index=False)
                 
+            # Reset index before saving to ensure clean output without extra index columns
+            if "index" in out_data.columns:
+                out_data = out_data.drop('index',axis=1)
             output_file[self._region] = out_data
             del out_data, data_s, data_o
-
 
 def main():
 

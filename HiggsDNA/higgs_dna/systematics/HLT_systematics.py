@@ -44,13 +44,13 @@ DoubleElectron_LowLeg_HLT_FILE = {
 
 # Hole files for 2023postBPix
 SingleElectron_HLT_FILE_HOLE = {
-    "2023postBPix" : "higgs_dna/systematics/data/2023postBPix_UL/hzg_eltrig30_2023BPixHole_efficiencies.json"
+    "2023postBPix" : f"{base_path}2023postBPix_UL/hzg_eltrig30_2023BPixHole_efficiencies.json"
 }
 DoubleElectron_LowLeg_HLT_FILE_HOLE = {
-    "2023postBPix" : "higgs_dna/systematics/data/2023postBPix_UL/hzg_eltrig12_2023BPixHole_efficiencies.json"
+    "2023postBPix" : f"{base_path}2023postBPix_UL/hzg_eltrig12_2023BPixHole_efficiencies.json"
 }
 DoubleElectron_HighLeg_HLT_FILE_HOLE = {
-    "2023postBPix" : "higgs_dna/systematics/data/2023postBPix_UL/hzg_eltrig23_2023BPixHole_efficiencies.json"
+    "2023postBPix" : f"{base_path}2023postBPix_UL/hzg_eltrig23_2023BPixHole_efficiencies.json"
 }
 
 
@@ -140,18 +140,9 @@ def get_lepton_probabilities(leptons, single_eval, high_eval, low_eval, is_elect
 
     # Probabilities for exclusive categories for each lepton
     # 0: fail all, 1: pass low only, 2: pass high only, 3: pass single only
-    p0 = 1.0 - eff_l
-    p1 = eff_l - eff_h
-    p2 = eff_h - eff_s
-    p3 = eff_s
-    
-    s0 = syst_l # uncertainty of 1-eff_l is syst_l
-    s1 = numpy.sqrt(syst_l**2 + syst_h**2)
-    s2 = numpy.sqrt(syst_h**2 + syst_s**2)
-    s3 = syst_s
 
-    probs = awkward.unflatten(numpy.stack([p0, p1, p2, p3], axis=1), n_leptons)
-    systs = awkward.unflatten(numpy.stack([s0, s1, s2, s3], axis=1), n_leptons)
+    probs = awkward.unflatten(numpy.stack([1.0 - eff_l, eff_l, eff_h, eff_s], axis=1), n_leptons)
+    systs = awkward.unflatten(numpy.stack([syst_l, syst_l, syst_h, syst_s], axis=1), n_leptons)
     
     return probs, systs
 
@@ -172,17 +163,13 @@ def calculate_multi_lepton_trigger_prob(probs, systs):
     """
     # Efficiencies for each lepton to pass different trigger legs
     eff_s = probs[:, :, 3]
-    eff_h = probs[:, :, 2] + probs[:, :, 3]
-    eff_l = probs[:, :, 1] + probs[:, :, 2] + probs[:, :, 3]
+    eff_h = probs[:, :, 2]
+    eff_l = probs[:, :, 1]
 
     # Systematics for each lepton
     syst_s = systs[:, :, 3]
-    syst_h = numpy.sqrt(systs[:, :, 2]**2 + systs[:, :, 3]**2)
-    syst_l = numpy.sqrt(systs[:, :, 1]**2 + systs[:, :, 2]**2 + systs[:, :, 3]**2)
-    print(probs[:, :, 0])
-    print(probs[:, :, 1])
-    print(probs[:, :, 2])
-    print(probs[:, :, 3])
+    syst_h = systs[:, :, 2]
+    syst_l = systs[:, :, 1]
 
     # --- Single Lepton Trigger Probability ---
     # P(single) = 1 - product(1 - P_i(single))
@@ -222,7 +209,7 @@ def calculate_multi_lepton_trigger_prob(probs, systs):
     
     one_minus_prob_pair = 1.0 - prob_pair_pass
     prod_one_minus_prob_pair = awkward.prod(one_minus_prob_pair, axis=1)
-    safe_one_minus_prob_pair = one_minus_prob_pair + 1e-12
+    safe_one_minus_prob_pair = one_minus_prob_pair #+ 1e-12
     unc_sq_dilep = awkward.sum((prod_one_minus_prob_pair / safe_one_minus_prob_pair)**2 * unc_sq_pair_pass, axis=1)
 
     # Total probability: P(total) = P(single) + P(dilep) - P(single) * P(dilep)
@@ -267,10 +254,6 @@ def get_flavor_probability(leptons, single_eval, high_eval, low_eval,
         )
         total_prob[mask_multi_lep] = awkward.to_numpy(prob_multi)
         total_unc_sq[mask_multi_lep] = awkward.to_numpy(unc_sq_multi)
-    
-    logger.debug(f"n_lep = 0: {awkward.sum(n_leptons == 0)}, n_lep = 1: {awkward.sum(n_leptons == 1)}, n_lep >= 2: {awkward.sum(n_leptons >= 2)}")
-    print("n_lep==1:", awkward.mean(total_prob[n_leptons == 1]))
-    print("n_lep>=2:", awkward.mean(total_prob[n_leptons >= 2]))
 
     return total_prob, numpy.sqrt(total_unc_sq)
 

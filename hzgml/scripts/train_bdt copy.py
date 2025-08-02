@@ -8,23 +8,23 @@ import uproot
 import pickle
 from sklearn.metrics import roc_curve, auc, confusion_matrix, roc_auc_score
 from sklearn.preprocessing import StandardScaler, QuantileTransformer
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.utils.validation import check_array, check_is_fitted
 import xgboost as xgb
 from tabulate import tabulate
-#from bayes_opt import BayesianOptimization
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-#import logging
 from pdb import set_trace
-#logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
-#logging.getLogger('matplotlib.font_manager').disabled = True
 import ROOT
 ROOT.gErrorIgnoreLevel = ROOT.kError + 1
+
+from weighted_quantile_transformer import WeightedQuantileTransformer # New import
 
 def getArgs():
     """Get arguments from command line."""
     parser = ArgumentParser()
     parser.add_argument('-c', '--config', action='store', default='data/training_config_BDT.json', help='Region to process')
-    parser.add_argument('-i', '--inputFolder', action='store', help='directory of training inputs')
+    parser.add_argument('-i', '--inputFolder', default='/eos/home-j/jiehan/root/skimmed_ntuples_run2', action='store', help='directory of training inputs')
     parser.add_argument('-o', '--outputFolder', action='store', help='directory for outputs')
     parser.add_argument('-r', '--region', action='store', choices=['two_jet', 'one_jet', 'zero_jet', 'zero_to_one_jet', 'VH_ttH', 'VBF', 'all_jet'], default='zero_jet', help='Region to process')
     parser.add_argument('-f', '--fold', action='store', type=int, nargs='+', choices=[0, 1, 2, 3], default=[0, 1, 2, 3], help='specify the fold for training')
@@ -34,9 +34,10 @@ def getArgs():
     parser.add_argument('--corr', action='store_true', default=True, help='Plot corelation between each training variables')
     parser.add_argument('--importance', action='store_true', default=True, help='Plot importance of variables, parameter "gain" is recommanded')
     parser.add_argument('--roc', action='store_true', default=True, help='Plot ROC')
-    parser.add_argument('--skopt', action='store_true', default=False, help='Run hyperparameter tuning using skopt')
-    parser.add_argument('--n-calls', action='store', type=int, default=36, help='Steps of hyperparameter tuning using skopt')
-    parser.add_argument('--skopt-plot', action='store_true', default=False, help='Plot skopt results')
+    parser.add_argument('--optuna', action='store_true', default=False, help='Run hyperparameter tuning using optuna')
+    parser.add_argument('--optuna_metric', action='store', default='auc', choices=['eval_auc', 'sqrt_eval_auc_minus_train_auc', 'eval_auc_minus_train_auc', 'eval_auc_over_train_auc', "eval_auc_minus_train_auc", "eval_significance", "sqrt_eval_significance_minus_train_significance", 'eval_auc_with_mass_shape_factor'], help='Optuna metric to optimize')
+    parser.add_argument('--n-calls', action='store', type=int, default=36, help='Steps of hyperparameter tuning using optuna')
+    parser.add_argument('--continue-optuna', action='store', type=int, default=0, help='Continue tuning hyperparameters using optuna')
 
     parser.add_argument('-s', '--shield', action='store', type=int, default=-1, help='Which variables needs to be shielded')
     parser.add_argument('-a', '--add', action='store', type=int, default=-1, help='Which variables needs to be added')
@@ -65,13 +66,15 @@ class XGBoostHandler(object):
               """)
 
         args=getArgs()
+        self.continue_optuna = args.continue_optuna
+        self.optuna_metric = args.optuna_metric
         self.n_calls = args.n_calls
         self._shield = args.shield
         self._add = args.add
 
         self._region = region
 
-        self._inputFolder = '/eos/home-j/jiehan/root/skimmed_ntuples'
+        self._inputFolder = args.inputFolder
         self._outputFolder = 'models'
         self._chunksize = 500000
         self._branches = []
@@ -81,6 +84,12 @@ class XGBoostHandler(object):
 
         self.m_data_sig = pd.DataFrame()
         self.m_data_bkg = pd.DataFrame()
+        self.m_train_w = {}
+        self.m_val_w = {}
+        self.m_test_w = {}
+        self.m_train_mass = {}
+        self.m_val_mass = {}
+        self.m_test_mass = {}
         self.m_train_wt = {}
         self.m_val_wt = {}
         self.m_test_wt = {}
@@ -99,6 +108,8 @@ class XGBoostHandler(object):
         self.m_score_test_sig = {}
         self.m_score_test_bkg = {}
         self.m_tsf = {}
+        self.m_test_sig_w = {} # New: For storing test signal weights
+        self.m_test_bkg_w = {} # New: For storing test background weights
 
         self.inputTree = 'inclusive'
         self.train_signal = []
@@ -106,7 +117,7 @@ class XGBoostHandler(object):
         self.train_mc_background = []
         self.train_dd_background = []
         self.train_variables = []
-        self.preselections = ['gamma_pt > 0']
+        self.preselections = [] 
         self.mc_preselections = []
         self.data_preselections = []
         self.signal_preselections = []
@@ -115,7 +126,7 @@ class XGBoostHandler(object):
         self.weight = 'weight'
         self.params = [{'eval_metric': ['auc', 'logloss']}]
         self.early_stopping_rounds = 10
-        self.numRound = 10000
+        self.numRound = 1000
         self.SF = -1
         self.readConfig(configPath)
         self.checkConfig()
@@ -186,16 +197,16 @@ class XGBoostHandler(object):
             self.randomIndex = self.randomIndex.replace('noexpand:', '')
             self.weight = self.weight.replace('noexpand:', '')
 
-            if self.preselections:
-                self.preselections = ['data.' + p for p in self.preselections]
-            if self.signal_preselections:
-                self.signal_preselections = ['data.' + p for p in self.signal_preselections]
-            if self.mc_preselections:
-                self.mc_preselections = ['data.' + p for p in self.mc_preselections]
-            if self.data_preselections:
-                self.data_preselections = ['data.' + p for p in self.data_preselections]
-            if self.background_preselections:
-                self.background_preselections = ['data.' + p for p in self.background_preselections]
+            # if self.preselections:
+            #     self.preselections = ['data.' + p for p in self.preselections]
+            # if self.signal_preselections:
+            #     self.signal_preselections = ['data.' + p for p in self.signal_preselections]
+            # if self.mc_preselections:
+            #     self.mc_preselections = ['data.' + p for p in self.mc_preselections]
+            # if self.data_preselections:
+            #     self.data_preselections = ['data.' + p for p in self.data_preselections]
+            # if self.background_preselections:
+            #     self.background_preselections = ['data.' + p for p in self.background_preselections]
 
         except Exception as e:
             logging.error("Error reading configuration '{config}'".format(config=configPath))
@@ -214,6 +225,8 @@ class XGBoostHandler(object):
         if fold == -1:
             self.params = [{'eval_metric': ['auc', 'logloss']}]
             fold = 0
+        else:
+            self.params[fold] = {'eval_metric': ['auc', 'logloss']}
         for key in params:
             self.params[fold][key] = params[key]
 
@@ -227,33 +240,32 @@ class XGBoostHandler(object):
         self._outputFolder = outputFolder
 
     def preselect(self, data, sample=''):
-
         if sample == 'signal':
             for p in self.signal_preselections:
-                data = data[eval(p)]
+                data = data.query(p)
             for p in self.mc_preselections:
-                data = data[eval(p)]
+                data = data.query(p)
         elif sample == 'background':
             for p in self.background_preselections:
-                data = data[eval(p)]
+                data = data.query(p)
         elif sample == 'data':
             for p in self.background_preselections:
-                data = data[eval(p)]
+                data = data.query(p)
             for p in self.data_preselections:
-                data = data[eval(p)]
+                data = data.query(p)
         elif sample == 'mc_background':
             for p in self.background_preselections:
-                data = data[eval(p)]
+                data = data.query(p)
             for p in self.mc_preselections:
-                data = data[eval(p)]
+                data = data.query(p)
         elif sample == 'DYJetsToLL':
-            data = data[data.n_iso_photons==0]
+            # data = data.query('n_iso_photons == 0')
             for p in self.background_preselections:
-                data = data[eval(p)]
+                data = data.query(p)
             for p in self.mc_preselections:
-                data = data[eval(p)]
+                data = data.query(p)
         for p in self.preselections:
-            data = data[eval(p)]
+            data = data.query(p)
 
         return data
 
@@ -292,7 +304,7 @@ class XGBoostHandler(object):
             for bkg in tqdm(sorted(bkg_mc_list), desc='XGB INFO: Loading training backgrounds', bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
                 #TODO put this to the config
                 if "DY" in bkg:
-                    branches = self._mc_branches + ["n_iso_photons"]
+                    branches = self._mc_branches #+ ["n_iso_photons"]
                 else: 
                     branches = self._mc_branches
                 file = uproot.open(bkg)
@@ -330,14 +342,29 @@ class XGBoostHandler(object):
             data = self.m_data_sig
         else:
             data = self.m_data_bkg
+        rename_map = {"l1g_deltaR": "max_deltaR", "l2g_deltaR": "min_deltaR"}
+        for col in rename_map.keys():
+            if col in data.columns:
+                data = data.rename(columns={col: rename_map[col]})
         columns = list(data.columns)
-        for rem in ("is_center", "weight", "event", "gamma_mvaID_WP80", "gamma_mvaID_WPL", "n_iso_photons", "n_b_jets", "n_jets"):
+        for rem in ("is_center", "weight", "event", "gamma_mvaID_WP80", "gamma_mvaID_WPL", "n_iso_photons", "n_b_jets", "n_jets", "H_mass", "gamma_pt"):
             if rem in columns:
                 columns.remove(rem)
                 data = data.drop(rem, axis=1)
-        print(columns)
+        # print(columns)
+
+        data = data[sorted(data.columns)]
+
+        # Replace values less than -900 with np.nan for correlation calculation
+        # This modification is local to the 'data' DataFrame in this function
+        for col_name in data.columns:
+            # Ensure the column is numeric before attempting comparison and assignment
+            if pd.api.types.is_numeric_dtype(data[col_name]):
+            # Use .loc for safe assignment to avoid SettingWithCopyWarning
+                data.loc[data[col_name] < -900, col_name] = np.nan
 
         data = data.corr() * 100
+        # data = data.dropna(axis=0, how='all').dropna(axis=1, how='all')
 
         # 将相关性矩阵转换为按相关性值排序的数据框
         sorted_corr = data.unstack().sort_values(ascending=False)
@@ -351,18 +378,27 @@ class XGBoostHandler(object):
             print(f"Correlation between {var1:<{max_var_length}} and {var2:<{max_var_length}} is {corr:.2f}")
         # print(data)
 
+        lower_triangle = np.tril(data, -1)
+        mask = np.triu(np.ones_like(data, dtype=bool), k=0)
+        lower_triangle[mask] = np.nan
         plt.figure(figsize=(12, 9), dpi=300)
-        plt.imshow(data)
-        plt.colorbar()
-        for i in range(0, len(columns)):
-            line = list(data[columns[i]])
-            for j in range(0, len(line)):
-                plt.text(i, j, int(line[j]), verticalalignment='center', horizontalalignment='center', fontsize=8)
-        plt.xticks(np.arange(0, len(columns)), columns, rotation=-90, fontsize=12)
-        plt.yticks(np.arange(0, len(columns)), columns, fontsize=12)
-        plt.title(self._region)
+        plt.imshow(lower_triangle, cmap='coolwarm')
+        cbar = plt.colorbar()
+        cbar.ax.tick_params(labelsize=16)
+        cbar.set_label('Correlation (%)', fontsize=16)
+        plt.clim(-100, 100)
+        for i in range(len(columns)):
+            for j in range(len(columns)):
+                if not np.isnan(lower_triangle[i, j]):
+                    plt.text(j, i, f"{lower_triangle[i, j]:3.0f}", ha="center", va="center", color="black", fontsize=12)
+        plt.xticks(np.arange(0, len(columns)), columns, rotation=-45, fontsize=16, ha="left")
+        plt.yticks(np.arange(0, len(columns)), columns, fontsize=16)
+        plt.gca().spines['top'].set_visible(False)
+        plt.gca().spines['right'].set_visible(False)
+        
+        # plt.title(self._region)
         plt.tight_layout()
-        plt.savefig("plots/corr/corr_%s_%s.pdf" % (self._region, data_type))
+        plt.savefig("plots/corr/corr_%s_%s.png" % (self._region, data_type))
 
     def reweightSignal(self):
         min_mass, max_mass = 100, 180
@@ -385,12 +421,12 @@ class XGBoostHandler(object):
         # training, validation, test split
         print('----------------------------------------------------------')
         print('XGB INFO: Splitting samples to training, validation, and test...')
-        test_sig = self.m_data_sig[self.m_data_sig[self.randomIndex]%4 == fold]
-        test_bkg = self.m_data_bkg[self.m_data_bkg[self.randomIndex]%4 == fold]
-        val_sig = self.m_data_sig[(self.m_data_sig[self.randomIndex]-1)%4 == fold]
-        val_bkg = self.m_data_bkg[(self.m_data_bkg[self.randomIndex]-1)%4 == fold]
-        train_sig = self.m_data_sig[((self.m_data_sig[self.randomIndex]-2)%4 == fold) | ((self.m_data_sig[self.randomIndex]-3)%4 == fold)]
-        train_bkg = self.m_data_bkg[((self.m_data_bkg[self.randomIndex]-2)%4 == fold) | ((self.m_data_bkg[self.randomIndex]-3)%4 == fold)]
+        test_sig = self.m_data_sig[self.m_data_sig[self.randomIndex]%314159%4 == fold]
+        test_bkg = self.m_data_bkg[self.m_data_bkg[self.randomIndex]%314159%4 == fold]
+        val_sig = self.m_data_sig[(self.m_data_sig[self.randomIndex]-1)%314159%4 == fold]
+        val_bkg = self.m_data_bkg[(self.m_data_bkg[self.randomIndex]-1)%314159%4 == fold]
+        train_sig = self.m_data_sig[((self.m_data_sig[self.randomIndex]-2)%314159%4 == fold) | ((self.m_data_sig[self.randomIndex]-3)%314159%4 == fold)]
+        train_bkg = self.m_data_bkg[((self.m_data_bkg[self.randomIndex]-2)%314159%4 == fold) | ((self.m_data_bkg[self.randomIndex]-3)%314159%4 == fold)]
 
         headers = ['Sample', 'Total', 'Training', 'Validation']
         sample_size_table = [
@@ -424,12 +460,25 @@ class XGBoostHandler(object):
         test_sig_wt = test_sig[[self.weight]]
         test_bkg_wt = test_bkg[[self.weight]]
 
+        self.m_train_w[fold] = pd.concat([train_sig[self.weight], train_bkg[self.weight]]).to_numpy()
+        self.m_val_w[fold] = pd.concat([val_sig[self.weight], val_bkg[self.weight]]).to_numpy()
+        self.m_test_w[fold] = pd.concat([test_sig[self.weight], test_bkg[self.weight]]).to_numpy()
+
+        self.m_train_mass[fold] = pd.concat([train_sig['H_mass'], train_bkg['H_mass']]).to_numpy()
+        self.m_val_mass[fold] = pd.concat([val_sig['H_mass'], val_bkg['H_mass']]).to_numpy()
+        self.m_test_mass[fold] = pd.concat([test_sig['H_mass'], test_bkg['H_mass']]).to_numpy()
+
         self.m_train_wt[fold] = pd.concat([train_sig_wt, train_bkg_wt]).to_numpy()
         self.m_train_wt[fold][self.m_train_wt[fold] < 0] = 0
         self.m_val_wt[fold] = pd.concat([val_sig_wt, val_bkg_wt]).to_numpy()
         self.m_val_wt[fold][self.m_val_wt[fold] < 0] = 0
         self.m_test_wt[fold] = pd.concat([test_sig_wt, test_bkg_wt]).to_numpy()
         self.m_test_wt[fold][self.m_test_wt[fold] < 0] = 0
+        
+        # Store weights for test signal and background separately for transformScore
+        self.m_test_sig_w[fold] = test_sig[self.weight].values.flatten()
+        self.m_test_bkg_w[fold] = test_bkg[self.weight].values.flatten()
+
 
         # setup the truth labels
         print('XGB INFO: Signal labeled as one; background labeled as zero.')
@@ -458,7 +507,7 @@ class XGBoostHandler(object):
         evals_result = {}
         eval_result_history = []
         try:
-            self.m_bst[fold] = xgb.train(param, self.m_dTrain[fold], self.numRound, evals=evallist, early_stopping_rounds=self.early_stopping_rounds, evals_result=evals_result)
+            self.m_bst[fold] = xgb.train(param, self.m_dTrain[fold], self.numRound, evals=evallist, early_stopping_rounds=self.early_stopping_rounds, evals_result=evals_result, verbose_eval=False)
         except KeyboardInterrupt:
             print('Finishing on SIGINT.')
 
@@ -565,17 +614,96 @@ class XGBoostHandler(object):
 
         return self.params[0 if len(self.params) == 1 else fold], roc_auc
 
+    def calSignificance(self, s, b, s_err, b_err):
+        ntot, bkg, sig = s+b, b, s
+        return np.sqrt(2*((ntot * np.log(ntot/bkg)) - sig)), np.sqrt((np.log(ntot/bkg)*s_err)**2 + ((np.log(ntot/bkg) - (sig/bkg))*b_err)**2)
+
+    def getSignificance(self, fold=0, sample_set='val'):
+        if sample_set == "train":
+            dataset = pd.DataFrame({'score': self.m_score_train[fold], 'weight': self.m_train_w[fold], 'mass': self.m_train_mass[fold], 'type': self.m_y_train[fold]})
+        elif sample_set == "val":
+            dataset = pd.DataFrame({'score': self.m_score_val[fold], 'weight': self.m_val_w[fold], 'mass': self.m_val_mass[fold], 'type': self.m_y_val[fold]})
+        elif sample_set == "test":
+            dataset = pd.DataFrame({'score': self.m_score_test[fold], 'weight': self.m_test_w[fold], 'mass': self.m_test_mass[fold], 'type': self.m_y_test[fold]})
+
+        significance_sum, significance_sum_err = 0, 0
+        significances, significance_errs = [], []
+        sig_dataset = dataset.query('mass > 120 & mass < 130 & type == 1').sort_values('score', ascending=True)  
+        sig_dataset['culmulative_sig'] = sig_dataset['weight'].cumsum()
+        sig_dataset['culmulative_sig'] = sig_dataset['culmulative_sig'] / sig_dataset['culmulative_sig'].max()
+        percentiles = [np.where(sig_dataset['culmulative_sig'] >= p/10)[0][0] for p in range(0, 11)]
+        scores = [sig_dataset.iloc[p]['score'] for p in percentiles]
+        store = [0, 0, 0, 0, 0]
+        for i in range(10, 0, -1):
+            sig = dataset.query(f'mass > 120 & mass < 130 & type == 1 & score > {scores[i-1]} & score < {scores[i]}')['weight'].sum()
+            sig_err = np.sqrt((dataset.query(f'mass > 120 & mass < 130 & type == 1 & score > {scores[i-1]} & score < {scores[i]}')['weight']**2).sum())
+            bkg = dataset.query(f'mass > 120 & mass < 130 & type == 0 & score > {scores[i-1]} & score < {scores[i]}')['weight'].sum()
+            bkg_err = np.sqrt((dataset.query(f'mass > 120 & mass < 130 & type == 0 & score > {scores[i-1]} & score < {scores[i]}')['weight']**2).sum())
+            if store[0] == 1:
+                sig += store[1]
+                bkg += store[2]
+                sig_err = np.sqrt(sig_err**2 + store[3]**2)
+                bkg_err = np.sqrt(bkg_err**2 + store[4]**2)
+            if bkg < 10: 
+                store = [1, sig, bkg, sig_err, bkg_err]
+                continue
+            store = [0, 0, 0, 0, 0]
+            significance, significance_err = self.calSignificance(sig, bkg, sig_err, bkg_err)
+            significances.append(significance)
+            significance_errs.append(significance_err)
+        significance_sum = np.sqrt((np.array(significances)**2).sum())
+        significance_sum_err = np.sqrt((np.array(significance_errs)**2*np.array(significances)**2).sum()) / significance_sum
+        return significance_sum, significance_sum_err
+
+    def get_mass_shape_factor(self, fold=0, sample_set='val'):
+        if sample_set == "train":
+            dataset = pd.DataFrame({'score': self.m_score_train[fold], 'weight': self.m_train_w[fold], 'mass': self.m_train_mass[fold], 'type': self.m_y_train[fold]})
+        elif sample_set == "val":
+            dataset = pd.DataFrame({'score': self.m_score_val[fold], 'weight': self.m_val_w[fold], 'mass': self.m_val_mass[fold], 'type': self.m_y_val[fold]})
+        elif sample_set == "test":
+            dataset = pd.DataFrame({'score': self.m_score_test[fold], 'weight': self.m_test_w[fold], 'mass': self.m_test_mass[fold], 'type': self.m_y_test[fold]})
+
+        bkg_dataset = dataset.query('type == 0').sort_values('score', ascending=True)
+        bkg_dataset['culmulative_bkg'] = bkg_dataset['weight'].cumsum()
+        bkg_dataset['culmulative_bkg'] = bkg_dataset['culmulative_bkg'] / bkg_dataset['culmulative_bkg'].max()
+        bkg_dataset = bkg_dataset.query('culmulative_bkg > 0.8')
+
+        y1, y2, y3, y4 = bkg_dataset.query('mass > 110 & mass < 120')['weight'].sum(), bkg_dataset.query('mass > 115 & mass < 125')['weight'].sum(), bkg_dataset.query('mass > 120 & mass < 130')['weight'].sum(), bkg_dataset.query('mass > 125 & mass < 135')['weight'].sum()
+        mass_shape_factor = np.log10((2 * y1 + y4) / (3 * y2) ) + np.log10((y1 + 2 * y4) / (3 * y3))
+
+        print(f'XGB INFO: y1: {y1}, y2: {y2}, y3: {y3}, y4: {y4}, mass_shape_factor: {mass_shape_factor}')
+
+        # y1, y2, y3 = bkg_dataset.query('mass > 100 & mass < 110')['weight'].sum(), bkg_dataset.query('mass > 105 & mass < 115')['weight'].sum(), bkg_dataset.query('mass > 110 & mass < 120')['weight'].sum()
+
+        # mass_shape_factor -= np.log10((y1 + y3) / (2 * y2))
+
+        # print(f'XGB INFO: y1: {y1}, y2: {y2}, y3: {y3}, mass_shape_factor: {mass_shape_factor}')
+
+        return mass_shape_factor
+
     def transformScore(self, fold=0, sample='sig'):
 
         print(f'XGB INFO: transforming scores based on {sample}')
         # transform the scores
-        self.m_tsf[fold] = QuantileTransformer(n_quantiles=1000, output_distribution='uniform', subsample=1000000000, random_state=0)
-        #plt.hist(score_test_sig, bins='auto')
-        #plt.show()
-        if sample == 'sig': self.m_tsf[fold].fit(self.m_score_test_sig[fold].reshape(-1, 1))
-        elif sample == 'bkg': self.m_tsf[fold].fit(self.m_score_test_bkg[fold].reshape(-1, 1))
-        #score_test_sig_t=tsf.transform(self.m_score_test_sig[fold].reshape(-1, 1)).reshape(-1)
-        #plt.hist(score_test_sig_t, bins='auto')
+        # Use the new WeightedQuantileTransformer
+        self.m_tsf[fold] = WeightedQuantileTransformer(n_quantiles=1000, output_distribution='uniform', random_state=0)
+        
+        if sample == 'sig':
+            scores_to_fit = self.m_score_test_sig[fold].reshape(-1, 1)
+            weights_for_fit = self.m_test_sig_w[fold]
+            self.m_tsf[fold].fit(scores_to_fit, sample_weight=weights_for_fit)
+        elif sample == 'bkg':
+            scores_to_fit = self.m_score_test_bkg[fold].reshape(-1, 1)
+            weights_for_fit = self.m_test_bkg_w[fold]
+            self.m_tsf[fold].fit(scores_to_fit, sample_weight=weights_for_fit)
+        
+        # The following lines for plotting transformed scores can be uncommented if needed for debugging
+        score_test_sig_t=self.m_tsf[fold].transform(self.m_score_test_sig[fold].reshape(-1, 1)).reshape(-1)
+        plt.hist(score_test_sig_t, weights=self.m_test_sig_w[fold] if sample=='sig' else None) # Example of weighted histogram
+        if os.path.isdir('plots/score_transform') is False:
+            os.makedirs('plots/score_transform')
+        plt.savefig('plots/score_transform/%d_BDT_%s_%d_%s_weighted.png' % (self._shield+1, self._region, fold, sample))
+        plt.clf() # Clear figure if shown or saved in loop
         #plt.show()
 
     def save(self, fold=0):
@@ -592,151 +720,76 @@ class XGBoostHandler(object):
             with open('%s/BDT_tsf_%s_%d.pkl' %(self._outputFolder, self._region, fold), 'wb') as f:
                 pickle.dump(self.m_tsf[fold], f, -1)
 
-    def skoptHP(self, fold):
+    def optunaHP(self, fold=0):
+        import optuna
+        from xgboost import XGBClassifier
+        import optuna.visualization as vis
 
-        import skopt
-        from skopt import dump
-        from skopt import Optimizer
-        from skopt import gbrt_minimize, gp_minimize
-        from skopt.utils import use_named_args
-        from skopt.space import Real, Categorical, Integer
-
-        print ('default param: ', self._region, fold, self.params[fold])
-
-        search_space = [Real(0.0, 1.0, name='alpha'),
-                Real(0.01, 1, name='colsample_bytree'),
-                Real(0.01, 10, name='gamma'),
-                Real(1, 20, name='max_delta_step'),
-                Real(0.0, 1.0, name='subsample'),
-                Real(0.01, 0.1, name='eta'),
-                Integer(1, 50, name='min_child_weight'),
-                Integer(1, 20, name='max_leaves'),
-                Integer(3, 25, name='max_depth')
-        ]
-
-        def objective(param):
-
-            self.setParams(param, fold)
-            # self.setParams({'eval_metric': ['auc']}, fold)
+        def objective(trial):
+            params = {
+                'max_depth': trial.suggest_int('max_depth', 3, 50),
+                'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.05, log=True),
+                'subsample': trial.suggest_float('subsample', 0.4, 1.0),
+                'colsample_bytree': trial.suggest_float('colsample_bytree', 0.4, 1.0),
+                'gamma': trial.suggest_float('gamma', 1e-6, 10, log=True),
+                'min_child_weight': trial.suggest_int('min_child_weight', 1, 50),
+                'max_delta_step': trial.suggest_int('max_delta_step', 10, 100),
+            }
+            
+            self.setParams(params, fold)
             self.trainModel(fold, self.params[fold])
             self.testModel(fold)
-            auc = self.getAUC(fold)[-1]
-            return -auc
-
-        search_names = [var.name for var in search_space]
-
-        opt = Optimizer(search_space, # TODO: Add noise
-                    n_initial_points=12,
-                    acq_optimizer_kwargs={'n_jobs':8})
-
-        n_calls = self.n_calls
-        exp_dir = 'models/skopt/'
-
+            eval_auc = self.getAUC(fold)[-1]
+            train_auc = self.getAUC(fold, 'train')[-1]
+            eval_signi, eval_signi_err = self.getSignificance(fold, 'val')
+            train_signi, train_signi_err = self.getSignificance(fold, 'train')
+            mass_shape_factor = self.get_mass_shape_factor(fold, 'val')
+            
+            metrics = {
+                'train_auc': train_auc,
+                'eval_auc': eval_auc,
+                'sqrt_eval_auc_minus_train_auc': np.sqrt(train_auc * (2 * eval_auc - train_auc)),
+                'eval_auc_minus_train_auc': eval_auc * 2 - train_auc,
+                'eval_auc_over_train_auc': eval_auc ** 2 / ((eval_auc + train_auc) / 2),
+                'eval_auc_minus_train_auc': 2 * eval_auc - train_auc,
+                'eval_significance': eval_signi,
+                'train_significance': train_signi,
+                'sqrt_eval_significance_minus_train_significance': np.sqrt(train_signi * (2 * eval_signi - train_signi)),
+                'eval_auc_with_mass_shape_factor': eval_auc + mass_shape_factor
+            }
+            print(f"params: {params}, eval_auc: {eval_auc}, train_auc: {train_auc}, "
+                  f"sqrt_eval_auc_minus_train_auc: {metrics['sqrt_eval_auc_minus_train_auc']}, "
+                  f"eval_auc_minus_train_auc: {metrics['eval_auc_minus_train_auc']}, "
+                  f"eval_auc_over_train_auc: {metrics['eval_auc_over_train_auc']}, "
+                  f"eval_auc_minus_train_auc: {metrics['eval_auc_minus_train_auc']}, "
+                  f"eval_significance: {eval_signi}, train_significance: {train_signi}, "
+                  f"sqrt_eval_significance_minus_train_significance: {metrics['sqrt_eval_significance_minus_train_significance']}, "
+                  f"eval_auc_with_mass_shape_factor: {metrics['eval_auc_with_mass_shape_factor']}"
+                )
+            return metrics.get(self.optuna_metric, eval_auc)
+        
+        exp_dir = f'models/optuna_{self._region}/'
         if not os.path.exists(exp_dir):
             os.makedirs(exp_dir)
 
-        for i in range(n_calls):
-
-            sampled_point = opt.ask()
-            param = dict(zip(search_names, sampled_point))
-            # param = {key.decode(): val for key, val in param.items()}
-            print('Point:', i+1, param)
-            f_val = objective(param)
-            print ('AUC:', -f_val)
-            opt_result = opt.tell(sampled_point, f_val)
-
-            with open(exp_dir + 'optimizer_region_'+self._region+'_fold'+str(fold) + '.pkl', 'wb') as fp:
-                
-                dump(opt, fp)
-
-            with open(exp_dir + 'results_region_'+self._region+'_fold'+str(fold) + '.pkl', 'wb') as fp:
-                # Delete objective function before saving. To be used when results have been loaded,
-                # the objective function must then be imported from this script.
-
-                if opt_result.specs is not None:
-
-                    if 'func' in opt_result.specs['args']:
-                        res_without_func = copy.deepcopy(opt_result)
-                        del res_without_func.specs['args']['func']
-                        dump(res_without_func, fp)
-                    else:
-                        dump(opt_result, fp)
-
-                else:
-
-                    dump(opt_result, fp)
-
-        print(opt_result)
-
-        opt_result_x = [float(i) for i in opt_result.x]
-        param = dict(zip(search_names, opt_result_x))
-        for name in search_names[-3:]:
-            param[name] = int(param[name])
-        self.setParams(param, fold)
-
-        with open(exp_dir + 'BDT_region_'+self._region+'_fold'+str(fold) + '.json', 'w') as fp:
-
-            json.dump(self.params[fold], fp)
-            print('Save to ', exp_dir + 'BDT_region_'+self._region+'_fold'+str(fold) + '.json')
-
-
-    def skoptPlot(self, fold):
-
-        from skopt import load
-        from skopt.plots import plot_objective, plot_evaluations, plot_convergence
-
-        plt.switch_backend('agg') # For outputting plots when running on a server
-        plt.ioff() # Turn off interactive mode, so that figures are only saved, not displayed
-        plt.style.use('seaborn-paper')
-        font_size = 9
-        label_font_size = 8
-
-        plt.rcParams.update({'font.size'        : font_size,
-                 'axes.titlesize'   : font_size,
-                 'axes.labelsize'   : font_size,
-                 'xtick.labelsize'  : label_font_size,
-                 'ytick.labelsize'  : label_font_size,
-                 'figure.figsize'   : (5,4)}) # w,h
-
-        exp_dir = 'models/skopt/'
-        fig_dir = 'plots/skopt/figures/BDT_region_'+self._region+'_fold'+str(fold)+'/'
-
-        if not os.path.exists(fig_dir):
-            os.makedirs(fig_dir)
-
-        # Plots expect default rcParams
-        plt.rcdefaults()
-
-        # Load results
-        res_loaded = load(exp_dir + 'results_region_'+self._region+'_fold'+str(fold) + '.pkl')
-        print(res_loaded)
-
-        # Plot evaluations
-        fig,ax = plt.subplots()
-        ax = plot_evaluations(res_loaded)
-        plt.tight_layout()
-        plt.savefig(fig_dir + 'evaluations.pdf')
-
-        # Plot objective
-        fig,ax = plt.subplots()
-        ax = plot_objective(res_loaded)
-        plt.tight_layout()
-        plt.savefig(fig_dir + 'objective.pdf')
-
-        # Plot convergence
-        fig,ax = plt.subplots()
-        ax = plot_convergence(res_loaded)
-        plt.tight_layout()
-        plt.savefig(fig_dir + 'convergence.pdf')
-
-        ## Plot regret
-        #fig,ax = plt.subplots()
-        #ax = plot_regret(res_loaded)
-        #plt.tight_layout()
-        #plt.savefig(fig_dir + 'regret.pdf')
-
-        print ('Saved skopt figures in ' + fig_dir)
+        study_name = f"study_fold_{fold}"  # Unique study name
+        storage_name = f"sqlite:///{exp_dir}optuna_study_fold_{fold}.sqlite3"  # Storage name for SQLite
+        if not self.continue_optuna and os.path.exists(f"{exp_dir}optuna_study_fold_{fold}.sqlite3"):
+            os.remove(f"{exp_dir}optuna_study_fold_{fold}.sqlite3")
+        self.study = optuna.create_study(
+                sampler=optuna.samplers.TPESampler(n_startup_trials=10, multivariate=True, group=True),
+                study_name=study_name, 
+                storage=storage_name, 
+                load_if_exists=True, 
+                direction='maximize'
+            )
+        self.study.optimize(objective, n_trials=self.n_calls)
         
+        best_params_path = f"{exp_dir}BDT_region_{self._region}_fold{fold}.json"
+     
+        self.setParams(self.study.best_params, fold)
+        with open(best_params_path, 'w') as f:
+            json.dump(self.params[fold], f)
 
 def main():
 
@@ -763,7 +816,7 @@ def main():
         xgb_model.plot_corr("sig")
         xgb_model.plot_corr("bkg")
 
-    xgb_model.reweightSignal()
+    # xgb_model.reweightSignal()
 
     # looping over the "4 folds"
     for i in args.fold:
@@ -777,9 +830,9 @@ def main():
 
         xgb_model.prepareData(i)
 
-        if args.skopt: 
+        if args.optuna:
             try:
-                xgb_model.skoptHP(i)
+                xgb_model.optunaHP(i)
             except KeyboardInterrupt:
                 print('Finishing on SIGINT.')
             continue
@@ -788,6 +841,7 @@ def main():
 
         xgb_model.testModel(i)
         print("param: %s, Val AUC: %f" % xgb_model.getAUC(i))
+        print("Train significance: %f +/- %f, " % xgb_model.getSignificance(i,'train'), "Val significance: %f +/- %f" % xgb_model.getSignificance(i))
 
         #xgb_model.plotScore(i, 'test')
         if args.importance:
@@ -799,11 +853,6 @@ def main():
         xgb_model.transformScore(i)
 
         if args.save: xgb_model.save(i)
-    
-    if args.skopt_plot: 
-        for i in args.fold:
-            xgb_model.skoptPlot(i)
-        return
 
     print('------------------------------------------------------------------------------')
     print('Finished training.')

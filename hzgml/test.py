@@ -266,11 +266,19 @@ for year in years:
             weight = weight * temp["weight_muon_looseid_sf_nomatch_SelectedGenNoRecoMuon_central"]
             print(f'{"muon looseid nomatch weight:":>35}{weight.sum():.4f}')
 
-            # weight = weight * temp["weight_photon_id_sf_Photon_central"] * temp["weight_photon_csev_sf_Photon_central"]
-            # print(f'{"photon weight:":>35}{weight.sum():.4f}')
+            weight = weight * temp["weight_photon_id_sf_SelectedPhoton_central"]
+            print(f'{"photon id weight:":>35}{weight.sum():.4f}')
+            weight = weight * temp["weight_photon_csev_sf_SelectedPhoton_central"]
+            print(f'{"photon csev weight:":>35}{weight.sum():.4f}')
             
             weight = weight * temp["weight_hlt_sf_central"]
             print(f'{"hlt weight:":>35}{weight.sum():.4f}')
+
+            weight = weight * temp["weight_photon_id_shape_sf_SelectedPhoton_central"]
+            print(f'{"photon id shape weight:":>35}{weight.sum():.4f}')
+
+            weight = weight * temp["weight_nnlo_sf_GenHzgHiggs_central"]
+            print(f'{"nnlo weight:":>35}{weight.sum():.4f}')
 
 # =====================================
 # Have a look at the hgg data

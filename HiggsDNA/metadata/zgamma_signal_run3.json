@@ -144,6 +144,19 @@
                     "SelectedMuon"
                 ]
             },
+            "nnlo_sf": {
+                "type": "object",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.NNLO_systematics",
+                    "name": "nnlo_sf"
+                },
+                "modify_central_weight": false,
+                "input_collection": "GenHzgHiggs",
+                "target_collections": [
+                    "GenHzgHiggs"
+                ]
+            },
             "photon_id_sf": {
                 "type": "object",
                 "method": "from_function",
@@ -153,10 +166,10 @@
                 },
                 "working_point": "wp80",
                 "modify_central_weight": false,
-                "input_collection": "Photon",
+                "input_collection": "SelectedPhoton",
                 "target_collections": [
                     [
-                        "Photon"
+                        "SelectedPhoton"
                     ]
                 ]
             },
@@ -169,10 +182,25 @@
                 },
                 "working_point": "MVA80",
                 "modify_central_weight": false,
-                "input_collection": "Photon",
+                "input_collection": "SelectedPhoton",
                 "target_collections": [
                     [
-                        "Photon"
+                        "SelectedPhoton"
+                    ]
+                ]
+            },
+            "photon_id_shape_sf": {
+                "type": "object",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.photon_id_shape_systematics",
+                    "name": "photon_id_shape_sf"
+                },
+                "modify_central_weight": false,
+                "input_collection": "SelectedPhoton",
+                "target_collections": [
+                    [
+                        "SelectedPhoton"
                     ]
                 ]
             }
@@ -193,6 +221,11 @@
         "H_eta",
         "H_phi",
         "H_mass",
+        "HT",
+        "MHT_pt",
+        "MHT_phi",
+        "MHT_eta",
+        "MHT_mass",
         "Z_pt",
         "Z_eta",
         "Z_phi",
@@ -406,6 +439,7 @@
         "Muon_mass",
         "Muon_charge",
         "Muon_ptErr",
+        "Muon_bsConstrainedPtErr",
         "Muon_miniPFRelIso_all",
         "Muon_pfRelIso03_all",
         "Muon_sip3d",
@@ -489,8 +523,10 @@
         "MET_T1_pt_unclustEnUp",
         "MET_T1_pt_unclustEnDown",
         "Muon_corrected_pt",
-        "Muon_correctedUp_pt",
-        "Muon_correctedDown_pt",
+        "Muon_scaleUp_pt",
+        "Muon_scaleDown_pt",
+        "Muon_smearUp_pt",
+        "Muon_smearDown_pt",
         "Flag_goodVertices",
         "Flag_globalSuperTightHalo2016Filter",
         "Flag_HBHENoiseFilter",
@@ -525,6 +561,16 @@
                 [
                     "Muon",
                     "corrected_pt"
+                ]
+            ],
+            [
+                [
+                    "Muon",
+                    "ptErr"
+                ],
+                [
+                    "Muon",
+                    "bsConstrainedPtErr"
                 ]
             ],
             [

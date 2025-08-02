@@ -12,7 +12,7 @@
 import os
 import math
 from argparse import ArgumentParser
-from ROOT import Math, TVector2, TVector3, TLorentzVector
+from ROOT import Math, TVector2, TVector3, TLorentzVector, gROOT, gSystem
 import numpy as np
 #import time
 import pandas as pd
@@ -21,8 +21,17 @@ import uproot
 from tqdm import tqdm
 import warnings
 from z_refit import apply_z_refit
+import ctypes
+
+# Import the kinematic DNN weighter module
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'kinematicdnn'))
+from kinr3_weighter import create_kin_weighter
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
+
+# Initialize the DNN model globally
+kin_weighter = create_kin_weighter()
 
 def getArgs():
     parser = ArgumentParser(description="Skim the input ntuples for Hmumu XGBoost analysis.")
@@ -38,8 +47,36 @@ def true_delta_phi(delta_phi):
 
 def compute_is_center(x):
 
-    if (x.H_mass >= 122 and x.H_mass <= 128): return 1
+    if (x.H_mass >= 120 and x.H_mass <= 130): return 1
     else: return 0
+
+def compute_photon_mht_dphi(x):
+    """Compute delta phi between photon and MHT"""
+    return true_delta_phi(abs(x.MHT_phi - x.gamma_phi))
+
+def compute_kin_weight(x):
+    """Compute kinematic weight using DNN model"""
+    # Input order: gamma_mvaID, photon_mht_dphi, n_jets, Z_pt, gamma_pt, H_pt, MHT_pt, HT
+    try:
+        photon_mht_dphi = compute_photon_mht_dphi(x)
+        inputs = [
+            x.gamma_mvaID,
+            photon_mht_dphi,
+            float(x.n_jets),
+            x.Z_pt,
+            x.gamma_pt,
+            x.H_pt,
+            x.MHT_pt,
+            x.HT
+        ]
+        
+        # Check for any invalid inputs
+        if any(math.isnan(val) or math.isinf(val) for val in inputs):
+            return 1.0  # Default weight
+            
+        return kin_weighter.evaluate(inputs)
+    except:
+        return 1.0  # Default weight if computation fails
 
 # others
 
@@ -71,23 +108,10 @@ def compute_l_costheta(x):
         l1 = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.Z_sublead_lepton_pt, x.Z_sublead_lepton_eta, x.Z_sublead_lepton_phi, x.Z_sublead_lepton_mass)
     else: print('leptons have same sign')
     Z = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.Z_pt, x.Z_eta, x.Z_phi, x.Z_mass)
-    # H = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.H_pt, x.H_eta, x.H_phi, x.H_mass)
     gamma = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.gamma_pt, x.gamma_eta, x.gamma_phi, x.gamma_mass)
     Z_beta = TLorentzVector(Z.Px(), Z.Py(), Z.Pz(), Z.E()).BoostVector()
-    # H_beta = TLorentzVector(H.Px(), H.Py(), H.Pz(), H.E()).BoostVector()
-    # Z_BH = Math.VectorUtil.boost(Z, -H_beta)
     l1_BZ = Math.VectorUtil.boost(l1, -Z_beta)
-    # l2_BZ = Math.VectorUtil.boost(l2, -Z_beta)
     gamma_BZ = Math.VectorUtil.boost(gamma, -Z_beta)
-    
-    ## Z and lepton
-    #a = l1_BZ + l2_BZ
-    #cosTheta = (a.Vect().Unit()).Dot(l1_BZ.Vect().Unit())
-    
-    ## formula
-    #a = l1_BZ.E() - l2_BZ.E()
-    #k1 = math.sqrt(Z_BH.Vect().Dot(Z_BH.Vect()))
-    #cosTheta = a/k1
 
     ## photon and lepton
     costheta = - (gamma_BZ.Vect()).Dot(l1_BZ.Vect())/gamma_BZ.Vect().R()/l1_BZ.Vect().R()
@@ -519,6 +543,10 @@ def decorate(data):
     data['pt_balance_0j'] = data.apply(lambda x: compute_pt_balance_0j(x), axis=1)
     data['pt_balance_1j'] = data.apply(lambda x: compute_pt_balance_1j(x), axis=1)
     data['is_center'] = data.apply(lambda x: compute_is_center(x), axis=1)
+    
+    # Add kinematic DNN weighting
+    data['photon_mht_dphi'] = data.apply(lambda x: compute_photon_mht_dphi(x), axis=1)
+    data['kin_weight'] = data.apply(lambda x: compute_kin_weight(x), axis=1)
     #data[['Jets_QGscore_Lead', 'Jets_QGflag_Lead', 'Jets_QGscore_Sub', 'Jets_QGflag_Sub']] = data.apply(lambda x: compute_QG(x), axis=1, result_type='expand')
 
     #data.rename(columns={'Muons_Minv_MuMu_Paper': 'm_mumu', 'Muons_Minv_MuMu_VH': 'm_mumu_VH', 'EventInfo_EventNumber': 'eventNumber', 'Jets_jetMultip': 'n_j'}, inplace=True)
@@ -547,6 +575,7 @@ def main():
         'jet_2_pt', 'jet_2_eta', 'jet_2_phi', 'jet_2_mass', 'jet_2_btagDeepFlavB',
         'n_jets', 'n_leptons', 'n_electrons', 'n_muons', 'n_iso_photons', 'n_b_jets',
         'MET_pt', 'MET_phi', 
+        'MHT_pt', 'MHT_phi', 'HT',  # Added for kinematic DNN
         'weight_central',
         'event'
     ]
