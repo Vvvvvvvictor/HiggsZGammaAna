@@ -257,6 +257,12 @@ def photon_CSEV_sf(events, year, central_only, input_collection, working_point =
         - https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/EGM_electron_Run2_UL/EGM_electron_2017_UL.html
         - https://gitlab.cern.ch/cms-nanoAOD/jsonpog-integration/-/blob/master/examples/electronExample.py
     """
+    
+    # working_point run3: MVA80 
+    # working_point run2: MVA
+    is_run2 = not (year.startswith("2022") or year.startswith("2023"))
+    working_point = "MVA" if is_run2 else "MVA80"
+    
     required_fields = [
         (input_collection, "eta"), (input_collection, "r9")
     ]
@@ -395,6 +401,82 @@ def photon_CSEV_sf(events, year, central_only, input_collection, working_point =
     return variations
 
 ########################
+##### Fake Photon SF ###
+########################
+
+PHOTON_Fake_Photon_SF_FILE = {
+    "2016preVFP" : "higgs_dna/systematics/data/fakephoton/fakephoton.json",
+    "2016postVFP" : "higgs_dna/systematics/data/fakephoton/fakephoton.json",
+    "2017" : "higgs_dna/systematics/data/fakephoton/fakephoton.json",
+    "2018" : "higgs_dna/systematics/data/fakephoton/fakephoton.json",
+    "2022preEE" : "higgs_dna/systematics/data/fakephoton/fakephoton.json",
+    "2022postEE" : "higgs_dna/systematics/data/fakephoton/fakephoton.json",
+    "2023preBPix" : "higgs_dna/systematics/data/fakephoton/fakephoton.json",
+    "2023postBPix" : "higgs_dna/systematics/data/fakephoton/fakephoton.json"
+}
+
+def photon_fake_photon_sf(events, year, central_only, input_collection):
+    """
+    See:
+        - https://cms-nanoaod-integration.web.cern.ch/commonJSONSFs/EGM_electron_Run2_UL/EGM_electron_2017_UL.html
+        - https://gitlab.cern.ch/cms-nanoAOD/jsonpog-integration/-/blob/master/examples/electronExample.py
+    """
+    required_fields = [
+        (input_collection, "eta"), (input_collection, "pt"), (input_collection, "genPartFlav")
+    ]
+    
+    missing_fields = awkward_utils.missing_fields(events, required_fields)
+    if missing_fields:
+        logger.warning(f"Missing fields for photon_fake_photon_sf: {missing_fields}")
+
+    is_run2 = not (year.startswith("2022") or year.startswith("2023"))
+    run_str = "run2" if is_run2 else "run3"
+    
+    photons = events[input_collection]
+    n_photons = awkward.num(photons)
+    
+    evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(PHOTON_Fake_Photon_SF_FILE[year]))
+    photons_flattened = awkward.flatten(photons)
+
+    photons_abseta = numpy.clip(
+            numpy.abs(awkward.to_numpy(photons_flattened.eta)),
+            0.0,
+            2.4999
+    )
+    photons_pt = numpy.clip(
+            awkward.to_numpy(photons_flattened.pt),
+            15.0,
+            499.999
+    )
+
+    isjet = awkward.where(photons_flattened.genPartFlav == 1, 0, 1)    
+    photons_isjet = awkward.to_numpy(isjet).astype(int)
+    
+    sf = evaluator["fakephoton_corrections"].evalv(
+        run_str,
+        photons_isjet,
+        photons_pt,
+        photons_abseta
+    )
+
+    variations = {}
+    variations["central"] = awkward.unflatten(sf, n_photons)
+
+    if not central_only:
+        # No systematics for fake photon SF, so up/down are the same as central
+        variations["up"] = variations["central"]
+        variations["down"] = variations["central"]
+
+    for var in variations.keys():
+        variations[var] = awkward.where(
+            (photons.pt < 15.0) | (photons.pt >= 500.0) | (abs(photons.eta) >= 2.5),
+            awkward.ones_like(variations[var], dtype=float),
+            variations[var]
+        )
+
+    return variations
+
+########################
 ### Electron veto SF ###
 ########################
 
@@ -1104,8 +1186,10 @@ def photon_scale_smear_run3(events, year):
 
     return events
 
-####################
-### 
+###############################
+### Photon Electron Veto SF ### 
+###############################
+
 from higgs_dna.systematics.data.electron_veto_sf import PHOTON_ELECTRON_VETO_SF_2016, PHOTON_ELECTRON_VETO_SF_2017, PHOTON_ELECTRON_VETO_SF_2018
 photon_electron_veto_sf_bins = {
     "2016" : PHOTON_ELECTRON_VETO_SF_2016,
