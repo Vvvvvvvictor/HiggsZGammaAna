@@ -144,6 +144,19 @@
                     "SelectedMuon"
                 ]
             },
+            "muon_reco_sf": {
+                "type": "object",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.lepton_systematics",
+                    "name": "muon_reco_sf"
+                },
+                "modify_central_weight": false,
+                "input_collection": "Muon",
+                "target_collections": [
+                    "SelectedMuon"
+                ]
+            },
             "nnlo_sf": {
                 "type": "object",
                 "method": "from_function",
