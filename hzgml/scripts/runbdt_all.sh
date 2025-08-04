@@ -35,9 +35,9 @@ echo "Shielded parameter is: $S . Added variables is: $A ."
 
 # python scripts/train_bdt.py -r zero_to_one_jet --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --save --hyperparams_path "models/optuna_zero_to_one_jet_0725"
 
-python scripts/apply_bdt.py -r zero_to_one_jet --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --outputFolder "/eos/home-j/jiehan/root/outputs/test"
+# python scripts/apply_bdt.py -r zero_to_one_jet --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --outputFolder "/eos/home-j/jiehan/root/outputs/test"
 # python scripts/categorization_1D.py -r zero_to_one_jet -n 120 --score_max 1.1 --score_min -0.1 -b 4 --minSB 20 --minN 4 -es "fullSimrw" --input "/eos/home-j/jiehan/root/outputs" #--floatB
-python scripts/categorization_1D.py -r zero_to_one_jet -n 100 -t True -b 4 --minSB 20 --minN 4 -es "fullSimrw" --input "/eos/home-j/jiehan/root/outputs" #--floatB
+# python scripts/categorization_1D.py -r zero_to_one_jet -n 100 -t True -b 4 --minSB 20 --minN 4 -es "fullSimrw" --input "/eos/home-j/jiehan/root/outputs" #--floatB
 
 # # # two_Jet category
 # for fold in {0..3};do #{0..3};do
@@ -46,11 +46,11 @@ python scripts/categorization_1D.py -r zero_to_one_jet -n 100 -t True -b 4 --min
 # python scripts/train_bdt.py -r two_jet --save --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --hyperparams_path "models/optuna_two_jet_0602"
 
 # python scripts/train_bdt.py -r two_jet --optuna --n-calls 60 --continue-optuna 1 --optuna_metric 'sqrt_eval_auc_minus_train_auc' --oneHyperparameter --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new"
-# python scripts/train_bdt.py -r two_jet --save --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --hyperparams_path "models/optuna_two_jet" --oneHyperparameter
+python scripts/train_bdt.py -r two_jet --save --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --hyperparams_path "models/optuna_two_jet" --oneHyperparameter
 
-# python scripts/apply_bdt.py -r two_jet --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --outputFolder "/eos/home-j/jiehan/root/outputs/test"
-# python scripts/categorization_1D.py -r two_jet -b 4 --minSB 20 -n 120 --score_max 1.1 --score_min -0.1 --minN 4 -es "fullSimrw" --input "/eos/home-j/jiehan/root/outputs" #--floatB
-# python scripts/categorization_1D.py -r two_jet -b 4 --minSB 20 -n 100 -t True --minN 4 -es "fullSimrw" --input "/eos/home-j/jiehan/root/outputs" #--floatB
+python scripts/apply_bdt.py -r two_jet --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --outputFolder "/eos/home-j/jiehan/root/outputs/test"
+python scripts/categorization_1D.py -r two_jet -b 4 --minSB 20 -n 120 --score_max 1.1 --score_min -0.1 --minN 4 -es "fullSimrw" --input "/eos/home-j/jiehan/root/outputs" #--floatB
+python scripts/categorization_1D.py -r two_jet -b 4 --minSB 20 -n 100 -t True --minN 4 -es "fullSimrw" --input "/eos/home-j/jiehan/root/outputs" #--floatB
 
 # # 012jet category
 # for fold in {0..3};do
@@ -72,18 +72,18 @@ python scripts/categorization_1D.py -r zero_to_one_jet -n 100 -t True -b 4 --min
 #===========================================
 # Plotting the BDT results
 #===========================================
-# python scripts/calculate_fold_significance.py -t false
-python scripts/calculate_fold_significance.py --region zero_to_one_jet --input test/significances/0_0_zero_to_one_jet_1D_4.json
+python scripts/calculate_fold_significance.py
+# python scripts/calculate_fold_significance.py --region zero_to_one_jet --input test/significances/0_0_zero_to_one_jet_1D_4.json
 # for chan in two_jet zero_to_one_jet all_jet;do
 #     python ../plot_python/compare_data_bkg_bdt_sideband.py --channel $chan
 # done
-# python ../plot_python/plot_cats_hmass_dis.py --channel "two_jet"
-python ../plot_python/plot_cats_hmass_dis.py --channel "zero_to_one_jet"
+python ../plot_python/plot_cats_hmass_dis.py --channel "two_jet"
+# python ../plot_python/plot_cats_hmass_dis.py --channel "zero_to_one_jet"
 # # python ../plot_python/plot_cats_hmass_dis.py --channel "all_jet"
-# python ../plot_python/compare_sig_bkg_bdt_sosb.py
-python ../plot_python/compare_sig_bkg_bdt_sosb.py --channel zero_to_one_jet
-python ../plot_python/compare_data_bkg_bdt_sideband.py
-# python ../plot_python/compare_data_bkg_bdt_sideband.py --channel two_jet
+python ../plot_python/compare_sig_bkg_bdt_sosb.py
+# python ../plot_python/compare_sig_bkg_bdt_sosb.py --channel zero_to_one_jet
+# python ../plot_python/compare_data_bkg_bdt_sideband.py
+python ../plot_python/compare_data_bkg_bdt_sideband.py --channel two_jet
 bash ../plot_python/run.sh
 
 # # vbf category
