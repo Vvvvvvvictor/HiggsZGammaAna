@@ -3,6 +3,7 @@ import time
 import numpy
 import numba
 import vector
+import math
 
 from pdb import set_trace
 
@@ -65,14 +66,6 @@ DEFAULT_OPTIONS = {
         "2022":["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL"],
         "2023":["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL"]
     },
-    # "trigger" : {
-    #     "2016" : ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ", "HLT_IsoMu20", "HLT_IsoMu24", "HLT_IsoMu27", "HLT_Mu50", "HLT_Mu55", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL", "HLT_Ele27_WPTight_Gsf"],
-    #     "2016UL_preVFP" : ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ", "HLT_IsoMu20", "HLT_IsoMu24", "HLT_IsoMu27", "HLT_Mu50", "HLT_Mu55", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL", "HLT_Ele27_WPTight_Gsf"],
-    #     "2016UL_postVFP" : ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ", "HLT_IsoMu20", "HLT_IsoMu24", "HLT_IsoMu27", "HLT_Mu50", "HLT_Mu55", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL", "HLT_Ele27_WPTight_Gsf"],
-    #     "2017" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8", "HLT_Ele27_WPTight_Gsf", "HLT_Ele32_WPTight_Gsf_L1DoubleEG", "HLT_Ele35_WPTight_Gsf", "HLT_IsoMu20", "HLT_IsoMu24", "HLT_IsoMu27", "HLT_Mu50", "HLT_IsoMu24_eta2p1"],
-    #     "2018" : ["HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8", "HLT_Mu37_TkMu27", "HLT_IsoMu20", "HLT_IsoMu24", "HLT_IsoMu27", "HLT_Mu50", "HLT_Mu55", "HLT_IsoMu24_eta2p1", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL", "HLT_DoubleEle25_CaloIdL_MW", "HLT_Ele27_WPTight_Gsf", "HLT_Ele32_WPTight_Gsf", "HLT_Ele32_WPTight_Gsf_L1DoubleEG", "HLT_Ele35_WPTight_Gsf", "HLT_Ele20_WPLoose_Gsf"],
-    #     "2022" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8", "HLT_Ele30_WPTight_Gsf", "HLT_Ele32_WPTight_Gsf", "HLT_Ele35_WPTight_Gsf", "HLT_IsoMu24", "HLT_IsoMu27", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ",  "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL"]
-    # }, 
     "electrons" : {
         "pt" : 7.0
     },
@@ -144,7 +137,6 @@ class ZGammaTaggerRun2(Tagger):
                     new = options
             )
 
-
     def calculate_selection(self, events):
         """
         Select photons and create diphoton pairs.
@@ -164,9 +156,6 @@ class ZGammaTaggerRun2(Tagger):
         else:
             rho = awkward.ones_like(events.Photon)
 
-        if not self.is_data:
-            self.overlap_removal(events=events)
-
         zgamma_selection, zgammas = self.produce_and_select_zgammas(
                 events = events,
                 rho = rho,
@@ -177,30 +166,6 @@ class ZGammaTaggerRun2(Tagger):
             zgammas = self.calculate_gen_info(zgammas, self.options["gen_info"])
 
         return zgamma_selection, zgammas 
-
-    def overlap_removal(self, events):
-        """
-        Select isolation photons in events
-        Add number of isolation photons (n_iso_photons) in output .parquet file to indetify thé overlap events
-        """
-        
-        """
-        statusFlags usage: (events.GenPart.statusFlags // numpy.power(2, i)) % 2 == 1
-        "statusFlags" is a number with 14 bits. 
-        Filling "1" on corresponding digit when the particle meets one of the 14 conditions, else, remaining "0".
-        Echo particles can meet more than one kind of condition, thus, more than one digit in "statusFlags" is "1".
-        """
-        iso_photons_cut = (events.GenPart.pdgId == 22) & (events.GenPart.pt > 15) & (abs(events.GenPart.eta) < 2.6) & (( (events.GenPart.statusFlags // numpy.power(2, 0)) % 2 == 1 ) | ( (events.GenPart.statusFlags // numpy.power(2, 8)) % 2 == 1 ))
-        iso_photons = events.GenPart[iso_photons_cut]
-
-        truth_objects_cut =  (events.GenPart.pdgId != 22) & (events.GenPart.pt > 5) & ( (events.GenPart.statusFlags // numpy.power(2, 8)) % 2 == 1 ) 
-        truth_objects = events.GenPart[truth_objects_cut]
-
-        iso_cut = object_selections.delta_R(iso_photons, truth_objects, 0.05)
-        iso_photons = iso_photons[iso_cut]
-
-        n_iso_photons = awkward.num(iso_photons)
-        awkward_utils.add_field(events, "n_iso_photons", n_iso_photons, overwrite=True)
 
     def produce_and_select_zgammas(self, events, rho, options):
         """
@@ -265,12 +230,6 @@ class ZGammaTaggerRun2(Tagger):
 
         unmatched_gen_mask = awkward.fill_none(object_selections.delta_R(gen_muons, reco_muons, 0.4), True)
         
-        # reco_gen_muon_indices = reco_muons.genPartIdx
-        # all_gen_muon_indices = awkward.local_index(gen_muons.pt)
-
-        # # For each event, check which of the gen muon indices are not in the list of reco-matched gen muon indices
-        # unmatched_gen_mask = awkward.all(all_gen_muon_indices[:, :, None] != reco_gen_muon_indices[:, None, :], axis=-1)
-        
         unmatched_gen_muons = gen_muons[unmatched_gen_mask]
         unmatched_gen_muons = unmatched_gen_muons[unmatched_gen_muons.pt > self.options["muons"]["pt"]]
 
@@ -285,12 +244,6 @@ class ZGammaTaggerRun2(Tagger):
         reco_eles = events.Electron
 
         unmatched_gen_mask = awkward.fill_none(object_selections.delta_R(gen_eles, reco_eles, 0.4), True)
-        
-        # reco_gen_ele_indices = reco_eles.genPartIdx
-        # all_gen_ele_indices = awkward.local_index(gen_eles.pt)
-
-        # # For each event, check which of the gen electron indices are not in the list of reco-matched gen electron indices
-        # unmatched_gen_mask = awkward.all(all_gen_ele_indices[:, :, None] != reco_gen_ele_indices[:, None, :], axis=-1)
 
         unmatched_gen_eles = gen_eles[unmatched_gen_mask]
         unmatched_gen_eles = unmatched_gen_eles[unmatched_gen_eles.pt > self.options["electrons"]["pt"]]
@@ -315,6 +268,10 @@ class ZGammaTaggerRun2(Tagger):
         clean_photon_mask = awkward.fill_none(object_selections.delta_R(photons, muons, 0.3), True) & awkward.fill_none(object_selections.delta_R(photons, electrons, 0.3), True) # FIXME: 0.4 -> 0.3(baseline)
         # object_selections.delta_R(photons, muons, 0.3) & object_selections.delta_R(photons, electrons, 0.3)
         photons = photons[clean_photon_mask]
+        
+        # Calculate photon energy from four-momentum (pt, eta, phi, mass)
+        photons["ptErrRel"] = photons.energyErr/photons.pt/numpy.cosh(photons.eta)
+        # print(f"ptErrRel of Photon: {photons.ptErrRel[:10]}")
         
         # Jets
         jet_cut = jet_selections.select_jets(
@@ -345,7 +302,7 @@ class ZGammaTaggerRun2(Tagger):
             name = "SelectedJet",
             data = events.Jet[jet_cut]
         )
-        
+
         photon = awkward_utils.add_field(
                 events = events,
                 name = "Photon",
@@ -406,6 +363,22 @@ class ZGammaTaggerRun2(Tagger):
         electrons = awkward.with_field(electrons, electrons.energyErr, "ptE_error")
         muons = awkward.with_field(muons, muons.ptErr, "ptE_error")
 
+        # Add object fields to events array
+        for objects, name in zip([electrons, muons, jets, unmatched_gen_muons, unmatched_gen_eles], ["electron", "muon", "jet", "gen_no_reco_muon", "gen_no_reco_electron"]):
+            for var in objects.fields:
+                if var in ["charge", "pt", "eta", "phi", "mass", "id", "ptE_error"]:
+                    awkward_utils.add_field(
+                        events,
+                        f"{name}_{var}",
+                        awkward.fill_none(objects[var], DUMMY_VALUE)
+                    )
+                else:
+                    awkward_utils.add_field(
+                        events,
+                        f"{name}_{var}",
+                        awkward.fill_none(objects[var], 0)
+                    )
+
         # Sort objects by pt
         photons = photons[awkward.argsort(photons.pt, ascending=False, axis=1)]
         electrons = electrons[awkward.argsort(electrons.pt, ascending=False, axis=1)]
@@ -417,7 +390,15 @@ class ZGammaTaggerRun2(Tagger):
         photons = awkward.Array(photons, with_name = "Momentum4D")
         electrons = awkward.Array(electrons, with_name = "Momentum4D")
         muons = awkward.Array(muons, with_name = "Momentum4D")
+        jets = awkward.Array(jets, with_name = "Momentum4D")
 
+        awkward_utils.add_object_fields(
+                events = events,
+                name = "jet",
+                objects = jets,
+                n_objects = 4,
+                dummy_value = DUMMY_VALUE
+            )
 
         ee_pairs = awkward.combinations(electrons, 2, fields = ["LeadLepton", "SubleadLepton"])
         os_cut = (ee_pairs.LeadLepton.charge * ee_pairs.SubleadLepton.charge) == -1
@@ -470,98 +451,7 @@ class ZGammaTaggerRun2(Tagger):
         trigger_cut = single_ele_trigger_cut | double_ele_trigger_cut | single_mu_trigger_cut  | double_mu_trigger_cut
         ele_trigger_cut = single_ele_trigger_cut | double_ele_trigger_cut
         mu_trigger_cut = single_mu_trigger_cut  | double_mu_trigger_cut
-        # HLT lepton status: [FIXME]
-        # 0: failed all triggers ->  double_ele_trigger_cut = False, single_ele_trigger_cut = False
-        # 1: passed lower dilepton trigger -> double_ele_trigger_cut = False, single_ele_trigger_cut = True
-        # 2: passed upper dilepton trigger -> double_ele_trigger_cut = True, single_ele_trigger_cut = False
-        # 3: passed single lepton trigger ->  single_ele_trigger_cut = True
-        # HLT_ele_cat0 = (~double_ele_trigger_cut) & (~single_ele_trigger_cut)
-        # HLT_mu_cat0 = (~double_mu_trigger_cut) & (~single_mu_trigger_cut)
-        # HLT_ele_cat1 = (~double_ele_trigger_cut) & single_ele_trigger_cut
-        # HLT_mu_cat1 = (~double_mu_trigger_cut) & single_mu_trigger_cut
-        # HLT_ele_cat2 = double_ele_trigger_cut & (~single_ele_trigger_cut)
-        # HLT_mu_cat2 = double_mu_trigger_cut & (~single_mu_trigger_cut)
-        # HLT_ele_cat3 = single_ele_trigger_cut
-        # HLT_mu_cat3 = single_mu_trigger_cut
-        # def GetLeptonProbability(lepton_pt, lepton_eta, is_data, is_electron, trigger_leg) :
-        #     if (is_electron):
-        #         if (trigger_leg == pass_lowerdilep):
-        #             if is_data:
-        #                 prob_map = diele12_correction_data
-        #                 unc_map = diele12_uncertainty_data
-        #             else :
-        #                 prob_map = diele12_correction_mc
-        #                 unc_map = diele12_uncertainty_mc
-        #         elif (trigger_leg == pass_upperdilep):
-        #             if is_data:
-        #                 prob_map = diele23_correction_data
-        #                 unc_map = diele23_uncertainty_data
-        #             else :
-        #                 prob_map = diele23_correction_mc
-        #                 unc_map = diele23_uncertainty_mc
-        #         else :  
-        #             if is_data:
-        #                 prob_map = singleele_correction_data
-        #                 unc_map = singleele_uncertainty_data
-        #             else :
-        #                 prob_map = singleele_correction_mc
-        #                 unc_map = singleele_uncertainty_mc
-        #     else:
-        #         if (trigger_leg == pass_lowerdilep):
-        #             if is_data:
-        #                 prob_map = dimu12_correction_data
-        #                 unc_map = dimu12_uncertainty_data
-        #             else :
-        #                 prob_map = dimu12_correction_mc
-        #                 unc_map = dimu12_uncertainty_mc
-        #         elif (trigger_leg == pass_upperdilep):
-        #             if is_data:
-        #                 prob_map = dimu23_correction_data
-        #                 unc_map = dimu23_uncertainty_data
-        #             else :
-        #                 prob_map = dimu23_correction_mc
-        #                 unc_map = dimu23_uncertainty_mc
-        #         else :  
-        #             if is_data:
-        #                 prob_map = singlemu_correction_data
-        #                 unc_map = singlemu_uncertainty_data
-        #             else :
-        #                 prob_map = singlemu_correction_mc
-        #                 unc_map = singlemu_uncertainty_mc
-        #     prob = prob_map
-        #     uncr = unc_map
-        #     return prob, uncr
 
-        # def GetFlavorProbability(lepton_pt, lepton_eta, pass_singlelep, pass_dilep, is_data, is_electron):
-        #     n_pass_lower = awkward.num(1*HLT_ele_cat1[1*HLT_ele_cat1>0])+awkward.num(1*HLT_mu_cat1[1*HLT_mu_cat1>0])
-        #     n_pass_upper = awkward.num(1*HLT_ele_cat2[1*HLT_ele_cat2>0])+awkward.num(1*HLT_mu_cat2[1*HLT_mu_cat2>0])
-        #     n_pass_single = awkward.num(1*HLT_ele_cat3[1*HLT_ele_cat3>0])+awkward.num(1*HLT_mu_cat3[1*HLT_mu_cat3>0])
-        #     relevant_cat = awkward.ones_like(lepton_pt) * True
-        #     relevant_cat = awkward.where(((n_pass_single>0)!=pass_singlelep), awkward.ones_like(relevant_cat) * False, relevant_cat)
-        #     relevant_cat = awkward.where((((n_pass_upper>0)&(n_pass_lower>1))!=pass_dilep), awkward.ones_like(relevant_cat) * False, relevant_cat)
-        #     lep_prob = awkward.zero_like(lepton_pt) 
-        #     lep_unc = awkward.zero_like(lepton_pt)
-
-        # def GetTotalProbability(electron_pt,muon_pt, electron_eta,muon_eta, pass_singleel,pass_singlemu, pass_diel, pass_dimu, is_data):
-        #     electron_prob = GetFlavorProbability(electron_pt, electron_eta,pass_singleel, pass_diel, is_data, True)
-        #     muon_prob = GetFlavorProbability(muon_pt, muon_eta,pass_singlemu, pass_dimu, is_data, False)
-        
-        # mc_prob = GetTotalProbability(electron_pt, muon_pt, electron_eta, muon_eta, pass_singleel, pass_singlemu, pass_diel, pass_dimu, False)
-
-
-        # 0: lep_prob = 1 - probability(1), lep_unc = uncertainty(1)
-        # 1: lep_prob = prob(1) - prob(2), lep_unc = sqrt(uncertainty(1)**2 + uncertainty(2)**2)
-        # 2: lep_prob = prob(2) - prob(3), lep_unc = sqrt(uncertainty(2)**2 + uncertainty(3)**2)
-        # 3: lep_prob = prob(3), lep_unc = uncertainty(3)
-        
-        #if mc_prob < 0.001: mc_prob = 0.
-        # sf = 1.0;
-        # unc = 0.0;
-        # propagate_uncertainty_ratio(data_prob, data_unc, mc_prob, mc_unc, sf, unc);
-        # sf,unc=1
-        # if mc_prob !=0: sf = data_prob/mc_prob; unc = sqrt((data_unc/mc_prob)**2 + ((mc_unc*data_prob)/(mc_prob*mc*prob))**2)
-        # elif mc_prob == 0 sf = 1; unc = 0
-        #[FIXME]
         # a trick that give 0 to the empty array    
         if self.year is not None:
             year = self.year[:4]
@@ -673,13 +563,21 @@ class ZGammaTaggerRun2(Tagger):
         logger.debug(f"Number of FSR photons: {awkward.num(FSRphotons)}")
         logger.debug(f"Total number of FSR photons: {sum(awkward.num(FSRphotons)>0)}")
 
+        
+        awkward_utils.add_field(photons, "mass", awkward.ones_like(photons.pt) * 0) #TODO: run3 BUG
+
         # Make gamma candidate-level cuts
         has_gamma_cand = (awkward.num(photons) >= 1) #& (events.n_iso_photons == 0) # only for dy samples
+        
+        awkward_utils.add_field(
+                events = events,
+                name = "SelectedPhoton",
+                data = photons[:, :1]
+        )
+        print(f"ptErrRel of SelectedPhoton: {awkward.fill_none(awkward.firsts(photons).ptErrRel, 0)[:10]}")
         gamma_cand = awkward.firsts(photons)
         gamma_mvaID_WPL = ((gamma_cand.isScEtaEB & (gamma_cand.mvaID > self.options["photons"]["mvaID_barrel"])) | (gamma_cand.isScEtaEE & (gamma_cand.mvaID > self.options["photons"]["mvaID_endcap"])))
         gamma_e_veto = gamma_cand.electronVeto > self.options["photons"]["e_veto"]
-
-        awkward_utils.add_field(gamma_cand, "mass", awkward.ones_like(gamma_cand.pt) * 0) #TODO: run3 BUG
 
         # Add gamma-related fields to array
         for field in ["pt", "eta", "phi", "mass", "mvaID", "energyErr", "sieie", "hoe", "r9", "mvaID_WP80", "mvaID_WP90"]:
@@ -697,6 +595,20 @@ class ZGammaTaggerRun2(Tagger):
             awkward_utils.add_field(events, "gamma_chiso",  gamma_cand.pfRelIso03_chg_quadratic) #run3
             awkward_utils.add_field(events, "gamma_alliso",  gamma_cand.pfRelIso03_all_quadratic) #run3
         #awkward_utils.add_field(events, "gamma_mvaID_17",  gamma_cand.mvaID_Fall17V2) #run3
+
+        # Calculate HT as scalar sum of all particle pt
+        particles = awkward.concatenate([photons[:,:1], electrons, muons, jets], axis=1)
+        ht = awkward.fill_none(awkward.sum(particles.pt, axis=1), 0)
+        awkward_utils.add_field(events, "HT", ht, overwrite=True)
+        
+        mht = awkward.sum(awkward.Array(particles[["pt", "eta", "phi", "mass"]], with_name = "Momentum4D"), axis=1)
+        # Add MHT fields to events
+        for field in ["pt", "eta", "phi", "mass"]:
+            awkward_utils.add_field(
+                events,
+                "MHT_%s" % field,
+                awkward.fill_none(getattr(mht, field), DUMMY_VALUE)
+            )
 
         # Make Higgs candidate-level cuts
         h_cand = (z_cand.ZCand + gamma_cand)
@@ -834,6 +746,9 @@ class ZGammaTaggerRun2(Tagger):
         #     print(event.run, event.luminosityBlock, event.event, sep=" ")
         # print("!!!end check events tag(muon)!!!")
 
+        gen_hzg = gen_selections.select_x_to_yz(events.GenPart, 25, 23, 22)
+        events["GenHzgHiggs"] = gen_hzg.GenParent
+
         elapsed_time = time.time() - start
         logger.debug("[ZGammaTagger] %s, syst variation : %s, total time to execute select_zgammas: %.6f s" % (self.name, self.current_syst, elapsed_time))
 
@@ -888,7 +803,7 @@ class ZGammaTaggerRun2(Tagger):
                 n_objects = 1
         )
 
-        awkward_utils.add_object_fields(
+        awkward_utils.add_field(
                 events = zgammas,
                 name = "GenHzgLeadGenChildChild2",
                 objects = gen_hzg.LeadGenChildChild2,

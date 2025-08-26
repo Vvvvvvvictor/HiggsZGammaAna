@@ -48,8 +48,8 @@ def calculate_significance_for_fold(data_dir, region, variable, boundaries, tran
     # Setup for analysis
     nscan = 100  # Fixed bin count
     fold_condition = "1" if fold == -1 else f"((event%{prime})%{nfold}=={fold})"
-    signal_window = f"weight*((H_mass>=120&&H_mass<=130)&&{fold_condition})"
-    sideband = f"weight*((H_mass>=100&&H_mass<=180)&&!(H_mass>=120&&H_mass<=130)&&{fold_condition})"
+    signal_window = f"weight_corr*((H_mass>=120&&H_mass<=130)&&{fold_condition})"
+    sideband = f"weight_corr*((H_mass>=100&&H_mass<=180)&&!(H_mass>=120&&H_mass<=130)&&{fold_condition})"
     score_var = f"{variable}_score{'_t' if transform else ''}"
     
     # Fill histograms
