@@ -1,8 +1,8 @@
 #!/bin/bash                                                                                                                                                                       
 echo "==============STARTED=============="
 
-input="/eos/user/j/jiehan/parquet/"
-target="/eos/home-j/jiehan/root/skimmed_ntuples_cutflow/"
+input="/eos/user/j/jiehan/parquet/nanov9/"
+target="/eos/home-j/jiehan/root/skimmed_ntuples/"
 # input="/eos/user/j/jiehan/parquet/nanov12/"
 # target="/eos/home-j/jiehan/root/skimmed_ntuples_run3/"
 # target="./"
@@ -15,13 +15,13 @@ target="/eos/home-j/jiehan/root/skimmed_ntuples_cutflow/"
 # input="/eos/home-p/pelai/HZgamma/Parquet/NanoV9/run2/"
 # target="/eos/home-p/pelai/HZgamma/Root_Dataset/run2/NanoV9/"
 
-
-# years=(2016preVFP 2016postVFP 2017 2018 2022preEE 2022postEE 2023preBPix 2023postBPix)
+years=(2018)
 # years=(2016preVFP 2016postVFP 2017 2018)
-years=(2023postBPix)
+systs=("Photon_scale" "Photon_smear" "Electron_scale" "Electron_smear" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt")
 # years=(2022preEE 2022postEE)
 # years=(2023preBPix 2023postBPix)
-# systs=("FNUF" "Material" "Scale" "Smearing" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt")
+# years=(2022preEE 2022postEE 2023preBPix 2023postBPix)
+# systs=("Photon_scale" "Photon_smear" "Electron_scale" "Electron_smear" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt_scale" "Muon_pt_smear")
 
 # 函数定义：执行命令并处理错误
 execute_command() {
@@ -87,7 +87,9 @@ process_sample_syst() {
         command="python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py "
         command+="-i ${input}${type}/${sample}_${year}/merged_${corr}.parquet "
         command+="-o ${target}${sample}_${syst}_${uod}/${year}.root"
-        
+
+        echo "Running command: $command"
+
         # 使用函数执行命令
         execute_command "$command" &
         pid_list+=($!)
@@ -101,13 +103,17 @@ process_sample_syst() {
     echo "Sample $sample completed successfully."
 }
 
+# python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/nanov9/signal/ggH_M125_2018/merged_nominal.parquet -o /eos/home-j/jiehan/root/skimmed_ntuples/ggH_M125/2018.root
+# python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py -i /eos/home-j/jiehan/parquet/nanov12/signal/ggH_M125_2023postBPix/merged_nominal.parquet -o /eos/home-j/jiehan/root/skimmed_ntuples/ggH_M125/2023postBPix.root
+
 
 # 处理 signal 样本
 
 # samples=(ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125 ggH_M120 VBFH_M120 WplusH_M120 WminusH_M120 ZH_M120 ttH_M120 ggH_M130 VBFH_M130 WplusH_M130 WminusH_M130 ZH_M130 ttH_M130 ggH_mix VBF_mix ggH VBF WplusH WminusH ZH ttH)
 
-samples=(ggH_M125) 
-type="cutflow_ggf"
+# samples=(ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125) 
+samples=(ggH_M125)
+type="signal_test"
 for sample in "${samples[@]}"; do
     mkdir -p "$target${sample}/"
     # 存储后台任务的进程ID列表
@@ -117,10 +123,10 @@ for sample in "${samples[@]}"; do
     process_sample "$sample" "$type"
 done
 
-# samples=(ttH_M125) # ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125
-# type="Sig_MC_WI_Systematic"
+# samples=(ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125) # ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125
+# type="signal"
 # for sample in "${samples[@]}"; do
-#     for sf in "down"; do #  "up" "down"
+#     for sf in "up" "down"; do #  "up" "down"
 #         for syst in "${systs[@]}"; do
 #             mkdir -p "$target${sample}_${syst}_${sf}"
 #         done

@@ -1875,22 +1875,22 @@ def photon_scale_smear_run3(events, year):
         
         if "up" in syst:
             scale_up = awkward.unflatten(scale, n_photons)
-            events["Photon", "dEscaleUp"] = photons.corrected_pt * awkward.where(
+            events["Photon", "pt_ScaleUp"] = photons.corrected_pt * awkward.where(
                 (abs(photons.eta) > 3.0) | (photons.pt < 20.0),
                 awkward.ones_like(scale_up, dtype=float),
                 scale_up
             )
         elif "down" in syst:
             scale_down = awkward.unflatten(scale, n_photons)
-            events["Photon", "dEscaleDown"] = photons.corrected_pt * awkward.where(
+            events["Photon", "pt_ScaleDown"] = photons.corrected_pt * awkward.where(
                 (abs(photons.eta) > 3.0) | (photons.pt < 20.0),
                 awkward.ones_like(scale_down, dtype=float),
                 scale_down
             )
 
     print("Photon pt after scale and smear corrections:", events["Photon", "corrected_pt"])
-    print("Photon pt Scale Up:", events["Photon", "dEscaleUp"])
-    print("Photon pt Scale Down:", events["Photon", "dEscaleDown"])
+    print("Photon pt Scale Up:", events["Photon", "pt_ScaleUp"])
+    print("Photon pt Scale Down:", events["Photon", "pt_ScaleDown"])
     print("Photon pt Smear Up:", events["Photon", "dEsigmaUp"])
     print("Photon pt Smear Down:", events["Photon", "dEsigmaDown"])
 

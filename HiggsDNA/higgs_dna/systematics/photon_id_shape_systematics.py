@@ -198,7 +198,13 @@ def photon_id_shape_sf(events, year, central_only, input_collection="Photon"):
     # Flatten photons for processing
     n_photons = ak.num(photons)
     photons_flattened = ak.flatten(photons)
-    
+
+    if ak.sum(n_photons) == 0:
+        if not central_only:
+            return {"central": ak.zeros_like(photons.pt), "up": ak.zeros_like(photons.pt), "down": ak.zeros_like(photons.pt)}
+        else:
+            return {"central": ak.zeros_like(photons.pt)}
+
     # Prepare input features for DNN
     pt = ak.to_numpy(photons_flattened.pt)
     abs_eta = np.abs(ak.to_numpy(photons_flattened.eta))

@@ -217,11 +217,54 @@ from pdb import set_trace
 # Get weight with syst
 # =====================================
 cats = ["inclusive"]
-years = ['2023postBPix']
+years = ['2018'] # '2023postBPix'
 types = ["mumu", "ee"]
+
+# Define weight lists and corresponding display names
+# Comment out any weight you don't want to apply by adding # at the beginning
+weight_configs = [
+    ("weight_pu_reweight_sf_central", "pileup weight"),
+    ("weight_btag_deepjet_wp_sf_SelectedJet_central", "btag weight"),
+    ("weight_hlt_sf_central", "hlt weight"),
+    ("weight_electron_wplid_sf_SelectedElectron_central", "electron wplid weight"),
+    ("weight_electron_wplid_sf_nomatch_SelectedGenNoRecoElectron_central", "electron wplid nomatch weight"),
+    ("weight_electron_iso_sf_SelectedElectron_central", "electron iso weight"),
+    ("weight_electron_reco_sf_SelectedElectron_central", "electron reco weight"),
+    ("weight_muon_looseid_sf_SelectedMuon_central", "muon looseid weight"),
+    ("weight_muon_looseid_sf_nomatch_SelectedGenNoRecoMuon_central", "muon looseid nomatch weight"),
+    ("weight_muon_iso_sf_SelectedMuon_central", "muon iso weight"),
+    ("weight_muon_reco_sf_SelectedMuon_central", "muon reco weight"),
+    ("weight_photon_id_sf_SelectedPhoton_central", "photon id weight"),
+    ("weight_photon_id_shape_sf_SelectedPhoton_central", "photon id shape weight"),
+    ("weight_photon_csev_sf_SelectedPhoton_central", "photon csev weight"),
+    # Examples of how to comment out weights:
+    # ("weight_electron_iso_sf_SelectedElectron_central", "electron iso weight"),  # Commented out
+    # ("weight_muon_iso_sf_SelectedMuon_central", "muon iso weight"),  # Commented out
+]
+
+# Extract active weights (uncommented ones)
+weight_list = [config[0] for config in weight_configs]
+name_list = [config[1] for config in weight_configs]
+
+ggH_weight_list = [
+    "weight_nnlo_sf_GenHzgHiggs_central"
+]
+
+ggH_name_list = [
+    "nnlo weight"
+]
+
+signal_weight_list = [
+    "pythia_weight"
+]
+
+background_weight_list = [
+    "weight_photon_fake_photon_sf_SelectedPhoton_central",
+    "kin_weight"
+]
 for year in years:
-    # data = uproot.open(f"/eos/home-j/jiehan/root/cutflow/ggH_M125/{year}.root")
-    data = pd.read_parquet(f"/eos/home-j/jiehan/parquet/cutflow_ggf/ggH_M125_{year}/merged_nominal.parquet")
+    data = uproot.open(f"/eos/home-j/jiehan/root/skimmed_ntuples/ggH_M125/{year}.root")['inclusive'].arrays(library='pd')
+    # data = pd.read_parquet(f"/eos/home-j/jiehan/parquet/cutflow_ggf/ggH_M125_{year}/merged_nominal.parquet")
     for i in data.columns:
         if "weight" in i and "central" in i:
             print(i)
@@ -239,46 +282,21 @@ for year in years:
 
         for t in types:
             temp = cat_data.query(f'z_{t} > 0')
-            weight = temp["weight_central"] / 0.96934
+            weight = temp["weight_central"]
             print(f'{year} {cat} {t}')
             print(f'{"total events:":>35}{len(temp)}')
+            weight = weight * temp["pythia_weight"]
             print(f'{"lumi weight:":>35}{weight.sum():.4f}')
-            # weight = weight * temp["weight_L1_prefiring_sf_central"]
-            # print(f'{"prefire weight:":>35}{weight.sum():.4f}')
-            weight = weight * temp["weight_pu_reweight_sf_central"]
-            print(f'{"pileup weight:":>35}{weight.sum():.4f}')
-            weight = weight * temp["weight_btag_deepjet_wp_sf_SelectedJet_central"]
-            print(f'{"btag weight:":>35}{weight.sum():.4f}')
             
-            # weight = weight * temp["weight_electron_iso_sf_SelectedElectron_central"]
-            # print(f'{"electron iso weight:":>35}{weight.sum():.4f}')
-            # weight = weight * temp["weight_electron_reco_sf_SelectedElectron_central"]
-            # print(f'{"electron reco weight:":>35}{weight.sum():.4f}')
-            weight = weight * temp["weight_electron_wplid_sf_SelectedElectron_central"]
-            print(f'{"electron wplid weight:":>35}{weight.sum():.4f}')
-            weight = weight * temp["weight_electron_wplid_sf_nomatch_SelectedGenNoRecoElectron_central"]
-            print(f'{"electron wplid nomatch weight:":>35}{weight.sum():.4f}')
-
-            # weight = weight * temp["weight_muon_iso_sf_SelectedMuon_central"]
-            # print(f'{"muon iso weight:":>35}{weight.sum():.4f}')
-            weight = weight * temp["weight_muon_looseid_sf_SelectedMuon_central"]
-            print(f'{"muon looseid weight:":>35}{weight.sum():.4f}')
-            weight = weight * temp["weight_muon_looseid_sf_nomatch_SelectedGenNoRecoMuon_central"]
-            print(f'{"muon looseid nomatch weight:":>35}{weight.sum():.4f}')
-
-            weight = weight * temp["weight_photon_id_sf_SelectedPhoton_central"]
-            print(f'{"photon id weight:":>35}{weight.sum():.4f}')
-            weight = weight * temp["weight_photon_csev_sf_SelectedPhoton_central"]
-            print(f'{"photon csev weight:":>35}{weight.sum():.4f}')
+            # Apply weights from weight_list
+            for weight_name, display_name in zip(weight_list, name_list):
+                weight = weight * temp[weight_name]
+                print(f'{display_name + ":":>35}{weight.sum():.4f}')
             
-            weight = weight * temp["weight_hlt_sf_central"]
-            print(f'{"hlt weight:":>35}{weight.sum():.4f}')
-
-            weight = weight * temp["weight_photon_id_shape_sf_SelectedPhoton_central"]
-            print(f'{"photon id shape weight:":>35}{weight.sum():.4f}')
-
-            weight = weight * temp["weight_nnlo_sf_GenHzgHiggs_central"]
-            print(f'{"nnlo weight:":>35}{weight.sum():.4f}')
+            # Apply ggH specific weights
+            for weight_name, display_name in zip(ggH_weight_list, ggH_name_list):
+                weight = weight * temp[weight_name]
+                print(f'{display_name + ":":>35}{weight.sum():.4f}')
 
 # =====================================
 # Have a look at the hgg data

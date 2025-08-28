@@ -21,7 +21,7 @@ def get_args():
     parser.add_argument('-o', '--outputFolder', default='/eos/home-j/jiehan/root/fitting_bkg', help='Path to the output folder')
     parser.add_argument('-s', '--catSplitFolder', default='/eos/home-j/jiehan/root/outputs/test/significances', help='Path to the category split folder')
     return parser.parse_args()
-
+    
 class BDTApplicator:
     def __init__(self, region, args):
         """Initialize the BDT Applicator with models and transformers."""

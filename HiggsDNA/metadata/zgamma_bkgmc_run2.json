@@ -12,7 +12,7 @@
                 "name": "zgamma_tagger_run2",
                 "options": {
                     "gen_info": {
-                        "calculate": true
+                        "calculate": false
                     }
                 }
             }
@@ -166,10 +166,10 @@
                 },
                 "working_point": "wp80",
                 "modify_central_weight": false,
-                "input_collection": "Photon",
+                "input_collection": "SelectedPhoton",
                 "target_collections": [
                     [
-                        "Photon"
+                        "SelectedPhoton"
                     ]
                 ]
             },
@@ -182,10 +182,10 @@
                 },
                 "working_point": "MVA",
                 "modify_central_weight": false,
-                "input_collection": "Photon",
+                "input_collection": "SelectedPhoton",
                 "target_collections": [
                     [
-                        "Photon"
+                        "SelectedPhoton"
                     ]
                 ]
             },
@@ -197,19 +197,34 @@
                     "name": "photon_fake_photon_sf"
                 },
                 "modify_central_weight": false,
-                "input_collection": "Photon",
+                "input_collection": "SelectedPhoton",
                 "target_collections": [
                     [
-                        "Photon"
+                        "SelectedPhoton"
                     ]
                 ]
-            }            
+            },
+            "photon_id_shape_sf": {
+                "type": "object",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.photon_id_shape_systematics",
+                    "name": "photon_id_shape_sf"
+                },
+                "modify_central_weight": false,
+                "input_collection": "SelectedPhoton",
+                "target_collections": [
+                    [
+                        "SelectedPhoton"
+                    ]
+                ]
+            }
         }
     },
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "DYJetsToLL"
+            "ZGToLLG", "DYJetsToLL", "ZG2JToG2L2J", "EWKZ2J"
         ],
         "years": [
             "2016preVFP", "2016postVFP", "2017", "2018"
@@ -221,6 +236,11 @@
         "H_eta",
         "H_phi",
         "H_mass",
+        "HT",
+        "MHT_pt",
+        "MHT_phi",
+        "MHT_eta",
+        "MHT_mass",
         "Z_pt",
         "Z_eta",
         "Z_phi",
@@ -434,6 +454,7 @@
         "Muon_mass",
         "Muon_charge",
         "Muon_ptErr",
+        "Muon_bsConstrainedPtErr",
         "Muon_miniPFRelIso_all",
         "Muon_pfRelIso03_all",
         "Muon_sip3d",
@@ -466,7 +487,7 @@
         "Electron_mvaFall17V2Iso_WP80",
         "Electron_mvaFall17V2Iso_WPL",
         "Electron_energyErr",
-        "Electron_r9",
+        "Electron_r9",  
         "Electron_genPartIdx",
         "Jet_pt",
         "Jet_eta",
@@ -517,8 +538,10 @@
         "MET_T1_pt_unclustEnUp",
         "MET_T1_pt_unclustEnDown",
         "Muon_corrected_pt",
-        "Muon_correctedUp_pt",
-        "Muon_correctedDown_pt",
+        "Muon_scaleUp_pt",
+        "Muon_scaleDown_pt",
+        "Muon_smearUp_pt",
+        "Muon_smearDown_pt",
         "Flag_goodVertices",
         "Flag_globalSuperTightHalo2016Filter",
         "Flag_HBHENoiseFilter",
@@ -532,5 +555,34 @@
         "Flag_BadPFMuonDzFilter",
         "TrigObj_id",
         "TrigObj_filterBits"
-    ]
+    ],
+    "branch_map": {
+        "mc": [
+            [
+                [
+                    "Jet",
+                    "pt"
+                ],
+                [
+                    "Jet",
+                    "pt_nom"
+                ]
+            ],
+            [
+                [
+                    "Muon",
+                    "pt"
+                ],
+                [
+                    "Muon",
+                    "corrected_pt"
+                ]
+            ],
+            [
+                "MET_pt",
+                "MET_T1_pt"
+            ]
+        ],
+        "data": []
+    }
 }
