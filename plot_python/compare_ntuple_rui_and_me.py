@@ -34,15 +34,15 @@ config_dict = {
     "n_jets": {"range": (2, 6, 5), "title": "n_jets", "match_var": "njet"}
 }
 
-for i in config_dict.keys():
-    print(f"{config_dict[i]['match_var']} to {i}")
-exit()
+# for i in config_dict.keys():
+#     print(f"{config_dict[i]['match_var']} to {i}")
+# exit()
 
 var_map = {
-    "H_mass": "lly_m",
-    "weight": "w_lumiXyear",
-    "Z_mass": "leplep_m",
-    "gamma_relpt": "y_ptmass"
+    # "H_mass": "lly_m",
+    "weight_corr": "weight_corr",
+    # "Z_mass": "leplep_m",
+    # "gamma_relpt": "y_ptmass"
 }
 
 def extract_unit(label):
@@ -52,10 +52,12 @@ def extract_unit(label):
 def plot_2_hist(data1, data2, var, range, xlabel, save_path):
     fig, [ax1, ax2] = plt.subplots(2, 1, figsize=(8, 8), dpi=200, gridspec_kw={"height_ratios": [3, 1]}, sharex=True)
     
-    hist1, bins = np.histogram(data1[var], bins=range[2], range=(range[0], range[1]), weights=data1["weight"])
-    hist1_err, _ = np.histogram(data1[var], bins=range[2], range=(range[0], range[1]), weights=data1["weight"]**2)
-    hist2, _ = np.histogram(data2[config_dict[var]["match_var"]], bins=range[2], range=(range[0], range[1]), weights=data2[var_map["weight"]])
-    hist2_err, _ = np.histogram(data2[config_dict[var]["match_var"]], bins=range[2], range=(range[0], range[1]), weights=data2[var_map["weight"]]**2)
+    hist1, bins = np.histogram(data1[var], bins=range[2], range=(range[0], range[1]), weights=data1["weight_corr"])
+    hist1_err, _ = np.histogram(data1[var], bins=range[2], range=(range[0], range[1]), weights=data1["weight_corr"]**2)
+    # hist2, _ = np.histogram(data2[config_dict[var]["match_var"]], bins=range[2], range=(range[0], range[1]), weights=data2[var_map["weight_corr"]])
+    # hist2_err, _ = np.histogram(data2[config_dict[var]["match_var"]], bins=range[2], range=(range[0], range[1]), weights=data2[var_map["weight_corr"]]**2)
+    hist2, _ = np.histogram(data2[var], bins=range[2], range=(range[0], range[1]), weights=data2[var_map["weight_corr"]])
+    hist2_err, _ = np.histogram(data2[var], bins=range[2], range=(range[0], range[1]), weights=data2[var_map["weight_corr"]]**2)
     
     hep.histplot(hist1, bins, histtype="errorbar", yerr=np.sqrt(hist1_err), label="Mine", ax=ax1, color="red")
     hep.histplot(hist2, bins, histtype="errorbar", yerr=np.sqrt(hist2_err), label="Rui's", ax=ax1, color="blue")
@@ -71,21 +73,24 @@ def plot_2_hist(data1, data2, var, range, xlabel, save_path):
     
     plt.tight_layout()
     plt.savefig(save_path)
+    print("Save figures in: ", save_path)
 
-dataset_name = ["ggH_M125", "VBF_M125", "DYJetsToLL", "ZGToLLG", "ZG2JToG2L2J"]
-filepaths = ["/eos/user/j/jiehan/root/skimmed_ntuples_run2/", "/eos/home-j/jiehan/root/skimmed_ntuples_rui/"]
+dataset_name = ["ggH_M125", "VBF_M125"]#, "DYJetsToLL", "ZGToLLG", "ZG2JToG2L2J"]
+filepaths = ["/eos/user/j/jiehan/root/skimmed_ntuples/", "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new/"]
 for name in dataset_name:
     data_mine, data_rui = pd.DataFrame(), pd.DataFrame()
     input_branches_mine = list(config_dict.keys()) + list(var_map.keys())
-    input_branches_rui = [config_dict[var]["match_var"] for var in config_dict.keys()] + [var_map[var] for var in var_map.keys()]
+    # input_branches_rui = [config_dict[var]["match_var"] for var in config_dict.keys()] + [var_map[var] for var in var_map.keys()]
+    input_branches_rui = input_branches_mine
     for file in os.listdir(f"{filepaths[0]}{name}"):
-        if ".root" in file:
+        print(file)
+        if "2018.root" in file:
             data = uproot.open(f"{filepaths[0]}{name}/{file}")["two_jet"].arrays(input_branches_mine, library="pd")
             data_mine = pd.concat([data_mine, data])
     for file in os.listdir(f"{filepaths[1]}{name}"):
-        if ".root" in file:
-            data = uproot.open(f"{filepaths[1]}{name}/{file}")["tree"].arrays(input_branches_rui, library="pd") 
+        if "2018.root" in file:
+            data = uproot.open(f"{filepaths[1]}{name}/{file}")["two_jet"].arrays(input_branches_rui, library="pd") 
             data_rui = pd.concat([data_rui, data])
-    data_rui = data_rui.query("lly_m > 100 & lly_m < 180 & leplep_m > 80 & leplep_m < 100 & leplep_m + lly_m > 185 & y_ptmass > 0.1363636 & njet >= 2")
+    # data_rui = data_rui.query("nel + nmu == 2 & H_mass > 100 & H_mass< 180 & Z_mass > 80 & Z_mass < 100 & Z_mass + H_mass > 185 & gamma_relpt > 0.1363636 & n_jets >= 2")
     for var in config_dict.keys():
         plot_2_hist(data_mine, data_rui, var, config_dict[var]["range"], config_dict[var]["title"], f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/var_com/{name}_{var}.png")

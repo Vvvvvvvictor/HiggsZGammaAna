@@ -39,7 +39,7 @@ def main():
     
     # Process name mapping
     proc_mapping = {
-        "DY0": "DYJetsToLL",
+        # "DY0": "DYJetsToLL",
         "EWK": "EWKZ2J",
         "SM1": "ZGToLLG",
         "SM2": "ZGToLLG2",
@@ -53,7 +53,7 @@ def main():
     
     # Map tree names based on process
     tree_mapping = {
-        "DY0": "TreeB",
+        # "DY0": "TreeB",
         "EWK": "TreeB",
         "SM1": "TreeB",
         "SM2": "TreeB",

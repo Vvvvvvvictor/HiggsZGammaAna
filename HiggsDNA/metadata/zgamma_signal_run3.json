@@ -217,15 +217,171 @@
                     ]
                 ]
             }
+        },
+        "independent_collections": {
+            "Photon_scale": {
+                "method": "from_branch",
+                "branch_modified": [
+                    "Photon",
+                    "pt"
+                ],
+                "branches": {
+                    "up": [
+                        "Photon",
+                        "pt_ScaleUp"
+                    ],
+                    "down": [
+                        "Photon",
+                        "pt_ScaleDown"
+                    ]
+                }
+            },
+            "Photon_smear": {
+                "method": "from_branch",
+                "branch_modified": [
+                    "Photon",
+                    "pt"
+                ],
+                "branches": {
+                    "up": [
+                        "Photon",
+                        "dEsigmaUp"
+                    ],
+                    "down": [
+                        "Photon",
+                        "dEsigmaDown"
+                    ]
+                },
+                "additive": true
+            },
+            "Electron_scale": {
+                "method": "from_branch",
+                "branch_modified": [
+                    "Electron",
+                    "pt"
+                ],
+                "branches": {
+                    "up": [
+                        "Electron",
+                        "dEscaleUp"
+                    ],
+                    "down": [
+                        "Electron",
+                        "dEscaleDown"
+                    ]
+                }
+            },
+            "Electron_smear": {
+                "method": "from_branch",
+                "branch_modified": [
+                    "Electron",
+                    "pt"
+                ],
+                "branches": {
+                    "up": [
+                        "Electron",
+                        "dEsigmaUp"
+                    ],
+                    "down": [
+                        "Electron",
+                        "dEsigmaDown"
+                    ]
+                },
+                "additive": true
+            },
+            "JER": {
+                "method": "from_branch",
+                "branch_modified": [
+                    "Jet",
+                    "pt"
+                ],
+                "branches": {
+                    "up": [
+                        "Jet",
+                        "pt_jerUp"
+                    ],
+                    "down": [
+                        "Jet",
+                        "pt_jerDown"
+                    ]
+                }
+            },
+            "JES": {
+                "method": "from_branch",
+                "branch_modified": [
+                    "Jet",
+                    "pt"
+                ],
+                "branches": {
+                    "up": [
+                        "Jet",
+                        "pt_jesTotalUp"
+                    ],
+                    "down": [
+                        "Jet",
+                        "pt_jesTotalDown"
+                    ]
+                }
+            },
+            "MET_JES": {
+                "method": "from_branch",
+                "branch_modified": "MET_pt",
+                "branches": {
+                    "up": "MET_T1_pt_jesTotalUp",
+                    "down": "MET_T1_pt_jesTotalDown"
+                }
+            },
+            "MET_Unclustered": {
+                "method": "from_branch",
+                "branch_modified": "MET_pt",
+                "branches": {
+                    "up": "MET_T1_pt_unclustEnUp",
+                    "down": "MET_T1_pt_unclustEnDown"
+                }
+            },
+            "Muon_pt_scale": {
+                "method": "from_branch",
+                "branch_modified": [
+                    "Muon",
+                    "pt"
+                ],
+                "branches": {
+                    "up": [
+                        "Muon",
+                        "scaleUp_pt"
+                    ],
+                    "down": [
+                        "Muon",
+                        "scaleDown_pt"
+                    ]
+                }
+            },
+            "Muon_pt_smear": {
+                "method": "from_branch",
+                "branch_modified": [
+                    "Muon",
+                    "pt"
+                ],
+                "branches": {
+                    "up": [
+                        "Muon",
+                        "smearUp_pt"
+                    ],
+                    "down": [
+                        "Muon",
+                        "smearDown_pt"
+                    ]
+                }
+            }
         }
     },
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "ggH_M125"
+            "ggH_M125", "VBF_M125", "ttH_M125", "WminusH_M125", "WplusH_M125", "ZH_M125"
         ],
         "years": [
-             "2023postBPix"
+             "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"
         ]
     },
     "variables_of_interest": [
@@ -452,6 +608,7 @@
         "Muon_mass",
         "Muon_charge",
         "Muon_ptErr",
+        "Muon_bsConstrainedPt",
         "Muon_bsConstrainedPtErr",
         "Muon_miniPFRelIso_all",
         "Muon_pfRelIso03_all",

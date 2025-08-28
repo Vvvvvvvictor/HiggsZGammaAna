@@ -139,7 +139,7 @@ extern "C" {{
         input_ctypes = (ctypes.c_float * 8)(*input_vec)
         # Evaluate DNN
         result = self._lib.evaluate_dnn(self._dnn_ptr, input_ctypes)
-        return float(result)
+        return float(result)/(1-float(result))  # Convert to weight format
     
     def __del__(self):
         """Cleanup when object is destroyed."""

@@ -64,6 +64,10 @@ def getArgs():
     parser.add_argument('-o', '--outputFolder', action='store', default='/eos/home-j/jiehan/root/outputs/test', help='directory for outputs')
     parser.add_argument('-r', '--region', action='store', choices=['two_jet', 'one_jet', 'zero_jet', 'zero_to_one_jet', 'VH_ttH', 'all_jet'], default='zero_jet', help='Region to process')
     parser.add_argument('-cat', '--category', action='store', nargs='+', help='apply only for specific categories')
+    parser.add_argument('--memory-efficient', action='store_true', help='Use memory-efficient processing for large files')
+    parser.add_argument('--batch-size', type=int, default=10, help='Number of chunks to process before writing to file')
+    parser.add_argument('--ultra-low-memory', action='store_true', help='Use ultra-low memory mode (slower but uses minimal RAM)')
+
     parser.add_argument('-s', '--shield', action='store', type=int, default=-1, help='Which variables needs to be shielded')
     parser.add_argument('-a', '--add', action='store', type=int, default=-1, help='Which variables needs to be added')
 
@@ -265,12 +269,18 @@ class ApplyXGBHandler(object):
         print('-------------------------------------------------')
         for f in f_list: print('XGB INFO: Including sample: ', f)
 
-        # Use ultra-low memory mode by default
-        print("XGB INFO: Using ultra-low memory mode")
-        self._process_files(f_list, output_path, branches, outputbraches, scale, shift, category)
+        # Use memory-efficient processing
+        args = getArgs()
+        if args.ultra_low_memory:
+            print("XGB INFO: Using ultra-low memory mode")
+            self._applyBDT_ultra_low_memory(f_list, output_path, branches, outputbraches, scale, shift, category)
+        elif args.memory_efficient:
+            self._applyBDT_memory_efficient(f_list, output_path, branches, outputbraches, scale, shift, category)
+        else:
+            self._applyBDT_original(f_list, output_path, branches, outputbraches, scale, shift, category)
 
-    def _process_files(self, f_list, output_path, branches, outputbraches, scale, shift, category):
-        """Process files with ultra-low memory usage."""
+    def _applyBDT_ultra_low_memory(self, f_list, output_path, branches, outputbraches, scale, shift, category):
+        """Ultra-low memory mode: direct write without accumulation."""
         import tempfile
         temp_files = []
         
@@ -339,8 +349,8 @@ class ApplyXGBHandler(object):
             print(f"XGB INFO: Processed file {file_idx+1}/{len(f_list)}, Memory: {current_memory:.2f} GB, Temp files: {len(temp_files)}")
         
         # Combine temp files with minimal memory usage
-        print(f"XGB INFO: Combining {len(temp_files)} temporary files...")
-        self._combine_temp_files(temp_files, output_path)
+        print(f"XGB INFO: Combining {len(temp_files)} temporary files in ultra-low memory mode...")
+        self._combine_temp_files_ultra_low_memory(temp_files, output_path)
         
         # Clean up
         for temp_file in temp_files:
@@ -352,8 +362,8 @@ class ApplyXGBHandler(object):
         final_memory = get_memory_usage()
         print(f"XGB INFO: Final memory usage: {final_memory:.2f} GB")
         
-    def _combine_temp_files(self, temp_files, output_path):
-        """Combine temporary files using ROOT hadd for optimal performance."""
+    def _combine_temp_files_ultra_low_memory(self, temp_files, output_path):
+        """Combine temp files with ultra-low memory usage using ROOT files and hadd."""
         if not temp_files:
             return
         
@@ -455,8 +465,120 @@ class ApplyXGBHandler(object):
         del combined_data
         gc.collect()
 
-    def _combine_files_streaming(self, temp_files, output_path):
-        """Combine temporary files using ROOT hadd in streaming mode."""
+    def _applyBDT_memory_efficient(self, f_list, output_path, branches, outputbraches, scale, shift, category):
+        """Memory-efficient BDT application with true streaming processing."""
+        args = getArgs()
+        batch_size = args.batch_size
+        
+        # Use temporary files to avoid memory accumulation
+        import tempfile
+        temp_files = []
+        
+        initial_memory = get_memory_usage()
+        print(f"XGB INFO: Initial memory usage: {initial_memory:.2f} GB")
+        
+        for file_idx, filename in enumerate(tqdm(sorted(f_list), desc='XGB INFO: Applying BDTs to %s samples' % category, bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}')):
+            try:
+                file = uproot.open(filename)
+            except Exception as e:
+                print('XGB ERROR: Failed to open file: ', filename)
+                continue
+                
+            batch_data = []
+            batch_count = 0
+                
+            for data in file[self._inputTree].iterate(library='pd', step_size=self._chunksize):
+                data = self.preselect(data)
+                
+                for i in range(4):
+                    data_s = data[(data[self.randomIndex]-shift)%314159%4 == i]
+                    if data_s.shape[0] == 0: continue
+                    
+                    data_o = data_s.copy()
+
+                    for model in self.train_variables.keys():
+                        x_Events = data_s[self.train_variables[model]]
+                        dEvents = xgb.DMatrix(x_Events)
+                        scores = self.m_models[model][i].predict(dEvents)
+                        if len(scores) > 0:
+                            scores_t = self.m_tsfs[model][i].transform(scores.reshape(-1,1)).reshape(-1)
+                        else:
+                            scores_t = scores
+                    
+                        xgb_basename = self.models[model]
+                        data_o[xgb_basename] = scores
+                        data_o[xgb_basename+'_t'] = scores_t
+                    
+                    batch_data.append(data_o)
+                    batch_count += 1
+                    
+                    # Process batch when it reaches the specified size
+                    if batch_count >= batch_size:
+                        # Save batch to temporary file instead of keeping in memory
+                        combined_batch = pd.concat(batch_data, ignore_index=True, sort=False)
+                        
+                        if PYARROW_AVAILABLE:
+                            temp_file = tempfile.NamedTemporaryFile(suffix='.parquet', delete=False)
+                            combined_batch.to_parquet(temp_file.name, engine='pyarrow')
+                        else:
+                            temp_file = tempfile.NamedTemporaryFile(suffix='.pkl', delete=False)
+                            combined_batch.to_pickle(temp_file.name)
+                        
+                        temp_files.append(temp_file.name)
+                        temp_file.close()
+                        
+                        # Clear batch data immediately
+                        del batch_data, combined_batch
+                        batch_data = []
+                        batch_count = 0
+                        gc.collect()  # Force garbage collection
+                        
+                        # Memory monitoring
+                        current_memory = get_memory_usage()
+                        if len(temp_files) % 10 == 0:  # Report every 10 batches
+                            print(f"XGB INFO: Processed {len(temp_files)} batches, Memory: {current_memory:.2f} GB")
+                
+                # Clear intermediate data
+                del data, data_s
+                
+            # Process remaining data in the batch
+            if batch_data:
+                combined_batch = pd.concat(batch_data, ignore_index=True, sort=False)
+                
+                if PYARROW_AVAILABLE:
+                    temp_file = tempfile.NamedTemporaryFile(suffix='.parquet', delete=False)
+                    combined_batch.to_parquet(temp_file.name, engine='pyarrow')
+                else:
+                    temp_file = tempfile.NamedTemporaryFile(suffix='.pkl', delete=False)
+                    combined_batch.to_pickle(temp_file.name)
+                
+                temp_files.append(temp_file.name)
+                temp_file.close()
+                del batch_data, combined_batch
+                
+            file.close()
+            gc.collect()
+            
+            # Report progress and memory usage
+            current_memory = get_memory_usage()
+            print(f"XGB INFO: Processed file {file_idx+1}/{len(f_list)}, Memory: {current_memory:.2f} GB, Temp files: {len(temp_files)}")
+        
+        # Combine all temporary files in chunks to avoid memory explosion
+        print(f"XGB INFO: Combining {len(temp_files)} temporary files...")
+        self._combine_temp_files_streaming(temp_files, output_path)
+        
+        # Clean up temporary files
+        for temp_file in temp_files:
+            try:
+                os.remove(temp_file)
+            except:
+                pass
+        
+        final_memory = get_memory_usage()
+        print(f"XGB INFO: Final memory usage: {final_memory:.2f} GB")
+        
+    def _combine_temp_files_streaming(self, temp_files, output_path):
+        """Combine temporary files using ROOT hadd for optimal performance."""
         if not temp_files:
             return
         
@@ -593,6 +715,79 @@ class ApplyXGBHandler(object):
         
         del combined_data
         gc.collect()
+            
+    def _write_batch_to_file(self, batch_data, output_file):
+        """Write a batch of data to the output file."""
+        # This method is now simplified and used only for compatibility
+        if not batch_data:
+            return
+            
+        # Concatenate batch data
+        combined_data = pd.concat(batch_data, ignore_index=True, sort=False)
+        
+        # Remove index column if it exists
+        if "index" in combined_data.columns:
+            combined_data = combined_data.drop('index', axis=1)
+            
+        # Write to file (this will overwrite, so only use for final write)
+        output_file[self._region] = combined_data
+        
+        # Clear the combined data
+        del combined_data
+
+    def _applyBDT_original(self, f_list, output_path, branches, outputbraches, scale, shift, category):
+        """Original BDT application method (kept for compatibility)."""
+        with uproot.recreate(output_path) as output_file:
+            out_data = pd.DataFrame()
+            for filename in tqdm(sorted(f_list), desc='XGB INFO: Applying BDTs to %s samples' % category, bar_format='{desc}: {percentage:3.0f}%|{bar:20}{r_bar}'):
+                try:
+                    file = uproot.open(filename)
+                except Exception as e:
+                    print('XGB ERROR: Failed to open file: ', filename)
+                    continue
+                # for data in file[self._inputTree].iterate(branches, library='pd', step_size=self._chunksize): 
+                for data in file[self._inputTree].iterate(library='pd', step_size=self._chunksize):
+                    data = self.preselect(data)
+                    # data = data[data.Z_sublead_lepton_pt >= 15]
+                    # if category == "DYJetsToLL":
+                    #     data = data[data.n_iso_photons == 0]
+                    # if category != "data_fake" and category != "mc_true" and category != "mc_med":
+                    #     pass
+                    #     # data = data[data.gamma_mvaID_WP80 > 0] #TODO: check this one
+                    #     data = data[data.gamma_mvaID_WPL > 0] #TODO: check this one
+
+                    for i in range(4):
+
+                        data_s = data[(data[self.randomIndex]-shift)%314159%4 == i]
+                        data_o = data_s
+                        # data_o = data_s[outputbraches]
+                        if data_s.shape[0] == 0: continue
+
+                        for model in self.train_variables.keys():
+                            x_Events = data_s[self.train_variables[model]]
+                            dEvents = xgb.DMatrix(x_Events)
+                            scores = self.m_models[model][i].predict(dEvents)
+                            if len(scores) > 0:
+                                scores_t = self.m_tsfs[model][i].transform(scores.reshape(-1,1)).reshape(-1)
+                            else:
+                                scores_t = scores
+                        
+                            xgb_basename = self.models[model]
+                            data_o[xgb_basename] = scores
+                            data_o[xgb_basename+'_t'] = scores_t
+                        
+                        if out_data.shape[0] != 0:
+                            out_data = pd.concat([out_data, data_o], ignore_index=True, sort=False)
+                        else:
+                            out_data = data_o
+
+                # out_data.to_root(output_path, key='test', mode='a', index=False)
+                
+            # Reset index before saving to ensure clean output without extra index columns
+            if "index" in out_data.columns:
+                out_data = out_data.drop('index',axis=1)
+            output_file[self._region] = out_data
+            del out_data
 
 def main():
 

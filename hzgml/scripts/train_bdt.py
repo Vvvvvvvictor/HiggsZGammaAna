@@ -127,8 +127,8 @@ class XGBoostHandler(object):
         self.randomIndex = 'eventNumber'
         self.weight = 'weight'
         self.params = [{'eval_metric': ['auc', 'logloss']}]
-        self.early_stopping_rounds = 10
-        self.numRound = 1000
+        self.early_stopping_rounds = 200
+        self.numRound = 10000
         self.SF = -1
         self.readConfig(configPath)
         self.checkConfig()
@@ -509,7 +509,7 @@ class XGBoostHandler(object):
         evals_result = {}
         eval_result_history = []
         try:
-            self.m_bst[fold] = xgb.train(param, self.m_dTrain[fold], self.numRound, evals=evallist, early_stopping_rounds=self.early_stopping_rounds, evals_result=evals_result, verbose_eval=False)
+            self.m_bst[fold] = xgb.train(param, self.m_dTrain[fold], self.numRound, evals=evallist, early_stopping_rounds=self.early_stopping_rounds, evals_result=evals_result, verbose_eval=50)
         except KeyboardInterrupt:
             print('Finishing on SIGINT.')
 
@@ -968,7 +968,7 @@ def main():
         print('===================================================')
 
         #xgb_model.setParams({'eval_metric': ['auc', 'logloss']}, i)
-        xgb_model.set_early_stopping_rounds(20)
+        # xgb_model.set_early_stopping_rounds(200)
 
         xgb_model.prepareData(i)
 

@@ -224,35 +224,36 @@ class ZGammaTaggerRun2(Tagger):
             data = events.Muon[muon_cut]
         )
 
-        # gen mu not reco
-        gen_muons = events.GenPart[(abs(events.GenPart.pdgId) == 13)]
-        reco_muons = events.Muon
+        if not self.is_data:
+            # gen mu not reco
+            gen_muons = events.GenPart[(abs(events.GenPart.pdgId) == 13)]
+            reco_muons = events.Muon
 
-        unmatched_gen_mask = awkward.fill_none(object_selections.delta_R(gen_muons, reco_muons, 0.4), True)
-        
-        unmatched_gen_muons = gen_muons[unmatched_gen_mask]
-        unmatched_gen_muons = unmatched_gen_muons[unmatched_gen_muons.pt > self.options["muons"]["pt"]]
+            unmatched_gen_mask = awkward.fill_none(object_selections.delta_R(gen_muons, reco_muons, 0.4), True)
+            
+            unmatched_gen_muons = gen_muons[unmatched_gen_mask]
+            unmatched_gen_muons = unmatched_gen_muons[unmatched_gen_muons.pt > self.options["muons"]["pt"]]
 
-        unmatched_gen_muons = awkward_utils.add_field(
-            events = events,
-            name = "SelectedGenNoRecoMuon",
-            data = unmatched_gen_muons
-        )
+            unmatched_gen_muons = awkward_utils.add_field(
+                events = events,
+                name = "SelectedGenNoRecoMuon",
+                data = unmatched_gen_muons
+            )
 
-        # gen ele not reco
-        gen_eles = events.GenPart[(abs(events.GenPart.pdgId) == 11)]
-        reco_eles = events.Electron
+            # gen ele not reco
+            gen_eles = events.GenPart[(abs(events.GenPart.pdgId) == 11)]
+            reco_eles = events.Electron
 
-        unmatched_gen_mask = awkward.fill_none(object_selections.delta_R(gen_eles, reco_eles, 0.4), True)
+            unmatched_gen_mask = awkward.fill_none(object_selections.delta_R(gen_eles, reco_eles, 0.4), True)
 
-        unmatched_gen_eles = gen_eles[unmatched_gen_mask]
-        unmatched_gen_eles = unmatched_gen_eles[unmatched_gen_eles.pt > self.options["electrons"]["pt"]]
+            unmatched_gen_eles = gen_eles[unmatched_gen_mask]
+            unmatched_gen_eles = unmatched_gen_eles[unmatched_gen_eles.pt > self.options["electrons"]["pt"]]
 
-        unmatched_gen_eles = awkward_utils.add_field(
-            events = events,
-            name = "SelectedGenNoRecoElectron",
-            data = unmatched_gen_eles
-        )
+            unmatched_gen_eles = awkward_utils.add_field(
+                events = events,
+                name = "SelectedGenNoRecoElectron",
+                data = unmatched_gen_eles
+            )
 
         # Photons
         photon_selection = self.select_photons(
@@ -309,27 +310,39 @@ class ZGammaTaggerRun2(Tagger):
                 data = events.Photon[photon_selection],
         )
 
-        # if "2017" not in self.year and "2018" not in self.year:
-        #     b_jet_cut = jets.btagDeepFlavB > self.options["btag_med"][self.year[:4]]
-        # else:
         b_jet_cut = jets.btagDeepFlavB > self.options["btag_med"][self.year]
         jets = awkward.with_field(jets, b_jet_cut, "is_med_bjet") 
 
         # Add object fields to events array
-        for objects, name in zip([electrons, muons, jets, unmatched_gen_muons, unmatched_gen_eles], ["electron", "muon", "jet", "gen_no_reco_muon", "gen_no_reco_electron"]):
-            for var in objects.fields:
-                if var in ["charge", "pt", "eta", "phi", "mass", "id", "ptE_error", "p"]:
-                    awkward_utils.add_field(
-                        events,
-                        f"{name}_{var}",
-                        awkward.fill_none(objects[var], DUMMY_VALUE)
-                    )
-                else:
-                    awkward_utils.add_field(
-                        events,
-                        f"{name}_{var}",
-                        awkward.fill_none(objects[var], 0)
-                    )
+        if not self.is_data:
+            for objects, name in zip([unmatched_gen_muons, unmatched_gen_eles], ["gen_no_reco_muon", "gen_no_reco_electron"]):
+                for var in objects.fields:
+                    if var in ["charge", "pt", "eta", "phi", "mass", "id", "ptE_error", "p"]:
+                        awkward_utils.add_field(
+                            events,
+                            f"{name}_{var}",
+                            awkward.fill_none(objects[var], DUMMY_VALUE)
+                        )
+                    else:
+                        awkward_utils.add_field(
+                            events,
+                            f"{name}_{var}",
+                            awkward.fill_none(objects[var], 0)
+                        )
+        for objects, name in zip([electrons, muons, jets], ["electron", "muon", "jet"]):
+           for var in objects.fields:
+               if var in ["charge", "pt", "eta", "phi", "mass", "id", "ptE_error", "p"]:
+                   awkward_utils.add_field(
+                       events,
+                       f"{name}_{var}",
+                       awkward.fill_none(objects[var], DUMMY_VALUE)
+                   )
+               else:
+                   awkward_utils.add_field(
+                       events,
+                       f"{name}_{var}",
+                       awkward.fill_none(objects[var], 0)
+                   )
 
         if not self.is_data:
             dZ = events.GenVtx_z - events.PV_z
@@ -364,7 +377,7 @@ class ZGammaTaggerRun2(Tagger):
         muons = awkward.with_field(muons, muons.ptErr, "ptE_error")
 
         # Add object fields to events array
-        for objects, name in zip([electrons, muons, jets, unmatched_gen_muons, unmatched_gen_eles], ["electron", "muon", "jet", "gen_no_reco_muon", "gen_no_reco_electron"]):
+        for objects, name in zip([electrons, muons, jets], ["electron", "muon", "jet"]):
             for var in objects.fields:
                 if var in ["charge", "pt", "eta", "phi", "mass", "id", "ptE_error"]:
                     awkward_utils.add_field(
@@ -378,6 +391,22 @@ class ZGammaTaggerRun2(Tagger):
                         f"{name}_{var}",
                         awkward.fill_none(objects[var], 0)
                     )
+
+        if not self.is_data:
+            for objects, name in zip([unmatched_gen_muons, unmatched_gen_eles], ["gen_no_reco_muon", "gen_no_reco_electron"]):
+                for var in objects.fields:
+                    if var in ["charge", "pt", "eta", "phi", "mass", "id", "ptE_error"]:
+                        awkward_utils.add_field(
+                            events,
+                            f"{name}_{var}",
+                            awkward.fill_none(objects[var], DUMMY_VALUE)
+                        )
+                    else:
+                        awkward_utils.add_field(
+                            events,
+                            f"{name}_{var}",
+                            awkward.fill_none(objects[var], 0)
+                        )
 
         # Sort objects by pt
         photons = photons[awkward.argsort(photons.pt, ascending=False, axis=1)]
@@ -479,42 +508,45 @@ class ZGammaTaggerRun2(Tagger):
         # mass_cut = z_cands.ZCand.mass > 50.
         z_cands = z_cands[mass_cut] # OSSF lepton pairs with m_ll > 50.
         
-        # HEM cut
-        if self.year=="2018" and self.is_data:
-            hem_run=events.run > 319077        
-            # checked 65.15623538907509% events in data could pass this run cut
-            hem_jet=awkward.num(events.Jet[(events.Jet.phi>-1.57) & (events.Jet.phi<-0.87) & (events.Jet.eta>-3) & (events.Jet.eta<-1.3)])>0
-            if "FatJet" in events.fields:
-                hem_fatjet=awkward.num(events.FatJet[(events.FatJet.phi>-1.57) & (events.FatJet.phi<-0.87) & (events.FatJet.eta>-3) & (events.FatJet.eta<-1.3)])>0
-            else:
-                hem_fatjet = awkward.num(events.Photon) < 0 # dummy all false
-            hem_cut=~((hem_run & hem_jet) | (hem_run & hem_fatjet))        
-        elif self.year=="2018" and not self.is_data:
-            #random number generator from 0 to 1
-            fraction=0.6515623538907509
-            events['random'] = numpy.random.rand(len(events))
-            hem_run=events.random < fraction
-            hem_jet=awkward.num(events.Jet[(events.Jet.phi>-1.57) & (events.Jet.phi<-0.87) & (events.Jet.eta>-3) & (events.Jet.eta<-1.3)])>0
-            if "FatJet" in events.fields:
-                hem_fatjet=awkward.num(events.FatJet[(events.FatJet.phi>-1.57) & (events.FatJet.phi<-0.87) & (events.FatJet.eta>-3) & (events.FatJet.eta<-1.3)])>0
-            else:
-                hem_fatjet = awkward.num(events.Photon) < 0 # dummy all false
-            hem_cut=~((hem_run & hem_jet) | (hem_run & hem_fatjet))
-        else:
-            hem_cut=awkward.num(events.Photon) >= 0 
-        events = events[hem_cut]
-        z_cands = z_cands[hem_cut]
-        electrons = electrons[hem_cut]
-        photons = photons[hem_cut]
-        muons = muons[hem_cut]
-        z_ee_cut = z_ee_cut[hem_cut]
-        z_mumu_cut = z_mumu_cut[hem_cut]
-        trigger_pt_cut = trigger_pt_cut[hem_cut]
-        ele_trigger_pt_cut = ele_trigger_pt_cut[hem_cut]
-        mu_trigger_pt_cut = mu_trigger_pt_cut[hem_cut]
-        ele_trigger_cut = ele_trigger_cut[hem_cut]
-        mu_trigger_cut = mu_trigger_cut[hem_cut]
-        trigger_cut = trigger_cut[hem_cut]
+        # # ==========================================================
+        # # HEM cut
+        # if self.year=="2018" and self.is_data:
+        #     hem_run=events.run > 319077        
+        #     # checked 65.15623538907509% events in data could pass this run cut
+        #     hem_jet=awkward.num(events.Jet[(events.Jet.phi>-1.57) & (events.Jet.phi<-0.87) & (events.Jet.eta>-3) & (events.Jet.eta<-1.3)])>0
+        #     if "FatJet" in events.fields:
+        #         hem_fatjet=awkward.num(events.FatJet[(events.FatJet.phi>-1.57) & (events.FatJet.phi<-0.87) & (events.FatJet.eta>-3) & (events.FatJet.eta<-1.3)])>0
+        #     else:
+        #         hem_fatjet = awkward.num(events.Photon) < 0 # dummy all false
+        #     hem_cut=~((hem_run & hem_jet) | (hem_run & hem_fatjet))        
+        # elif self.year=="2018" and not self.is_data:
+        #     #random number generator from 0 to 1
+        #     fraction=0.6515623538907509
+        #     events['random'] = numpy.random.rand(len(events))
+        #     hem_run=events.random < fraction
+        #     hem_jet=awkward.num(events.Jet[(events.Jet.phi>-1.57) & (events.Jet.phi<-0.87) & (events.Jet.eta>-3) & (events.Jet.eta<-1.3)])>0
+        #     if "FatJet" in events.fields:
+        #         hem_fatjet=awkward.num(events.FatJet[(events.FatJet.phi>-1.57) & (events.FatJet.phi<-0.87) & (events.FatJet.eta>-3) & (events.FatJet.eta<-1.3)])>0
+        #     else:
+        #         hem_fatjet = awkward.num(events.Photon) < 0 # dummy all false
+        #     hem_cut=~((hem_run & hem_jet) | (hem_run & hem_fatjet))
+        # else:
+        #     hem_cut=awkward.num(events.Photon) >= 0 
+        # events = events[hem_cut]
+        # z_cands = z_cands[hem_cut]
+        # electrons = electrons[hem_cut]
+        # photons = photons[hem_cut]
+        # muons = muons[hem_cut]
+        # jets = jets[hem_cut]
+        # z_ee_cut = z_ee_cut[hem_cut]
+        # z_mumu_cut = z_mumu_cut[hem_cut]
+        # trigger_pt_cut = trigger_pt_cut[hem_cut]
+        # ele_trigger_pt_cut = ele_trigger_pt_cut[hem_cut]
+        # mu_trigger_pt_cut = mu_trigger_pt_cut[hem_cut]
+        # ele_trigger_cut = ele_trigger_cut[hem_cut]
+        # mu_trigger_cut = mu_trigger_cut[hem_cut]
+        # trigger_cut = trigger_cut[hem_cut]
+        # # ==========================================================
 
         has_z_cand = awkward.num(z_cands) >= 1
         z_cand = awkward.firsts(z_cands)
@@ -597,7 +629,11 @@ class ZGammaTaggerRun2(Tagger):
         #awkward_utils.add_field(events, "gamma_mvaID_17",  gamma_cand.mvaID_Fall17V2) #run3
 
         # Calculate HT as scalar sum of all particle pt
-        particles = awkward.concatenate([photons[:,:1], electrons, muons, jets], axis=1)
+        logger.debug(f"Number of photons: {photons[:,:1].pt.type}")
+        logger.debug(f"Number of electrons: {electrons.pt.type}")
+        logger.debug(f"Number of muons: {muons.pt.type}")
+        logger.debug(f"Number of jets: {jets.pt.type}")
+        particles = awkward.concatenate([photons, electrons, muons, jets], axis=1)
         ht = awkward.fill_none(awkward.sum(particles.pt, axis=1), 0)
         awkward_utils.add_field(events, "HT", ht, overwrite=True)
         
@@ -696,9 +732,9 @@ class ZGammaTaggerRun2(Tagger):
             cut9 = cut8 & event_filter
             
             if cut_type == "zgammas_ele":
-                ee_all_cut = cut9
+                ee_all_cut = cut7 & event_filter
             if cut_type == "zgammas_mu":
-                mm_all_cut = cut9
+                mm_all_cut = cut7 & event_filter
             
             # if cut_type == "zgammas_ele":
             #     print(f"!!!start check events tag({cut_type})!!!")
@@ -707,47 +743,18 @@ class ZGammaTaggerRun2(Tagger):
             #     print(f"!!!end check events tag({cut_type})!!!")
 
             self.register_event_cuts(
-                # names = ["all", "N_lep_sel", "trig_cut", "lead_lep_pt_cut", "sub_lep_pt_cut", "has_g_cand", "has_z_cand", "sel_h_1", "sel_h_2", "sel_h_3"],
-                # results = [cut0, cut1, cut2, cut3, cut4, cut5, cut6, cut7, cut8, cut9],
                 names = ["all", "N_lep_sel", "trig_cut", "lep_pt_cut", "has_g_cand", "has_z_cand", "sel_h_1", "sel_h_2", "sel_h_3", "event", "all cuts"],
                 results = [cut0, cut1, cut2, cut3, cut4, cut5, cut6, cut7, cut8, cut9, all_cuts],
                 events = events,
                 cut_type = cut_type,
                 weighted = weighted
             )
-            # cut_names = ["N_lep_sel", "trig_cut", "lep_pt_cut", "has_g_cand", "os_cut", "has_z_cand", "sel_h_1", "sel_h_2", "sel_h_3"]
-            # for cut, cut_name in zip([cut1, cut2, cut3, cut4, cut5, cut6, cut7, cut8, cut9], cut_names):
-            #     awkward_utils.add_field(events, f"{cut_type}_{cut_name}", cut)
 
-        all_cuts = ee_all_cut | mm_all_cut
-        
-        # print(f"Sum of all_cuts: {sum(all_cuts)}")
-        # all_cuts = ee_all_cut | mm_all_cut
-        # print(f"Sum of all_cuts: {sum(all_cuts)}")
+        all_cuts = (ee_all_cut | mm_all_cut)
 
-        # checked_cut = (z_ee_cut | z_mumu_cut) & pair_cut
-        # checked_events = events[checked_cut]
-        # print("!!!start check events tag(inclusive)!!!")
-        # for event in checked_events:
-        #     print(event.run, event.luminosityBlock, event.event, sep=" ")
-        # print("!!!end check events tag(inclusive)!!!")
-
-        # checked_cut = z_ee_cut & ele_trigger_pt_cut
-        # checked_events = events[checked_cut]
-        # print("!!!start check events tag(electron)!!!")
-        # for event in checked_events:
-        #     print(event.run, event.luminosityBlock, event.event, sep=" ")
-        # print("!!!end check events tag(electron)!!!")
-
-        # checked_cut = z_mumu_cut & mm_trigger_pt_cut
-        # checked_events = events[checked_cut]
-        # print("!!!start check events tag(muon)!!!")
-        # for event in checked_events:
-        #     print(event.run, event.luminosityBlock, event.event, sep=" ")
-        # print("!!!end check events tag(muon)!!!")
-
-        gen_hzg = gen_selections.select_x_to_yz(events.GenPart, 25, 23, 22)
-        events["GenHzgHiggs"] = gen_hzg.GenParent
+        if not self.is_data:
+            gen_hzg = gen_selections.select_x_to_yz(events.GenPart, 25, 23, 22)
+            events["GenHzgHiggs"] = gen_hzg.GenParent
 
         elapsed_time = time.time() - start
         logger.debug("[ZGammaTagger] %s, syst variation : %s, total time to execute select_zgammas: %.6f s" % (self.name, self.current_syst, elapsed_time))

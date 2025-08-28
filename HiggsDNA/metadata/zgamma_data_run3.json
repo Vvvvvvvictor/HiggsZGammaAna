@@ -12,7 +12,7 @@
                 "name": "zgamma_tagger_run2",
                 "options": {
                     "gen_info": {
-                        "calculate": true
+                        "calculate": false
                     }
                 }
             }

@@ -17,37 +17,37 @@ config_dict = {
     # "jet_2_btagDeepFlavB": {"range": (0, 0.15), "title": "j2 btag"},
     # "HZ_deltaRap": {"range": (-0.7, 0.7), "title": r"$\Delta y(ll,ll\gamma)$"},
 
-    # "jet_1_mass": {"range": (0, 40), "bins": 50, "title": r"$m_{j}(GeV/c^{2})$"},
-    # "jet_1_eta": {"range": (-5, 5), "bins": 50, "title": r"$\eta_{j1}$"},
+    "jet_1_mass": {"range": (0, 40), "bins": 50, "title": r"$m_{j}(GeV/c^{2})$"},
+    "jet_1_eta": {"range": (-5, 5), "bins": 50, "title": r"$\eta_{j1}$"},
 
-    "mass_jj": {"range": (0, 1000), "bins": 50, "title": r"$m_{jj}(GeV/c^{2})$"},
-    # "n_jets": {"range": (2, 6), "bins": 4, "title": r"$N_{jets}$"},
-    # "llphoton_hmiss_photon_dphi": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi(ll\gamma-rev, photon)$"},
+    # "mass_jj": {"range": (0, 1000), "bins": 50, "title": r"$m_{jj}(GeV/c^{2})$"},
+    "n_jets": {"range": (0, 2), "bins": 2, "title": r"$N_{jets}$"},
+    "llphoton_hmiss_photon_dphi": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi(ll\gamma-rev, photon)$"},
 
     # "delta_eta_jj": {"range": (0, 8), "bins": 40, "title": r"$\Delta\eta_{j}$"},
     # "delta_phi_jj": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi_{j}$"},
 
-    # "delta_phi_zgjj": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi_{ll\gamma,j}$"},
-    # "gamma_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta_{\gamma}$"},
-    # "gamma_mvaID": {"range": (0.14, 1), "bins": 43, "title": "photon MVA"},
-    # "jet_1_pt": {"range": (30, 330), "bins": 50, "title": r"$p_{T_{j1}}(GeV/c)$"},
+    "delta_phi_zgjj": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi_{ll\gamma,j}$"},
+    "gamma_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta_{\gamma}$"},
+    "gamma_mvaID": {"range": (0.14, 1), "bins": 43, "title": "photon MVA"},
+    "jet_1_pt": {"range": (30, 330), "bins": 50, "title": r"$p_{T_{j1}}(GeV/c)$"},
     # "jet_2_pt": {"range": (30, 150), "bins": 50, "title": r"$p_{T_{j2}}(GeV/c)$"},
-    # "jet1G_deltaR": {"range": (0.4, 6.4), "bins": 40, "title": r"$\Delta R(\gamma,j1)$"},
+    "jet1G_deltaR": {"range": (0.4, 6.4), "bins": 40, "title": r"$\Delta R(\gamma,j1)$"},
     # "jet2G_deltaR": {"range": (0.4, 6.4), "bins": 40, "title": r"$\Delta R(\gamma,j2)$"},
-    # "l1g_deltaR": {"range": (0.3, 4.3), "bins": 40, "title": r"max($\Delta R(l,\gamma)$)"},
-    # "l2g_deltaR": {"range": (0.3, 3.3), "bins": 40, "title": r"min($\Delta R(l,\gamma)$)"},
-    # "lep_cos_theta": {"range": (-1, 1), "bins": 40, "title": r"$\cos\theta$"},
-    # "lep_phi": {"range": (-3.2, 3.2), "bins": 40, "title": r"$\phi$"},
-    # "photon_zeppenfeld": {"range": (0, 5), "bins": 50, "title": "Zeppenfeld $\gamma$"},
-    # "pt_balance": {"range": (0, 1), "bins": 50, "title": "system balance"},
-    # "Z_cos_theta": {"range": (-1, 1), "bins": 50, "title": r"$\cos\Theta$"},
-    # "Z_lead_lepton_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta_{l1}$"},
-    # "Z_sublead_lepton_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta_{l2}$"},
-    # "H_relpt": {"range": (0, 3), "bins": 50, "title": r"${p_{T_{ll\gamma}}\cdot c}/{m_{ll\gamma}}$"},
-    # "gamma_ptRelErr": {"range": (0.01, 0.11), "bins": 50, "title": r"$\sigma_{p_T^{\gamma}}/p_T^{\gamma}$"}
+    "l1g_deltaR": {"range": (0.3, 4.3), "bins": 40, "title": r"max($\Delta R(l,\gamma)$)"},
+    "l2g_deltaR": {"range": (0.3, 3.3), "bins": 40, "title": r"min($\Delta R(l,\gamma)$)"},
+    "lep_cos_theta": {"range": (-1, 1), "bins": 40, "title": r"$\cos\theta$"},
+    "lep_phi": {"range": (-3.2, 3.2), "bins": 40, "title": r"$\phi$"},
+    "photon_zeppenfeld": {"range": (0, 5), "bins": 50, "title": "Zeppenfeld $\gamma$"},
+    "pt_balance": {"range": (0, 1), "bins": 50, "title": "system balance"},
+    "Z_cos_theta": {"range": (-1, 1), "bins": 50, "title": r"$\cos\Theta$"},
+    "Z_lead_lepton_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta_{l1}$"},
+    "Z_sublead_lepton_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta_{l2}$"},
+    "H_relpt": {"range": (0, 3), "bins": 50, "title": r"${p_{T_{ll\gamma}}\cdot c}/{m_{ll\gamma}}$"},
+    "gamma_ptRelErr": {"range": (0.01, 0.11), "bins": 50, "title": r"$\sigma_{p_T^{\gamma}}/p_T^{\gamma}$"}
 }
 
-TREE = "two_jet"
+TREE = "zero_to_one_jet"
 WEIGHT = "weight_corr"
 PATH = "/eos/user/j/jiehan/root/skimmed_ntuples_rui_new/"
 
@@ -119,8 +119,15 @@ for var in config_dict:
 
     points = (bins[:-1] + bins[1:]) / 2
 
-    fig, ax1 = plt.subplots(1, 1, figsize=(8, 8), dpi=200)
-    ax1.tick_params(axis='x', which='both', bottom=True, top=True, labelbottom=True, left=True, right=True, labelright=False)
+    # Create figure with two subplots, ratio 7:3
+    fig = plt.figure(figsize=(8, 8), dpi=200)
+    gs = fig.add_gridspec(2, 1, height_ratios=[7, 3], hspace=0)
+    ax1 = fig.add_subplot(gs[0])
+    ax2 = fig.add_subplot(gs[1])
+
+    # Upper plot
+    ax1.tick_params(axis='x', which='both', bottom=True, top=True, labelbottom=False, left=True, right=True, labelright=False)
+    ax1.tick_params(axis='x', labelbottom=False)  # Remove x tick labels
 
     colors = [color_dict[i] for i in bkg]
     labels = [i+f"[N={bkg_yields[j]:.1f}]" for j, i in enumerate(bkg.keys())]
@@ -143,10 +150,30 @@ for var in config_dict:
     ax1.set_xlim(RMIN, RMAX)
     ax1.set_ylim(0, 1.6*max(hist1[0].max(), np.sum(hist2, axis=0).max()))
     ax1.annotate(rf"L=137.61 fb$^{{-1}}$(13TeV)+62.32 fb$^{{-1}}$(13.6TeV)", xy=(1, 1.01), xycoords='axes fraction', fontsize=16, ha="right")
-    ax1.set_xlabel(XLABLE, fontsize=24)
+    # Add CMS preliminary label in upper left
+    ax1.text(-0.1, 1.01, "CMS preliminary", transform=ax1.transAxes, fontsize=16, fontweight='bold', 
+             verticalalignment='bottom', horizontalalignment='left')
+
+    # Lower plot - ratio plot
+    hist2_sum = np.sum(hist2, axis=0)
+    # Avoid division by zero
+    ratio = np.divide(hist1[0], hist2_sum, out=np.zeros_like(hist1[0]), where=hist2_sum!=0)
+    
+    hep.histplot(ratio, bins, color=color_dict[list(sig.keys())[0]], histtype="step", ax=ax2, linewidth=2)
+    ax2.set_ylabel("S/B   ", fontsize=24)
+    ax2.set_xlabel(XLABLE, fontsize=24)
+    ax2.tick_params(axis='both', which='both', bottom=True, top=True, labelbottom=True, left=True, right=True, labelright=False)
+    ax2.grid()
+    ax2.set_xlim(RMIN, RMAX)
+    # Set y-axis range to show all data including negative values
+    ratio_min = np.min(ratio[ratio != 0])  # Exclude zeros
+    ratio_max = np.max(ratio)
+    y_margin = 0.1 * (ratio_max - ratio_min)
+    ax2.set_ylim(ratio_min - y_margin, ratio_max + y_margin)
+    ax2.axhline(y=1, color='black', linestyle='--', alpha=0.5)
 
     plt.tight_layout()
-    if os.path.exists("pic/sigVbkg") == False:
-        os.makedirs("pic/sigVbkg")
-    plt.savefig(f"pic/sigVbkg/{VAR}.png")
+    if os.path.exists(f"pic/sigVbkg/{TREE}") == False:
+        os.makedirs(f"pic/sigVbkg/{TREE}")
+    plt.savefig(f"pic/sigVbkg/{TREE}/{VAR}.png")
     plt.clf()
