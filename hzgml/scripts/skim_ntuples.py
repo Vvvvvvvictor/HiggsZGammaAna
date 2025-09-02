@@ -26,12 +26,15 @@ import ctypes
 # Import the kinematic DNN weighter module
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'kinematicdnn'))
-from kinr3_weighter import create_kin_weighter
+from kinr2_weighter import create_kin_weighter as create_kinr2_weighter
+from kinr3_weighter import create_kin_weighter as create_kinr3_weighter
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
-# Initialize the DNN model globally
-kin_weighter = create_kin_weighter()
+# Initialize the DNN models globally
+kin_weighter_r2 = None
+kin_weighter_r3 = None
+kin_weighter = None
 
 def getArgs():
     parser = ArgumentParser(description="Skim the input ntuples for Hmumu XGBoost analysis.")
@@ -393,7 +396,7 @@ def compute_zeppenfeld_variables_vectorized(data):
         if mask_2jets.iloc[i]:
             jet1_eta = data['jet_1_eta'].iloc[i] if 'jet_1_eta' in data.columns else 0
             jet2_eta = data['jet_2_eta'].iloc[i] if 'jet_2_eta' in data.columns else 0
-            avg_jet_eta = (jet1_eta + jet2_eta) / 2.0
+            avg_jet_eta = (jet1_eta + jet2_eta) / 2.0;
             
             photon_zep.append(data['gamma_eta'].iloc[i] - avg_jet_eta)
             h_zep.append(data['H_eta'].iloc[i] - avg_jet_eta)
@@ -577,7 +580,8 @@ def compute_kin_weight(x):
             return 1.0  # Default weight
             
         return kin_weighter.evaluate(inputs)
-    except:
+    except Exception as e:
+        print(f"Error in compute_kin_weight: {e}")
         return 1.0  # Default weight if computation fails
 
 def compute_kin_weight_refit(x):
@@ -600,7 +604,8 @@ def compute_kin_weight_refit(x):
             return 1.0  # Default weight
             
         return kin_weighter.evaluate(inputs)
-    except:
+    except Exception as e:
+        print(f"Error in compute_kin_weight_refit: {e}")
         return 1.0  # Default weight if computation fails
 
 # others
@@ -1030,6 +1035,19 @@ def main():
     
     args = getArgs()
 
+    # Initialize weighters based on year from input file name
+    global kin_weighter, kin_weighter_r2, kin_weighter_r3
+    if any(year in args.input for year in ["2016", "2017", "2018"]):
+        if kin_weighter_r2 is None:
+            kin_weighter_r2 = create_kinr2_weighter()
+        kin_weighter = kin_weighter_r2
+        print("Using kinr2_weighter for 201X data.")
+    else: # Assume 202X for others
+        if kin_weighter_r3 is None:
+            kin_weighter_r3 = create_kinr3_weighter()
+        kin_weighter = kin_weighter_r3
+        print("Using kinr3_weighter for 202X data.")
+
     variables = [
         'H_pt', 'H_eta', 'H_phi', 'H_mass',
         'Z_pt', 'Z_eta', 'Z_phi', 'Z_mass',
@@ -1062,8 +1080,8 @@ def main():
     final_events = 0
 
     data = pd.read_parquet(args.input)
-    print(f"Loaded data with shape: {data.shape}")
-    print(f"Available columns: {list(data.columns)}")
+    # print(f"Loaded data with shape: {data.shape}")
+    # print(f"Available columns: {list(data.columns)}")
     
     # Remove columns with object dtype
     data = data.drop(columns=data.select_dtypes(include=['object']).columns)
@@ -1108,7 +1126,6 @@ def main():
     
     if missing_weights:
         print(f"Warning: Missing weight columns: {missing_weights}")
-        print(f"Available columns: {list(data.columns)}")
         # Create default weight if weight column is missing
         if 'weight' not in data.columns:
             data['weight'] = np.ones(len(data))

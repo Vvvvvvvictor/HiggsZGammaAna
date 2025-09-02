@@ -15,7 +15,7 @@ log_path = '/eos/user/j/jiehan/parquet/nanov9/'
 # dataset_names = ["Data"]
 # dataset_years = ["2016preVFP", "2016postVFP", "2017", "2018"] #"2016preVFP", "2016postVFP", "2017", "2018", "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"
 
-dataset_type = 'signal'
+dataset_type = 'signal_test'
 dataset_names = ["ggH_M125"] #"ggH", "VBF", "ZH", "ttH", "WplusH", "WminusH" "ggH_M125", "VBFH_M125", "ZH_M125", "ttH_M125", "WplusH_M125", "WminusH_M125"
 dataset_years = ["2018"]#"2016preVFP", "2016postVFP", "2017", "2018", "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"
 

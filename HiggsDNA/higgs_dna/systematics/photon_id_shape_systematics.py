@@ -17,8 +17,9 @@ class PhotonIDShapeDNN:
     Wrapper class for the C++ DNN model used in photon ID shape systematic calculations.
     """
     
-    def __init__(self):
+    def __init__(self, year):
         self._compiled_lib = None
+        self.year = str(year)
         self._compile_cpp_model()
     
     def _compile_cpp_model(self):
@@ -26,13 +27,25 @@ class PhotonIDShapeDNN:
         Compile the C++ DNN model into a shared library and load it.
         """
         try:
+            # Determine which header and class to use based on year
+            if self.year in ["2016", "2017", "2018"]:
+                header_file = "rw_mmp.hpp"
+                class_name = "rw_mmp"
+                header_path_str = "higgs_dna/systematics/data/photon_id_dnn/rw_mmp.hpp"
+            elif "2022" in self.year or "2023" in self.year: # For Run3
+                header_file = "rw_mmp_r3.hpp"
+                class_name = "rw_mmp_r3"
+                header_path_str = "higgs_dna/systematics/data/photon_id_dnn/rw_mmp_r3.hpp"
+            else:
+                raise ValueError(f"Year {self.year} is not supported for PhotonIDShapeDNN.")
+
             # Get the path to the C++ header file
-            cpp_header_path = misc_utils.expand_path("higgs_dna/systematics/data/rw_mmp_r3.hpp")
+            cpp_header_path = misc_utils.expand_path(header_path_str)
             
             # Create a temporary directory for compilation
             temp_dir = tempfile.mkdtemp()
-            cpp_source = os.path.join(temp_dir, "rw_mmp_r3.cpp")
-            shared_lib = os.path.join(temp_dir, "librw_mmp_r3.so")
+            cpp_source = os.path.join(temp_dir, f"{class_name}.cpp")
+            shared_lib = os.path.join(temp_dir, f"lib{class_name}.so")
             
             # Create a C++ source file with a C interface
             cpp_code = f'''
@@ -40,15 +53,15 @@ class PhotonIDShapeDNN:
 #include <vector>
 
 extern "C" {{
-    rw_mmp_r3* create_dnn() {{
-        return new rw_mmp_r3();
+    {class_name}* create_dnn() {{
+        return new {class_name}();
     }}
     
-    void delete_dnn(rw_mmp_r3* dnn) {{
+    void delete_dnn({class_name}* dnn) {{
         delete dnn;
     }}
     
-    float evaluate_dnn(rw_mmp_r3* dnn, float* input) {{
+    float evaluate_dnn({class_name}* dnn, float* input) {{
         std::vector<float> input_vec(input, input + 4);
         return dnn->evaluate(input_vec);
     }}
@@ -80,10 +93,10 @@ extern "C" {{
             # Create DNN instance
             self._dnn_ptr = self._lib.create_dnn()
             
-            logger.info("Successfully compiled and loaded C++ DNN model")
+            logger.info(f"Successfully compiled and loaded C++ DNN model for year {self.year}")
             
         except Exception as e:
-            logger.error(f"Failed to compile C++ DNN model: {e}")
+            logger.error(f"Failed to compile C++ DNN model for year {self.year}: {e}")
             # Fallback to pure Python implementation
             self._use_fallback = True
             
@@ -151,11 +164,11 @@ extern "C" {{
 # Global DNN instance
 _dnn_instance = None
 
-def get_dnn_instance():
+def get_dnn_instance(year):
     """Get or create the global DNN instance."""
     global _dnn_instance
     if _dnn_instance is None:
-        _dnn_instance = PhotonIDShapeDNN()
+        _dnn_instance = PhotonIDShapeDNN(year)
     return _dnn_instance
 
 
@@ -221,7 +234,7 @@ def photon_id_shape_sf(events, year, central_only, input_collection="Photon"):
     dnn_input = np.column_stack([pt, abs_eta, idmva, relpterr])
     
     # Get DNN instance and evaluate
-    dnn = get_dnn_instance()
+    dnn = get_dnn_instance(year[:4])
     dnn_output = dnn.evaluate(dnn_input)
     
     # Convert DNN output to scale factor

@@ -16,7 +16,7 @@ import numpy as np
 from typing import List
 
 
-class KinR3Weighter:
+class KinR2Weighter:
     """
     Wrapper class for the C++ kinematic DNN model.
     Compiles and loads the C++ implementation for efficient evaluation.
@@ -39,11 +39,11 @@ class KinR3Weighter:
         """
         Compile the C++ DNN model into a shared library and load it.
         """
-        print("Starting C++ compilation process...")
+        print("Starting C++ compilation process for kinr2_weighter...")
         
         # Get the path to the C++ header file
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        cpp_header_path = os.path.join(current_dir, "kinr3_weighter.hpp")
+        cpp_header_path = os.path.join(current_dir, "kinr2_weighter.hpp")
         
         print(f"Looking for C++ header at: {cpp_header_path}")
         
@@ -54,8 +54,8 @@ class KinR3Weighter:
         
         # Create a temporary directory for compilation
         temp_dir = tempfile.mkdtemp()
-        cpp_source = os.path.join(temp_dir, "kinr3_weighter_wrapper.cpp")
-        shared_lib = os.path.join(temp_dir, "libkinr3_weighter.so")
+        cpp_source = os.path.join(temp_dir, "kinr2_weighter_wrapper.cpp")
+        shared_lib = os.path.join(temp_dir, "libkinr2_weighter.so")
         
         print(f"Temporary directory: {temp_dir}")
         
@@ -65,15 +65,15 @@ class KinR3Weighter:
 #include <vector>
 
 extern "C" {{
-    kinr3_weighter* create_dnn() {{
-        return new kinr3_weighter();
+    kinr2_weighter* create_dnn() {{
+        return new kinr2_weighter();
     }}
     
-    void delete_dnn(kinr3_weighter* dnn) {{
+    void delete_dnn(kinr2_weighter* dnn) {{
         delete dnn;
     }}
     
-    float evaluate_dnn(kinr3_weighter* dnn, float* input) {{
+    float evaluate_dnn(kinr2_weighter* dnn, float* input) {{
         std::vector<float> input_vec(input, input + 8);
         return dnn->evaluate(input_vec);
     }}
@@ -159,22 +159,22 @@ def get_weighter_instance():
     """Get or create the global kinematic weighter instance."""
     global _weighter_instance
     if _weighter_instance is None:
-        _weighter_instance = KinR3Weighter()
+        _weighter_instance = KinR2Weighter()
     return _weighter_instance
 
 
-def create_kin_weighter() -> KinR3Weighter:
+def create_kin_weighter() -> KinR2Weighter:
     """
     Factory function to create a kinematic weighter
     
     Returns:
-        Initialized KinR3Weighter instance
+        Initialized KinR2Weighter instance
     """
-    return KinR3Weighter()
+    return KinR2Weighter()
 
 
 # For backward compatibility
-def get_default_weighter() -> KinR3Weighter:
+def get_default_weighter() -> KinR2Weighter:
     """Get a default weighter instance"""
     return get_weighter_instance()
 
@@ -184,7 +184,7 @@ if __name__ == "__main__":
     print("Testing kinematic DNN weighter...")
     
     # Create weighter
-    weighter = KinR3Weighter()
+    weighter = KinR2Weighter()
     print("Weighter created successfully!")
     
     # Test with some example inputs
