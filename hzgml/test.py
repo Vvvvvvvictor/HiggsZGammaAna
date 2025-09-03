@@ -217,7 +217,7 @@ from pdb import set_trace
 # Get weight with syst
 # =====================================
 cats = ["inclusive"]
-years = ['2018'] # '2023postBPix'
+years = ['2016preVFP', '2016postVFP', '2017', '2018'] # '2016preVFP', '2016postVFP', '2017', '2018', '2022preEE', '2022postEE', '2023preBPix', '2023postBPix'
 types = ["mumu", "ee"]
 
 # Define weight lists and corresponding display names
@@ -235,8 +235,8 @@ weight_configs = [
     ("weight_muon_iso_sf_SelectedMuon_central", "muon iso weight"),
     ("weight_muon_reco_sf_SelectedMuon_central", "muon reco weight"),
     ("weight_photon_id_sf_SelectedPhoton_central", "photon id weight"),
-    ("weight_photon_id_shape_sf_SelectedPhoton_central", "photon id shape weight"),
     ("weight_photon_csev_sf_SelectedPhoton_central", "photon csev weight"),
+    ("weight_photon_id_shape_sf_SelectedPhoton_central", "photon id shape weight"),
     # Examples of how to comment out weights:
     # ("weight_electron_iso_sf_SelectedElectron_central", "electron iso weight"),  # Commented out
     # ("weight_muon_iso_sf_SelectedMuon_central", "muon iso weight"),  # Commented out
@@ -265,9 +265,9 @@ background_weight_list = [
 for year in years:
     data = uproot.open(f"/eos/home-j/jiehan/root/skimmed_ntuples/ggH_M125/{year}.root")['inclusive'].arrays(library='pd')
     # data = pd.read_parquet(f"/eos/home-j/jiehan/parquet/cutflow_ggf/ggH_M125_{year}/merged_nominal.parquet")
-    for i in data.columns:
-        if "weight" in i and "central" in i:
-            print(i)
+    # for i in data.columns:
+    #     if "weight" in i and "central" in i:
+    #         print(i)
     for cat in cats:
         # 加入所有满足这个格式的变量 'weight*central'
         variables = ['H_mass', 'z_mumu', 'z_ee']
@@ -281,7 +281,7 @@ for year in years:
             exit()
 
         for t in types:
-            temp = cat_data.query(f'z_{t} > 0')
+            temp = cat_data.query(f'H_mass>100 & H_mass<180 & z_{t} > 0')
             weight = temp["weight_central"]
             print(f'{year} {cat} {t}')
             print(f'{"total events:":>35}{len(temp)}')
