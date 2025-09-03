@@ -26,7 +26,7 @@ DEFAULT_JETS = {
     "looseID" : True
 }
 
-def select_jets(jets, options, clean, year, name = "none", tagger = None):
+def select_jets(jets, options, clean, year, name = "none", tagger = None, event_runs = None):
     """
 
     """
@@ -98,16 +98,43 @@ def select_jets(jets, options, clean, year, name = "none", tagger = None):
     )
     jet_veto_cut = awkward.unflatten(jet_veto_sf, n_jets)
 
-    all_cuts = standard_cuts & id_cut & photon_veto_cut & jet_veto_cut
+    # ---- 2018 HEM jet-level cleaning (moved from event-level) ----
+    hem_mask = jets.pt > 0  # default: keep all
+    if year == "2018":
+        if tagger is not None and event_runs is not None:
+            # broadcast event-level info to jet dimension
+            if len(jets) == len(event_runs):
+                run_broadcast = awkward.broadcast_arrays(event_runs, jets.pt)[0]
+                region = ((jets.phi > -1.57) & (jets.phi < -0.87) &
+                          (jets.eta > -3.0) & (jets.eta < -1.3))
+                if tagger.is_data:
+                    run_region = (run_broadcast > 319077)
+                    remove = region & run_region
+                else:
+                    fraction = 0.6515623538907509
+                    # 產生一次 per-event 隨機數 (可重複執行時保持非決定性；若需可加種子)
+                    rand = numpy.random.random(len(event_runs))
+                    hem_run = rand < fraction
+                    hem_run_broadcast = awkward.broadcast_arrays(hem_run, jets.pt)[0]
+                    remove = region & hem_run_broadcast
+                hem_mask = ~remove
+                if awkward.any(~hem_mask):
+                    logger.debug(f"[HEM] Removed jets: {awkward.sum(~hem_mask, axis=1)[:10]}")
+            else:
+                logger.warning("[HEM] event_runs length mismatch; skip HEM cleaning.")
+
+    all_cuts = standard_cuts & id_cut & photon_veto_cut & jet_veto_cut & hem_mask
+
     standard_cuts = awkward.sum(standard_cuts, axis=1) > 0
     id_cut = awkward.sum(standard_cuts & id_cut, axis=1) > 0
     photon_veto_cut = awkward.sum(standard_cuts & id_cut & photon_veto_cut, axis=1) > 0
     jet_veto_cut = awkward.sum(standard_cuts & id_cut & photon_veto_cut & jet_veto_cut, axis=1) > 0
+    hem_event_cut = awkward.sum(standard_cuts & id_cut & photon_veto_cut & jet_veto_cut & hem_mask, axis=1) > 0
 
     if tagger is not None:
         tagger.register_cuts(
-            names = ["std cuts", "id cut", "photon veto cut", "jet veto cut", "all cuts"],
-            results = [standard_cuts, id_cut, photon_veto_cut, jet_veto_cut, all_cuts],
+            names = ["std cuts", "id cut", "photon veto cut", "jet veto cut", "hem cut", "all cuts"],
+            results = [standard_cuts, id_cut, photon_veto_cut, jet_veto_cut, hem_event_cut, all_cuts],
             cut_type = name
         )
 
