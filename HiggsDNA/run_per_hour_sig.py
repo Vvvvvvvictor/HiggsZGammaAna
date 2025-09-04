@@ -6,9 +6,7 @@ import signal
 from datetime import datetime
 
 # ===== 參數 =====
-# CMD = ["bash", "scripts/run_analysis_data_run3.sh"]
-# CMD = ["bash", "scripts/run_analysis_signal_run3.sh"]
-CMD = ["bash", "scripts/run_analysis_bkgmc_run3.sh"]
+CMD = ["bash", "scripts/run_analysis_signal_run2.sh"]
 # NUM_CYCLES = 5            # 週期次數
 # NUM_CYCLES = 10           # 週期次數
 NUM_CYCLES = 10           # 週期次數

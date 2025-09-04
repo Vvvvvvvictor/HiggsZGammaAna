@@ -22,7 +22,14 @@ from higgs_dna.utils.misc_utils import check_proxy, create_chunks, get_HiggsDNA_
 from higgs_dna.job_management.constants import CONDOR_STATUS_FLAGS, HOST_PARAMS 
 
 import enlighten
-en_manager = enlighten.get_manager() # for job progress status bar
+# en_manager = enlighten.get_manager() # for job progress status bar
+# Pei-Zhu
+en_manager = enlighten.get_manager(
+    stream=sys.stdout,
+    enabled=sys.stdout.isatty(),   # 只在真實終端啟用動態條
+    set_scroll=False               # 避免設定滾動區，減少 CPR/ANSI 操作
+)
+
 
 class JobsManager():
     """
@@ -247,7 +254,14 @@ class LocalManager(JobsManager):
         """
 
         """
-        with tqdm(total = sum([len(task.jobs) for task in self.tasks])) as prog:
+        # Pei-Zhu
+        # with tqdm(total = sum([len(task.jobs) for task in self.tasks])) as prog:
+        with tqdm(
+            total=sum([len(task.jobs) for task in self.tasks]),
+            dynamic_ncols=True,
+            ascii=True,
+            disable=not sys.stdout.isatty()
+        ) as prog:
             for task in self.tasks:
                 for job in task.jobs:
                     job.__class__ = self.job_type
@@ -353,7 +367,14 @@ class CondorManager(JobsManager):
         """
 
         """
-        with tqdm(total = sum([len(task.jobs) for task in self.tasks])) as prog:
+        # Pei-Zhu
+        # with tqdm(total = sum([len(task.jobs) for task in self.tasks])) as prog:
+        with tqdm(
+            total=sum([len(task.jobs) for task in self.tasks]),
+            dynamic_ncols=True,
+            ascii=True,
+            disable=not sys.stdout.isatty()
+        ) as prog:
             for task in self.tasks:
                 for job in task.jobs:
                     job.__class__ = self.job_type

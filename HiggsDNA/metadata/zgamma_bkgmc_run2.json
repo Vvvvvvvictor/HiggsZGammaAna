@@ -202,6 +202,21 @@
                     ]
                 ]
             },
+            "photon_fake_photon_sf": {
+                "type": "object",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.photon_systematics",
+                    "name": "photon_fake_photon_sf"
+                },
+                "modify_central_weight": false,
+                "input_collection": "SelectedPhoton",
+                "target_collections": [
+                    [
+                        "SelectedPhoton"
+                    ]
+                ]
+            },
             "photon_id_shape_sf": {
                 "type": "object",
                 "method": "from_function",
@@ -365,7 +380,7 @@
             "ZGToLLG", "DYJetsToLL", "ZG2JToG2L2J", "EWKZ2J"
         ],
         "years": [
-            "2016preVFP", "2016postVFP", "2017", "2018"
+            "2018"
         ]
     },
     "variables_of_interest": [
@@ -717,6 +732,36 @@
                 ],
                 [
                     "Muon",
+                    "corrected_pt"
+                ]
+            ],
+            [
+                [
+                    "Muon",
+                    "ptErr"
+                ],
+                [
+                    "Muon",
+                    "bsConstrainedPtErr"
+                ]
+            ],
+            [
+                [
+                    "Electron",
+                    "pt"
+                ],
+                [
+                    "Electron",
+                    "corrected_pt"
+                ]
+            ],
+            [
+                [
+                    "Photon",
+                    "pt"
+                ],
+                [
+                    "Photon",
                     "corrected_pt"
                 ]
             ],
