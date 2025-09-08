@@ -295,7 +295,8 @@ class ZGammaTaggerRun2(Tagger):
             },
             year = self.year,
             name = "SelectedJet",
-            tagger = self
+            tagger = self,
+            event_runs = events.run  # 新增：提供 HEM 清除所需 run
         )
 
         jets = awkward_utils.add_field(
@@ -509,43 +510,12 @@ class ZGammaTaggerRun2(Tagger):
         z_cands = z_cands[mass_cut] # OSSF lepton pairs with m_ll > 50.
         
         # ==========================================================
-        # HEM cut
-        if self.year=="2018" and self.is_data:
-            hem_run=events.run > 319077        
-            # checked 65.15623538907509% events in data could pass this run cut
-            hem_jet=awkward.num(events.Jet[(events.Jet.phi>-1.57) & (events.Jet.phi<-0.87) & (events.Jet.eta>-3) & (events.Jet.eta<-1.3)])>0
-            if "FatJet" in events.fields:
-                hem_fatjet=awkward.num(events.FatJet[(events.FatJet.phi>-1.57) & (events.FatJet.phi<-0.87) & (events.FatJet.eta>-3) & (events.FatJet.eta<-1.3)])>0
-            else:
-                hem_fatjet = awkward.num(events.Photon) < 0 # dummy all false
-            hem_cut=~((hem_run & hem_jet) | (hem_run & hem_fatjet))        
-        elif self.year=="2018" and not self.is_data:
-            #random number generator from 0 to 1
-            fraction=0.6515623538907509
-            events['random'] = numpy.random.rand(len(events))
-            hem_run=events.random < fraction
-            hem_jet=awkward.num(events.Jet[(events.Jet.phi>-1.57) & (events.Jet.phi<-0.87) & (events.Jet.eta>-3) & (events.Jet.eta<-1.3)])>0
-            if "FatJet" in events.fields:
-                hem_fatjet=awkward.num(events.FatJet[(events.FatJet.phi>-1.57) & (events.FatJet.phi<-0.87) & (events.FatJet.eta>-3) & (events.FatJet.eta<-1.3)])>0
-            else:
-                hem_fatjet = awkward.num(events.Photon) < 0 # dummy all false
-            hem_cut=~((hem_run & hem_jet) | (hem_run & hem_fatjet))
-        else:
-            hem_cut=awkward.num(events.Photon) >= 0 
-        events = events[hem_cut]
-        z_cands = z_cands[hem_cut]
-        electrons = electrons[hem_cut]
-        photons = photons[hem_cut]
-        muons = muons[hem_cut]
-        jets = jets[hem_cut]
-        z_ee_cut = z_ee_cut[hem_cut]
-        z_mumu_cut = z_mumu_cut[hem_cut]
-        trigger_pt_cut = trigger_pt_cut[hem_cut]
-        ele_trigger_pt_cut = ele_trigger_pt_cut[hem_cut]
-        mu_trigger_pt_cut = mu_trigger_pt_cut[hem_cut]
-        ele_trigger_cut = ele_trigger_cut[hem_cut]
-        mu_trigger_cut = mu_trigger_cut[hem_cut]
-        trigger_cut = trigger_cut[hem_cut]
+        # 原本的 2018 HEM event-level 過濾已改為在 jet_selections.py 中只移除受影響的 jets
+        # 保留此區塊為註解以示歷史：
+        """
+        (舊版已移除)
+        """
+        # 不再改動 events / photons / jets / leptons 於此處
         # ==========================================================
 
         has_z_cand = awkward.num(z_cands) >= 1

@@ -157,6 +157,19 @@
                     "SelectedMuon"
                 ]
             },
+            "nnlo_sf": {
+                "type": "object",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.NNLO_systematics",
+                    "name": "nnlo_sf"
+                },
+                "modify_central_weight": false,
+                "input_collection": "GenHzgHiggs",
+                "target_collections": [
+                    "GenHzgHiggs"
+                ]
+            },
             "photon_id_sf": {
                 "type": "object",
                 "method": "from_function",
@@ -219,15 +232,155 @@
                     ]
                 ]
             }
+        },
+        "independent_collections": {
+            "Scale": {
+                "method": "from_branch",
+                "branch_modified": [
+                    "Photon",
+                    "pt"
+                ],
+                "branches": {
+                    "up": [
+                        "Photon",
+                        "pt_ScaleUp"
+                    ],
+                    "down": [
+                        "Photon",
+                        "pt_ScaleDown"
+                    ]
+                }
+            },
+            "Smearing": {
+                "method": "from_branch",
+                "branch_modified": [
+                    "Photon",
+                    "pt"
+                ],
+                "branches": {
+                    "up": [
+                        "Photon",
+                        "dEsigmaUp"
+                    ],
+                    "down": [
+                        "Photon",
+                        "dEsigmaDown"
+                    ]
+                },
+                "additive": true
+            },
+            "Electron_scale": {
+                "method": "from_branch",
+                "branch_modified": [
+                    "Electron",
+                    "pt"
+                ],
+                "branches": {
+                    "up": [
+                        "Electron",
+                        "dEscaleUp"
+                    ],
+                    "down": [
+                        "Electron",
+                        "dEscaleDown"
+                    ]
+                },
+                "additive": true
+            },
+            "Electron_smear": {
+                "method": "from_branch",
+                "branch_modified": [
+                    "Electron",
+                    "pt"
+                ],
+                "branches": {
+                    "up": [
+                        "Electron",
+                        "dEsigmaUp"
+                    ],
+                    "down": [
+                        "Electron",
+                        "dEsigmaDown"
+                    ]
+                },
+                "additive": true
+            },
+            "JER": {
+                "method": "from_branch",
+                "branch_modified": [
+                    "Jet",
+                    "pt"
+                ],
+                "branches": {
+                    "up": [
+                        "Jet",
+                        "pt_jerUp"
+                    ],
+                    "down": [
+                        "Jet",
+                        "pt_jerDown"
+                    ]
+                }
+            },
+            "JES": {
+                "method": "from_branch",
+                "branch_modified": [
+                    "Jet",
+                    "pt"
+                ],
+                "branches": {
+                    "up": [
+                        "Jet",
+                        "pt_jesTotalUp"
+                    ],
+                    "down": [
+                        "Jet",
+                        "pt_jesTotalDown"
+                    ]
+                }
+            },
+            "MET_JES": {
+                "method": "from_branch",
+                "branch_modified": "MET_pt",
+                "branches": {
+                    "up": "MET_T1_pt_jesTotalUp",
+                    "down": "MET_T1_pt_jesTotalDown"
+                }
+            },
+            "MET_Unclustered": {
+                "method": "from_branch",
+                "branch_modified": "MET_pt",
+                "branches": {
+                    "up": "MET_T1_pt_unclustEnUp",
+                    "down": "MET_T1_pt_unclustEnDown"
+                }
+            },
+            "Muon_pt": {
+                "method": "from_branch",
+                "branch_modified": [
+                    "Muon",
+                    "pt"
+                ],
+                "branches": {
+                    "up": [
+                        "Muon",
+                        "correctedUp_pt"
+                    ],
+                    "down": [
+                        "Muon",
+                        "correctedDown_pt"
+                    ]
+                }
+            }
         }
     },
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "DYJetsToLL", "ZG2JToG2L2J"
+            "DYGto2LG_10to100"
         ],
         "years": [
-            "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"
+            "2023preBPix", "2023postBPix"
         ]
     },
     "variables_of_interest": [
@@ -475,6 +628,10 @@
         "Electron_mass",
         "Electron_energyErr",
         "Electron_ptErr",
+        "Electron_dEscaleUp",
+        "Electron_dEscaleDown",
+        "Electron_dEsigmaUp",
+        "Electron_dEsigmaDown",
         "Electron_charge",
         "Electron_miniPFRelIso_all",
         "Electron_pfRelIso03_all",
