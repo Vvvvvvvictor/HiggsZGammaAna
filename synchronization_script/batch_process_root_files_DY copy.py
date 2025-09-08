@@ -21,10 +21,10 @@ logging.basicConfig(
 def parse_arguments():
     """Parse command line arguments"""
     parser = argparse.ArgumentParser(description='Batch process DY input ROOT files')
-    parser.add_argument('--input-dir', type=str, default='/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_input_new/',
+    parser.add_argument('--input-dir', type=str, default='/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_input_redwood/',
                         help='Directory of input files')
     parser.add_argument('--output-dir', type=str, 
-                        default='/eos/user/j/jiehan/root/skimmed_ntuples_rui/',
+                        default='/eos/user/j/jiehan/root/skimmed_ntuples_rui_new/',
                         help='Directory to save output files')
     parser.add_argument('--dry-run', action='store_true',
                         help='If set, only list files without processing them')
@@ -121,12 +121,12 @@ def main():
     }
     
     # Find all matching files - including special DY files
-    input_files = glob.glob(os.path.join(args.input_dir, "*_*_pinnacles_*.root"))
+    input_files = glob.glob(os.path.join(args.input_dir, "*_*_redwood_v1_*.root"))
     logging.info(f"Found {len(input_files)} files")
     
     # 修改正则表达式以匹配DY相关文件和其他格式
-    # 匹配格式如: DY0_2016APV_pinnacles_ggf_fixedjet_ggf_ext.root
-    pattern = re.compile(r'(DY0|DYfilter|DYmix|[^_]+)_((?:2016APV)|(?:2022EE)|(?:2023BPix)|[0-9]{4})_pinnacles_(?:(?:all|ggf|vbf)_)?(?:fixedjet_)?(ggf_ext|vbf_ext|all)\.root')
+    # 匹配格式如: DYfilter_2016_redwood_v1_vbf.root
+    pattern = re.compile(r'(DY0|DYfilter|DYmix|[^_]+)_((?:2016APV)|(?:2022EE)|(?:2023BPix)|[0-9]{4})_redwood_v1_(?:(?:all|ggf|vbf)_)?(?:fixedjet_)?(ggf_ext|vbf_ext)\.root')
     
     # Statistics for processing results
     stats = {"success": 0, "skipped": 0, "recovered": 0, "failed": 0}
@@ -265,13 +265,16 @@ def main():
                                 logging.warning(f"Neither n_jets nor njet field found in {file_path}")
                                 ak_array_filtered = ak_array
                             
-                            if "met" in ak_array_filtered.fields:
+                            if "met" in ak_array_filtered.fields and "zg_categorizationBitMap" in ak_array_filtered.fields:
+                                zg_categorization = ak_array_filtered["zg_categorizationBitMap"]
+                                zg_categorization = ak.where(ak.is_none(zg_categorization), 0, zg_categorization)
+                                ak_array_filtered = ak_array_filtered[(zg_categorization == 128)]
                                 met = ak_array_filtered["met"]
                                 met = ak.where(ak.is_none(met), 0, met)
                                 ak_array_filtered = ak_array_filtered[met < 90]
                             else:
-                                logging.warning(f"met field not found in {file_path}")
-                            
+                                logging.warning(f"met or zg_categorizationBitMap field not found in {file_path}")
+
                             all_data["zero_to_one_jet"].append(ak_array_filtered)
                         elif ext_type == "vbf_ext":
                             # Only two_jet selection
@@ -282,12 +285,14 @@ def main():
                             elif "njet" in ak_array.fields:
                                 njet_field = "njet"
                                 
-                            if njet_field and "nbdfm" in ak_array.fields:
+                            if njet_field and "nbdfm" in ak_array.fields and "zg_categorizationBitMap" in ak_array.fields:
                                 n_jets = ak_array[njet_field]
                                 nbdfm = ak_array["nbdfm"]
+                                zg_categorization = ak_array["zg_categorizationBitMap"]
                                 n_jets = ak.where(ak.is_none(n_jets), 0, n_jets)
                                 nbdfm = ak.where(ak.is_none(nbdfm), 0, nbdfm)
-                                ak_array_filtered = ak_array[(n_jets >= 2) & (nbdfm == 0)]
+                                zg_categorization = ak.where(ak.is_none(zg_categorization), 0, zg_categorization)
+                                ak_array_filtered = ak_array[(n_jets >= 2) & (nbdfm == 0) & (zg_categorization == 64)]
                             else:
                                 logging.warning(f"Required fields not found in {file_path}: njet_field={njet_field}, nbdfm={'nbdfm' in ak_array.fields}")
                                 ak_array_filtered = ak_array
@@ -298,6 +303,8 @@ def main():
             expected_fields = ['weight_corr', 'llphoton_m', 'llphoton_eta', 'llphoton_phi', 'llphoton_pt', 'part', 'll_m', 'gamma_mvaID', 'pt_mass', 'H_relpt', 'gamma_ptRelErr', 'gamma_eta', 'Z_lead_lepton_eta', 'Z_sublead_lepton_eta', 'cosTheta', 'costheta', 'phi', 'l2g_deltaR', 'l1g_deltaR', 'weight', 'weight_dm', 'dm', 'mllg', 'gamma_pt', 'photon_eta', 'photon_phi', 'photon_reliso', 'jet1G_deltaR', 'jet2G_deltaR', 'photon_jet_mindr', 'photon_jet_maxdr', 'photon_zeppenfeld', 'gamma_relpt', 'll_lepid', 'll_refit_pt', 'Z_mass', 'll_refit_l1_pt', 'll_refit_l2_pt', 'll_refit_eta', 'll_refit_phi', 'llphoton_refit_pt', 'llphoton_refit_eta', 'llphoton_refit_phi', 'H_mass', 'llphoton_refit_dphi', 'llphoton_refit_deta', 'llphoton_refit_dr', 'llphoton_refit_l1_masserr', 'llphoton_refit_l2_masserr', 'llphoton_refit_ph_masserr', 'lep_cos_theta', 'Z_cos_theta', 'lep_phi', 'delta_phi_zgjj', 'pt_balance', 'llphoton_refit_dijet_dr', 'H_ptt', 'llphoton_refit_pTt_an_hig019014', 'llphoton_dijet_dphi', 'llphoton_dijet_balance', 'llphoton_dijet_dr', 'llphoton_hmiss_photon_dphi', 'llphoton_pTt', 'llphoton_pTt_an_hig019014', 'event', 'n_jets', 'nbdfm', 'jet_1_pt', 'jet_1_eta', 'j1_phi', 'jet_1_mass', 'j1_isgood', 'jet_2_pt', 'jet_2_eta', 'j2_phi', 'j2_isgood', 'j2_m', 'j3_pt', 'j3_eta', 'j3_phi', 'j3_isgood', 'j3_m', 'dijet_pt', 'dijet_eta', 'dijet_phi', 'mass_jj', 'dijet_dr', 'delta_phi_jj', 'delta_eta_jj', 'j1_qgl', 'j1_puid_disc', 'j1_ne_emef', 'j2_qgl', 'j2_puid_disc', 'j2_ne_emef', 'j3_qgl', 'j3_puid_disc', 'j3_zeppenfeld', 'zg_cutBitMap', 'met', 'isrun3', 'nel', 'nmu', 'year']
             with uproot.recreate(output_path) as out:
                 for tree_name, arrays in all_data.items():
+                    if "zero_to_one_jet" in tree_name:
+                        continue
                     try:
                         logging.info(f"Merging {len(arrays)} arrays for {tree_name}")
                         
@@ -345,34 +352,34 @@ def main():
                         # Create empty array as fallback
                         out[tree_name] = ak.Array({})
                 
-                # Also create all_jet tree by combining two_jet and zero_to_one_jet  
-                try:
-                    if all_data["two_jet"] or all_data["zero_to_one_jet"]:
-                        combined_arrays = []
-                        if all_data["two_jet"]:
-                            combined_arrays.extend(all_data["two_jet"])
-                        if all_data["zero_to_one_jet"]:
-                            combined_arrays.extend(all_data["zero_to_one_jet"])
+                # # Also create all_jet tree by combining two_jet and zero_to_one_jet  
+                # try:
+                #     if all_data["two_jet"] or all_data["zero_to_one_jet"]:
+                #         combined_arrays = []
+                #         if all_data["two_jet"]:
+                #             combined_arrays.extend(all_data["two_jet"])
+                #         if all_data["zero_to_one_jet"]:
+                #             combined_arrays.extend(all_data["zero_to_one_jet"])
                         
-                        # Use the same alignment logic
-                        common_fields = set(combined_arrays[0].fields)
-                        for arr in combined_arrays[1:]:
-                            common_fields &= set(arr.fields)
+                #         # Use the same alignment logic
+                #         common_fields = set(combined_arrays[0].fields)
+                #         for arr in combined_arrays[1:]:
+                #             common_fields &= set(arr.fields)
                         
-                        aligned_arrays = []
-                        sorted_common_fields = sorted(common_fields)
+                #         aligned_arrays = []
+                #         sorted_common_fields = sorted(common_fields)
                         
-                        for arr in combined_arrays:
-                            field_dict = {field: arr[field] for field in sorted_common_fields}
-                            aligned_arrays.append(ak.Array(field_dict))
+                #         for arr in combined_arrays:
+                #             field_dict = {field: arr[field] for field in sorted_common_fields}
+                #             aligned_arrays.append(ak.Array(field_dict))
                         
-                        merged_all = ak.concatenate(aligned_arrays)
-                        logging.info(f"DY {year} all_jet: {len(merged_all)} events")
-                        out["all_jet"] = merged_all
-                except Exception as e:
-                    logging.error(f"Error creating all_jet tree: {e}")
-                    import traceback
-                    traceback.print_exc()
+                #         merged_all = ak.concatenate(aligned_arrays)
+                #         logging.info(f"DY {year} all_jet: {len(merged_all)} events")
+                #         out["all_jet"] = merged_all
+                # except Exception as e:
+                #     logging.error(f"Error creating all_jet tree: {e}")
+                #     import traceback
+                #     traceback.print_exc()
             
             logging.info(f"Successfully merged DY files for year {year} -> {output_path}")
             stats["success"] += 1

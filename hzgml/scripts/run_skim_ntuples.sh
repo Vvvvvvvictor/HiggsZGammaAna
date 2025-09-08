@@ -1,7 +1,7 @@
 #!/bin/bash                                                                                                                                                                       
 echo "==============STARTED=============="
 
-input="/eos/user/j/jiehan/parquet/nanov9/"
+input="/eos/user/j/jiehan/parquet/nanov12/"
 target="/eos/home-j/jiehan/root/skimmed_ntuples/"
 # input="/eos/user/j/jiehan/parquet/nanov12/"
 # target="/eos/home-j/jiehan/root/skimmed_ntuples_run3/"
@@ -16,13 +16,13 @@ target="/eos/home-j/jiehan/root/skimmed_ntuples/"
 # target="/eos/home-p/pelai/HZgamma/Root_Dataset/run2/NanoV9/"
 
 # years=(2018)
-years=(2016preVFP 2016postVFP 2017 2018)
-systs=("Photon_scale" "Photon_smear" "Electron_scale" "Electron_smear" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt_smear")
+# years=(2016preVFP 2016postVFP 2017 2018)
+# systs=("Photon_scale" "Photon_smear" "Electron_scale" "Electron_smear" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt_smear")
 # systs=("Photon_scale" "Photon_smear" "Electron_scale" "Electron_smear" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt")
 # years=(2022preEE 2022postEE)
 # years=(2023preBPix 2023postBPix)
-# years=(2022preEE 2022postEE 2023preBPix 2023postBPix)
-# systs=("Photon_scale" "Photon_smear" "Electron_scale" "Electron_smear" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt_scale" "Muon_pt_smear")
+years=(2022preEE 2022postEE 2023preBPix 2023postBPix)
+systs=("Photon_scale" "Photon_smear" "Electron_scale" "Electron_smear" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt_scale" "Muon_pt_smear")
 # years=(2016preVFP 2016postVFP 2017 2018 2022preEE 2022postEE 2023preBPix 2023postBPix)
 
 # 函数定义：执行命令并处理错误
@@ -200,16 +200,16 @@ done
 
 # # # # 处理 data 样本
 
-# samples=(Data)
-# type="data"
-# for sample in "${samples[@]}"; do
-#     mkdir -p "$target$sample"
-#     # 存储后台任务的进程ID列表
-#     pid_list=()
+samples=(Data)
+type="data"
+for sample in "${samples[@]}"; do
+    mkdir -p "$target$sample"
+    # 存储后台任务的进程ID列表
+    pid_list=()
 
-#     # 调用函数处理样本数据
-#     process_sample "$sample" "$type"
-# done
+    # 调用函数处理样本数据
+    process_sample "$sample" "$type"
+done
 
 # Use fake photon background estimation with data-driven
 
