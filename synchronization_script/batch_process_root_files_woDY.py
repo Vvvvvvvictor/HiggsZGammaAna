@@ -23,7 +23,7 @@ def parse_arguments():
     parser.add_argument('--input-dir', type=str, default='/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_input_new/',# BDT_input_new/',
                         help='Directory of input files')
     parser.add_argument('--output-dir', type=str, 
-                        default='/eos/user/j/jiehan/root/skimmed_ntuples_rui_new/',
+                        default='/eos/user/j/jiehan/root/skimmed_ntuples_rui/',
                         help='Directory to save output files')
     parser.add_argument('--dry-run', action='store_true',
                         help='If set, only list files without processing them')

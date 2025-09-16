@@ -22,10 +22,10 @@ print("=====================================================================")
 folder = "test"  # Can be "val" or "test"
 path = f"/eos/home-j/jiehan/root/outputs/{folder}/"
 tree = channel  # Tree name is assumed to be the same as channel name
-var = "bdt_score_t" # Variable to plot
+var = "bdt_score" # Variable to plot
 bins = 100  # Number of bins
-x_range = (0.0, 1.0)  # Range of the variable
-x_title = "Transformed BDT score"
+x_range = (-0.1, 1.1)  # Range of the variable
+x_title = "BDT score"
 bin_width = (x_range[1] - x_range[0]) / bins
 y_title = f"Events / {bin_width:.3f}"
 sub_y_title = "Data / MC"
@@ -112,10 +112,6 @@ for i, bkg_source in enumerate(mc_file_list):
 for hist in mc_hist_list:
     mc_total_hist.Add(hist)
 
-# Add individual MC hists to stack in reverse order for correct drawing
-for hist in reversed(mc_hist_list):
-    h_stack_mc.Add(hist.Clone()) # Clone to be safe as THStack might take ownership
-
 print(f"Total MC Integral (for ratio): {mc_total_hist.Integral()}")
 
 # --- Process Data Sample ---
@@ -138,6 +134,17 @@ for data_file_name in data_file_list:
 
 plot.Set(data_hist, MarkerStyle=20, MarkerSize=1.0, LineColor=ROOT.kBlack) # Standard data style
 print(f"Total Data Integral: {data_hist.Integral()}")
+
+sf = data_hist.Integral() / mc_total_hist.Integral() if mc_total_hist.Integral() > 0 else 1.0
+print(f"Data/MC Scale Factor: {sf:.3f}")
+for i in range(mc_hist_list.__len__()):
+    mc_hist_list[i].Scale(sf)
+mc_total_hist.Scale(sf)
+
+# Add individual MC hists to stack in reverse order for correct drawing
+# for hist in reversed(mc_hist_list):
+for hist in mc_hist_list:
+    h_stack_mc.Add(hist.Clone()) # Clone to be safe as THStack might take ownership
 
 # --- Create Ratio Plot ---
 ratio_hist = None
@@ -166,7 +173,7 @@ else:
 # --- Drawing ---
 # Upper Pad (Main Plot)
 pads[0].cd()
-pads[0].SetLogy(True) # Set log scale for Y-axis
+# pads[0].SetLogy(True) # Set log scale for Y-axis
 
 h_stack_mc.Draw("HIST") # Draw stacked MC
 
@@ -220,10 +227,8 @@ else:
     h_stack_mc.SetMinimum(0)
 
 # Legend
-legend_x_start = 0.25
-legend_y_start = 0.90 - (len(mc_legend) + 1) * 0.045 # Adjust Y start based on number of entries
-legend = plot.PositionedLegend(legend_x_start, 0.25, 2, 0.04) # x, y_bottom_of_legend, n_columns, y_spacing
-plot.Set(legend, TextSize=0.030, FillStyle=0, BorderSize=0)
+legend = plot.PositionedLegend(0.6, (len(mc_legend) / 2 ) * 0.045, 2, 0.04) # x, y_bottom_of_legend, n_columns, y_spacing
+plot.Set(legend, TextSize=0.025, FillStyle=0, BorderSize=0, NColumns=2)
 legend.AddEntry(data_hist, f"Data ({data_hist.Integral():.1f})", "pe")
 for i, mc_h in enumerate(mc_hist_list):
     if i < len(mc_legend):
@@ -231,6 +236,12 @@ for i, mc_h in enumerate(mc_hist_list):
     else:
         legend.AddEntry(mc_h, f"MC Comp {i} ({mc_h.Integral():.1f})", "f") # Fallback legend
 legend.Draw()
+# Draw scale factor on the main pad and save to a text file
+pads[0].cd()
+sf_latex = ROOT.TLatex()
+sf_latex.SetNDC()
+sf_latex.SetTextSize(0.035)
+sf_latex.DrawLatex(0.62, 0.80, f"Data/MC SF = {sf:.3f}")
 
 pads[0].Update()
 pads[0].RedrawAxis()
