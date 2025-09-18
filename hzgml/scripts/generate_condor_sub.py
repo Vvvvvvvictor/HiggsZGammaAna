@@ -16,12 +16,12 @@ def generate_condor_submission():
     target_base = "/eos/home-j/jiehan/root/skimmed_ntuples/"
     script_path = "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py"
     
-    years = ["2018"] #["2016preVFP", "2016postVFP", "2017", "2018", "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"]
+    years = ["2016preVFP", "2016postVFP", "2017", "2018", "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"] #["2016preVFP", "2016postVFP", "2017", "2018", "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"]
 
     signal_samples = ["ggH_M125", "VBF_M125", "WplusH_M125", "WminusH_M125", "ZH_M125", "ttH_M125"]
     bkg_samples = [
-        "ZGToLLG", "DYJetsToLL", "ZG2JToG2L2J", "EWKZ2J",
-        "DYGto2LG_10to50", "DYGto2LG_50to100", "DYGto2LG_10to100"
+        # "ZGToLLG", "DYJetsToLL", "ZG2JToG2L2J", "EWKZ2J",
+        # "DYGto2LG_10to50", "DYGto2LG_50to100", "DYGto2LG_10to100"
     ]
     data_samples = ["Data"]
 

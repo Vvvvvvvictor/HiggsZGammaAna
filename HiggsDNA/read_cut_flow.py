@@ -7,8 +7,9 @@ import time
 
 start_time = time.time()
 
-eos_path = '/eos/home-j/jiehan/parquet/nanov9/'
-log_path = '/eos/user/j/jiehan/eos_log_20250808/'
+eos_path = '/eos/home-j/jiehan/parquet/nanov12/'
+log_path = '/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/HiggsDNA/eos_logs/'
+# log_path = '/eos/user/j/jiehan/eos_log_20250808/'
 # log_path = '/eos/user/j/jiehan/parquet/nanov9/'
 
 dataset_type = 'data'
@@ -29,7 +30,7 @@ cut_type = ['all', 'N_lep_sel','trig_cut','lep_pt_cut','has_g_cand', 'has_z_cand
 cut_name = {
     'zgammas':['No selction', r'$N_{l}\geq2$', r'e, ee trigger || $\mu$, $\mu\mu$ trigger', r'lepton trigger $p_{T}$ cut', r'$N_{\gamma}\geq1$', r'80GeV<m_{ll}<100GeV', r'p_{T}^{\gamma}/m_{ll\gamma}>15./110.', r'm_{ll}+m_{ll\gamma}<185GeV', r'100GeV<m_{ll\gamma}<180GeV', 'event_filter'], 
     'zgammas_ele':['No selction', r'$N_{e}\geq2$', 'e, ee trigger', r'e trigger $p_{T}$ cut', r'$N_{\gamma}\geq1$', r'80GeV<$m_{ee}$<100GeV', r'$p_{T}^{\gamma}/m_{ll\gamma}$>15./110.', r'$m_{ee}+m_{ee\gamma}$<185GeV', r'100GeV<$m_{ee\gamma}$<180GeV', 'event_filter'],
-    'zgammas_mu':['No selction', r'$N_{\mu}\geq2$', r'$\mu$, $\mu\mu$ trigger', r'$\mu$ trigger $p_{T}$ cut', r'$N_{\gamma}\geq1$', r'80GeV<$m_{\mu\mu}$<100GeV', r'$p_{T}^{\gamma}/m_{ll\gamma}$>15./110.', r'$m_{\mu\mu}+m_{\mu\mu\gamma}$<185GeV', r'100GeV<$m_{\mu\mu\gamma}$<180GeV', 'event_filter'], 
+    'zgammas_mu':['No selction', r'$N_{\mu}\geq2$', r'$\mu$, $\mu\mu$ trigger', r'$\mu$ trigger $p_{T} cut', r'$N_{\gamma}\geq1$', r'80GeV<$m_{\mu\mu}$<100GeV', r'$p_{T}^{\gamma}/m_{ll\gamma}$>15./110.', r'$m_{\mu\mu}+m_{\mu\mu\gamma}$<185GeV', r'100GeV<$m_{\mu\mu\gamma}$<180GeV', 'event_filter'], 
     'zgammas_w':['No selction', r'$N_{l}\geq2$', r'e, ee trigger || $\mu$, $\mu\mu$ trigger', r'lepton trigger $p_{T}$ cut', r'$N_{\gamma}\geq1$', r'80GeV<m_{ll}<100GeV', r'p_{T}^{\gamma}/m_{ll\gamma}>15./110.', r'm_{ll}+m_{ll\gamma}<185GeV', r'100GeV<m_{ll\gamma}<180GeV', 'event_filter'],  
     'zgammas_ele_w':['No selction', r'$N_{e}\geq2$', 'e, ee trigger', r'e trigger $p_{T}$ cut', r'$N_{\gamma}\geq1$', r'80GeV<$m_{ee}$<100GeV', r'$p_{T}^{\gamma}/m_{ll\gamma}$>15./110.', r'$m_{ee}+m_{ee\gamma}$<185GeV', r'100GeV<$m_{ee\gamma}$<180GeV', 'event_filter'],
     'zgammas_mu_w':['No selction', r'$N_{\mu}\geq2$', r'$\mu$, $\mu\mu$ trigger', r'$\mu$ trigger $p_{T}$ cut', r'$N_{\gamma}\geq1$', r'80GeV<$m_{\mu\mu}$<100GeV', r'$p_{T}^{\gamma}/m_{ll\gamma}$>15./110.', r'$m_{\mu\mu}+m_{\mu\mu\gamma}$<185GeV', r'100GeV<$m_{\mu\mu\gamma}$<180GeV', 'event_filter']
@@ -60,6 +61,8 @@ for dataset in dataset_names:
         if not os.path.isdir("{}{}/{}_{}".format(log_path, dataset_type, dataset, year)):
             continue      
         for log_dir in os.listdir("{}{}/{}_{}".format(log_path, dataset_type, dataset, year)):
+            # if int(log_dir.split("_")[1]) < 449 or int(log_dir.split("_")[1]) > 1000:
+            #     continue
             flag = 1
             log_dir = "{}{}/{}_{}/{}".format(log_path, dataset_type, dataset, year, log_dir)
             # print(log_dir)

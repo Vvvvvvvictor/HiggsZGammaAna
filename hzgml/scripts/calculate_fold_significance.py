@@ -19,7 +19,7 @@ def parse_args():
                         help='Region to process')
     parser.add_argument('-d', '--datapath', default='/eos/home-j/jiehan/root/outputs/', help='Path to root files')
     parser.add_argument('-v', '--variable', default='bdt', choices=['bdt', 'NN'], help='MVA variable')
-    parser.add_argument('-t', '--transform', type=bool, default=True, help='Use transformed scores')
+    parser.add_argument('-t', '--transform', type=bool, default=False, help='Use transformed scores')
     parser.add_argument('-p', '--prime', type=int, default=314159, help='Prime number for fold division')
     parser.add_argument('-o', '--output', default=None, help='Output JSON file path')
     parser.add_argument('-e', '--estimate', default='fullSimrw', 

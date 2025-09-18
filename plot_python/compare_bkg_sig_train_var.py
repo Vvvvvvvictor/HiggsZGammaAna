@@ -49,11 +49,11 @@ config_dict = {
 
 TREE = "two_jet"
 WEIGHT = "weight_corr"
-PATH = "/eos/user/j/jiehan/root/skimmed_ntuples_rui/"
+PATH = "/eos/user/j/jiehan/root/skimmed_ntuples_rui_new/"
 
 sig = {"sig": ["ggH_M125", "VBF_M125"], "ggH": ["ggH_M125"], "VBF": ["VBF_M125"]}
 bkg = {r"Z$+\gamma$": ["ZGToLLG"], 
-        "Z+Fake Photon": ["DYJetsToLL"], #, "EWKZ2J"], 
+        "Z+Fake Photon": ["DYJetsToLL_ext"], #, "EWKZ2J"], 
         r"VBSZ+$\gamma$": ["EWKZ2J"], #"ZG2JToG2L2J"], 
         # r"t$\bar{t}$": ["TT"], r"t$\gamma$/t$\bar{t}\gamma$": ["TTGJets", "TGJets"], "multiboson": ["WW", "WZ", "ZZ", "WWG", "WZG", "ZZG"], r"t$\bar{t}$+X": ["ttZJets", "ttWJets"]
         }
@@ -82,7 +82,7 @@ def convert_root_to_hist(file_dict, selection=None):
                         continue
                 if selection != None:
                     samples = samples.query(selection)
-                hist, _ = np.histogram(samples["H_mass"], bins=80, range=[100, 180], weights=samples[WEIGHT])
+                hist, _ = np.histogram(samples["H_mass"], bins=80, range=[95, 180], weights=samples[WEIGHT])
                 mass_hist = mass_hist + hist
                 hist, bins = np.histogram(samples[VAR], bins=BINS, range=[RMIN, RMAX], weights=samples[WEIGHT])
                 hist[0] += np.sum(samples[WEIGHT][(samples[VAR] < RMIN) & (samples[VAR] > -900)])

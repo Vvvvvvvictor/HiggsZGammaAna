@@ -1,7 +1,7 @@
 #!/bin/bash                                                                                                                                                                       
 echo "==============STARTED=============="
 
-input="/eos/user/j/jiehan/parquet/nanov12/"
+input="/eos/user/j/jiehan/parquet/nanov9/"
 target="/eos/home-j/jiehan/root/skimmed_ntuples/"
 # input="/eos/user/j/jiehan/parquet/nanov12/"
 # target="/eos/home-j/jiehan/root/skimmed_ntuples_run3/"
@@ -16,13 +16,13 @@ target="/eos/home-j/jiehan/root/skimmed_ntuples/"
 # target="/eos/home-p/pelai/HZgamma/Root_Dataset/run2/NanoV9/"
 
 # years=(2018)
-# years=(2016preVFP 2016postVFP 2017 2018)
-# systs=("Photon_scale" "Photon_smear" "Electron_scale" "Electron_smear" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt_smear")
+years=(2016preVFP 2016postVFP 2017 2018)
+systs=("Photon_scale" "Photon_smear" "Electron_scale" "Electron_smear" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt_smear")
 # systs=("Photon_scale" "Photon_smear" "Electron_scale" "Electron_smear" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt")
 # years=(2022preEE 2022postEE)
 # years=(2023preBPix 2023postBPix)
-years=(2022preEE 2022postEE 2023preBPix 2023postBPix)
-systs=("Photon_scale" "Photon_smear" "Electron_scale" "Electron_smear" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt_scale" "Muon_pt_smear")
+# years=(2022preEE 2022postEE 2023preBPix 2023postBPix)
+# systs=("Photon_scale" "Photon_smear" "Electron_scale" "Electron_smear" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt_scale" "Muon_pt_smear")
 # years=(2016preVFP 2016postVFP 2017 2018 2022preEE 2022postEE 2023preBPix 2023postBPix)
 
 # 函数定义：执行命令并处理错误
@@ -113,34 +113,34 @@ process_sample_syst() {
 
 # samples=(ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125 ggH_M120 VBFH_M120 WplusH_M120 WminusH_M120 ZH_M120 ttH_M120 ggH_M130 VBFH_M130 WplusH_M130 WminusH_M130 ZH_M130 ttH_M130 ggH_mix VBF_mix ggH VBF WplusH WminusH ZH ttH)
 
-samples=(ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125) 
-# # samples=(ggH_M125)
-type="signal"
-for sample in "${samples[@]}"; do
-    mkdir -p "$target${sample}/"
-    # 存储后台任务的进程ID列表
-    pid_list=()
+# samples=(ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125) 
+# # # samples=(ggH_M125)
+# type="signal"
+# for sample in "${samples[@]}"; do
+#     mkdir -p "$target${sample}/"
+#     # 存储后台任务的进程ID列表
+#     pid_list=()
 
-    # 调用函数处理样本数据
-    process_sample "$sample" "$type"
-done
+#     # 调用函数处理样本数据
+#     process_sample "$sample" "$type"
+# done
 
-samples=(ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125) # ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125
-type="signal"
-for sample in "${samples[@]}"; do
-    for sf in "up" "down"; do #  "up" "down"
-        for syst in "${systs[@]}"; do
-            mkdir -p "$target${sample}_${syst}_${sf}"
-        done
-        for year in "${years[@]}"; do
-            # 存储后台任务的进程ID列表
-            pid_list=()
+# samples=(ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125) # ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125
+# type="signal"
+# for sample in "${samples[@]}"; do
+#     for sf in "up" "down"; do #  "up" "down"
+#         for syst in "${systs[@]}"; do
+#             mkdir -p "$target${sample}_${syst}_${sf}"
+#         done
+#         for year in "${years[@]}"; do
+#             # 存储后台任务的进程ID列表
+#             pid_list=()
 
-            # 调用函数处理样本数据
-            process_sample_syst "$sample" "$type" "$year" "$sf"
-        done
-    done
-done
+#             # 调用函数处理样本数据
+#             process_sample_syst "$sample" "$type" "$year" "$sf"
+#         done
+#     done
+# done
 
 # ****************************
 # ********** Bkg *************

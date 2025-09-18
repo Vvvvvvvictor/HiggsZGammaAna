@@ -71,37 +71,37 @@ print("============================")
 print("Finish setting picture style")
 print("============================")
 
-# get hists
-data_sb_yields, mc_sb_yields = 0, 0
-for i, bkg in enumerate(mc_file_list):
-    if isinstance(bkg, list):
-        for sub_bkg in bkg:
-            arrays = pic.read_root_file(path+channel+"/"+sub_bkg, var, tree, selections)
-            if file_hist in globals():
-                file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range, file_hist)
-            else:
-                file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range)
-    else: 
-        arrays = pic.read_root_file(path+channel+"/"+bkg, var, tree, selections)
-        file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range)
-    mc_sb_yields = mc_sb_yields + yields
+# # get hists
+# data_sb_yields, mc_sb_yields = 0, 0
+# for i, bkg in enumerate(mc_file_list):
+#     if isinstance(bkg, list):
+#         for sub_bkg in bkg:
+#             arrays = pic.read_root_file(path+channel+"/"+sub_bkg, var, tree, selections)
+#             if file_hist in globals():
+#                 file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range, file_hist)
+#             else:
+#                 file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range)
+#     else: 
+#         arrays = pic.read_root_file(path+channel+"/"+bkg, var, tree, selections)
+#         file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range)
+#     mc_sb_yields = mc_sb_yields + yields
 
-for data in data_file_list:
-    if isinstance(data, list):
-        for sub_data in data:
-            arrays = pic.read_root_file(path+channel+"/"+sub_data, var, tree, selections)
-            if file_hist in globals():
-                file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range, file_hist)
-            else:
-                file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range)
-    else: 
-        arrays = pic.read_root_file(path+channel+"/"+data, var, tree, selections)
-        file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range)
-    data_sb_yields = data_sb_yields + yields
+# for data in data_file_list:
+#     if isinstance(data, list):
+#         for sub_data in data:
+#             arrays = pic.read_root_file(path+channel+"/"+sub_data, var, tree, selections)
+#             if file_hist in globals():
+#                 file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range, file_hist)
+#             else:
+#                 file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range)
+#     else: 
+#         arrays = pic.read_root_file(path+channel+"/"+data, var, tree, selections)
+#         file_hist, _, yields = pic.get_hist_sb(arrays, var, 1, "mc_{}".format(i), bins, x_range, blind_range)
+#     data_sb_yields = data_sb_yields + yields
 
-sb_ratio = data_sb_yields / mc_sb_yields
+# sb_ratio = data_sb_yields / mc_sb_yields
 
-# sb_ratio=1.
+sb_ratio=1.
 
 # selections+=["H_mass<130", "H_mass>120"]
 

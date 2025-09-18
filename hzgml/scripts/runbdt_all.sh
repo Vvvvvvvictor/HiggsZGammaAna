@@ -82,17 +82,17 @@ python scripts/categorization_1D.py -r two_jet -b 4 --minSB 20 -n 100 -t True --
 # Plotting the BDT results
 #===========================================
 # python scripts/calculate_fold_significance.py
-# python scripts/calculate_fold_significance.py --region zero_to_one_jet --input test/significances/0_0_zero_to_one_jet_1D_4.json
-# for chan in two_jet zero_to_one_jet all_jet;do
-#     python ../plot_python/compare_data_bkg_bdt_sideband.py --channel $chan
-# done
+python scripts/calculate_fold_significance.py --region zero_to_one_jet --input test/significances/0_0_zero_to_one_jet_1D_4.json
+# # for chan in two_jet zero_to_one_jet all_jet;do
+# #     python ../plot_python/compare_data_bkg_bdt_sideband.py --channel $chan
+# # done
 # python ../plot_python/plot_cats_hmass_dis.py --channel "two_jet"
-# python ../plot_python/plot_cats_hmass_dis.py --channel "zero_to_one_jet"
-# # python ../plot_python/plot_cats_hmass_dis.py --channel "all_jet"
+python ../plot_python/plot_cats_hmass_dis.py --channel "zero_to_one_jet"
+# # # python ../plot_python/plot_cats_hmass_dis.py --channel "all_jet"
 # python ../plot_python/compare_sig_bkg_bdt_sosb.py
-# python ../plot_python/compare_sig_bkg_bdt_sosb.py --channel zero_to_one_jet
-# python ../plot_python/compare_data_bkg_bdt_sideband.py
-python ../plot_python/compare_data_bkg_bdt_sideband.py --channel two_jet
+python ../plot_python/compare_sig_bkg_bdt_sosb.py --channel zero_to_one_jet
+python ../plot_python/compare_data_bkg_bdt_sideband.py
+# python ../plot_python/compare_data_bkg_bdt_sideband.py --channel two_jet
 # bash ../plot_python/run.sh
 
 # # vbf category
@@ -145,7 +145,8 @@ python ../plot_python/compare_data_bkg_bdt_sideband.py --channel two_jet
 
 # python ../SSTest/Generate_template.py
 # python scripts/Generate_fake_photon_template.py -r two_jet
-# python ../plot_python/make_data_driven_two_jet.py 
+# python ../plot_python/make_data_driven_two_jet.py
+# python ../plot_python/compare_bkg_data_train_var.py
 # python ../plot_python/compare_sig_bkg_bdt_sosb.py
 # python ../SSTest/Generate_fake_photon_template_2J.py
 # rm ../plot_python/pic/2J/*

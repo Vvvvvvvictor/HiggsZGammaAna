@@ -44,8 +44,9 @@ def getArgs():
     return  parser.parse_args()
 
 def true_delta_phi(delta_phi):
-    if delta_phi > math.pi:
-        return 2 * math.pi - delta_phi
+    delta_phi_mod = delta_phi % (2 * math.pi)
+    if delta_phi_mod > math.pi:
+        return 2 * math.pi - delta_phi_mod
     return delta_phi
     
 def true_delta_phi_vectorized(delta_phi):
@@ -122,7 +123,7 @@ def compute_delta_phi_variables_vectorized(data):
     
     # MET and MHT delta phi with gamma
     delta_phi_vars['MET_deltaphi'] = true_delta_phi_vectorized(np.abs(data['MET_phi'] - data['gamma_phi']))
-    delta_phi_vars['photon_mht_deltaphi'] = true_delta_phi_vectorized(np.abs(data['MHT_phi'] - data['gamma_phi']))
+    delta_phi_vars['photon_mht_deltaphi'] = true_delta_phi_vectorized(np.abs(data['MHT_phi'] + math.pi - data['gamma_phi']))
     
     # Jet delta phi with gamma
     for i in range(1, 5):

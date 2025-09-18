@@ -11,22 +11,22 @@ config_dict = {
     # "Z_relpt": {"range": (0, 1), "title": r"${p_T^{ll}\cdot c}/{m_{ll\gamma}}$"},
     # "gamma_relpt": {"range": (0.1, 1), "title": r"${p_T^{\gamma}\cdot c}/{m_{ll\gamma}}$"},
     # "pt_balance_0j": {"range": (0, 1), "title": r"$Zeppenfeld_{\gamma}(0j)$"},
-    # "H_mass": {"range": (100, 180), "title": r"$m_{ll\gamma}(GeV/c^{2})$"},
+    # "H_mass": {"range": (50, 350), "bins": 150, "title": r"$m_{ll\gamma}(GeV/c^{2})$"},
     # "H_ptt": {"range": (0, 160), "title": r"$p_{T_{t}}^{ll\gamma}$"},
     # "jet_1_btagDeepFlavB": {"range": (0, 0.1), "title": "j1 btag"},
     # "jet_2_btagDeepFlavB": {"range": (0, 0.15), "title": "j2 btag"},
     # "HZ_deltaRap": {"range": (-0.7, 0.7), "title": r"$\Delta y(ll,ll\gamma)$"},
 
-    # "jet_1_mass": {"range": (0, 40), "bins": 50, "title": r"$m_{j}(GeV/c^{2})$"},
-    # "jet_1_eta": {"range": (-5, 5), "bins": 50, "title": r"$\eta_{j1}$"},
+    "jet_1_mass": {"range": (0, 40), "bins": 50, "title": r"$m_{j}(GeV/c^{2})$"},
+    "jet_1_eta": {"range": (-5, 5), "bins": 50, "title": r"$\eta_{j1}$"},
 
-    "mass_jj": {"range": (0, 1000), "bins": 50, "title": r"$m_{jj}(GeV/c^{2})$"},
-    "delta_eta_jj": {"range": (0, 8), "bins": 40, "title": r"$\Delta\eta_{j}$"},
-    "delta_phi_jj": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi_{j}$"},
-    "jet_2_pt": {"range": (30, 150), "bins": 50, "title": r"$p_{T_{j2}}(GeV/c)$"},
-    "jet2G_deltaR": {"range": (0.4, 6.4), "bins": 40, "title": r"$\Delta R(\gamma,j2)$"},
+    # "mass_jj": {"range": (0, 1000), "bins": 50, "title": r"$m_{jj}(GeV/c^{2})$"},
+    # "delta_eta_jj": {"range": (0, 8), "bins": 40, "title": r"$\Delta\eta_{j}$"},
+    # "delta_phi_jj": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi_{j}$"},
+    # "jet_2_pt": {"range": (30, 150), "bins": 50, "title": r"$p_{T_{j2}}(GeV/c)$"},
+    # "jet2G_deltaR": {"range": (0.4, 6.4), "bins": 40, "title": r"$\Delta R(\gamma,j2)$"},
 
-    "n_jets": {"range": (2, 6), "bins": 4, "title": r"$N_{jets}$"},
+    "n_jets": {"range": (0, 2), "bins": 2, "title": r"$N_{jets}$"},
 
     "llphoton_hmiss_photon_dphi": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi(ll\gamma-rev, photon)$"},
     "delta_phi_zgjj": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi_{ll\gamma,j}$"},
@@ -47,9 +47,9 @@ config_dict = {
     "gamma_ptRelErr": {"range": (0.01, 0.11), "bins": 50, "title": r"$\sigma_{p_T^{\gamma}}/p_T^{\gamma}$"}
 }
 
-TREE = "two_jet"
+TREE = "zero_to_one_jet"
 WEIGHT = "weight_corr"
-PATH = "/eos/user/j/jiehan/root/skimmed_ntuples_rui/"
+PATH = "/eos/user/j/jiehan/root/skimmed_ntuples_rui_new/"
 years = ["2016preVFP", "2016postVFP", "2017", "2018", "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"] #"2016preVFP", "2016postVFP", "2017", "2018", "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"
 
 data = {"data": ["Data"]}
@@ -122,7 +122,7 @@ def convert_root_to_hist(file_dict, sf_var=None, sf_bins=None, sf=None, selectio
                         sf_weight[(samples[sf_var] > low) & (samples[sf_var] < high)] = sf[i]
                     weight = weight * sf_weight
                 samples[WEIGHT] = weight
-                samples = samples.query(f"({VAR}>-900) & ({VAR}<900)")
+                samples = samples.query(f"({VAR}!=-999) & ({VAR}!=999)").copy()
                 hist, _ = np.histogram(samples.query("H_mass<120 | H_mass>130")["H_mass"], bins=80, range=[100, 180], weights=samples.query("H_mass<120 | H_mass>130")[WEIGHT])
                 mass_hist = mass_hist + hist
                 hist, bins = np.histogram(samples[VAR], bins=BINS, range=[RMIN, RMAX], weights=samples[WEIGHT])
@@ -139,7 +139,7 @@ def convert_root_to_hist(file_dict, sf_var=None, sf_bins=None, sf=None, selectio
     return hists, np.sqrt(error), bins, mass_hist
 
 # mass_selection = "((H_mass<120) | (H_mass>130))"
-selection = "H_mass>95"
+selection = "H_mass>95 & H_mass<180"
 # selection = "jet_2_pt < 50"
 # sf_var = "delta_phi_zgjj"
 # sf_bins, sf = get_sf(bkg, data, sf_var, (2, 3.14, 20), selection=f"{mass_selection} & {selection}")

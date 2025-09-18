@@ -7,10 +7,10 @@ import os
 # Parse command line arguments
 parser = argparse.ArgumentParser(description='Plot 4-fold comparison with average curves')
 parser.add_argument('--mode', choices=['test', 'val'], default='test', help='Choose test or val data')
-parser.add_argument('--type', choices=['background', 'signal', 'data'], default='background', help='Choose plot type')
-parser.add_argument('--channel', default='two_jet', help='Channel to plot')
-parser.add_argument('--variable', choices=['bdt_score', 'H_mass'], default='bdt_score', help='Variable to plot')
-parser.add_argument('--score_type', default='score_t', help='type of score to plot (only for BDT)')
+parser.add_argument('--type', choices=['background', 'signal', 'data'], default='data', help='Choose plot type')
+parser.add_argument('--channel', default='zero_to_one_jet', help='Channel to plot')
+parser.add_argument('--variable', choices=['bdt_score', 'H_mass'], default='H_mass', help='Variable to plot')
+parser.add_argument('--score_type', default='score', help='type of score to plot (only for BDT)')
 args = parser.parse_args()
 
 COLORS = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kOrange, ROOT.kViolet, ROOT.kCyan, ROOT.kMagenta, ROOT.kYellow+2]
@@ -30,8 +30,8 @@ tree = channel
 # Set variable and plotting parameters based on choice
 if args.variable == 'H_mass':
     var = "H_mass"
-    bins = 85 if args.type == 'background' else 60
-    x_range = (95, 180) if args.type == 'background' else (110, 135)
+    bins = 85 if args.type == 'background' or args.type == 'data' else 60
+    x_range = (95, 180) if args.type == 'background' or args.type == 'data' else (110, 135)
     x_title = "$m_{\ell\ell\gamma}$ [GeV/c^2]"
     plot_title_suffix = "H_mass"
     
@@ -70,7 +70,7 @@ bkg_file_list = [
     ["ZGToLLG.root", "DYJetsToLL.root", "EWKZ2J.root"] #, "ZG2JToG2L2J.root", "TT.root", "TTGJets.root", "TGJets.root", "WWG.root", "WZG.root", "ZZG.root", "ttZJets.root", "ttWJets.root"]
 ]
 data_file_list = [
-    "data.root"
+    "Data.root"
 ]
 
 # Select which file list to use
@@ -85,7 +85,7 @@ elif args.type == 'signal':
 else:  # data
     file_list = data_file_list
     plot_title = "Data"
-    legend_list = ["data"]
+    legend_list = ["Data"]
 
 # Define color function
 def get_color(i):
@@ -112,8 +112,8 @@ def create_histograms(bin_selection, bin_suffix):
                     else:
                         file_hist, _, file_yields = pic.get_hist(arrays, var, 1, "subfile_{}".format(j), bins, x_range)
             else: 
-                arrays, _ = pic.read_root_file(path_full+channel+"/"+sub_file, var, tree, hist_selections)
-                file_hist, _, file_yields = pic.get_hist(arrays, var, 1, "subfile_{}".format(j), bins, x_range)
+                arrays, _ = pic.read_root_file(path_full+channel+"/"+file_item, var, tree, hist_selections)
+                file_hist, _, file_yields = pic.get_hist(arrays, var, 1, "file_{}".format(j), bins, x_range)
             yields.append(file_yields)
             hist.Add(file_hist)
         
@@ -237,7 +237,7 @@ for bin_idx in range(num_bins):
         # Create bin selection for H_mass
         bin_min = boundaries[bin_idx]
         bin_max = boundaries[bin_idx + 1]
-        bin_selection = [f"bdt_score_t >= {bin_min} & bdt_score_t < {bin_max}"]
+        bin_selection = [f"bdt_score >= {bin_min} & bdt_score < {bin_max}"]
         print(f"Processing bin {bin_idx + 1}/{num_bins}: BDT score [{bin_min:.2f}, {bin_max:.2f})")
         bin_suffix = f"_bin{bin_idx + 1}"
     else:

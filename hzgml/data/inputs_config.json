@@ -1,4 +1,5 @@
 {"sample_list": {"DYJetsToLL":   ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"],
+                 "DYJetsToLL_ext":   ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"],
                  "ZGToLLG":      ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"],
                  "EWKZ2J":       ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"],
                  "VBF_M125":     ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"],

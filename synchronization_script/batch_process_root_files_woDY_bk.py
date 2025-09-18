@@ -39,21 +39,21 @@ def main():
     
     # Process name mapping
     proc_mapping = {
-        # "DY0": "DYJetsToLL",
-        "EWK": "EWKZ2J",
-        "SM1": "ZGToLLG1",
-        "SM2": "ZGToLLG2",
-        "data": "Data",
-        "GGF": "ggH_M125",
-        "VBF": "VBF_M125",
-        "WH": "WH_M125",
-        "ZH": "ZH_M125",
-        "ttH": "ttH_M125"
+        "DY0": "DYJetsToLL",
+        # "EWK": "EWKZ2J",
+        # "SM1": "ZGToLLG1",
+        # "SM2": "ZGToLLG2",
+        # "data": "Data",
+        # "GGF": "ggH_M125",
+        # "VBF": "VBF_M125",
+        # "WH": "WH_M125",
+        # "ZH": "ZH_M125",
+        # "ttH": "ttH_M125"
     }
     
     # Map tree names based on process
     tree_mapping = {
-        # "DY0": "TreeB",
+        "DY0": "TreeB",
         "EWK": "TreeB",
         "SM1": "TreeB",
         "SM2": "TreeB",
@@ -243,11 +243,15 @@ def main():
 
                         ak_array = ak_array[ak_array["nel"] + ak_array["nmu"] == 2]
 
+                        # Ensure zg_categorizationBitMap is integer for bitwise operations
+                        if "zg_categorizationBitMap" in ak_array.fields:
+                            ak_array["zg_categorizationBitMap"] = ak.values_astype(ak_array["zg_categorizationBitMap"], np.int64)
+
                         if ext == "vbf":
-                            ak_array_vbf = ak_array[(ak_array["n_jets"] >= 2) & (ak_array["nbdfm"] == 0)]
+                            ak_array_vbf = ak_array[(ak_array["n_jets"] >= 2) & (ak_array["nbdfm"] == 0) & (ak_array["zg_categorizationBitMap"] & 64 == 64)]
                             all_data["two_jet"].append(ak_array_vbf)
                         elif ext == "ggf":
-                            ak_array_ggf = ak_array[(ak_array["n_jets"] < 2) & (ak_array["met"] < 90)]
+                            ak_array_ggf = ak_array[(ak_array["n_jets"] < 2) & (ak_array["met"] < 90) & (ak_array["zg_categorizationBitMap"] & 128 == 128)]
                             all_data["zero_to_one_jet"].append(ak_array_ggf)
 
                 with uproot.recreate(output_path) as out:
