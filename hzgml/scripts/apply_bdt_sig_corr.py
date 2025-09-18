@@ -15,7 +15,7 @@ def get_args():
     """Parse command-line arguments."""
     parser = ArgumentParser(description='Apply BDT signal correction to data')
     parser.add_argument('-c', '--config', default='data/training_config_BDT.json', help='Path to the training config file')
-    parser.add_argument('-i', '--inputFolder', default='/eos/home-j/jiehan/root/skimmed_ntuples_run2', help='Path to the input folder')
+    parser.add_argument('-i', '--inputFolder', default='/eos/home-j/jiehan/root/skimmed_ntuples', help='Path to the input folder')
     parser.add_argument('-m', '--modelFolder', default='models', help='Path to the model folder')
     parser.add_argument('-o', '--outputFolder', default='/eos/home-j/jiehan/root/fitting_signal', help='Path to the output folder')
     parser.add_argument('-s', '--catSplitFolder', default='/eos/home-j/jiehan/root/outputs/test/significances', help='Path to the category split folder')
@@ -89,6 +89,20 @@ class BDTApplicator:
             for i in range(len(self.cat_boundaries) - 1)
         ]
 
+def filter_columns(df):
+    """Filter columns of the dataframe based on a predefined list."""
+    columns_to_keep = []
+    for col in df.columns:
+        if col in ["CMS_hgg_mass", "weight", "dZ"] or col.endswith("Up") or col.endswith("Down") or col.endswith("central"):
+            columns_to_keep.append(col)
+    
+    # Ensure essential columns are not accidentally dropped if they don't match the pattern
+    for essential_col in ["CMS_hgg_mass", "weight", "dZ"]:
+        if essential_col in df.columns and essential_col not in columns_to_keep:
+            columns_to_keep.append(essential_col)
+            
+    return df[columns_to_keep]
+
 def process_files(applicators, output_folder, input_folder):
     """Process input files and write the results to output ROOT files."""
     region_map = {
@@ -97,21 +111,23 @@ def process_files(applicators, output_folder, input_folder):
         # 'two_jet': 'VBF'
         # 'all_jet': 'Incl'
     }
-    syst_variations = [
-        "nominal", 
-        # "FNUF_up", "FNUF_down", "Material_up", "Material_down",
-        # "Scale_up", "Scale_down", "Smearing_up", "Smearing_down", "JER_up", 
-        # "JER_down", "JES_up", "JES_down", "MET_JES_up", "MET_JES_down",
-        # "MET_Unclustered_up", "MET_Unclustered_down", "Muon_pt_up", "Muon_pt_down"
-    ]
-    procductions = ['ggH_M125', 'VBF_M125']#, 'WplusH_M125', 'WminusH_M125', 'ZH_M125', 'ttH_M125'] # 'ggH_M125', 'VBF_M125', 'WplusH_M125', 'WminusH_M125', 'ZH_M125', 'ttH_M125'
-    years = ['2016preVFP', '2016postVFP', '2017', '2018', '2022preEE', '2022postEE', '2023preBPix', '2023postBPix']
+    base_systs = ["nominal"] + [f"{syst}_{direction}" for syst in ["Photon_scale", "Photon_smear", "Electron_scale", "Electron_smear", "JER", "JES", "MET_JES", "MET_Unclustered", "Muon_pt_smear"] for direction in ["up", "down"]]
+    run3_systs = [f"Muon_pt_scale_{direction}" for direction in ["up", "down"]]
+    
+    procductions = ['ggH_M125', 'VBF_M125', 'WplusH_M125', 'WminusH_M125', 'ZH_M125', 'ttH_M125'] # 'ggH_M125', 'VBF_M125', 'WplusH_M125', 'WminusH_M125', 'ZH_M125', 'ttH_M125'
+    years = ['2016preVFP', '2016postVFP'] #'2016preVFP', '2016postVFP', '2017', '2018', '2022preEE', '2022postEE', '2023preBPix', '2023postBPix'
 
     # Create all necessary directories in one go
     os.makedirs(output_folder, exist_ok=True)
 
     # Iterate over all process-year combinations and write output
     for proc, year in [(p, y) for p in procductions for y in years]:
+        systs_for_year = base_systs[:]
+        if '2022' in year or '2023' in year:
+            systs_for_year.extend(run3_systs)
+        
+        syst_variations = ["nominal"] + systs_for_year
+
         proc_name = proc.replace('M125', '125')
         if not os.path.exists(f"{output_folder}/{proc}_{year}/output_{proc}.root"): os.makedirs(f"{output_folder}/{proc}_{year}", exist_ok=True)
         with uproot.recreate(f"{output_folder}/{proc}_{year}/output_{proc}.root") as outfile:
@@ -134,18 +150,22 @@ def process_files(applicators, output_folder, input_folder):
                         if 'dZ' not in all_data.columns:
                             all_data['dZ'] = np.zeros(len(all_data))
                         for lep in ['ele', 'mu']:
-                            data = all_data.query('nel==2' if lep == 'ele' else 'nmu==2')
+                            # data = all_data.query('nel==2' if lep == 'ele' else 'nmu==2')
+                            data = all_data
+                            data.loc[:, 'llphoton_hmiss_photon_dphi'] = data['photon_mht_deltaphi']
                             if channel in applicators:
                                 applicator = applicators[channel]
                                 data_splits = applicator.apply_bdt(data)
                                 for i, split_data in enumerate(data_splits):
                                     logging.info(f"Number of events in {region_map[channel]}{i}{syst_name}: {len(split_data)}")
                                     split_data = split_data.rename(columns={"H_mass": "CMS_hgg_mass"})
+                                    split_data = filter_columns(split_data)
                                     tree_name = f'{proc_name}_{lep}_13TeV_{region_map[channel]}{i}{syst_name}'
                                     outfile[f'DiphotonTree/{tree_name}'] = split_data
                             else:
                                 logging.info(f"Number of events in {region_map[channel]}{syst_name}: {len(data)}")
                                 data = data.rename(columns={"H_mass": "CMS_hgg_mass"})
+                                data = filter_columns(data)
                                 tree_name = f'{proc_name}_{lep}_13TeV_{region_map[channel]}{syst_name}'
                                 outfile[f'DiphotonTree/{tree_name}'] = data
 
@@ -154,6 +174,6 @@ if __name__ == "__main__":
     applicators = {
         'zero_to_one_jet': BDTApplicator('zero_to_one_jet', args),
         'two_jet': BDTApplicator('two_jet', args),
-        'all_jet': BDTApplicator('all_jet', args)
+        # 'all_jet': BDTApplicator('all_jet', args)
     }
     process_files(applicators, args.outputFolder, args.inputFolder)

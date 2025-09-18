@@ -95,6 +95,9 @@ def get_hist_sb(arrays, variable, ratio, name, bins, range, blind_range, hist=No
         hist = ROOT.TH1D(name,name,bins,range[0],range[1])
         hist.Sumw2()
     yields = hist.Integral()
+    print(arrays)
+    print(variable)
+    print(arrays['bdt_score'])
     for i in trange(0, len(arrays[variable])):
         if (arrays["H_mass"][i]>blind_range[1] and arrays["H_mass"][i]<blind_range[0]):
             continue

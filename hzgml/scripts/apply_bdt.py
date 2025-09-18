@@ -621,15 +621,15 @@ def main():
         if args.category and category not in args.category: continue
         xgb.applyBDT(category, shift=1)
 
-    xgb.setOutputFolder(args.outputFolder.replace('test', 'train1'))
-    for category in sample_list:
-        if args.category and category not in args.category: continue
-        xgb.applyBDT(category, shift=2)
+    # xgb.setOutputFolder(args.outputFolder.replace('test', 'train1'))
+    # for category in sample_list:
+    #     if args.category and category not in args.category: continue
+    #     xgb.applyBDT(category, shift=2)
 
-    xgb.setOutputFolder(args.outputFolder.replace('test', 'train2'))
-    for category in sample_list:
-        if args.category and category not in args.category: continue
-        xgb.applyBDT(category, shift=3)
+    # xgb.setOutputFolder(args.outputFolder.replace('test', 'train2'))
+    # for category in sample_list:
+    #     if args.category and category not in args.category: continue
+    #     xgb.applyBDT(category, shift=3)
         
     return
 

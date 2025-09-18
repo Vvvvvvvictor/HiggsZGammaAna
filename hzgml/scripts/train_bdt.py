@@ -775,13 +775,13 @@ class XGBoostHandler(object):
 
         def objective(trial):
             params = {
-                'max_depth': trial.suggest_int('max_depth', 3, 60),
-                'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.05, log=True),
+                'max_depth': trial.suggest_int('max_depth', 3, 40),
+                'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.03, log=True),
                 'subsample': trial.suggest_float('subsample', 0.4, 1.0),
                 'colsample_bytree': trial.suggest_float('colsample_bytree', 0.4, 1.0),
                 'gamma': trial.suggest_float('gamma', 1e-6, 10, log=True),
                 'min_child_weight': trial.suggest_int('min_child_weight', 1, 50),
-                'max_delta_step': trial.suggest_int('max_delta_step', 10, 100),
+                'max_delta_step': trial.suggest_int('max_delta_step', 10, 50),
             }
             
             # Helper function to calculate metrics for a single fold

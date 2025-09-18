@@ -28,7 +28,7 @@ def parse_arguments():
                         help='Directory to save output files')
     parser.add_argument('--dry-run', action='store_true',
                         help='If set, only list files without processing them')
-    parser.add_argument('--years', type=str, nargs='+', default=["2016", "2016APV", "2017", "2018", "2022", "2022EE", "2023", "2023BPix"],
+    parser.add_argument('--years', type=str, nargs='+', default=["2022", "2022EE", "2023", "2023BPix"],
                         help='List of years to process (default: "2016", "2016APV", "2017", "2018", "2022", "2022EE", "2023", "2023BPix")')
     return parser.parse_args()
 
@@ -40,7 +40,7 @@ def main():
     proc_mapping = {
         "DY0": "DYJetsToLL",
         "DYfilter": "DYJetsToLL",
-        "DYmix": "DYJetsToLL"
+        "DYmix": "DYJetsToL"
     }
     
     # Map tree names based on process - only DY related
@@ -172,7 +172,7 @@ def main():
     
     # Process DY files (merge them)
     for year, file_groups in dy_files_by_year.items():
-        output_dir = os.path.join(args.output_dir, "DYJetsToLL")
+        output_dir = os.path.join(args.output_dir, "DYJetsToLL_ext")
         os.makedirs(output_dir, exist_ok=True)
         output_path = os.path.join(output_dir, f"{year}.root")
         
@@ -197,6 +197,8 @@ def main():
                             continue
                         
                         data = f["TreeB"].arrays()
+                        # if "DYmix" in file_path:
+                        #     set_trace()
                         
                         # Create a new dict to store renamed branches
                         new_data = {}
@@ -268,7 +270,7 @@ def main():
                             if "met" in ak_array_filtered.fields and "zg_categorizationBitMap" in ak_array_filtered.fields:
                                 zg_categorization = ak_array_filtered["zg_categorizationBitMap"]
                                 zg_categorization = ak.where(ak.is_none(zg_categorization), 0, zg_categorization)
-                                ak_array_filtered = ak_array_filtered[(zg_categorization == 128)]
+                                # ak_array_filtered = ak_array_filtered[(zg_categorization == 128)]
                                 met = ak_array_filtered["met"]
                                 met = ak.where(ak.is_none(met), 0, met)
                                 ak_array_filtered = ak_array_filtered[met < 90]
@@ -291,8 +293,8 @@ def main():
                                 zg_categorization = ak_array["zg_categorizationBitMap"]
                                 n_jets = ak.where(ak.is_none(n_jets), 0, n_jets)
                                 nbdfm = ak.where(ak.is_none(nbdfm), 0, nbdfm)
-                                zg_categorization = ak.where(ak.is_none(zg_categorization), 0, zg_categorization)
-                                ak_array_filtered = ak_array[(n_jets >= 2) & (nbdfm == 0) & (zg_categorization == 64)]
+                                # zg_categorization = ak.where(ak.is_none(zg_categorization), 0, zg_categorization)
+                                ak_array_filtered = ak_array[(n_jets >= 2) & (nbdfm == 0)]
                             else:
                                 logging.warning(f"Required fields not found in {file_path}: njet_field={njet_field}, nbdfm={'nbdfm' in ak_array.fields}")
                                 ak_array_filtered = ak_array
@@ -303,8 +305,8 @@ def main():
             expected_fields = ['weight_corr', 'llphoton_m', 'llphoton_eta', 'llphoton_phi', 'llphoton_pt', 'part', 'll_m', 'gamma_mvaID', 'pt_mass', 'H_relpt', 'gamma_ptRelErr', 'gamma_eta', 'Z_lead_lepton_eta', 'Z_sublead_lepton_eta', 'cosTheta', 'costheta', 'phi', 'l2g_deltaR', 'l1g_deltaR', 'weight', 'weight_dm', 'dm', 'mllg', 'gamma_pt', 'photon_eta', 'photon_phi', 'photon_reliso', 'jet1G_deltaR', 'jet2G_deltaR', 'photon_jet_mindr', 'photon_jet_maxdr', 'photon_zeppenfeld', 'gamma_relpt', 'll_lepid', 'll_refit_pt', 'Z_mass', 'll_refit_l1_pt', 'll_refit_l2_pt', 'll_refit_eta', 'll_refit_phi', 'llphoton_refit_pt', 'llphoton_refit_eta', 'llphoton_refit_phi', 'H_mass', 'llphoton_refit_dphi', 'llphoton_refit_deta', 'llphoton_refit_dr', 'llphoton_refit_l1_masserr', 'llphoton_refit_l2_masserr', 'llphoton_refit_ph_masserr', 'lep_cos_theta', 'Z_cos_theta', 'lep_phi', 'delta_phi_zgjj', 'pt_balance', 'llphoton_refit_dijet_dr', 'H_ptt', 'llphoton_refit_pTt_an_hig019014', 'llphoton_dijet_dphi', 'llphoton_dijet_balance', 'llphoton_dijet_dr', 'llphoton_hmiss_photon_dphi', 'llphoton_pTt', 'llphoton_pTt_an_hig019014', 'event', 'n_jets', 'nbdfm', 'jet_1_pt', 'jet_1_eta', 'j1_phi', 'jet_1_mass', 'j1_isgood', 'jet_2_pt', 'jet_2_eta', 'j2_phi', 'j2_isgood', 'j2_m', 'j3_pt', 'j3_eta', 'j3_phi', 'j3_isgood', 'j3_m', 'dijet_pt', 'dijet_eta', 'dijet_phi', 'mass_jj', 'dijet_dr', 'delta_phi_jj', 'delta_eta_jj', 'j1_qgl', 'j1_puid_disc', 'j1_ne_emef', 'j2_qgl', 'j2_puid_disc', 'j2_ne_emef', 'j3_qgl', 'j3_puid_disc', 'j3_zeppenfeld', 'zg_cutBitMap', 'met', 'isrun3', 'nel', 'nmu', 'year']
             with uproot.recreate(output_path) as out:
                 for tree_name, arrays in all_data.items():
-                    if "zero_to_one_jet" in tree_name:
-                        continue
+                    # if "zero_to_one_jet" in tree_name:
+                    #     continue
                     try:
                         logging.info(f"Merging {len(arrays)} arrays for {tree_name}")
                         
@@ -312,7 +314,7 @@ def main():
                         if len(arrays) > 1:
                             # Find intersection of all fields
                             common_fields = set(arrays[0].fields)
-                            for arr in arrays[1:]:
+                            for arr in arrays[0:]:
                                 common_fields &= set(arr.fields)
                             
                             logging.info(f"Common fields: {len(common_fields)} out of expected {len(expected_fields)}")
