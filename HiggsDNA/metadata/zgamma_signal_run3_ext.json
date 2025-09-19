@@ -28,7 +28,8 @@
             "ttH_M120", "ttH_M130", "ttH_up", "ttH_down",
             "WminusH_M120", "WminusH_M130", "WminusH_up", "WminusH_down",
             "WplusH_M120", "WplusH_M130", "WplusH_up", "WplusH_down",
-            "ZH_M120", "ZH_M130", "ZH_up", "ZH_down"
+            "ZH_M120", "ZH_M130", "ZH_up", "ZH_down",
+            "ggH_mu", "VBF_mu", "ttH_mu", "WminusH_mu", "WplusH_mu", "ZH_mu"
         ],
         "years": [
              "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"
