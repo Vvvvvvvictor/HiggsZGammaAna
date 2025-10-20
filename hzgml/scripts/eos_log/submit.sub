@@ -1,0 +1,12 @@
+
+executable              = /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/run_condor_job.sh
+arguments               = "$(command)"
+output                  = /dev/null
+error                   = /dev/null
+log                     = /dev/null
++JobFlavour             = "longlunch"
+
+# Use this to avoid transferring large root files
+should_transfer_files   = NO
+
+queue command from /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/eos_log/condor_commands.txt

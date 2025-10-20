@@ -8,8 +8,8 @@ import time
 start_time = time.time()
 
 eos_path = '/eos/home-j/jiehan/parquet/nanov12/'
-log_path = '/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/HiggsDNA/eos_logs/'
-# log_path = '/eos/user/j/jiehan/eos_log_20250808/'
+# log_path = '/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/HiggsDNA/eos_logs/'
+log_path = '/eos/user/j/jiehan/eos_log_20251008/'
 # log_path = '/eos/user/j/jiehan/parquet/nanov9/'
 
 dataset_type = 'data'

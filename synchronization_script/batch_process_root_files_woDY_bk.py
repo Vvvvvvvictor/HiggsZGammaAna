@@ -40,15 +40,15 @@ def main():
     # Process name mapping
     proc_mapping = {
         "DY0": "DYJetsToLL",
-        # "EWK": "EWKZ2J",
-        # "SM1": "ZGToLLG1",
-        # "SM2": "ZGToLLG2",
-        # "data": "Data",
-        # "GGF": "ggH_M125",
-        # "VBF": "VBF_M125",
-        # "WH": "WH_M125",
-        # "ZH": "ZH_M125",
-        # "ttH": "ttH_M125"
+        "EWK": "EWKZ2J",
+        "SM1": "ZGToLLG1",
+        "SM2": "ZGToLLG2",
+        "data": "Data",
+        "GGF": "ggH_M125",
+        "VBF": "VBF_M125",
+        "WH": "WH_M125",
+        "ZH": "ZH_M125",
+        "ttH": "ttH_M125"
     }
     
     # Map tree names based on process
@@ -89,29 +89,29 @@ def main():
     
     # Branch renaming mapping
     branch_mapping = {
-        # "pt_mass": "H_relpt",
-        # "llphoton_m": "H_mass",
-        # "ll_m": "Z_mass",
-        # "llphoton_dijet_dphi": "delta_phi_zgjj",
-        # "llphoton_pTt": "H_ptt",
-        # "costheta": "lep_cos_theta",
-        # "phi": "lep_phi",
-        # "llphoton_dijet_balance": "pt_balance",
-        # "cosTheta": "Z_cos_theta",
+        "llphoton_pTt": "H_ptt",
+        "pt_mass": "H_relpt",
+        "llphoton_m": "H_mass",
+        "ll_m": "Z_mass",
+        "llphoton_dijet_dphi": "delta_phi_zgjj",
+        "costheta": "lep_cos_theta",
+        "phi": "lep_phi",
+        "llphoton_dijet_balance": "pt_balance",
+        "cosTheta": "Z_cos_theta",
 
         "j1_m": "jet_1_mass",
         "j1_eta": "jet_1_eta",
 
-        "llphoton_refit_pTt": "H_ptt",
-        "pt_mass_refit": "H_relpt",
-        "llphoton_refit_m": "H_mass",
-        "ll_refit_m": "Z_mass",
-        "llphoton_refit_dijet_dphi": "delta_phi_zgjj",
-        "llphoton_refit_pTt": "H_ptt",
-        "llphoton_refit_costheta": "lep_cos_theta",
-        "llphoton_refit_psi": "lep_phi",
-        "llphoton_refit_dijet_balance": "pt_balance",
-        "llphoton_refit_cosTheta": "Z_cos_theta",
+        # "llphoton_refit_pTt": "H_ptt",
+        # "pt_mass_refit": "H_relpt",
+        # "llphoton_refit_m": "H_mass",
+        # "ll_refit_m": "Z_mass",
+        # "llphoton_refit_dijet_dphi": "delta_phi_zgjj",
+        # "llphoton_refit_pTt": "H_ptt",
+        # "llphoton_refit_costheta": "lep_cos_theta",
+        # "llphoton_refit_psi": "lep_phi",
+        # "llphoton_refit_dijet_balance": "pt_balance",
+        # "llphoton_refit_cosTheta": "Z_cos_theta",
 
         "photon_pt_ratio": "gamma_relpt",
         "dijet_m": "mass_jj",
@@ -306,5 +306,4 @@ def main():
 if __name__ == "__main__":
     main()
 
-# rm ZGToLLG/2022preEE.root; hadd ZGToLLG/2022preEE.root ZGToLLG1/2022preEE.root ZGToLLG2/2022preEE.root
-# rm ZGToLLG/2022postEE.root; hadd ZGToLLG/2022postEE.root ZGToLLG1/2022postEE.root ZGToLLG2/2022postEE.root
+# rm ZGToLLG/2022preEE.root; hadd ZGToLLG/2022preEE.root ZGToLLG1/2022preEE.root ZGToLLG2/2022preEE.root; rm ZGToLLG/2022postEE.root; hadd ZGToLLG/2022postEE.root ZGToLLG1/2022postEE.root ZGToLLG2/2022postEE.root

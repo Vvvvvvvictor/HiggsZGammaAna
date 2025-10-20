@@ -3,6 +3,7 @@ import numpy
 import json
 
 from correctionlib import _core
+import correctionlib
 # logger = logging.getLogger(__name__)
 from higgs_dna.utils.logger_utils import simple_logger
 logger = simple_logger(__name__)
@@ -884,25 +885,33 @@ electron_scale_FILE = {
     "2023postBPix" : "jsonpog-integration/POG/EGM/2023_Summer23BPix/electronSS_EtDependent.json"
 }
 
-electron_year_names = {
+electron_smear_names = {
     "2022preEE" : "EGMSmearAndSyst_ElePTsplit_2022preEE",
     "2022postEE" : "EGMSmearAndSyst_ElePTsplit_2022postEE",
     "2023preBPix" : "EGMSmearAndSyst_ElePTsplit_2023preBPIX", 
     "2023postBPix" : "EGMSmearAndSyst_ElePTsplit_2023postBPIX"
 }
 
+electron_scale_names = {
+    "2022preEE": "EGMScale_Compound_Ele_2022preEE",
+    "2022postEE": "EGMScale_Compound_Ele_2022postEE",
+    "2023preBPix": "EGMScale_Compound_Ele_2023preBPIX",
+    "2023postBPix": "EGMScale_Compound_Ele_2023postBPIX"
+}
 
-def electron_scale_smear_run3(events, year):
+def electron_scale_smear_run3(events, year, is_data):
     """
-    This function applies electron scale and smear corrections on the electron pt.
-    It returns events with the corrected electron pt values.
-    Based on the photon_scale_smear_run3 function but adapted for electrons.
+    See:
+        - https://gitlab.cern.ch/cms-egamma/EgammaPostRecoTools/-/tree/master/EgammaAnalysis/ElectronTools/data/Run3
     """
     logger.info("[Lepton Systematics] Applying electron scale and smear corrections for year %s", year)
 
     required_fields = [
         ("Electron", "eta"), ("Electron", "pt"), ("Electron", "r9"), ("Electron", "deltaEtaSC")
     ]
+    if is_data:
+        required_fields.append(("Electron", "seedGain"))
+        required_fields.append("run")
 
     missing_fields = awkward_utils.missing_fields(events, required_fields)
 
@@ -912,21 +921,41 @@ def electron_scale_smear_run3(events, year):
         )
         return events
 
-    evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(electron_scale_FILE[year]))
+    if is_data:
+        evaluator = correctionlib.CorrectionSet.from_file(misc_utils.expand_path(electron_scale_FILE[year]))
+    else:
+        evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(electron_scale_FILE[year]))
 
     electrons = events["Electron"]
     n_electrons = awkward.num(electrons)
     electrons_flattened = awkward.flatten(electrons)
 
-    electrons_AbsEta = numpy.abs(awkward.to_numpy(electrons_flattened.eta+electrons_flattened.deltaEtaSC))
+    electrons_scEta = awkward.to_numpy(electrons_flattened.eta + electrons_flattened.deltaEtaSC)
+    electrons_AbsScEta = numpy.abs(electrons_scEta)
     electrons_pt = awkward.to_numpy(electrons_flattened.pt)
     electrons_r9 = awkward.to_numpy(electrons_flattened.r9)
+    if is_data:
+        electrons_seedGain = awkward.to_numpy(electrons_flattened.seedGain)
+        run_arr_flattened = numpy.repeat(awkward.to_numpy(events["run"]), n_electrons)
+
+    if is_data:
+        scale = evaluator.compound[electron_scale_names[year]].evaluate("scale", run_arr_flattened, electrons_scEta, electrons_r9, electrons_AbsScEta, electrons_pt, electrons_seedGain)
+        scale = awkward.where(
+            (electrons_AbsScEta > 3.0) | (electrons_pt < 20.0),
+            awkward.ones_like(electrons_pt, dtype=float),
+            scale
+        )
+        corrected_pt = awkward.to_numpy(electrons_pt * scale)
+        events["Electron", "corrected_pt"] = awkward.unflatten(corrected_pt, n_electrons)
+        logger.info("[Lepton Systematics] Electron pt before scale correction (data): %s", electrons.pt)
+        logger.info("[Lepton Systematics] Electron pt after scale correction (data): %s", corrected_pt)
+        return events
 
     # Apply smear corrections first
-    smear = evaluator[electron_year_names[year]].evalv("smear", electrons_pt, electrons_r9, electrons_AbsEta)
+    smear = evaluator[electron_smear_names[year]].evalv("smear", electrons_pt, electrons_r9, electrons_AbsScEta)
     rng = numpy.random.default_rng(seed=8011)
     smear_val = awkward.where(
-        (electrons_AbsEta > 3.0) | (electrons_pt < 20.0),
+        (electrons_AbsScEta > 3.0) | (electrons_pt < 20.0),
         awkward.ones_like(electrons_pt, dtype=float),
         rng.normal(loc=1., scale=numpy.abs(smear))
     )
@@ -936,21 +965,21 @@ def electron_scale_smear_run3(events, year):
 
     # Calculate smear systematics
     for syst in ["smear_up", "smear_down"]:
-        smear_syst = evaluator[electron_year_names[year]].evalv(syst, electrons_pt, electrons_r9, electrons_AbsEta)
+        smear_syst = evaluator[electron_smear_names[year]].evalv(syst, electrons_pt, electrons_r9, electrons_AbsScEta)
         smear_val_syst = awkward.where(
-            (electrons_AbsEta > 3.0) | (electrons_pt < 20.0),
+            (electrons_AbsScEta > 3.0) | (electrons_pt < 20.0),
             awkward.ones_like(electrons_pt, dtype=float),
             rng.normal(loc=1., scale=numpy.abs(smear_syst))
         )
         events["Electron", "dEsigma" + syst.replace("smear_", "").capitalize()] = awkward.unflatten(corrected_pt * (smear_val_syst - 1), n_electrons)
 
-    print("Electron pt before scale correction:", electrons.pt)
+    print("Electron pt before smear correction:", electrons.pt)
     events["Electron", "corrected_pt"] = awkward.unflatten(corrected_pt, n_electrons)
     electrons = events["Electron"]
 
     # Calculate scale systematics
     for syst in ["scale_up", "scale_down"]:
-        scale_syst = evaluator[electron_year_names[year]].evalv(syst, electrons_pt, electrons_r9, electrons_AbsEta)
+        scale_syst = evaluator[electron_smear_names[year]].evalv(syst, electrons_pt, electrons_r9, electrons_AbsScEta)
         events["Electron", "dEscale" + syst.replace("scale_", "").capitalize()] = awkward.unflatten(corrected_pt * scale_syst, n_electrons)
 
     logger.info("[Lepton Systematics] Electron scale and smear corrections applied successfully")
@@ -959,5 +988,79 @@ def electron_scale_smear_run3(events, year):
     print("Electron pt Scale Down:", events["Electron", "dEscaleDown"])
     print("Electron pt Smear Up:", events["Electron", "dEsigmaUp"])
     print("Electron pt Smear Down:", events["Electron", "dEsigmaDown"])
+
+    return events
+
+##########################
+### Muon Scale Run3 ###
+##########################
+
+MUON_SCALE_FILE = {
+    "2022preEE" : "higgs_dna/systematics/data/2022preEE_UL/muon_scale_2022preEE.json",
+    "2022postEE" : "higgs_dna/systematics/data/2022postEE_UL/muon_scale_2022postEE.json",
+    "2023preBPix" : "higgs_dna/systematics/data/2023preBPix_UL/muon_scale_2023preBPix.json",
+    "2023postBPix" : "higgs_dna/systematics/data/2023postBPix_UL/muon_scale_2023postBPix.json"
+}
+
+def muon_scale_run3(events, year, is_data):
+    """
+    Apply muon scale corrections for Run3 data only.
+    Based on MuonScaRe package.
+    
+    See:
+        - https://github.com/CMS-MUO-POG/MuonScaRe
+    """
+    logger.info("[Lepton Systematics] Applying muon scale corrections for year %s", year)
+
+    required_fields = [
+        ("Muon", "eta"), ("Muon", "pt"), ("Muon", "phi"), ("Muon", "charge")
+    ]
+
+    missing_fields = awkward_utils.missing_fields(events, required_fields)
+
+    if missing_fields:
+        logger.warning(
+            "[Lepton Systematics] Muon scale corrections will not be applied, because the following fields are missing: %s" % str(missing_fields)
+        )
+        return events
+
+    # Only apply to data
+    if not is_data:
+        logger.info("[Lepton Systematics] Muon scale corrections are only applied to data, skipping MC")
+        return events
+
+    evaluator = correctionlib.CorrectionSet.from_file(misc_utils.expand_path(MUON_SCALE_FILE[year]))
+
+    muons = events["Muon"]
+    n_muons = awkward.num(muons)
+    muons_flattened = awkward.flatten(muons)
+
+    muon_pt = awkward.to_numpy(muons_flattened.pt)
+    muon_eta = awkward.to_numpy(muons_flattened.eta)
+    muon_phi = awkward.to_numpy(muons_flattened.phi)
+    muon_charge = awkward.to_numpy(muons_flattened.charge)
+
+    # Get scale correction parameters from correctionlib
+    a_data = evaluator["a_data"].evaluate(muon_eta, muon_phi, "nom")
+    m_data = evaluator["m_data"].evaluate(muon_eta, muon_phi, "nom")
+
+    # Apply scale correction: pt_corr = 1 / (m/pt + charge * a)
+    pt_corr = 1.0 / (m_data / muon_pt + muon_charge * a_data)
+
+    # Filter boundaries: only apply corrections for pt in [26, 200] GeV
+    pt_corr = numpy.where((muon_pt < 26) | (muon_pt > 200), muon_pt, pt_corr)
+    
+    # Filter out NaN entries
+    pt_corr = numpy.where(numpy.isnan(pt_corr), muon_pt, pt_corr)
+    
+    # # Additional safety check: reject unreasonable corrections
+    # pt_ratio = pt_corr / muon_pt
+    # pt_corr = numpy.where((pt_ratio > 2) | (pt_ratio < 0.1) | (pt_corr < 0), muon_pt, pt_corr)
+
+    # Store corrected pt
+    events["Muon", "corrected_pt"] = awkward.unflatten(pt_corr, n_muons)
+    
+    logger.info("[Lepton Systematics] Muon pt before scale correction (data): mean = %.2f", awkward.mean(muons.pt))
+    logger.info("[Lepton Systematics] Muon pt after scale correction (data): mean = %.2f", awkward.mean(events["Muon", "corrected_pt"]))
 
     return events

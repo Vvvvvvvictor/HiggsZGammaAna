@@ -775,11 +775,11 @@ class XGBoostHandler(object):
 
         def objective(trial):
             params = {
-                'max_depth': trial.suggest_int('max_depth', 3, 40),
+                'max_depth': trial.suggest_int('max_depth', 3, 25),
                 'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.03, log=True),
                 'subsample': trial.suggest_float('subsample', 0.4, 1.0),
                 'colsample_bytree': trial.suggest_float('colsample_bytree', 0.4, 1.0),
-                'gamma': trial.suggest_float('gamma', 1e-6, 10, log=True),
+                'gamma': trial.suggest_float('gamma', 1e-6, 1, log=True),
                 'min_child_weight': trial.suggest_int('min_child_weight', 1, 50),
                 'max_delta_step': trial.suggest_int('max_delta_step', 10, 50),
             }
@@ -788,9 +788,9 @@ class XGBoostHandler(object):
             def calculate_fold_metrics(fold_idx):
                 eval_auc = self.getAUC(fold_idx)[-1]
                 train_auc = self.getAUC(fold_idx, 'train')[-1]
-                eval_signi, eval_signi_err = self.getSignificance(fold_idx, 'val')
-                train_signi, train_signi_err = self.getSignificance(fold_idx, 'train')
-                mass_shape_factor = self.get_mass_shape_factor(fold_idx, 'val')
+                # eval_signi, eval_signi_err = self.getSignificance(fold_idx, 'val')
+                # train_signi, train_signi_err = self.getSignificance(fold_idx, 'train')
+                # mass_shape_factor = self.get_mass_shape_factor(fold_idx, 'val')
                 
                 return {
                     'train_auc': train_auc,
@@ -798,10 +798,10 @@ class XGBoostHandler(object):
                     'sqrt_eval_auc_minus_train_auc': np.sqrt(train_auc * (2 * eval_auc - train_auc)),
                     'eval_auc_minus_train_auc': eval_auc * 2 - train_auc,
                     'eval_auc_over_train_auc': eval_auc ** 2 / ((eval_auc + train_auc) / 2),
-                    'eval_significance': eval_signi,
-                    'train_significance': train_signi,
-                    'sqrt_eval_significance_minus_train_significance': np.sqrt(train_signi * (2 * eval_signi - train_signi)),
-                    'eval_auc_with_mass_shape_factor': eval_auc + mass_shape_factor
+                    # 'eval_significance': eval_signi,
+                    # 'train_significance': train_signi,
+                    # 'sqrt_eval_significance_minus_train_significance': np.sqrt(train_signi * (2 * eval_signi - train_signi)),
+                    # 'eval_auc_with_mass_shape_factor': eval_auc + mass_shape_factor
                 }
             
             # Helper function to log and print results

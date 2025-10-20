@@ -32,12 +32,24 @@
                     "Pileup_nTrueInt"
                 ]
             },
-            "btag_deepjet_wp_sf" : {
+            "btag_deepjet_wp_sf_heavy" : {
                 "type" : "object",
                 "method" : "from_function",
                 "function" : {
                     "module_name" : "higgs_dna.systematics.jet_systematics",
-                    "name" : "btag_deepjet_wp_sf"
+                    "name" : "btag_deepjet_wp_sf_heavy"
+                },
+                "modify_central_weight" : false,
+                "input_collection" : "Jet",
+                "target_collections" : ["SelectedJet"],
+                "working_point" : "M"
+            },
+            "btag_deepjet_wp_sf_light" : {
+                "type" : "object",
+                "method" : "from_function",
+                "function" : {
+                    "module_name" : "higgs_dna.systematics.jet_systematics",
+                    "name" : "btag_deepjet_wp_sf_light"
                 },
                 "modify_central_weight" : false,
                 "input_collection" : "Jet",

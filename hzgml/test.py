@@ -20,29 +20,34 @@ from pdb import set_trace
 # # ==================================
 # # Test yields in categories
 # # ==================================
-# cats = ['zero_to_one_jet', "two_jet", "VH", "ZH", "ttH_had", "ttH_lep"]
-# # years = ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"]
-# years = ["2016preVFP", "2016postVFP", "2017", "2018"]
-# cats_yields = {'zero_to_one_jet': 0, "two_jet": 0, "VH": 0, "ZH": 0, "ttH_had": 0, "ttH_lep": 0}
+cats = ['zero_to_one_jet', "two_jet", "VH", "ZH", "ttH_had", "ttH_lep"]
+years = ["2023postBPix"] #"2016preVFP", "2016postVFP", "2017", "2018", "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"
+cats_yields = {'zero_to_one_jet': 0, "two_jet": 0, "VH": 0, "ZH": 0, "ttH_had": 0, "ttH_lep": 0}
 # for year in years:
-#     data = uproot.open(f"/eos/home-j/jiehan/root/skimmed_ntuples_run2/ggH_M125/{year}.root")
+#     data = uproot.open(f"/eos/home-j/jiehan/root/skimmed_ntuples/ggH_M125/{year}.root")
 #     for cat in cats:
 #         cat_data = data[cat].arrays(['weight', 'H_mass'], library='pd').query('H_mass > 120 & H_mass < 130')
 #         cats_yields[cat] += cat_data['weight'].sum()
 # print(cats_yields)
 
-# for year in years:
-#     data = uproot.open(f"/eos/home-j/jiehan/root/skimmed_ntuples_run2/ggH_M125/{year}.root")
-#     data_inc = data["inclusive"].arrays(['z_mumu', 'z_ee', 'H_mass'], library='pd').query('H_mass > 100')
-#     print(f'Year {year} inclusive z_mumu: {data_inc["z_mumu"].sum()}, z_ee: {data_inc["z_ee"].sum()}')
-#     for cat in cats:
-#         cat_data = data[cat].arrays(['z_mumu', 'z_ee', 'H_mass'], library='pd')
-#         if "jet" in cat:
-#             cat_data = cat_data.query('H_mass > 100')
-#         else:
-#             cat_data = cat_data.query('H_mass > 100 & (H_mass < 120 | H_mass > 130)')
-#         print(f'{year} {cat} z_mumu: {cat_data["z_mumu"].sum()}, z_ee: {cat_data["z_ee"].sum()}')
-#     print("================================================================================================")
+for year in years:
+    data = uproot.open(f"/eos/home-j/jiehan/root/skimmed_ntuples_test/Data/{year}.root")
+    data_inc = data["inclusive"].arrays(['z_mumu', 'z_ee', 'H_mass', 'n_leptons', 'n_jets', 'n_b_jets', 'MET_pt'], library='pd').query('H_mass > 100 & H_mass < 180')
+    print(f'{year} inclusive z_mumu: {data_inc["z_mumu"].sum()}, z_ee: {data_inc["z_ee"].sum()}')
+    print("================================================================================================")
+    print(f'{year} {"nl=2":<20} z_mumu: {data_inc.query("n_leptons==2")["z_mumu"].sum():>10.1f}, z_ee: {data_inc.query("n_leptons==2")["z_ee"].sum():>10.1f}')
+    print(f'{year} {"nl=2 nj>=2":<20} z_mumu: {data_inc.query("n_leptons==2 & n_jets>=2")["z_mumu"].sum():>10.1f}, z_ee: {data_inc.query("n_leptons==2 & n_jets>=2")["z_ee"].sum():>10.1f}')
+    print(f'{year} {"nl=2 nj>=2 nb=0":<20} z_mumu: {data_inc.query("n_leptons==2 & n_jets>=2 & n_b_jets==0")["z_mumu"].sum():>10.1f}, z_ee: {data_inc.query("n_leptons==2 & n_jets>=2 & n_b_jets==0")["z_ee"].sum():>10.1f}')
+    print(f'{year} {"nl=2 nj<2":<20} z_mumu: {data_inc.query("n_leptons==2 & n_jets<2")["z_mumu"].sum():>10.1f}, z_ee: {data_inc.query("n_leptons==2 & n_jets<2")["z_ee"].sum():>10.1f}')
+    print(f'{year} {"nl=2 nj<2 met<90":<20} z_mumu: {data_inc.query("n_leptons==2 & n_jets<2 & MET_pt<90")["z_mumu"].sum():>10.1f}, z_ee: {data_inc.query("n_leptons==2 & n_jets<2 & MET_pt<90")["z_ee"].sum():>10.1f}')
+    for cat in cats:
+        cat_data = data[cat].arrays(['z_mumu', 'z_ee', 'H_mass'], library='pd')
+        if "jet" in cat:
+            cat_data = cat_data.query('H_mass > 100 & H_mass < 180')
+        else:
+            cat_data = cat_data.query('H_mass > 100 & (H_mass < 120 | H_mass > 130) & H_mass < 180')
+        print(f'{year} {cat} z_mumu: {cat_data["z_mumu"].sum()}, z_ee: {cat_data["z_ee"].sum()}')
+    print("================================================================================================")
 
 # ===================================
 # Print run, lumi, event and store in files(int number)
@@ -213,90 +218,90 @@ from pdb import set_trace
 #     else:
 #         print(f'Run: {run[i]}, Lumi: {lumi[i]}, Event: {event[i]} not found in data.')
         
-# =====================================
-# Get weight with syst
-# =====================================
-cats = ["inclusive"]
-years = ['2016preVFP', '2016postVFP', '2017', '2018'] # '2016preVFP', '2016postVFP', '2017', '2018', '2022preEE', '2022postEE', '2023preBPix', '2023postBPix'
-types = ["mumu", "ee"]
+# # =====================================
+# # Get weight with syst
+# # =====================================
+# cats = ["inclusive"]
+# years = ['2016preVFP', '2016postVFP', '2017', '2018'] # '2016preVFP', '2016postVFP', '2017', '2018', '2022preEE', '2022postEE', '2023preBPix', '2023postBPix'
+# types = ["mumu", "ee"]
 
-# Define weight lists and corresponding display names
-# Comment out any weight you don't want to apply by adding # at the beginning
-weight_configs = [
-    ("weight_pu_reweight_sf_central", "pileup weight"),
-    ("weight_btag_deepjet_wp_sf_SelectedJet_central", "btag weight"),
-    ("weight_hlt_sf_central", "hlt weight"),
-    ("weight_electron_wplid_sf_SelectedElectron_central", "electron wplid weight"),
-    ("weight_electron_wplid_sf_nomatch_SelectedGenNoRecoElectron_central", "electron wplid nomatch weight"),
-    ("weight_electron_iso_sf_SelectedElectron_central", "electron iso weight"),
-    ("weight_electron_reco_sf_SelectedElectron_central", "electron reco weight"),
-    ("weight_muon_looseid_sf_SelectedMuon_central", "muon looseid weight"),
-    ("weight_muon_looseid_sf_nomatch_SelectedGenNoRecoMuon_central", "muon looseid nomatch weight"),
-    ("weight_muon_iso_sf_SelectedMuon_central", "muon iso weight"),
-    ("weight_muon_reco_sf_SelectedMuon_central", "muon reco weight"),
-    ("weight_photon_id_sf_SelectedPhoton_central", "photon id weight"),
-    ("weight_photon_csev_sf_SelectedPhoton_central", "photon csev weight"),
-    ("weight_photon_id_shape_sf_SelectedPhoton_central", "photon id shape weight"),
-    # Examples of how to comment out weights:
-    # ("weight_electron_iso_sf_SelectedElectron_central", "electron iso weight"),  # Commented out
-    # ("weight_muon_iso_sf_SelectedMuon_central", "muon iso weight"),  # Commented out
-]
+# # Define weight lists and corresponding display names
+# # Comment out any weight you don't want to apply by adding # at the beginning
+# weight_configs = [
+#     ("weight_pu_reweight_sf_central", "pileup weight"),
+#     ("weight_btag_deepjet_wp_sf_SelectedJet_central", "btag weight"),
+#     ("weight_hlt_sf_central", "hlt weight"),
+#     ("weight_electron_wplid_sf_SelectedElectron_central", "electron wplid weight"),
+#     ("weight_electron_wplid_sf_nomatch_SelectedGenNoRecoElectron_central", "electron wplid nomatch weight"),
+#     ("weight_electron_iso_sf_SelectedElectron_central", "electron iso weight"),
+#     ("weight_electron_reco_sf_SelectedElectron_central", "electron reco weight"),
+#     ("weight_muon_looseid_sf_SelectedMuon_central", "muon looseid weight"),
+#     ("weight_muon_looseid_sf_nomatch_SelectedGenNoRecoMuon_central", "muon looseid nomatch weight"),
+#     ("weight_muon_iso_sf_SelectedMuon_central", "muon iso weight"),
+#     ("weight_muon_reco_sf_SelectedMuon_central", "muon reco weight"),
+#     ("weight_photon_id_sf_SelectedPhoton_central", "photon id weight"),
+#     ("weight_photon_csev_sf_SelectedPhoton_central", "photon csev weight"),
+#     ("weight_photon_id_shape_sf_SelectedPhoton_central", "photon id shape weight"),
+#     # Examples of how to comment out weights:
+#     # ("weight_electron_iso_sf_SelectedElectron_central", "electron iso weight"),  # Commented out
+#     # ("weight_muon_iso_sf_SelectedMuon_central", "muon iso weight"),  # Commented out
+# ]
 
-# Extract active weights (uncommented ones)
-weight_list = [config[0] for config in weight_configs]
-name_list = [config[1] for config in weight_configs]
+# # Extract active weights (uncommented ones)
+# weight_list = [config[0] for config in weight_configs]
+# name_list = [config[1] for config in weight_configs]
 
-ggH_weight_list = [
-    "weight_nnlo_sf_GenHzgHiggs_central"
-]
+# ggH_weight_list = [
+#     "weight_nnlo_sf_GenHzgHiggs_central"
+# ]
 
-ggH_name_list = [
-    "nnlo weight"
-]
+# ggH_name_list = [
+#     "nnlo weight"
+# ]
 
-signal_weight_list = [
-    "pythia_weight"
-]
+# signal_weight_list = [
+#     "pythia_weight"
+# ]
 
-background_weight_list = [
-    "weight_photon_fake_photon_sf_SelectedPhoton_central",
-    "kin_weight"
-]
-for year in years:
-    data = uproot.open(f"/eos/home-j/jiehan/root/skimmed_ntuples/ggH_M125/{year}.root")['inclusive'].arrays(library='pd')
-    # data = pd.read_parquet(f"/eos/home-j/jiehan/parquet/cutflow_ggf/ggH_M125_{year}/merged_nominal.parquet")
-    # for i in data.columns:
-    #     if "weight" in i and "central" in i:
-    #         print(i)
-    for cat in cats:
-        # 加入所有满足这个格式的变量 'weight*central'
-        variables = ['H_mass', 'z_mumu', 'z_ee']
-        # for i in data[cat].keys():
-        #     if i.startswith('weight') and i.endswith('central'):
-        #         variables.append(i)
-        # cat_data = data[cat].arrays(variables, library='pd')
-        if cat == "inclusive":
-            cat_data = data
-        else:
-            exit()
+# background_weight_list = [
+#     "weight_photon_fake_photon_sf_SelectedPhoton_central",
+#     "kin_weight"
+# ]
+# for year in years:
+#     data = uproot.open(f"/eos/home-j/jiehan/root/skimmed_ntuples/ggH_M125/{year}.root")['inclusive'].arrays(library='pd')
+#     # data = pd.read_parquet(f"/eos/home-j/jiehan/parquet/cutflow_ggf/ggH_M125_{year}/merged_nominal.parquet")
+#     # for i in data.columns:
+#     #     if "weight" in i and "central" in i:
+#     #         print(i)
+#     for cat in cats:
+#         # 加入所有满足这个格式的变量 'weight*central'
+#         variables = ['H_mass', 'z_mumu', 'z_ee']
+#         # for i in data[cat].keys():
+#         #     if i.startswith('weight') and i.endswith('central'):
+#         #         variables.append(i)
+#         # cat_data = data[cat].arrays(variables, library='pd')
+#         if cat == "inclusive":
+#             cat_data = data
+#         else:
+#             exit()
 
-        for t in types:
-            temp = cat_data.query(f'H_mass>100 & H_mass<180 & z_{t} > 0')
-            weight = temp["weight_central"]
-            print(f'{year} {cat} {t}')
-            print(f'{"total events:":>35}{len(temp)}')
-            weight = weight * temp["pythia_weight"]
-            print(f'{"lumi weight:":>35}{weight.sum():.4f}')
+#         for t in types:
+#             temp = cat_data.query(f'H_mass>100 & H_mass<180 & z_{t} > 0')
+#             weight = temp["weight_central"]
+#             print(f'{year} {cat} {t}')
+#             print(f'{"total events:":>35}{len(temp)}')
+#             weight = weight * temp["pythia_weight"]
+#             print(f'{"lumi weight:":>35}{weight.sum():.4f}')
             
-            # Apply weights from weight_list
-            for weight_name, display_name in zip(weight_list, name_list):
-                weight = weight * temp[weight_name]
-                print(f'{display_name + ":":>35}{weight.sum():.4f}')
+#             # Apply weights from weight_list
+#             for weight_name, display_name in zip(weight_list, name_list):
+#                 weight = weight * temp[weight_name]
+#                 print(f'{display_name + ":":>35}{weight.sum():.4f}')
             
-            # Apply ggH specific weights
-            for weight_name, display_name in zip(ggH_weight_list, ggH_name_list):
-                weight = weight * temp[weight_name]
-                print(f'{display_name + ":":>35}{weight.sum():.4f}')
+#             # Apply ggH specific weights
+#             for weight_name, display_name in zip(ggH_weight_list, ggH_name_list):
+#                 weight = weight * temp[weight_name]
+#                 print(f'{display_name + ":":>35}{weight.sum():.4f}')
 
 # =====================================
 # Have a look at the hgg data

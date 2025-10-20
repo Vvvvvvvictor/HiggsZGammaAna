@@ -44,13 +44,14 @@ def getArgs():
     return  parser.parse_args()
 
 def true_delta_phi(delta_phi):
-    delta_phi_mod = delta_phi % (2 * math.pi)
-    if delta_phi_mod > math.pi:
-        return 2 * math.pi - delta_phi_mod
+    delta_phi = delta_phi % (2 * math.pi)
+    if delta_phi > math.pi:
+        return 2 * math.pi - delta_phi
     return delta_phi
     
 def true_delta_phi_vectorized(delta_phi):
     """Vectorized version of true_delta_phi"""
+    delta_phi = delta_phi % (2 * math.pi)
     return np.where(delta_phi > np.pi, 2 * np.pi - delta_phi, delta_phi)
 
 def compute_lorentz_vectors(data, suffix=''):
@@ -123,7 +124,7 @@ def compute_delta_phi_variables_vectorized(data):
     
     # MET and MHT delta phi with gamma
     delta_phi_vars['MET_deltaphi'] = true_delta_phi_vectorized(np.abs(data['MET_phi'] - data['gamma_phi']))
-    delta_phi_vars['photon_mht_deltaphi'] = true_delta_phi_vectorized(np.abs(data['MHT_phi'] + math.pi - data['gamma_phi']))
+    delta_phi_vars['llphoton_hmiss_photon_dphi'] = true_delta_phi_vectorized(np.abs(data['MHT_phi'] + math.pi - data['gamma_phi']))
     
     # Jet delta phi with gamma
     for i in range(1, 5):
@@ -133,10 +134,10 @@ def compute_delta_phi_variables_vectorized(data):
             delta_phi_vars[f'jet_{i}_deltaphi'] = np.where(
                 mask,
                 true_delta_phi_vectorized(np.abs(data[jet_phi_col] - data['gamma_phi'])),
-                -9999
+                -999
             )
         else:
-            delta_phi_vars[f'jet_{i}_deltaphi'] = np.full(len(data), -9999)
+            delta_phi_vars[f'jet_{i}_deltaphi'] = np.full(len(data), -999)
     
     # Additional lepton delta phi
     for i in [1, 2]:
@@ -144,7 +145,7 @@ def compute_delta_phi_variables_vectorized(data):
         if col in data.columns:
             delta_phi_vars[f'additional_lepton_{i}_deltaphi'] = true_delta_phi_vectorized(np.abs(data[col] - data['gamma_phi']))
         else:
-            delta_phi_vars[f'additional_lepton_{i}_deltaphi'] = np.full(len(data), -9999)
+            delta_phi_vars[f'additional_lepton_{i}_deltaphi'] = np.full(len(data), -999)
     
     return delta_phi_vars
 
@@ -154,37 +155,18 @@ def compute_simple_jet_variables_vectorized(data):
     
     # Jet zeppenfeld variables
     mask_2jets = data['n_jets'] >= 2
-    avg_jet_eta = (data['jet_1_eta'] + data['jet_2_eta']) / 2
-    
-    jet_vars['photon_zeppenfeld'] = np.where(
-        mask_2jets,
-        np.abs(data['gamma_eta'] - avg_jet_eta),
-        -9999
-    )
-    
-    jet_vars['H_zeppenfeld'] = np.where(
-        mask_2jets,
-        np.abs(data['H_eta'] - avg_jet_eta),
-        -9999
-    )
-    
-    jet_vars['H_zeppenfeld_refit'] = np.where(
-        mask_2jets,
-        np.abs(data['H_eta_refit'] - avg_jet_eta),
-        -9999
-    )
     
     # Delta eta and phi between jets
     jet_vars['delta_eta_jj'] = np.where(
         mask_2jets,
         np.abs(data['jet_1_eta'] - data['jet_2_eta']),
-        -9999
+        -999
     )
     
     jet_vars['delta_phi_jj'] = np.where(
         mask_2jets,
         true_delta_phi_vectorized(np.abs(data['jet_1_phi'] - data['jet_2_phi'])),
-        -9999
+        -999
     )
     
     return jet_vars
@@ -204,14 +186,14 @@ def compute_additional_delta_phi_vectorized(data):
             np.abs(data['additional_lepton_1_phi'] - data['gamma_phi'])
         )
     else:
-        additional_vars['additional_lepton_1_deltaphi'] = np.full(len(data), -9999.0)
+        additional_vars['additional_lepton_1_deltaphi'] = np.full(len(data), -999.0)
         
     if 'additional_lepton_2_phi' in data.columns:
         additional_vars['additional_lepton_2_deltaphi'] = true_delta_phi_vectorized(
             np.abs(data['additional_lepton_2_phi'] - data['gamma_phi'])
         )
     else:
-        additional_vars['additional_lepton_2_deltaphi'] = np.full(len(data), -9999.0)
+        additional_vars['additional_lepton_2_deltaphi'] = np.full(len(data), -999.0)
     
     return additional_vars
 
@@ -234,10 +216,10 @@ def compute_jet_delta_phi_variables_vectorized(data):
                 delta_phi = jet_vars[f'jet_{i}_deltaphi']
                 jet_vars[f'jet{i}G_deltaR'] = np.sqrt(delta_eta**2 + delta_phi**2)
             else:
-                jet_vars[f'jet{i}G_deltaR'] = np.full(len(data), -9999.0)
+                jet_vars[f'jet{i}G_deltaR'] = np.full(len(data), -999.0)
         else:
-            jet_vars[f'jet_{i}_deltaphi'] = np.full(len(data), -9999.0)
-            jet_vars[f'jet{i}G_deltaR'] = np.full(len(data), -9999.0)
+            jet_vars[f'jet_{i}_deltaphi'] = np.full(len(data), -999.0)
+            jet_vars[f'jet{i}G_deltaR'] = np.full(len(data), -999.0)
     
     # Max and min jet deltaR
     jet_deltaR_cols = [f'jet{i}G_deltaR' for i in [1, 2] if f'jet{i}G_deltaR' in jet_vars]
@@ -246,8 +228,8 @@ def compute_jet_delta_phi_variables_vectorized(data):
         jet_vars['max_jet_deltaR'] = np.max(jet_deltaR_array, axis=1)
         jet_vars['min_jet_deltaR'] = np.min(jet_deltaR_array, axis=1)
     else:
-        jet_vars['max_jet_deltaR'] = np.full(len(data), -9999.0)
-        jet_vars['min_jet_deltaR'] = np.full(len(data), -9999.0)
+        jet_vars['max_jet_deltaR'] = np.full(len(data), -999.0)
+        jet_vars['min_jet_deltaR'] = np.full(len(data), -999.0)
     
     return jet_vars
 
@@ -306,7 +288,7 @@ def compute_jet_pair_variables_vectorized(data, vectors):
     
     if 'jet_1' not in vectors or 'jet_2' not in vectors:
         for var_name in ['delta_eta_jj', 'delta_phi_jj', 'mass_jj', 'jet_pair_pt']:
-            jet_vars[var_name] = np.full(n_events, -9999.0)
+            jet_vars[var_name] = np.full(n_events, -999.0)
         return jet_vars
     
     jet1_vecs = vectors['jet_1']
@@ -328,10 +310,10 @@ def compute_jet_pair_variables_vectorized(data, vectors):
             mass_jj.append(dijet.M())
             jet_pair_pt.append(dijet.Pt())
         else:
-            delta_eta_jj.append(-9999)
-            delta_phi_jj.append(-9999)
-            mass_jj.append(-9999)
-            jet_pair_pt.append(-9999)
+            delta_eta_jj.append(-999)
+            delta_phi_jj.append(-999)
+            mass_jj.append(-999)
+            jet_pair_pt.append(-999)
     
     jet_vars['delta_eta_jj'] = np.array(delta_eta_jj)
     jet_vars['delta_phi_jj'] = np.array(delta_phi_jj)
@@ -367,10 +349,10 @@ def compute_jet_btag_variables_vectorized(data):
                 delta_phi = true_delta_phi(abs(jet1_phi - jet2_phi))
                 jet_ptt_values.append(abs(jet1_pt * np.sin(delta_phi)))
             else:
-                jet_ptt_values.append(-9999)
+                jet_ptt_values.append(-999)
         else:
-            max_btag_values.append(-9999)
-            jet_ptt_values.append(-9999)
+            max_btag_values.append(-999)
+            jet_ptt_values.append(-999)
     
     jet_vars['max_two_jet_btag'] = np.array(max_btag_values)
     jet_vars['jet_ptt'] = np.array(jet_ptt_values)
@@ -379,7 +361,7 @@ def compute_jet_btag_variables_vectorized(data):
 
 def compute_gamma_ptRelErr_vectorized(data):
     """Vectorized computation of gamma_ptRelErr"""
-    return data['gamma_energyErr'] / data['gamma_pt']
+    return data['gamma_energyErr'] / data['gamma_pt'] / np.cosh(data['gamma_eta'])
 
 def compute_zeppenfeld_variables_vectorized(data):
     """Vectorized computation of zeppenfeld variables"""
@@ -391,21 +373,42 @@ def compute_zeppenfeld_variables_vectorized(data):
     h_zep = []
     h_zep_refit = []
     
+    mask_ge1jet = data['n_jets'] >= 1
     mask_2jets = data['n_jets'] >= 2
     
-    for i in range(n_events):
-        if mask_2jets.iloc[i]:
-            jet1_eta = data['jet_1_eta'].iloc[i] if 'jet_1_eta' in data.columns else 0
-            jet2_eta = data['jet_2_eta'].iloc[i] if 'jet_2_eta' in data.columns else 0
-            avg_jet_eta = (jet1_eta + jet2_eta) / 2.0;
-            
-            photon_zep.append(data['gamma_eta'].iloc[i] - avg_jet_eta)
-            h_zep.append(data['H_eta'].iloc[i] - avg_jet_eta)
-            h_zep_refit.append(data['H_eta_refit'].iloc[i] - avg_jet_eta)
-        else:
-            photon_zep.append(-9999)
-            h_zep.append(-9999)
-            h_zep_refit.append(-9999)
+    # Vectorized zeppenfeld calculation using numpy.where
+    # Initialize arrays with default values
+    photon_zep = np.full(n_events, -999.0)
+    h_zep = np.full(n_events, -999.0)
+    h_zep_refit = np.full(n_events, -999.0)
+    
+    # Calculate for events with at least 1 jet
+    if 'jet_1_eta' in data.columns:
+        # Calculate average jet eta: use (jet_1 + jet_2)/2 for 2+ jets, jet_1 for 1 jet
+        avg_jet_eta = np.where(
+            mask_2jets,
+            (data['jet_1_eta'] + data['jet_2_eta']) / 2.0,
+            data['jet_1_eta']
+        )
+        
+        # Calculate zeppenfeld for events with at least 1 jet
+        photon_zep = np.where(
+            mask_ge1jet,
+            np.abs(data['gamma_eta'] - avg_jet_eta),
+            -999.0
+        )
+        
+        h_zep = np.where(
+            mask_ge1jet,
+            np.abs(data['H_eta'] - avg_jet_eta),
+            -999.0
+        )
+        
+        h_zep_refit = np.where(
+            mask_ge1jet,
+            np.abs(data['H_eta_refit'] - avg_jet_eta),
+            -999.0
+        )
     
     zep_vars['photon_zeppenfeld'] = np.array(photon_zep)
     zep_vars['H_zeppenfeld'] = np.array(h_zep)
@@ -500,7 +503,7 @@ def compute_jet_complex_variables_optimized(data, vectors, suffix=''):
     if 'jet_1' not in vectors or 'jet_2' not in vectors:
         # Return default values if jets not available
         for var_name in ['system_pt', 'pt_balance', 'delta_phi_zgjj', 'delta_eta_zgjj']:
-            jet_vars[f'{var_name}{suffix}'] = np.full(n_events, -9999.0)
+            jet_vars[f'{var_name}{suffix}'] = np.full(n_events, -999.0)
         return jet_vars
     
     Z_vecs = vectors['Z']
@@ -509,6 +512,7 @@ def compute_jet_complex_variables_optimized(data, vectors, suffix=''):
     jet2_vecs = vectors['jet_2']
     
     mask_2jets = data['n_jets'] >= 2
+    mask_1jet = data['n_jets'] == 1
     
     # System pt and pt balance calculations
     system_pt_values = []
@@ -518,6 +522,7 @@ def compute_jet_complex_variables_optimized(data, vectors, suffix=''):
     
     for i in range(n_events):
         if mask_2jets.iloc[i]:
+            # For events with 2 or more jets, use dijet system
             total = Z_vecs[i] + gamma_vecs[i] + jet1_vecs[i] + jet2_vecs[i]
             system_pt_values.append(total.Pt())
             
@@ -530,17 +535,40 @@ def compute_jet_complex_variables_optimized(data, vectors, suffix=''):
             # ZG-jj angles
             zg = Z_vecs[i] + gamma_vecs[i]
             j1j2 = jet1_vecs[i] + jet2_vecs[i]
-            delta_phi_zgjj_values.append(abs(zg.Phi() - j1j2.Phi()))
+            delta_phi_zgjj_values.append(true_delta_phi(zg.Phi() - j1j2.Phi()))
             delta_eta_zgjj_values.append(abs(zg.Eta() - j1j2.Eta()))
+        elif mask_1jet.iloc[i]:
+            # For events with exactly 1 jet, use single jet system
+            total = Z_vecs[i] + gamma_vecs[i] + jet1_vecs[i]
+            system_pt_values.append(total.Pt())
+            
+            # pt balance
+            pt_sum = data['Z_pt'].iloc[i] + data['gamma_pt'].iloc[i] + data['jet_1_pt'].iloc[i]
+            if suffix == '_refit':
+                pt_sum = data['Z_pt_refit'].iloc[i] + data['gamma_pt'].iloc[i] + data['jet_1_pt'].iloc[i]
+            pt_balance_values.append(total.Pt() / pt_sum)
+            
+            # ZG-j angles (using single jet instead of dijet)
+            zg = Z_vecs[i] + gamma_vecs[i]
+            j1 = jet1_vecs[i]
+            delta_phi_zgjj_values.append(true_delta_phi(zg.Phi() - j1.Phi()))
+            delta_eta_zgjj_values.append(abs(zg.Eta() - j1.Eta()))
+            if i < 200:
+                print(f"Event {i}: zg.Phi()={zg.Phi()}, j1.Phi()={j1.Phi()}, delta_phi={delta_phi_zgjj_values[-1]}")
         else:
-            system_pt_values.append(-9999)
-            pt_balance_values.append(-9999)
-            delta_phi_zgjj_values.append(-9999)
-            delta_eta_zgjj_values.append(-9999)
+            # For events with 0 jets
+            system_pt_values.append(-999)
+            total = Z_vecs[i] + gamma_vecs[i]
+            pt_sum = data['Z_pt'].iloc[i] + data['gamma_pt'].iloc[i]
+            if suffix == '_refit':
+                pt_sum = data['Z_pt_refit'].iloc[i] + data['gamma_pt'].iloc[i]
+            pt_balance_values.append(total.Pt() / pt_sum)
+            delta_phi_zgjj_values.append(-999)
+            delta_eta_zgjj_values.append(-999)
     
     jet_vars[f'system_pt{suffix}'] = np.array(system_pt_values)
     jet_vars[f'pt_balance{suffix}'] = np.array(pt_balance_values)
-    jet_vars[f'delta_phi_zgjj{suffix}'] = true_delta_phi_vectorized(np.array(delta_phi_zgjj_values))
+    jet_vars[f'delta_phi_zgjj{suffix}'] = np.array(delta_phi_zgjj_values)
     jet_vars[f'delta_eta_zgjj{suffix}'] = np.array(delta_eta_zgjj_values)
     
     return jet_vars
@@ -866,7 +894,7 @@ def compute_pt_balance_0j_refit(x):
 def compute_pt_balance_1j(x):
 
     if x.n_jets < 1:
-        return -9999
+        return -999
     else:
         Z = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.Z_pt, x.Z_eta, x.Z_phi, x.Z_mass)
         gamma = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.gamma_pt, x.gamma_eta, x.gamma_phi, x.gamma_mass)
@@ -877,7 +905,7 @@ def compute_pt_balance_1j(x):
 def compute_pt_balance_1j_refit(x):
 
     if x.n_jets < 1:
-        return -9999
+        return -999
     else:
         Z = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.Z_pt_refit, x.Z_eta_refit, x.Z_phi_refit, x.Z_mass_refit)
         gamma = Math.LorentzVector("ROOT::Math::PtEtaPhiM4D<float>")(x.gamma_pt, x.gamma_eta, x.gamma_phi, x.gamma_mass)
@@ -1095,7 +1123,8 @@ def main():
     weight_list = [
         "weight_hlt_sf_central", 
         "weight_pu_reweight_sf_central", 
-        "weight_btag_deepjet_wp_sf_SelectedJet_central",
+        "weight_btag_deepjet_wp_sf_light_SelectedJet_central",
+        "weight_btag_deepjet_wp_sf_heavy_SelectedJet_central",
         "weight_electron_iso_sf_SelectedElectron_central",
         "weight_electron_reco_sf_SelectedElectron_central",
         "weight_electron_wplid_sf_SelectedElectron_central",
@@ -1159,7 +1188,7 @@ def main():
     data_zero_to_one_jet = data.query("n_jets <= 1 & n_leptons == 2 & MET_pt < 90")
     data_VH_ttH = data[(data.n_leptons > 2) & (data.n_b_jets == 0)]
     data_VH =  data.query("n_leptons >= 3 & n_b_jets == 0 & max_I_mini < 0.15 & H_relpt > 0.3 & MET_pt > 30 & Z_mass > 85 & Z_mass < 95")
-    data_ZH = data.query("n_leptons == 2 & n_jets <= 1 & MET_pt > 90 & H_relpt > 0.4 & Z_mass > 85 & Z_mass < 95") 
+    data_ZH = data.query("n_leptons == 2 & n_jets <= 1 & MET_pt > 90 & H_relpt > 0.4") 
     data_ttH_had = data.query("n_leptons == 2 & n_jets >= 5 & n_b_jets >= 1 & Z_mass > 85 & Z_mass < 95")
     data_ttH_lep = data.query("((n_leptons == 3 & n_jets >= 3 & n_b_jets >= 1) | (n_leptons >= 4 & n_jets >= 1 & n_b_jets >= 1)) & (max_I_mini < 0.1 & Z_mass > 85 & Z_mass < 95)")
     with uproot.recreate(args.output) as f:

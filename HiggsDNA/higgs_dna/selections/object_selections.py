@@ -73,9 +73,9 @@ def select_objects(objects, cuts = {}, clean = {}, name = "none", tagger = None)
     for i, cut in enumerate(cut_results):
         all_cuts = (all_cuts) & cut
         if i == 0:
-            cut_results[i] = (awkward.sum(cut, axis=1) > 0)
+            cut_results[i] = awkward.flatten(cut)
         else:
-             cut_results[i] = (awkward.sum(cut, axis=1) > 0) & cut_results[i-1]
+             cut_results[i] = awkward.flatten(cut) & cut_results[i-1]
 
     if tagger is not None:
         tagger.register_cuts(

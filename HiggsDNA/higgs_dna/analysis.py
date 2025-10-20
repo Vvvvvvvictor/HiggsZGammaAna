@@ -9,6 +9,7 @@ import numpy
 
 import uproot
 import awkward
+import pyarrow.parquet
 
 import logging
 import orjson
@@ -28,7 +29,7 @@ from higgs_dna.utils.metis_utils import do_cmd
 from higgs_dna.taggers.duplicated_samples_tagger import DuplicatedSamplesTagger
 from higgs_dna.taggers.mc_overlap_tagger import MCOverlapTagger
 from higgs_dna.systematics.photon_systematics import photon_scale_smear_run3
-from higgs_dna.systematics.lepton_systematics import electron_scale_smear_run3
+from higgs_dna.systematics.lepton_systematics import electron_scale_smear_run3, muon_scale_run3
 
 condor=False
 def run_analysis(config):
@@ -517,16 +518,6 @@ class AnalysisManager():
         with open(self.summary_file, "w") as f_out:
             json.dump(self.summary, f_out, sort_keys = True, indent = 4)
 
-    # def get_file_handler(file):
-    #     xrootd_src = file.startswith("root://")
-    #     if not xrootd_src:
-    #         return {"file_handler": uproot.MultithreadedFileSource} # otherwise the memory maps overload available Vmem
-    #     elif xrootd_src:
-    #         # uncomment below for MultithreadedXRootDSource
-    #         return {"xrootd_handler": uproot.source.xrootd.MultithreadedXRootDSource}
-    #     # return {}
-    #  **get_file_handler(file),
-
     @staticmethod
     def get_file_handler(filename):
         xrootd_src = filename.startswith("root://")
@@ -572,14 +563,6 @@ class AnalysisManager():
                 f = uproot.open(f'/tmp/{os.getpid()}/{os.path.basename(file)}',timeout = 300, num_workers=1)
 
             runs = f["Runs"]
-            # if "genEventCount" in runs.keys() and "genEventSumw" in runs.keys():
-            #     # sum_weights += numpy.sum(runs["genEventSumw"].array()) #FIXME: use genWeight or Generator_weight
-            #     sum_genWeight = numpy.sum(runs["genEventSumw"].array())
-            #     logger.debug("[AnalysisManager : genEventSumw] genEventSumw: {}".format(sum_genWeight))
-            # elif "genEventCount_" in runs.keys() and "genEventSumw_" in runs.keys():
-            #     # sum_weights += numpy.sum(runs["genEventSumw_"].array()) #FIXME: use genWeight or Generator_weight
-            #     sum_genWeight = numpy.sum(runs["genEventSumw_"].array())
-            #     logger.debug("[AnalysisManager : genEventSumw_] genEventSumw_: {}".format(sum_genWeight))
             tree = f["Events"]
 
             if "Generator_weight" in tree.keys():
@@ -590,14 +573,6 @@ class AnalysisManager():
                 for i, value in enumerate(unique_values):
                     unique_counts = numpy.sum(tree["Generator_weight"] == value)
                     logger.debug("[AnalysisManager : GeneratorWeight] Unique values of Generator_weight: {}, numbers: {}".format(value, unique_counts))
-
-            # if "genWeight" in tree.keys():
-            #     sum_genWeight = numpy.sum(tree["genWeight"])
-            #     # sum_weights += sum_genWeight #FIXME: use genWeight or Generator_weight
-            #     logger.debug("[AnalysisManager : GenWeightSum] Sum of genWeight: {}".format(sum_genWeight))
-            #     unique_values = numpy.unique(tree["genWeight"])
-            #     for value in unique_values:
-            #         logger.debug("[AnalysisManager : GenWeight] Unique values of genWeight: ".format(value))
                     
             # Get events that is not duplicated or overlapped
             if is_data:
@@ -615,9 +590,10 @@ class AnalysisManager():
                 events_file = tree.arrays(trimmed_branches, library = "ak", how = "zip")
                 events_file = events_file[overlap_cut]
 
-                if int(year[:4]) > 2020:
-                    events_file = photon_scale_smear_run3(events_file, year)
-                    events_file = electron_scale_smear_run3(events_file, year)
+            if int(year[:4]) > 2020:
+                events_file = photon_scale_smear_run3(events_file, year, is_data)
+                events_file = electron_scale_smear_run3(events_file, year, is_data)
+                events_file = muon_scale_run3(events_file, year, is_data)
 
             f.close()
             
@@ -714,8 +690,10 @@ class AnalysisManager():
         """
         out_name = "%s_%s.parquet" % (name, syst_tag)
 
-        if not len(events) >= 1:
-            return out_name 
+        if len(events) == 0:
+            logger.info("[bold yellow]Empty events array, skipping writing to parquet.[/bold yellow]")
+            return out_name
+
         save_map = {}
         for branch in save_branches:
             if isinstance(branch, tuple) or isinstance(branch, list):
@@ -737,12 +715,19 @@ class AnalysisManager():
             if "weight_" in field and not field in save_map.keys():
                 save_map[field] = events[field]
 
-        events = awkward.zip(save_map, depth_limit=1)    
+        events = awkward.zip(save_map, depth_limit=1)
         logger.debug("[AnalysisManager : write_events] Writing output file '%s'." % (out_name))
-        if condor:
-       	  #awkward.to_parquet(events, out_name.split("/")[-1],list_to32=True) 
-            awkward.to_parquet(events, out_name.split("/")[-1]) 
+
+        if len(events) == 1:
+            logger.info("[bold yellow]Single event found, converting to pyarrow table before writing to parquet.[/bold yellow]")
+            arrow_table = awkward.to_arrow_table(events)
+            if condor:
+                pyarrow.parquet.write_table(arrow_table, out_name.split("/")[-1])
+            else:
+                pyarrow.parquet.write_table(arrow_table, out_name)
         else:
-          #awkward.to_parquet(events, out_name,list_to32=True) 
-            awkward.to_parquet(events, out_name) 
+            if condor:
+                awkward.to_parquet(events, out_name.split("/")[-1])
+            else:
+                awkward.to_parquet(events, out_name)
         return out_name

@@ -6,11 +6,11 @@
 echo "开始BDT分数比较..."
 
 # 设置Python环境（如果需要）
-source /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/setup_env.sh
+# source /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/setup_env.sh
 
 # 文件路径
-FILE1="/eos/project-h/htozg-dy-privatemc/rzou/bdt/Output_ggF_rui_commonparam/SM1_2018_output.root"
-FILE2="/eos/user/j/jiehan/root/outputs/bdt_comparison_20250818_153334/zero_to_one_jet/ZGToLLG_2018_zero_to_one_jet_bdt_comparison.root"
+FILE1="/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/Output_ggF_rui_redwood_v1_ext_val/SM1_2018_output.root"
+FILE2="/eos/user/j/jiehan/root/outputs/bdt_comparison_20250929_075830/zero_to_one_jet/ZGToLLG_2018_zero_to_one_jet_bdt_comparison.root"
 
 # 输出目录
 OUTPUT_DIR="/eos/home-j/jiehan/root/outputs/bdt_score_comparison_$(date +%Y%m%d_%H%M%S)"
