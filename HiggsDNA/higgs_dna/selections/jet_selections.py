@@ -103,20 +103,22 @@ def select_jets(jets, options, clean, year, name = "none", tagger = None, event_
         if tagger is not None and event_runs is not None:
             # broadcast event-level info to jet dimension
             if len(jets) == len(event_runs):
+                print("Min and Max of event_runs:", numpy.min(event_runs), " , ", numpy.max(event_runs))
                 run_broadcast = awkward.broadcast_arrays(event_runs, jets.pt)[0]
                 region = ((jets.phi > -1.57) & (jets.phi < -0.87) &
                           (jets.eta > -3.0) & (jets.eta < -1.3))
                 if tagger.is_data:
+                    print("Data detected: removing all jets in HEM region for affected runs.")
                     run_region = (run_broadcast > 319077)
-                    remove = region & run_region
+                    hem_mask = ~(region & run_region)
                 else:
+                    print("MC detected: applying probabilistic HEM jet removal for affected runs.")
                     fraction = 0.6515623538907509
                     # 產生一次 per-event 隨機數 (可重複執行時保持非決定性；若需可加種子)
                     rand = numpy.random.random(len(event_runs))
                     hem_run = rand < fraction
                     hem_run_broadcast = awkward.broadcast_arrays(hem_run, jets.pt)[0]
-                    remove = region & hem_run_broadcast
-                hem_mask = ~remove
+                    hem_mask = ~(region & hem_run_broadcast)
                 if awkward.any(~hem_mask):
                     logger.debug(f"[HEM] Removed jets: {awkward.sum(~hem_mask, axis=1)[:10]}")
             else:

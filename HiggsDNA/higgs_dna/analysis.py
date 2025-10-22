@@ -6,6 +6,7 @@ import json
 import pickle
 import dill
 import numpy
+import re
 
 import uproot
 import awkward
@@ -30,6 +31,7 @@ from higgs_dna.taggers.duplicated_samples_tagger import DuplicatedSamplesTagger
 from higgs_dna.taggers.mc_overlap_tagger import MCOverlapTagger
 from higgs_dna.systematics.photon_systematics import photon_scale_smear_run3
 from higgs_dna.systematics.lepton_systematics import electron_scale_smear_run3, muon_scale_run3
+from higgs_dna.systematics.jet_systematics import pt_correction_data, pt_correction_mc
 
 condor=False
 def run_analysis(config):
@@ -70,11 +72,12 @@ def run_analysis(config):
         if branch_map:
             for x in branch_map:
                 logger.debug("[run_analysis] Replacing %s with %s." % (str(x[0]), str(x[1])))
-                print("[DEBUG]: ", str(x[0]), list, tuple(x[0]), tuple(x[1]))
-                print("[DEBUG]: ", awkward.fields(events))
-                print("[DEBUG]: ", awkward.fields(events["Jet"]))
+                print("[run_analysis] variables in Photon", awkward.fields(events["Photon"]))
                 if isinstance(x[0], list):
-                    events[tuple(x[0])] = events[tuple(x[1])]
+                    try:
+                        events[tuple(x[0])] = events[tuple(x[1])]
+                    except:
+                        print("[run_analysis] Failed to map branches:", x)
                 else:
                     events[x[0]] = events[x[1]]
 
@@ -594,6 +597,14 @@ class AnalysisManager():
                 events_file = photon_scale_smear_run3(events_file, year, is_data)
                 events_file = electron_scale_smear_run3(events_file, year, is_data)
                 events_file = muon_scale_run3(events_file, year, is_data)
+                if is_data:
+                    if "2022postEE" in year:
+                        period = re.search(r"Run2022([A-Z]+)", file).group(1)
+                        events_file = pt_correction_data(events_file, year, period)
+                    else:
+                        events_file = pt_correction_data(events_file, year)
+                else:
+                    events_file = pt_correction_mc(events_file, year)
 
             f.close()
             

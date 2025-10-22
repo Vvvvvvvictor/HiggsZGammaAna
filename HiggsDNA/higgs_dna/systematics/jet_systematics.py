@@ -3,6 +3,7 @@ import awkward
 import numpy
 
 from correctionlib import _core
+import correctionlib
 
 from higgs_dna.utils import misc_utils, awkward_utils
 
@@ -360,124 +361,263 @@ def btag_deepjet_wp_sf_light(events, year, central_only, input_collection):
     }
     return swapped_variations
 
-def btag_deepjet_mujet_sf(events, year, central_only, input_collection, working_point ="M"):
-    required_fields = [
-        (input_collection, "eta"), (input_collection, "pt"), (input_collection, "hadronFlavour")
-    ]    
-    evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(BTAG_RESHAPE_SF_FILE[year]))
+def pt_correction_mc(
+    events,
+    year,
+    jes_unc_source,
+    jer_variation,
+    input_collection="Jet",
+    jec_algo="AK4PFPuppi",
+    reapply_jes=True
+):
+    """
+    Applies jet energy scale (JES) corrections and jet energy resolution (JER) smearing to simulated jets.
+    This function is a Python replica of the C++ version in jets.cxx.
+
+    Parameters
+    ----------
+    events : awkward.Array
+        The events array.
+    year : str
+        The year of the data-taking period (e.g., "2018", "2022preEE").
+    jes_unc_source : str
+        The JES uncertainty source to vary. If empty, no JES uncertainty is applied.
+        If "All", a total uncertainty is applied.
+    jer_variation : str
+        The JER variation ("central", "up", "down").
+    input_collection : str, optional
+        The name of the jet collection, by default "Jet".
+    jec_algo : str, optional
+        The jet algorithm, by default "AK4PFchs".
+    reapply_jes : bool, optional
+        Whether to reapply JES corrections, by default False.
+    is_data : bool, optional
+        Whether the input is data or MC, by default False.
+
+    Returns
+    -------
+    awkward.Array
+        An array with the corrected jet pT.
+    """
+    JEC_TAG_MC = {
+        "2016preVFP": "Summer19UL16APV_V7_MC",
+        "2016postVFP": "Summer19UL16_V7_MC",
+        "2017": "Summer19UL17_V5_MC",
+        "2018": "Summer19UL18_V5_MC",
+        "2022preEE": "Summer22_22Sep2023_V2_MC",
+        "2022postEE": "Summer22EE_22Sep2023_V2_MC",
+        "2023preBPix": "Summer23Prompt23_V2_MC",
+        "2023postBPix": "Summer23BPixPrompt23_V3_MC",
+    }
+    JEC_FILE = {
+        "2016preVFP": "jsonpog-integration/POG/JME/2016preVFP_UL/jet_jerc.json",
+        "2016postVFP": "jsonpog-integration/POG/JME/2016postVFP_UL/jet_jerc.json",
+        "2017": "jsonpog-integration/POG/JME/2017_UL/jet_jerc.json",
+        "2018": "jsonpog-integration/POG/JME/2018_UL/jet_jerc.json",
+        "2022preEE": "jsonpog-integration/POG/JME/2022_Summer22/jet_jerc.json",
+        "2022postEE": "jsonpog-integration/POG/JME/2022_Summer22EE/jet_jerc.json",
+        "2023preBPix": "jsonpog-integration/POG/JME/2023_Summer23/jet_jerc.json",
+        "2023postBPix": "jsonpog-integration/POG/JME/2023_Summer23BPix/jet_jerc.json",
+    }
+
+    jets = events[input_collection]
     
-    jets = events[input_collection]   
-    jets["flavor"] = jets.hadronFlavour
-    n_jets = awkward.num(jets) # save n_jets to convert back to jagged format at the end 
-    jets_flattened = awkward.flatten(jets)
+    lhc_run = 2
+    if "2022" in year or "2023" in year:
+        lhc_run = 3
 
-    jet_flavor = awkward.to_numpy(jets_flattened.flavor)
-    is_light = jet_flavor == 0
+    jes_tag = JEC_TAG_MC[year]
+    jer_tag = jes_tag.replace("_V", "_JRV") if lhc_run == 2 else jes_tag.replace("_V", "_JR_V")
+    jec_file = misc_utils.expand_path(JEC_FILE[year])
+    evaluator = _core.CorrectionSet.from_file(jec_file)
+
+    # Flatten jets for easier processing
+    n_jets = awkward.num(jets)
+    jets_flat = awkward.flatten(jets)
+
+    corrected_pts = jets_flat.pt
+
+    if reapply_jes:
+        raw_pt = jets_flat.pt * (1 - jets_flat.rawFactor)
+        jes_evaluator = evaluator.compound[f"{jes_tag}_L1L2L3Res_{jec_algo}"]
+        corr = jes_evaluator.evaluate(
+            jets_flat.area, jets_flat.eta, raw_pt, events.fixedGridRhoFastjetAll
+        )
+        corrected_pts = raw_pt * corr
+
+    # JER smearing
+    jer_resolution_evaluator = evaluator[f"{jer_tag}_PtResolution_{jec_algo}"]
+    reso = jer_resolution_evaluator.evalv(jets_flat.eta, corrected_pts, events.fixedGridRhoFastjetAll)
+
+    jer_sf_evaluator = evaluator[f"{jer_tag}_ScaleFactor_{jec_algo}"]
+    jer_var_map = {"central": "nom", "up": "up", "down": "down"}
+    jer_shift_str = jer_var_map[jer_variation]
+
+    if lhc_run == 2:
+        reso_sf = jer_sf_evaluator.evalv(jets_flat.eta, jer_shift_str)
+    else: # lhc_run == 3
+        reso_sf = jer_sf_evaluator.evalv(jets_flat.eta, corrected_pts, jer_shift_str)
+
+    # Gen jet matching
+    gen_jets = events.GenJet
+    jets_flat_cartesian = awkward.zip({"pt": jets_flat.pt, "eta": jets_flat.eta, "phi": jets_flat.phi, "mass": jets_flat.mass}, with_name="Momentum4D")
+    gen_jets_cartesian = awkward.zip({"pt": gen_jets.pt, "eta": gen_jets.eta, "phi": gen_jets.phi, "mass": gen_jets.mass}, with_name="Momentum4D")
     
-    jet_abs_eta = numpy.clip(
-        awkward.to_numpy(abs(jets_flattened.eta)),
-        0.0,
-        2.49999 # SFs only valid up to eta 2.5
-    )
-    jet_pt = numpy.clip(
-        awkward.to_numpy(jets_flattened.pt),
-        20.0, # SFs only valid for pT > 20.
-        999.99
-    )
-    variations_list = ["central"]
-
-    if not central_only:
-        variations_list += DEEPJET_VARIATIONS.keys()
-
-    variations = {}
-    print(type(jet_flavor))
-    print(type(numpy.where(is_light,4,jet_flavor)))
-    central_sf = evaluator["deepJet_mujets"].evalv(
-            "central",
-            working_point,
-            numpy.where(is_light,4,jet_flavor),
-            jet_abs_eta,
-            jet_pt
-    )    
-    central_sf = numpy.where(is_light,1,central_sf)
-    variations["central"] = awkward.unflatten(central_sf, n_jets)
-    if not central_only:
-        syst_vars = ["up_correlated", "down_correlated", "up_uncorrelated", "down_uncorrelated"]
-        for syst_var in syst_vars:
-            syst = evaluator["deepJet_mujets"].evalv(
-                    syst_var,
-                    working_point,
-                    numpy.where(is_light,4,jet_flavor),
-                    jet_abs_eta,
-                    jet_pt,
-            )
-            if "up_correlated" in syst_var:
-                syst_var_name = "up_correlated"
-            elif "down_correlated" in syst_var:
-                syst_var_name = "down_correlated"
-            elif "up_uncorrelated" in syst_var:
-                syst_var_name = "up_uncorrelated"
-            elif "down_uncorrelated" in syst_var:
-                syst_var_name = "down_uncorrelated"
-            variations[syst_var_name] = awkward.unflatten(syst, n_jets)
-    return variations
-
-def btag_deepjet_incl_sf(events, year, central_only, input_collection, working_point ="M"):
-    required_fields = [
-        (input_collection, "eta"), (input_collection, "pt"), (input_collection, "hadronFlavour")
-    ]    
-    evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(BTAG_RESHAPE_SF_FILE[year]))
+    matched_gen_jets = awkward.firsts(gen_jets_cartesian[awkward.singletons(jets_flat_cartesian.delta_r(gen_jets_cartesian) < 0.2)])
     
-    jets = events[input_collection]   
-    jets["flavor"] = jets.hadronFlavour
-    n_jets = awkward.num(jets) # save n_jets to convert back to jagged format at the end 
-    jets_flattened = awkward.flatten(jets)
-
-    jet_flavor = awkward.to_numpy(jets_flattened.flavor)
-    is_light = jet_flavor == 0
-
-    jet_abs_eta = numpy.clip(
-        awkward.to_numpy(abs(jets_flattened.eta)),
-        0.0,
-        2.49999 # SFs only valid up to eta 2.5
+    gen_jet_pt = awkward.where(
+        (matched_gen_jets.pt > 0) & (abs(corrected_pts - matched_gen_jets.pt) < (3.0 * reso * corrected_pts)),
+        matched_gen_jets.pt,
+        -1.0
     )
-    jet_pt = numpy.clip(
-        awkward.to_numpy(jets_flattened.pt),
-        20.0, # SFs only valid for pT > 20.
-        999.99
-    )
-    variations_list = ["central"]
 
-    if not central_only:
-        variations_list += DEEPJET_VARIATIONS.keys()
+    # Apply smearing
+    smear_factor = numpy.ones_like(corrected_pts, dtype=numpy.float32)
     
-    variations = {}
-    central_sf = evaluator["deepJet_incl"].evalv(
-            "central",
-            working_point,
-            numpy.where(~is_light,0,jet_flavor),
-            jet_abs_eta,
-            jet_pt
-    )   
-    central_sf = numpy.where(~is_light,1,central_sf)
-    variations["central"] = awkward.unflatten(central_sf, n_jets)
-    if not central_only:
-        syst_vars = ["up_correlated", "down_correlated", "up_uncorrelated", "down_uncorrelated"]
-        for syst_var in syst_vars:
-            syst = evaluator["deepJet_incl"].evalv(
-                    syst_var,
-                    working_point,
-                    numpy.where(is_light,4,jet_flavor),
-                    jet_abs_eta,
-                    jet_pt,
-            )
-            if "up_correlated" in syst_var:
-                syst_var_name = "up_correlated"
-            elif "down_correlated" in syst_var:
-                syst_var_name = "down_correlated"
-            elif "up_uncorrelated" in syst_var:
-                syst_var_name = "up_uncorrelated"
-            elif "down_uncorrelated" in syst_var:
-                syst_var_name = "down_uncorrelated"
-            variations[syst_var_name] = awkward.unflatten(syst, n_jets)
-    return variations
+    # Scaling method for matched jets
+    matched_mask = gen_jet_pt > 0
+    shift = (reso_sf - 1.0) * (corrected_pts - gen_jet_pt) / corrected_pts
+    smear_factor = numpy.where(matched_mask, numpy.maximum(0.0, 1.0 + shift), smear_factor)
+
+    # Stochastic method for non-matched jets
+    not_matched_mask = ~matched_mask
+    seed = events.event
+    randm = numpy.random.RandomState(seed=seed)
+    gaus_smear = randm.normal(0, reso)
+    shift_stochastic = gaus_smear * numpy.sqrt(numpy.maximum(reso_sf * reso_sf - 1.0, 0.0))
+    smear_factor = numpy.where(not_matched_mask, numpy.maximum(0.0, 1.0 + shift_stochastic), smear_factor)
+
+    corrected_pts = corrected_pts * smear_factor
+
+    # JES uncertainties
+    pt_scale_sf = numpy.ones_like(corrected_pts, dtype=numpy.float32)
+    if jes_unc_source:
+        jes_shift = 1.0 if "up" in jes_unc_source.lower() else -1.0
+        source_name = jes_unc_source.replace("_up", "").replace("_down", "")
+
+        if source_name == "HEMIssue" and year == "2018":
+            if jes_shift == -1.0:
+                hem_mask = (corrected_pts > 15.0) & (jets_flat.phi > -1.57) & (jets_flat.phi < -0.87) & (jets_flat.jetId == 2)
+                eta_mask1 = (jets_flat.eta > -2.5) & (jets_flat.eta < -1.3)
+                eta_mask2 = (jets_flat.eta > -3.0) & (jets_flat.eta <= -2.5)
+                pt_scale_sf = numpy.where(hem_mask & eta_mask1, 0.8, pt_scale_sf)
+                pt_scale_sf = numpy.where(hem_mask & eta_mask2, 0.65, pt_scale_sf)
+        else:
+            # Assuming 'Total' for combined sources, or a specific source name
+            if source_name == "Total":
+                # This part requires listing all sources and summing in quadrature.
+                # For simplicity, let's assume a 'Total' uncertainty is available.
+                # This might need adjustment based on what's in the JEC file.
+                try:
+                    jes_source_evaluator = evaluator[f"{jes_tag}_{source_name}_{jec_algo}"]
+                    unc = jes_source_evaluator.evalv(jets_flat.eta, corrected_pts)
+                    pt_scale_sf = 1.0 + jes_shift * unc
+                except:
+                    logger.warning(f"Could not find total JES uncertainty '{jes_tag}_{source_name}_{jec_algo}'. Using individual sources.")
+                    # Fallback to summing individual sources if 'Total' is not present
+                    all_sources = [s.name for s in evaluator if f"{jes_tag}_" in s.name and f"_{jec_algo}" in s.name and "_L1" not in s.name] # simplified
+                    quad_sum = numpy.zeros_like(corrected_pts, dtype=numpy.float32)
+                    for source in all_sources:
+                        if "PtResolution" in source or "ScaleFactor" in source: continue
+                        s_eval = evaluator[source]
+                        quad_sum += numpy.power(s_eval.evalv(jets_flat.eta, corrected_pts), 2.0)
+                    pt_scale_sf = 1.0 + jes_shift * numpy.sqrt(quad_sum)
+
+            else: # single source
+                jes_source_evaluator = evaluator[f"{jes_tag}_{source_name}_{jec_algo}"]
+                unc = jes_source_evaluator.evalv(jets_flat.eta, corrected_pts)
+                pt_scale_sf = 1.0 + jes_shift * unc
+
+    corrected_pts = corrected_pts * pt_scale_sf
+
+    return awkward.unflatten(corrected_pts, n_jets)
+
+
+def pt_correction_data(
+    events,
+    year,
+    run_period=None,
+    input_collection="Jet",
+    jec_algo="AK4PFPuppi"
+):
+    """
+    Applies jet energy corrections (JEC) to jets in real data.
+    This function is a Python replica of the C++ version in jets.cxx.
+
+    Parameters
+    ----------
+    events : awkward.Array
+        The events array.
+    year : str
+        The year of the data-taking period (e.g., "2018", "2022preEE").
+    run_period : str
+        The data-taking run period (e.g., "A", "B", "C").
+    input_collection : str, optional
+        The name of the jet collection, by default "Jet".
+    jec_algo : str, optional
+        The jet algorithm, by default "AK4PFchs".
+
+    Returns
+    -------
+    awkward.Array
+        An array with the corrected jet pT.
+    """
+    JEC_TAG_DATA = {
+        "2016preVFP": "Summer19UL16APV_V7_DATA",
+        "2016postVFP": "Summer19UL16_V7_DATA",
+        "2017": "Summer19UL17_V5_DATA",
+        "2018": "Summer19UL18_V5_DATA",
+        "2022preEE": "Summer22_22Sep2023_RunCD_V2_DATA",
+        "2022postEE": "Summer22EE_22Sep2023_V2_DATA",
+        "2023preBPix": "Summer23Prompt23_V2_DATA",
+        "2023postBPix": "Summer23BPixPrompt23_V3_DATA",
+    }
+    JEC_FILE = {
+        "2016preVFP": "jsonpog-integration/POG/JME/2016preVFP_UL/jet_jerc.json",
+        "2016postVFP": "jsonpog-integration/POG/JME/2016postVFP_UL/jet_jerc.json",
+        "2017": "jsonpog-integration/POG/JME/2017_UL/jet_jerc.json",
+        "2018": "jsonpog-integration/POG/JME/2018_UL/jet_jerc.json",
+        "2022preEE": "jsonpog-integration/POG/JME/2022_Summer22/jet_jerc.json",
+        "2022postEE": "jsonpog-integration/POG/JME/2022_Summer22EE/jet_jerc.json",
+        "2023preBPix": "jsonpog-integration/POG/JME/2023_Summer23/jet_jerc.json",
+        "2023postBPix": "jsonpog-integration/POG/JME/2023_Summer23BPix/jet_jerc.json",
+    }
+
+    jets = events[input_collection]
+    
+    if run_period:
+        jes_tag = f"{JEC_TAG_DATA[year][:-8]}_Run{run_period}_{JEC_TAG_DATA[year][-7:]}"
+    else:
+        jes_tag = JEC_TAG_DATA[year]
+    jec_file = misc_utils.expand_path(JEC_FILE[year])
+    evaluator = correctionlib.CorrectionSet.from_file(jec_file)
+
+    n_jets = awkward.num(jets)
+    jets_flat = awkward.flatten(jets)
+    jets_area = awkward.to_numpy(jets_flat.area)
+    jets_eta = awkward.to_numpy(jets_flat.eta)
+    rho_arr = numpy.repeat(awkward.to_numpy(events["Rho_fixedGridRhoFastjetAll"]), n_jets)
+
+    raw_pt = jets_flat.pt * (1 - jets_flat.rawFactor)
+    raw_pt = awkward.to_numpy(raw_pt)
+    if "2023" in year:
+        run_arr = numpy.repeat(awkward.to_numpy(events["run"]), n_jets)
+        jets_phi = awkward.to_numpy(jets_flat.phi)
+    
+    jec_evaluator = evaluator.compound[f"{jes_tag}_L1L2L3Res_{jec_algo}"]
+    if "2023post" in year:
+        corr = jec_evaluator.evaluate(
+            jets_area, jets_eta, raw_pt, rho_arr, jets_phi, run_arr
+        )
+    elif "2023pre" in year:
+        corr = jec_evaluator.evaluate(
+            jets_area, jets_eta, raw_pt, rho_arr, run_arr
+        )
+    else:
+        corr = jec_evaluator.evaluate(
+            jets_area, jets_eta, raw_pt, rho_arr
+        )
+    corrected_pts = raw_pt * corr
+    events["Jet", "corrected_pt"] = awkward.unflatten(corrected_pts, n_jets)
+
+    return events
