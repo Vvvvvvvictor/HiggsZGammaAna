@@ -8,7 +8,7 @@ plt.style.use(hep.style.CMS)
 from pdb import set_trace
 
 # Define output directory
-output_dir = "/eos/home-j/jiehan/root/outputs/"
+output_dir = "/eos/home-p/pelai/HZgamma/root_hzgml/"
 
 # Add color dictionary
 color_dict = {r"Z$+\gamma$": "#3f90da", "Z+Fake Photon": "#ffa90e", r"VBSZ+$\gamma$": "#92dadd", 
@@ -51,7 +51,7 @@ backgrounds = ["ZGToLLG", "DYJetsToLL", "EWKZ2J"]
 signal = ["ggH_M125", "VBF_M125"] #, "ZH_M125", "WplusH_M125", "WminusH_M125", "ttH_M125"]
 data = ["Data"]
 
-output_plot_dir = f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/{channel}/"
+output_plot_dir = f"/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/plot_python/pic/{channel}/"
 if not os.path.exists(output_plot_dir):
     os.makedirs(output_plot_dir)
 
@@ -138,5 +138,9 @@ for i in range(len(boundaries)-1):
     ax2.grid(True, alpha=0.3)
     
     # plt.savefig(f"{output_plot_dir}hmass_dis_all.png")
-    plt.savefig(f"{output_plot_dir}hmass_dis_{len(boundaries)-1-i}.png")
+    # plt.savefig(f"{output_plot_dir}hmass_dis_{len(boundaries)-1-i}.png")
+    output_filename = f"{output_plot_dir}hmass_dis_{len(boundaries)-1-i}.png"
+    plt.savefig(output_filename)
+    plt.savefig(output_filename.replace(".png",".pdf")) # Also save as PDF
+
     plt.clf()

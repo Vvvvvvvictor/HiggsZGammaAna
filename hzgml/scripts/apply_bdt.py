@@ -36,6 +36,8 @@ except ImportError:
 
 from weighted_quantile_transformer import WeightedQuantileTransformer # New import
 
+hzgml_PATH="/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml"
+
 def get_memory_usage():
     """Get current memory usage in GB."""
     if PSUTIL_AVAILABLE:
@@ -58,9 +60,12 @@ HADD_AVAILABLE = check_hadd_available()
 def getArgs():
     """Get arguments from command line."""
     parser = ArgumentParser()
-    parser.add_argument('-c', '--config', action='store', nargs=2, default=['data/training_config_BDT.json', 'data/apply_config_BDT.json'], help='Region to process')
+    parser.add_argument('-c', '--config', action='store', nargs=2,
+                        default=[os.path.join(hzgml_PATH, 'data', 'training_config_BDT.json'),
+                                 os.path.join(hzgml_PATH, 'data', 'apply_config_BDT.json')],
+                        help='Region to process')
     parser.add_argument('-i', '--inputFolder', action='store', default='/eos/home-j/jiehan/root/skimmed_ntuples_run2', help='directory of training inputs')
-    parser.add_argument('-m', '--modelFolder', action='store', default='models', help='directory of BDT models')
+    parser.add_argument('-m', '--modelFolder', action='store', default='/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml/models', help='directory of BDT models')
     parser.add_argument('-o', '--outputFolder', action='store', default='/eos/home-j/jiehan/root/outputs/test', help='directory for outputs')
     parser.add_argument('-r', '--region', action='store', choices=['two_jet', 'one_jet', 'zero_jet', 'zero_to_one_jet', 'VH_ttH', 'all_jet'], default='zero_jet', help='Region to process')
     parser.add_argument('-cat', '--category', action='store', nargs='+', help='apply only for specific categories')
@@ -607,7 +612,7 @@ def main():
     xgb.loadModels()
     xgb.loadTransformer()
 
-    with open('data/inputs_config.json') as f:
+    with open(os.path.join(hzgml_PATH, 'data', 'inputs_config.json')) as f:
         config = json.load(f)
     sample_list = config['sample_list']
 

@@ -7,17 +7,17 @@
 #                                                                       #
 #########################################################################
 
-echo $#
-if [ $# == 1 ]
-then
-    A=-1; S=$1;
-else 
-    S=-1; A=-1;
-fi
-echo "==================================================="
-echo "num: $2"
-echo "==================================================="
-echo "Shielded parameter is: $S . Added variables is: $A ."
+# echo $#
+# if [ $# == 1 ]
+# then
+#     A=-1; S=$1;
+# else 
+#     S=-1; A=-1;
+# fi
+# echo "==================================================="
+# echo "num: $2"
+# echo "==================================================="
+# echo "Shielded parameter is: $S . Added variables is: $A ."
 
 # python ../synchronization_script/batch_process_root_files.py
 
@@ -28,20 +28,23 @@ echo "Shielded parameter is: $S . Added variables is: $A ."
 # done
 
 # # cp models/optuna_two_jet/*0.* models/optuna_two_jet_nosyst_sqrt_base/
-
+BASE_PATH="/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml"
 # ------- 01jet category -------
 # [skip] 4 fold training with each hyperparameters 
 # python scripts/train_bdt.py -r zero_to_one_jet --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --save --hyperparams_path "models/optuna_zero_to_one_jet_0725"
 
-# 1 - Tune 1 set of hyperparameter
-python scripts/train_bdt.py -r zero_to_one_jet --optuna --n-calls 60 --continue-optuna 0 --optuna_metric 'sqrt_eval_auc_minus_train_auc' --oneHyperparameter --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new"
-# # 2 - Train with 1 set of hyperparameter
-# python scripts/train_bdt.py -r zero_to_one_jet --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --save --hyperparams_path "models/optuna_zero_to_one_jet" --oneHyperparameter
-# # 3 - Apply
-# python scripts/apply_bdt.py -r zero_to_one_jet --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --outputFolder "/eos/home-p/pelai/HZgamma/root_hzgml/test"
-# # 4 - Nominal Score (purity)
-# python scripts/categorization_1D.py -r zero_to_one_jet -n 120 --score_max 1.1 --score_min -0.1 -b 4 --minSB 20 --minN 4 -es "fullSimrw" --input "/eos/home-p/pelai/HZgamma/root_hzgml" #--floatB
-
+if [ "$1" -eq 1 ]; then
+    # 1 - Tune 1 set of hyperparameter
+    python $BASE_PATH/scripts/train_bdt.py -r zero_to_one_jet --optuna --n-calls 60 --continue-optuna 0 --optuna_metric 'sqrt_eval_auc_minus_train_auc' --oneHyperparameter --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" -c "/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml/data/training_config_BDT.json"
+elif [ "$1" -eq 2 ]; then
+    # 2 - Train with 1 set of hyperparameter
+    python $BASE_PATH/scripts/train_bdt.py -r zero_to_one_jet --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --save --hyperparams_path "/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml/models/optuna_zero_to_one_jet" --oneHyperparameter
+elif [ "$1" -eq 3 ]; then
+    # 3 - Apply
+    python $BASE_PATH/scripts/apply_bdt.py -r zero_to_one_jet --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --outputFolder "/eos/home-p/pelai/HZgamma/root_hzgml/test"
+elif [ "$1" -eq 4 ]; then
+    # 4 - Nominal Score (purity)
+    python $BASE_PATH/scripts/categorization_1D.py -r zero_to_one_jet -n 120 --score_max 1.1 --score_min -0.1 -b 4 --minSB 20 --minN 4 -es "fullSimrw" --input "/eos/home-p/pelai/HZgamma/root_hzgml" #--floatB
 # [skip] Transform BDT 
 # python scripts/categorization_1D.py -r zero_to_one_jet -n 100 -t True -b 4 --minSB 20 --minN 4 -es "fullSimrw" --input "/eos/home-j/jiehan/root/outputs" #--floatB
 
@@ -52,18 +55,21 @@ python scripts/train_bdt.py -r zero_to_one_jet --optuna --n-calls 60 --continue-
 # done
 # [skip] Tune 4 sets of hypers 
 # python scripts/train_bdt.py -r two_jet --save --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --hyperparams_path "models/optuna_two_jet_0602"
-
-# # 1 - Tune 1 set of hyperparameter
-# python scripts/train_bdt.py -r two_jet --optuna --n-calls 60 --continue-optuna 0 --optuna_metric 'sqrt_eval_auc_minus_train_auc' --oneHyperparameter --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new"
-# # 2 - Train with 1 set of hyperparameter
-# python scripts/train_bdt.py -r two_jet --save --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --hyperparams_path "models/optuna_two_jet" --oneHyperparameter
-# # 3 - Apply
-# python scripts/apply_bdt.py -r two_jet --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --outputFolder "/eos/home-j/jiehan/root/outputs/test"
-# # 4 - Nonimal Score
-# python scripts/categorization_1D.py -r two_jet -b 4 --minSB 20 -n 120 --score_max 1.1 --score_min -0.1 --minN 4 -es "fullSimrw" --input "/eos/home-j/jiehan/root/outputs" #--floatB
-
+elif [ "$1" -eq 5 ]; then
+    # 1 - Tune 1 set of hyperparameter
+    python $BASE_PATH/scripts/train_bdt.py -r two_jet --optuna --n-calls 60 --continue-optuna 0 --optuna_metric 'sqrt_eval_auc_minus_train_auc' --oneHyperparameter --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" -c "/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml/data/training_config_BDT_ext.json"
+elif [ "$1" -eq 6 ]; then
+    # 2 - Train with 1 set of hyperparameter
+    python $BASE_PATH/scripts/train_bdt.py -r two_jet --save --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --hyperparams_path "/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml/models/optuna_two_jet" --oneHyperparameter
+elif [ "$1" -eq 7 ]; then
+    # 3 - Apply
+    python $BASE_PATH/scripts/apply_bdt.py -r two_jet --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --outputFolder "/eos/home-p/pelai/HZgamma/root_hzgml/test"
+elif [ "$1" -eq 8 ]; then 
+    # 4 - Nonimal Score
+    python $BASE_PATH/scripts/categorization_1D.py -r two_jet -b 4 --minSB 20 -n 120 --score_max 1.1 --score_min -0.1 --minN 4 -es "fullSimrw" --input "/eos/home-p/pelai/HZgamma/root_hzgml" #--floatB
 # [skip] Transform BDT
 # python scripts/categorization_1D.py -r two_jet -b 4 --minSB 20 -n 100 -t True --minN 4 -es "fullSimrw" --input "/eos/home-j/jiehan/root/outputs" #--floatB
+fi
 
 # # 012jet category
 # for fold in {0..3};do
@@ -85,18 +91,24 @@ python scripts/train_bdt.py -r zero_to_one_jet --optuna --n-calls 60 --continue-
 #===========================================
 # Plotting the BDT results
 #===========================================
+
+# ---------------Significance (Default VBF)----------------
 # python scripts/calculate_fold_significance.py
 # python scripts/calculate_fold_significance.py --region zero_to_one_jet --input test/significances/0_0_zero_to_one_jet_1D_4.json
-# # for chan in two_jet zero_to_one_jet all_jet;do
-# #     python ../plot_python/compare_data_bkg_bdt_sideband.py --channel $chan
-# # done
-# python ../plot_python/plot_cats_hmass_dis.py --channel "two_jet"
-# python ../plot_python/plot_cats_hmass_dis.py --channel "zero_to_one_jet"
-# # # python ../plot_python/plot_cats_hmass_dis.py --channel "all_jet"
+
+# ---------------Sideband_BDT_Score_Data_vs_Bkg------------
+# for chan in two_jet zero_to_one_jet;do
+    # python ../plot_python/compare_data_bkg_bdt_sideband.py --channel $chan
+# done
+# ---------------Sideband_BDT_Score_Bkg_vs_Sig------------
 # python ../plot_python/compare_sig_bkg_bdt_sosb.py
 # python ../plot_python/compare_sig_bkg_bdt_sosb.py --channel zero_to_one_jet
-# python ../plot_python/compare_data_bkg_bdt_sideband.py
-# python ../plot_python/compare_data_bkg_bdt_sideband.py --channel two_jet
+
+# ---------------Higgs Mass Distribution in each category------------
+# python ../plot_python/plot_cats_hmass_dis.py --channel "two_jet"
+# python ../plot_python/plot_cats_hmass_dis.py --channel "zero_to_one_jet"
+
+# ---------------Compare 4-fold------------
 # bash ../plot_python/run.sh
 
 # # vbf category

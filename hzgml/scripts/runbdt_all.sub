@@ -1,0 +1,23 @@
+universe   = vanilla
+executable = /afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml/scripts/run_condor_job.sh
+arguments  = "/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml/scripts/runbdt_all.sh $(task)"
+log        = ../logs/condor_$(task)_$(Cluster).log
+output     = ../logs/job_$(task)_$(Cluster)_$(Process).out
+error      = ../logs/job_$(task)_$(Cluster)_$(Process).err
+request_cpus   = 1
+request_memory = 4 GB
++JobFlavour    = "workday"
+
+# 這行會排四個 job，分別 arguments=1,2,3,4
+# ggF
+# 1 Hyperparameter
+# 2 Train 
+# 3 Apply 
+# 4 Score running 
+# VBF
+# 5 Hyperparameter 
+# 6 Train
+# 7 Apply
+# 8 Score
+
+queue task in 1,5

@@ -17,7 +17,7 @@ def parse_args():
     parser.add_argument('-r', '--region', default='two_jet', 
                         choices=['all_jet', 'two_jet', 'one_jet', 'zero_jet', 'zero_to_one_jet', 'VH_ttH'],
                         help='Region to process')
-    parser.add_argument('-d', '--datapath', default='/eos/home-j/jiehan/root/outputs/', help='Path to root files')
+    parser.add_argument('-d', '--datapath', default='/eos/home-p/pelai/HZgamma/root_hzgml', help='Path to root files')
     parser.add_argument('-v', '--variable', default='bdt', choices=['bdt', 'NN'], help='MVA variable')
     parser.add_argument('-t', '--transform', type=bool, default=False, help='Use transformed scores')
     parser.add_argument('-p', '--prime', type=int, default=314159, help='Prime number for fold division')

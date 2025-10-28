@@ -24,11 +24,11 @@ ratio = 1
 mc_legend = ["Z+#gamma", "Z+Fake Photon", "VBSZ+#gamma", "t#bar{t}", "t#gamma/t#bar{t}#gamma", "t#bar{t}+X", "multiboson"]
 sig_legend = ["sig", "ggH", "VBF"]
 # path = "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/final_fit/CMSSW_10_2_13/src/flashggFinalFit/InputData/outputs/"
-path = f"/eos/home-j/jiehan/root/outputs/{folder}/"
+path = f"/eos/home-p/pelai/HZgamma/root_hzgml/{folder}/"
 # boundaries 文件的路径固定在 test 文件夹中
 channel = args.channel
 tree = channel
-boundaries_path = f"/eos/home-j/jiehan/root/outputs/test/significances/bin_boundaries_1D_{channel}.txt"
+boundaries_path = f"/eos/home-p/pelai/HZgamma/root_hzgml/test/significances/bin_boundaries_1D_{channel}.txt"
 var = "bdt_score"
 bins = 50
 x_range = (-0.1, 1.1)
@@ -221,4 +221,6 @@ print("Finish adding CMS word")
 print("========================")
 
 c1.Draw()
-c1.SaveAs("/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/sig_bkg_{}_{}.png".format(channel, var))
+output_filename = f"/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/plot_python/pic/sig_bkg_{channel}_{var}.png"
+c1.SaveAs(output_filename)
+c1.SaveAs(output_filename.replace(".png",".pdf")) # Also save as PDF

@@ -23,7 +23,7 @@ print("=====================================================================")
 bkg_legend = ["bkg"]
 sig_legend = ["sig"]
 fold_legend = ["1^{st}", "2^{nd}", "3^{rd}", "4^{th}"]
-path = "/eos/user/j/jiehan/root/outputs/"
+path = "/eos/home-p/pelai/HZgamma/root_hzgml/"
 channel = args.channel
 tree = channel
 
@@ -36,7 +36,7 @@ if args.variable == 'H_mass':
     plot_title_suffix = "H_mass"
     
     # Read bin boundaries for H_mass
-    bin_boundaries_file = f"/eos/user/j/jiehan/root/outputs/test/significances/bin_boundaries_1D_{channel}.txt"
+    bin_boundaries_file = f"/eos/home-p/pelai/HZgamma/root_hzgml/test/significances/bin_boundaries_1D_{channel}.txt"
     try:
         with open(bin_boundaries_file, 'r') as f:
             boundaries_line = f.readline().strip()
@@ -95,7 +95,7 @@ def create_histograms(bin_selection, bin_suffix):
     """Create histograms for 4 folds with given bin selection"""
     hist_list = []
     for i in range(4):
-        path_full = "/eos/user/j/jiehan/root/outputs/{}/".format(args.mode)
+        path_full = "/eos/home-p/pelai/HZgamma/root_hzgml/{}/".format(args.mode)
         print("Reading fold {} from {}{}".format(i+1, path_full, " (no bin selection)" if not bin_selection else ""))
         yields = []
         fold_selection = ["event%314159%4 == {}".format(i)]
@@ -216,7 +216,7 @@ def draw_and_save_plots(hist_list, avg_hist, chi2_values, pads, hist_suffix, c1,
     plot.DrawCMSLogo(c1, "137.61 fb^{-1} (13 TeV) & 62.32 fb^{-1} (13.6 TeV)", "", 3, 0., -0.02, 1.2, cmsTextSize=0.45)
 
     c1.Draw()
-    output_filename = "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/{}/4fold_{}_{}_{}_{}.png".format(plot_title_suffix, channel, args.mode, args.type, output_suffix)
+    output_filename = "/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/plot_python/pic/{}/4fold_{}_{}_{}_{}.png".format(plot_title_suffix, channel, args.mode, args.type, output_suffix)
 
     # Check and create output directory if needed
     output_dir = os.path.dirname(output_filename)
@@ -225,6 +225,8 @@ def draw_and_save_plots(hist_list, avg_hist, chi2_values, pads, hist_suffix, c1,
         print("Created directory: {}".format(output_dir))
 
     c1.SaveAs(output_filename)
+    c1.SaveAs(output_filename.replace(".png",".pdf")) # Also save as PDF
+
     print("Saved plot to: {}".format(output_filename))
 
 print("============================")

@@ -20,7 +20,7 @@ print("=====================================================================")
 
 # --- Configuration ---
 folder = "test"  # Can be "val" or "test"
-path = f"/eos/home-j/jiehan/root/outputs/{folder}/"
+path = f"/eos/home-p/pelai/HZgamma/root_hzgml/{folder}/"
 tree = channel  # Tree name is assumed to be the same as channel name
 var = "bdt_score" # Variable to plot
 bins = 100  # Number of bins
@@ -60,7 +60,7 @@ data_file_list = [
 ]
 
 # Path for bin boundaries (optional)
-boundaries_path_val = f"/eos/home-j/jiehan/root/outputs/test/significances/bin_boundaries_1D_{channel}.txt"
+boundaries_path_val = f"/eos/home-p/pelai/HZgamma/root_hzgml/test/significances/bin_boundaries_1D_{channel}.txt"
 
 # --- Plotting Setup ---
 plot.ModTDRStyle()
@@ -279,7 +279,7 @@ plot.DrawCMSLogo(c1, "CMS", "Preliminary", 0, 0.1, -0.02, 1.2, cmsTextSize=0.55)
 plot.DrawCMSLogo(c1, "137.61 fb^{-1} (13 TeV) & 62.32 fb^{-1} (13.6 TeV)", "", 3, 0.1, -0.02, 1.2, cmsTextSize=0.40) 
 
 c1.Update()
-output_filename = f"/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/plot_python/pic/data_mc_sideband_{channel}_{var}.png"
+output_filename = f"/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/plot_python/pic/data_mc_sideband_{channel}_{var}.png"
 c1.SaveAs(output_filename)
 c1.SaveAs(output_filename.replace(".png",".pdf")) # Also save as PDF
 print(f"Plot saved as {output_filename} and .pdf")

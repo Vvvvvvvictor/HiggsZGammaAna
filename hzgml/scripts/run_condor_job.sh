@@ -27,7 +27,8 @@ export PYTHONPATH="`pwd`/hzgml:$PYTHONPATH"
 export PYTHONPATH="/eos/user/${USER::1}/$USER/hzgmlenv/lib/python3.9/site-packages/:$PYTHONPATH"
 
 # Execute the command
-eval ${COMMAND_TO_RUN}
+# eval ${COMMAND_TO_RUN}
+bash ${COMMAND_TO_RUN}
 EXIT_CODE=$?
 
 echo "========================================="

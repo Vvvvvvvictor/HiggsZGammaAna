@@ -20,10 +20,21 @@ ROOT.gErrorIgnoreLevel = ROOT.kError + 1
 
 from weighted_quantile_transformer import WeightedQuantileTransformer # New import
 
+hzgml_PATH="/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml"
+
+# 將輸出路徑統一轉為以 hzgml_PATH 為前綴的絕對路徑
+def out_path(*parts):
+    p = os.path.join(*parts)
+    # 已經是以 hzgml_PATH 開頭的絕對路徑則直接回傳
+    if os.path.isabs(p) and os.path.normpath(p).startswith(os.path.normpath(hzgml_PATH)):
+        return p
+    # 其餘一率掛到 hzgml_PATH 下
+    return os.path.join(hzgml_PATH, p.lstrip(os.sep))
+
 def getArgs():
     """Get arguments from command line."""
     parser = ArgumentParser()
-    parser.add_argument('-c', '--config', action='store', default='data/training_config_BDT.json', help='Region to process')
+    parser.add_argument('-c', '--config', action='store', default='/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml/data/training_config_BDT.json', help='Region to process')
     parser.add_argument('-i', '--inputFolder', default='/eos/home-j/jiehan/root/skimmed_ntuples_run2', action='store', help='directory of training inputs')
     parser.add_argument('-o', '--outputFolder', action='store', help='directory for outputs')
     parser.add_argument('-r', '--region', action='store', choices=['two_jet', 'one_jet', 'zero_jet', 'zero_to_one_jet', 'VH_ttH', 'VBF', 'all_jet'], default='zero_jet', help='Region to process')
@@ -77,7 +88,8 @@ class XGBoostHandler(object):
         self._region = region
 
         self._inputFolder = args.inputFolder
-        self._outputFolder = 'models'
+        # 原本為 'models'，改為 hzgml_PATH/models 的絕對路徑
+        self._outputFolder = out_path('models')
         self._chunksize = 500000
         self._branches = []
         self._sig_branches = []
@@ -239,7 +251,8 @@ class XGBoostHandler(object):
         self._inputFolder = inputFolder
 
     def setOutputFolder(self, outputFolder):
-        self._outputFolder = outputFolder
+        # 一律加上 hzgml_PATH 為前綴
+        self._outputFolder = out_path(outputFolder)
 
     def preselect(self, data, sample=''):
         if sample == 'signal':
@@ -338,8 +351,9 @@ class XGBoostHandler(object):
                     self.m_data_bkg = pd.concat([self.m_data_bkg, data], ignore_index=True)
 
     def plot_corr(self, data_type):
-        if not os.path.isdir("plots/corr/"):
-            os.makedirs("plots/corr/")
+        # 改用絕對路徑: hzgml_PATH/plots/corr
+        corr_dir = out_path("plots", "corr")
+        os.makedirs(corr_dir, exist_ok=True)
         if data_type == "sig":
             data = self.m_data_sig
         else:
@@ -368,14 +382,14 @@ class XGBoostHandler(object):
         data = data.corr() * 100
         # data = data.dropna(axis=0, how='all').dropna(axis=1, how='all')
 
-        # 将相关性矩阵转换为按相关性值排序的数据框
+        # 將相關性矩陣轉換為按相關性值排序的資料框
         sorted_corr = data.unstack().sort_values(ascending=False)
 
-        # 选择相关性大于0.4的变量对
+        # 選擇相關性大於0.4的變數對
         strong_corr = sorted_corr[(sorted_corr.abs() > 40) & (sorted_corr < 100)]
         strong_corr = strong_corr[strong_corr.index.map(lambda x: x[0] < x[1])]
         max_var_length = max([len(var) for var in columns])
-        # 输出结果
+        # 輸出結果
         for (var1, var2), corr in strong_corr.items():
             print(f"Correlation between {var1:<{max_var_length}} and {var2:<{max_var_length}} is {corr:.2f}")
         # print(data)
@@ -400,7 +414,7 @@ class XGBoostHandler(object):
         
         # plt.title(self._region)
         plt.tight_layout()
-        plt.savefig("plots/corr/corr_%s_%s.png" % (self._region, data_type))
+        plt.savefig(os.path.join(corr_dir, "corr_%s_%s.png" % (self._region, data_type)))
 
     def reweightSignal(self):
         min_mass, max_mass = 100, 180
@@ -547,11 +561,9 @@ class XGBoostHandler(object):
         plt.tight_layout()
 
         if save:
-            # create output directory
-            if not os.path.isdir('plots/feature_importance'):
-                os.makedirs('plots/feature_importance')
-            # save figure
-            plt.savefig('plots/feature_importance/%d_BDT_%s_%d_%s.png' % (self._shield+1, self._region, fold, type))
+            fi_dir = out_path('plots', 'feature_importance')
+            os.makedirs(fi_dir, exist_ok=True)
+            plt.savefig(os.path.join(fi_dir, '%d_BDT_%s_%d_%s.png' % (self._shield+1, self._region, fold, type)))
 
         if show: plt.show()
 
@@ -590,11 +602,9 @@ class XGBoostHandler(object):
         plt.tight_layout()
 
         if save:
-            # create output directory
-            if not os.path.isdir('plots/roc_curve'):
-                os.makedirs('plots/roc_curve')
-            # save figure
-            plt.savefig('plots/roc_curve/%d_BDT_%s_%d.pdf' % (self._shield+1, self._region, fold))
+            roc_dir = out_path('plots', 'roc_curve')
+            os.makedirs(roc_dir, exist_ok=True)
+            plt.savefig(os.path.join(roc_dir, '%d_BDT_%s_%d.pdf' % (self._shield+1, self._region, fold)))
 
         if show: plt.show()
 
@@ -702,24 +712,23 @@ class XGBoostHandler(object):
         # The following lines for plotting transformed scores can be uncommented if needed for debugging
         score_test_sig_t=self.m_tsf[fold].transform(self.m_score_test_sig[fold].reshape(-1, 1)).reshape(-1)
         plt.hist(score_test_sig_t, weights=self.m_test_sig_w[fold] if sample=='sig' else None) # Example of weighted histogram
-        if os.path.isdir('plots/score_transform') is False:
-            os.makedirs('plots/score_transform')
-        plt.savefig('plots/score_transform/%d_BDT_%s_%d_%s_weighted.png' % (self._shield+1, self._region, fold, sample))
+        st_dir = out_path('plots', 'score_transform')
+        os.makedirs(st_dir, exist_ok=True)
+        plt.savefig(os.path.join(st_dir, '%d_BDT_%s_%d_%s_weighted.png' % (self._shield+1, self._region, fold, sample)))
         plt.clf() # Clear figure if shown or saved in loop
         #plt.show()
 
     def save(self, fold=0):
 
-        # create output directory
-        if not os.path.isdir(self._outputFolder):
-            os.makedirs(self._outputFolder)
+        # 輸出資料夾已為絕對路徑，確保存在
+        os.makedirs(self._outputFolder, exist_ok=True)
 
         # save BDT model
-        if fold in self.m_bst.keys(): self.m_bst[fold].save_model('%s/BDT_%s_%d.h5' % (self._outputFolder, self._region, fold))
+        if fold in self.m_bst.keys(): self.m_bst[fold].save_model(os.path.join(self._outputFolder, 'BDT_%s_%d.h5' % (self._region, fold)))
 
         # save score transformer
         if fold in self.m_tsf.keys(): 
-            with open('%s/BDT_tsf_%s_%d.pkl' %(self._outputFolder, self._region, fold), 'wb') as f:
+            with open(os.path.join(self._outputFolder, 'BDT_tsf_%s_%d.pkl' % (self._region, fold)), 'wb') as f:
                 pickle.dump(self.m_tsf[fold], f, -1)
 
     def optunaHP(self, fold=0):
@@ -729,14 +738,13 @@ class XGBoostHandler(object):
         import logging
 
         # Setup logging for optuna
-        exp_dir = f'models/optuna_{self._region}/'
-        if not os.path.exists(exp_dir):
-            os.makedirs(exp_dir)
+        exp_dir = out_path(f'models/optuna_{self._region}')
+        os.makedirs(exp_dir, exist_ok=True)
         
         if self.oneHyperparameter:
-            log_filename = f"{exp_dir}optuna_optimization_unified.log"
+            log_filename = os.path.join(exp_dir, "optuna_optimization_unified.log")
         else:
-            log_filename = f"{exp_dir}optuna_optimization_fold_{fold}.log"
+            log_filename = os.path.join(exp_dir, f"optuna_optimization_fold_{fold}.log")
         
         # Configure logging
         logger = logging.getLogger(f'optuna_optimization_{self._region}_{fold}')
@@ -842,31 +850,27 @@ class XGBoostHandler(object):
                 
                 log_and_print_results(metrics, params, trial.number)
                 return metrics.get(self.optuna_metric, metrics['eval_auc'])
-        
-        exp_dir = f'models/optuna_{self._region}/'
-        if not os.path.exists(exp_dir):
-            os.makedirs(exp_dir)
 
+        # Study storage 路徑統一用絕對路徑
         if self.oneHyperparameter:
-            # For oneHyperparameter mode, use a single study for all folds
-            study_name = f"study_unified"
-            storage_name = f"sqlite:///{exp_dir}optuna_study_unified.sqlite3"
-            if not self.continue_optuna and os.path.exists(f"{exp_dir}optuna_study_unified.sqlite3"):
-                os.remove(f"{exp_dir}optuna_study_unified.sqlite3")
+            study_name = "study_unified"
+            storage_fs = os.path.join(exp_dir, "optuna_study_unified.sqlite3")
+            if not self.continue_optuna and os.path.exists(storage_fs):
+                os.remove(storage_fs)
         else:
-            # Original fold-specific study
             study_name = f"study_fold_{fold}"
-            storage_name = f"sqlite:///{exp_dir}optuna_study_fold_{fold}.sqlite3"
-            if not self.continue_optuna and os.path.exists(f"{exp_dir}optuna_study_fold_{fold}.sqlite3"):
-                os.remove(f"{exp_dir}optuna_study_fold_{fold}.sqlite3")
-            
+            storage_fs = os.path.join(exp_dir, f"optuna_study_fold_{fold}.sqlite3")
+            if not self.continue_optuna and os.path.exists(storage_fs):
+                os.remove(storage_fs)
+
+        storage_name = f"sqlite:///{storage_fs}"
         self.study = optuna.create_study(
-                sampler=optuna.samplers.TPESampler(n_startup_trials=10, multivariate=True, group=True),
-                study_name=study_name, 
-                storage=storage_name, 
-                load_if_exists=True, 
-                direction='maximize'
-            )
+            sampler=optuna.samplers.TPESampler(n_startup_trials=10, multivariate=True, group=True),
+            study_name=study_name,
+            storage=storage_name,
+            load_if_exists=True,
+            direction='maximize'
+        )
         
         logger.info(f"Created optuna study: {study_name}")
         logger.info(f"Storage: {storage_name}")
@@ -879,19 +883,15 @@ class XGBoostHandler(object):
         logger.info(f"Best parameters: {self.study.best_params}")
         
         if self.oneHyperparameter:
-            # Save unified hyperparameters for all folds
-            best_params_path = f"{exp_dir}BDT_region_{self._region}_unified.json"
-            # Set the best params for all folds
+            best_params_path = os.path.join(exp_dir, f"BDT_region_{self._region}_unified.json")
             for current_fold in range(4):
                 self.setParams(self.study.best_params, current_fold)
         else:
-            # Original fold-specific save
-            best_params_path = f"{exp_dir}BDT_region_{self._region}_fold{fold}.json"
+            best_params_path = os.path.join(exp_dir, f"BDT_region_{self._region}_fold{fold}.json")
             self.setParams(self.study.best_params, fold)
      
         with open(best_params_path, 'w') as f:
             if self.oneHyperparameter:
-                # Save the same params for unified mode
                 json.dump(self.params[0], f)
                 logger.info(f"Saved unified hyperparameters to {best_params_path}")
             else:
@@ -910,7 +910,9 @@ def main():
     xgb_model = XGBoostHandler(configPath, args.region)
 
     if args.inputFolder: xgb_model.setInputFolder(args.inputFolder)
-    if args.outputFolder: xgb_model.setOutputFolder(args.outputFolder)
+    if args.outputFolder:
+        # 保證輸出資料夾為絕對路徑並以 hzgml_PATH 為前綴
+        xgb_model.setOutputFolder(args.outputFolder)
     if args.params: xgb_model.setParams(args.params)
 
     if args.hyperparams_path:

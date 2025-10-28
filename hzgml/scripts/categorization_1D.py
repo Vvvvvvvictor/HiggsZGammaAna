@@ -23,6 +23,8 @@ from pdb import set_trace
 
 pd.options.mode.chained_assignment = None
 
+hzgml_PATH="/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml"
+
 def getArgs():
     """Get arguments from command line."""
     parser = ArgumentParser()
