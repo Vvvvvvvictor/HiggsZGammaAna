@@ -8,7 +8,7 @@ plt.style.use(hep.style.CMS)
 from pdb import set_trace
 
 # Define output directory
-output_dir = "/eos/home-p/pelai/HZgamma/root_hzgml/"
+output_dir = "c"
 
 # Add color dictionary
 color_dict = {r"Z$+\gamma$": "#3f90da", "Z+Fake Photon": "#ffa90e", r"VBSZ+$\gamma$": "#92dadd", 
@@ -47,7 +47,8 @@ channel = args.channel
 # --- End of new code ---
 
 boundaries = read_config(f"{output_dir}test/significances/bin_boundaries_1D_{channel}.txt")
-backgrounds = ["ZGToLLG", "DYJetsToLL", "EWKZ2J"]
+# backgrounds = ["ZGToLLG", "DYJetsToLL", "EWKZ2J"]
+backgrounds = ["ZGToLLG", "DYJetsToLL_ext", "EWKZ2J"]
 signal = ["ggH_M125", "VBF_M125"] #, "ZH_M125", "WplusH_M125", "WminusH_M125", "ttH_M125"]
 data = ["Data"]
 

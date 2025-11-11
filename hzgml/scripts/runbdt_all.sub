@@ -1,23 +1,24 @@
 universe   = vanilla
 executable = /afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml/scripts/run_condor_job.sh
 arguments  = "/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml/scripts/runbdt_all.sh $(task)"
-log        = ../logs/condor_$(task)_$(Cluster).log
-output     = ../logs/job_$(task)_$(Cluster)_$(Process).out
-error      = ../logs/job_$(task)_$(Cluster)_$(Process).err
+log        = /afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml/logs/$(task)_condor.log
+output     = /afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml/logs/$(task)_job.out
+error      = /afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml/logs/$(task)_job.err
 request_cpus   = 1
-request_memory = 4 GB
-+JobFlavour    = "workday"
+request_memory = 6 GB
++JobFlavour    = "testmatch"
 
+# espresso=20mins, microcentury=1hr, longlunch=2hr, workday=8hr, tomorrow=1day, testmatch=3 days, nextweek=1 week
 # 這行會排四個 job，分別 arguments=1,2,3,4
 # ggF
-# 1 Hyperparameter
-# 2 Train 
-# 3 Apply 
-# 4 Score running 
+# 1 Hyperparameter v
+# 2 Train run v
+# 3 Apply v
+# 4 Score 
 # VBF
-# 5 Hyperparameter 
-# 6 Train
-# 7 Apply
+# 5 Hyperparameter v
+# 6 Train run v
+# 7 Apply v
 # 8 Score
 
-queue task in 1,5
+queue task in 4,8
