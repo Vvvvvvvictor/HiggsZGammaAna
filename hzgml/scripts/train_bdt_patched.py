@@ -247,7 +247,7 @@ class XGBoostHandler(object):
 
         # add stable defaults if not provided
         self.params[fold].setdefault('tree_method', 'hist')
-        self.params[fold].setdefault('sampling_method', 'gradient_based')
+        self.params[fold].setdefault('sampling_method', 'uniform')
         self.params[fold].setdefault('grow_policy', 'depthwise')
         self.params[fold].setdefault('nthread', -1)
         self.params[fold].setdefault('verbosity', 1)
@@ -823,7 +823,7 @@ class XGBoostHandler(object):
                 'reg_lambda': trial.suggest_float('reg_lambda', 0.5, 20.0, log=True),
                 'max_bin': trial.suggest_int('max_bin', 64, 512),
                 'tree_method': 'hist',
-                'sampling_method': 'gradient_based',
+                'sampling_method': 'uniform',
                 'grow_policy': 'depthwise',
                 'eval_metric': ['auc','logloss']
             }

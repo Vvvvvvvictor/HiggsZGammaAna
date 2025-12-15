@@ -318,10 +318,7 @@ def main():
     outs['score_max'] = args.score_max
     outs.update(yields.to_dict())
 
-    print("================================================")
-    print("outs content:")
-    print(json.dumps(outs, indent=4, sort_keys=True))
-    print("================================================")
+    print(outs, '\n================================================\n')
 
     if not os.path.isdir('%s/significances/%s'%(input_path,region)):
         print(f'INFO: Creating output folder: "{input_path}/significances/{region}"')

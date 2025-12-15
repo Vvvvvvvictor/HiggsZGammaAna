@@ -35,7 +35,7 @@ BASE_PATH="/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml"
 
 if [ "$1" -eq 1 ]; then
     # 1 - Tune 1 set of hyperparameter
-    python $BASE_PATH/scripts/train_bdt_patched.py -r zero_to_one_jet --optuna --n-calls 60 --continue-optuna 0 --optuna_metric 'eval_auc_minus_train_auc' --oneHyperparameter --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" -c "/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml/data/training_config_BDT.json"  --planing-bins 24
+    python $BASE_PATH/scripts/train_bdt_patched.py -r zero_to_one_jet --optuna --n-calls 60 --continue-optuna 0 --optuna_metric 'eval_auc_minus_train_auc' --oneHyperparameter --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" -c "/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml/data/training_config_BDT.json"  --planing-bins 100
 elif [ "$1" -eq 2 ]; then
     # 2 - Train with 1 set of hyperparameter
     python $BASE_PATH/scripts/train_bdt_patched.py -r zero_to_one_jet --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --save --hyperparams_path "/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml/models/optuna_zero_to_one_jet" --oneHyperparameter
@@ -57,7 +57,7 @@ elif [ "$1" -eq 4 ]; then
 # python scripts/train_bdt.py -r two_jet --save --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --hyperparams_path "models/optuna_two_jet_0602"
 elif [ "$1" -eq 5 ]; then
     # 1 - Tune 1 set of hyperparameter
-    python $BASE_PATH/scripts/train_bdt_patched.py -r two_jet --optuna --n-calls 60 --continue-optuna 0 --optuna_metric 'eval_auc_minus_train_auc' --oneHyperparameter --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" -c "/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml/data/training_config_BDT_ext.json"  --planing-bins 24
+    python $BASE_PATH/scripts/train_bdt_patched.py -r two_jet --optuna --n-calls 60 --continue-optuna 0 --optuna_metric 'eval_auc_minus_train_auc' --oneHyperparameter --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" -c "/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml/data/training_config_BDT_ext.json"  --planing-bins 100
 elif [ "$1" -eq 6 ]; then
     # 2 - Train with 1 set of hyperparameter
     python $BASE_PATH/scripts/train_bdt_patched.py -r two_jet --save --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --hyperparams_path "/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml/models/optuna_two_jet" --oneHyperparameter
@@ -91,27 +91,31 @@ fi
 #===========================================
 # Plotting the BDT results
 #===========================================
-# # ---------------Significance Uncertainty----------------
+# ---------------Significance Uncertainty----------------
 # python scripts/calculate_fold_uncertainty.py
 
-# # ---------------Significance (Default VBF)----------------
+# ---------------Significance (Default VBF)----------------
 # python scripts/calculate_fold_significance.py
 # python scripts/calculate_fold_significance.py --region zero_to_one_jet --input test/significances/0_0_zero_to_one_jet_1D_4.json
 
 # # ---------------Sideband_BDT_Score_Data_vs_Bkg------------
 # for chan in two_jet zero_to_one_jet;do
-    # python ../plot_python/compare_data_bkg_bdt_sideband.py --channel $chan
+#     python ../plot_python/compare_data_bkg_bdt_sideband.py --channel $chan
 # done
 # # ---------------Sideband_BDT_Score_Bkg_vs_Sig------------
-python ../plot_python/compare_sig_bkg_bdt_sosb.py
+# python ../plot_python/compare_sig_bkg_bdt_sosb.py
 # python ../plot_python/compare_sig_bkg_bdt_sosb.py --channel zero_to_one_jet
 
-# ---------------Higgs Mass Distribution in each category------------
+# ##---------------Higgs Mass Distribution in each category------------
 # python ../plot_python/plot_cats_hmass_dis.py --channel "two_jet"
 # python ../plot_python/plot_cats_hmass_dis.py --channel "zero_to_one_jet"
 
-# ---------------Compare 4-fold------------
-# bash ../plot_python/run.sh
+##---------------Compare 4-fold------------
+bash ../plot_python/run.sh
+
+# ##---------------Data-MC Closure(Need other conda environment)------------
+# python ../plot_python/compare_bkg_data_train_var_PZ.py
+
 
 # # vbf category
 # for fold in {0..3};do

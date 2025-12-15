@@ -6,7 +6,7 @@ from datetime import datetime
 # 在這裡填入四個 fold 的 significance；請將 None 改成數字 (float)
 FOLD_SIGNIFICANCE = {
     "ggF": [0.49, 0.61, 0.79, 0.45],  # 例: [2.31, 2.45, 2.28, 2.52]
-    "VBF": [0.85, 0.77, 0.61, 0.30],  # 例: [0.85, 0.90, 0.78, 0.88]
+    "VBF": [0.96, 0.73, 0.56, 0.24],  # 例: [0.85, 0.90, 0.78, 0.88]
 }
 
 def check_filled(values):
@@ -46,7 +46,7 @@ def main():
     output["timestamp"] = datetime.utcnow().isoformat() + "Z"
 
     # 將輸出目錄改為 Path 物件，並以腳本所在資料夾建立 plots 子資料夾
-    out_dir = "/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml/plots"
+    out_dir = Path("/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml/plots")
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / "fold_significance_uncertainty.json"
 

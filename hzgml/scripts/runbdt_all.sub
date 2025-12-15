@@ -12,13 +12,13 @@ request_memory = 6 GB
 # 這行會排四個 job，分別 arguments=1,2,3,4
 # ggF
 # 1 Hyperparameter v
-# 2 Train run v
-# 3 Apply v
+# 2 Train v
+# 3 Apply 
 # 4 Score 
 # VBF
 # 5 Hyperparameter v
-# 6 Train run v
+# 6 Train v
 # 7 Apply v
 # 8 Score
 
-queue task in 4,8
+queue task in 3

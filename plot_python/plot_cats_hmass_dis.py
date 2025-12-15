@@ -8,7 +8,7 @@ plt.style.use(hep.style.CMS)
 from pdb import set_trace
 
 # Define output directory
-output_dir = "c"
+output_dir = "/eos/home-p/pelai/HZgamma/root_hzgml/"
 
 # Add color dictionary
 color_dict = {r"Z$+\gamma$": "#3f90da", "Z+Fake Photon": "#ffa90e", r"VBSZ+$\gamma$": "#92dadd", 
