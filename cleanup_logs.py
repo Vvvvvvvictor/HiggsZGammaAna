@@ -93,8 +93,8 @@ def main():
     主函数
     """
     # 获取基础路径
-    base_path = "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/HiggsDNA/eos_logs/data/"
-    # base_path = "/eos/user/j/jiehan/eos_log_20250808/signal/"
+    base_path = "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/HiggsDNA/eos_logs/signal/"
+    # base_path = "/eos/user/j/jiehan/eos_logs/background/"
     
     if not os.path.exists(base_path):
         print(f"错误: 路径不存在: {base_path}")

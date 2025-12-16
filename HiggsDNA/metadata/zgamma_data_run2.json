@@ -28,7 +28,7 @@
             "Data"
         ],
         "years": [
-            "2018"
+            "2016preVFP", "2016postVFP", "2017", "2018"
         ]
     },
     "variables_of_interest": [
@@ -225,6 +225,7 @@
         "FsrPhoton_pt",
         "FsrPhoton_relIso03",
         "nFsrPhoton",
+        "Muon_jetIdx",
         "Muon_pt",
         "Muon_eta",
         "Muon_phi",
@@ -245,6 +246,7 @@
         "Muon_highPtId",
         "Muon_ptErr",
         "Muon_genPartIdx",
+        "Electron_jetIdx",
         "Electron_pt",
         "Electron_eta",
         "Electron_deltaEtaSC",
@@ -271,6 +273,7 @@
         "Jet_mass",
         "Jet_btagDeepFlavB",
         "Jet_jetId",
+        "Jet_puId",
         "Jet_hadronFlavour",
         "MET_pt",
         "MET_phi",

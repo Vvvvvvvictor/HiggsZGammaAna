@@ -20,6 +20,30 @@
     ],
     "systematics": {
         "weights": {
+            "ps_isr_sf": {
+                "type": "event",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.ps_systematics",
+                    "name": "ps_isr_sf"
+                },
+                "modify_central_weight": false,
+                "requires_branches": [
+                    "PSWeight"
+                ]
+            },
+            "ps_fsr_sf": {
+                "type": "event",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.ps_systematics",
+                    "name": "ps_fsr_sf"
+                },
+                "modify_central_weight": false,
+                "requires_branches": [
+                    "PSWeight"
+                ]
+            },
             "pu_reweight_sf": {
                 "type": "event",
                 "method": "from_function",
@@ -234,121 +258,126 @@
             "Photon_scale": {
                 "method": "from_branch",
                 "branch_modified": [
-                    "Photon",
-                    "pt"
+                    ["Photon", "pt"],
+                    ["Photon", "energyErr"]
                 ],
                 "branches": {
                     "up": [
-                        "Photon",
-                        "pt_ScaleUp"
+                        ["Photon", "pt_ScaleUp"],
+                        ["Photon", "energyErr_ScaleUp"]
                     ],
                     "down": [
-                        "Photon",
-                        "pt_ScaleDown"
+                        ["Photon", "pt_ScaleDown"],
+                        ["Photon", "energyErr_ScaleDown"]
                     ]
                 }
             },
             "Photon_smear": {
                 "method": "from_branch",
                 "branch_modified": [
-                    "Photon",
-                    "pt"
+                    ["Photon", "pt"],
+                    ["Photon", "energyErr"]
                 ],
                 "branches": {
                     "up": [
-                        "Photon",
-                        "dEsigmaUp"
+                        ["Photon", "dEsigmaUp"],
+                        ["Photon", "energyErr_dEsigmaUp"]
                     ],
                     "down": [
-                        "Photon",
-                        "dEsigmaDown"
+                        ["Photon", "dEsigmaDown"],
+                        ["Photon", "energyErr_dEsigmaDown"]
                     ]
-                },
-                "additive": true
+                }
             },
             "Electron_scale": {
                 "method": "from_branch",
                 "branch_modified": [
-                    "Electron",
-                    "pt"
+                    ["Electron", "pt"],
+                    ["Electron", "energyErr"]
                 ],
                 "branches": {
                     "up": [
-                        "Electron",
-                        "dEscaleUp"
+                        ["Electron", "dEscaleUp"],
+                        ["Electron", "energyErr_dEscaleUp"]
                     ],
                     "down": [
-                        "Electron",
-                        "dEscaleDown"
+                        ["Electron", "dEscaleDown"],
+                        ["Electron", "energyErr_dEscaleDown"]
                     ]
                 }
             },
             "Electron_smear": {
                 "method": "from_branch",
                 "branch_modified": [
-                    "Electron",
-                    "pt"
+                    ["Electron", "pt"],
+                    ["Electron", "energyErr"]
                 ],
                 "branches": {
                     "up": [
-                        "Electron",
-                        "dEsigmaUp"
+                        ["Electron", "dEsigmaUp"],
+                        ["Electron", "energyErr_dEsigmaUp"]
                     ],
                     "down": [
-                        "Electron",
-                        "dEsigmaDown"
+                        ["Electron", "dEsigmaDown"],
+                        ["Electron", "energyErr_dEsigmaDown"]
                     ]
-                },
-                "additive": true
+                }
             },
             "JER": {
                 "method": "from_branch",
                 "branch_modified": [
-                    "Jet",
-                    "pt"
+                   ["Jet", "pt"],
+                    "MET_pt",
+                    "MET_phi"
                 ],
                 "branches": {
                     "up": [
-                        "Jet",
-                        "pt_jerUp"
+                        ["Jet", "pt_jerUp"],
+                        "PuppiMET_ptJERUp",
+                        "PuppiMET_phiJERUp"
                     ],
                     "down": [
-                        "Jet",
-                        "pt_jerDown"
+                        ["Jet", "pt_jerDown"],
+                        "PuppiMET_ptJERDown",
+                        "PuppiMET_phiJERDown"
                     ]
                 }
             },
             "JES": {
                 "method": "from_branch",
                 "branch_modified": [
-                    "Jet",
-                    "pt"
+                    ["Jet", "pt"],
+                    "MET_pt",
+                    "MET_phi"
                 ],
                 "branches": {
                     "up": [
-                        "Jet",
-                        "pt_jesTotalUp"
+                        ["Jet", "pt_jesTotalUp"],
+                        "PuppiMET_ptJESUp",
+                        "PuppiMET_phiJESUp"
                     ],
                     "down": [
-                        "Jet",
-                        "pt_jesTotalDown"
+                        ["Jet", "pt_jesTotalDown"],
+                        "PuppiMET_ptJESDown",
+                        "PuppiMET_phiJESDown"
                     ]
-                }
-            },
-            "MET_JES": {
-                "method": "from_branch",
-                "branch_modified": "MET_pt",
-                "branches": {
-                    "up": "MET_T1_pt_jesTotalUp",
-                    "down": "MET_T1_pt_jesTotalDown"
                 }
             },
             "MET_Unclustered": {
                 "method": "from_branch",
-                "branch_modified": "MET_pt",
+                "branch_modified": [
+                    "MET_pt",
+                    "MET_phi"
+                ],
                 "branches": {
-                    "up": "MET_T1_pt_unclustEnUp",
-                    "down": "MET_T1_pt_unclustEnDown"
+                    "up": [
+                        "PuppiMET_ptUnclusteredUp",
+                        "PuppiMET_phiUnclusteredUp"
+                    ],
+                    "down": [
+                        "PuppiMET_ptUnclusteredDown",
+                        "PuppiMET_phiUnclusteredDown"
+                    ]
                 }
             },
             "Muon_pt_scale": {
@@ -390,10 +419,10 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "ggH_M125", "VBF_M125", "ttH_M125", "WminusH_M125", "WplusH_M125", "ZH_M125"
+            "ggH_M125"
         ],
         "years": [
-             "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"
+            "2022preEE"
         ]
     },
     "variables_of_interest": [
@@ -433,6 +462,10 @@
         "muon_2_ptErr",
         "muon_3_ptErr",
         "muon_4_ptErr",
+        "muon_1_ptErr_store",
+        "muon_2_ptErr_store",
+        "muon_3_ptErr_store",
+        "muon_4_ptErr_store",
         "gamma_pt",
         "gamma_eta",
         "gamma_phi",
@@ -536,6 +569,7 @@
         "z_ee"
     ],
     "branches": [
+        "PSWeight",
         "GenVtx_z",
         "PV_z",
         "L1PreFiringWeight_Nom",
@@ -635,6 +669,7 @@
         "Muon_highPtId",
         "Muon_ptErr",
         "Muon_genPartIdx",
+        "Muon_nTrackerLayers",
         "Electron_pt",
         "Electron_eta",
         "Electron_deltaEtaSC",
@@ -656,6 +691,11 @@
         "Electron_energyErr",
         "Electron_r9",  
         "Electron_genPartIdx",
+        "Jet_area",
+        "Jet_rawFactor",
+        "Rho_fixedGridRhoFastjetAll",
+        "Jet_neHEF",
+        "Jet_neEmEF",
         "Jet_pt",
         "Jet_eta",
         "Jet_phi",
@@ -665,6 +705,24 @@
         "Jet_hadronFlavour",
         "MET_pt",
         "MET_phi",
+        "PuppiMET_pt",
+        "PuppiMET_phi",
+        "PuppiMET_ptJESUp",
+        "PuppiMET_phiJESUp",
+        "PuppiMET_ptJESDown",
+        "PuppiMET_phiJESDown",
+        "PuppiMET_ptJERUp",
+        "PuppiMET_phiJERUp",
+        "PuppiMET_ptJERDown",
+        "PuppiMET_phiJERDown",
+        "PuppiMET_ptUnclusteredUp",
+        "PuppiMET_phiUnclusteredUp",
+        "PuppiMET_ptUnclusteredDown",
+        "PuppiMET_phiUnclusteredDown",
+        "GenJet_eta",
+        "GenJet_mass",
+        "GenJet_phi",
+        "GenJet_pt",
         "GenPart_eta",
         "GenPart_genPartIdxMother",
         "GenPart_mass",
@@ -767,6 +825,16 @@
             ],
             [
                 [
+                    "Electron",
+                    "energyErr"
+                ],
+                [
+                    "Electron",
+                    "corrected_energyErr"
+                ]
+            ],
+            [
+                [
                     "Photon",
                     "pt"
                 ],
@@ -776,8 +844,30 @@
                 ]
             ],
             [
-                "MET_pt",
-                "MET_T1_pt"
+                [
+                    "Photon",
+                    "energyErr"
+                ],
+                [
+                    "Photon",
+                    "corrected_energyErr"
+                ]
+            ],
+            [
+                [
+                    "MET_pt"
+                ],
+                [
+                    "PuppiMET_pt"
+                ]
+            ],
+            [
+                [
+                    "MET_phi"
+                ],
+                [
+                    "PuppiMET_phi"
+                ]
             ]
         ],
         "data": []

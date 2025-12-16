@@ -2,6 +2,8 @@ import pic_template as pic
 import plotting as plot
 import ROOT
 
+from pdb import set_trace as bp
+
 COLORS = ["Red", "Blue"]
 
 print("=====================================================================")
@@ -9,15 +11,19 @@ print("Starting to run the tutorial of plotting in Higgs to Z Gamma analysis")
 print("=====================================================================")
 
 legend = ["refit", "original"]
-samples = ["DYJetsToLL"]
-path = "/eos/user/j/jiehan/root/skimmed_ntuples_run3/"
-years = ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"]
+samples = ["ggH_M125"]
+path = "/eos/user/j/jiehan/root/skimmed_ntuples/"
+years = ["2023postBPix"]
 channel = "inclusive"
-selections = ["z_ee == 1"]
+selections = ["z_mumu >= 0"]
 
 settings = {
-        "H_mass": {"range": (100, 180, 80), "x_title": r"$m_{ll\gamma}$ [GeV]"},
+        "H_mass": {"range": (115, 135, 80), "x_title": r"$m_{ll\gamma}$ [GeV]"},
         "Z_mass": {"range": (80, 100, 80), "x_title": r"$m_{ll}$ [GeV]"},
+        "H_pt": {"range": (0, 100, 40), "x_title": r"$p_{T}^{ll\gamma}$ [GeV]"},
+        "H_eta": {"range": (-5, 5, 50), "x_title": r"$\eta^{ll\gamma}$"},
+        "Z_pt": {"range": (0, 100, 40), "x_title": r"$p_{T}^{ll}$ [GeV]"},
+        "Z_eta": {"range": (-5, 5, 50), "x_title": r"$\eta^{ll}$"}
         }
 
 for var, config in settings.items():
@@ -59,8 +65,8 @@ for var, config in settings.items():
 
     legend = plot.PositionedLegend(0.3, 0.10, 3, 0.015)
     plot.Set(legend, TextSize=0.03)
-    legend.AddEntry(original_hist, "Original", "l")
-    legend.AddEntry(refit_hist, "Refitted", "l")
+    legend.AddEntry(original_hist, "Original", "lp")
+    legend.AddEntry(refit_hist, "Refitted", "lp")
     legend.Draw()
 
     print("========================")

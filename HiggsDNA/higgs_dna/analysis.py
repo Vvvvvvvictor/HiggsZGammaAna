@@ -32,6 +32,7 @@ from higgs_dna.taggers.mc_overlap_tagger import MCOverlapTagger
 from higgs_dna.systematics.photon_systematics import photon_scale_smear_run3
 from higgs_dna.systematics.lepton_systematics import electron_scale_smear_run3, muon_scale_run3
 from higgs_dna.systematics.jet_systematics import pt_correction_data, pt_correction_mc
+from higgs_dna.systematics.ps_systematics import ps_isr_sf, ps_fsr_sf
 
 condor=False
 def run_analysis(config):
@@ -72,7 +73,6 @@ def run_analysis(config):
         if branch_map:
             for x in branch_map:
                 logger.debug("[run_analysis] Replacing %s with %s." % (str(x[0]), str(x[1])))
-                print("[run_analysis] variables in Photon", awkward.fields(events["Photon"]))
                 if isinstance(x[0], list):
                     try:
                         events[tuple(x[0])] = events[tuple(x[1])]
@@ -640,7 +640,7 @@ class AnalysisManager():
 
                 # Merge skimmed file data into main events
                 # add muon sys
-                if "Muon" in events_file.fields and "Muon" in events_skimmed_file.fields:
+                if "Muon" in events_file.fields and "Muon" in events_skimmed_file.fields and int(year[:4]) < 2020:
                     events_keys_muon = events_file.Muon.fields  
                     skimmed_keys_muon = events_skimmed_file.Muon.fields
                     extra_keys = [key for key in skimmed_keys_muon if key not in events_keys_muon] 
@@ -656,7 +656,7 @@ class AnalysisManager():
                         events_file['Photon'] = awkward.with_field(events_file['Photon'], events_skimmed_file['Photon'][key], key)
                 
                 # add jets sys
-                if "Jet" in events_file.fields and "Jet" in events_skimmed_file.fields:
+                if "Jet" in events_file.fields and "Jet" in events_skimmed_file.fields and int(year[:4]) < 2020:
                     events_keys_jet = events_file.Jet.fields
                     skimmed_keys_jet = events_skimmed_file.Jet.fields
                     extra_keys = [key for key in skimmed_keys_jet if key not in events_keys_jet]
@@ -670,17 +670,42 @@ class AnalysisManager():
                 for key in extra_keys:
                     events_file = awkward.with_field(events_file, events_skimmed_file[key], key)
                     
+            # # # FIXME: DANGEROUS!
+            # events_to_keep = [
+            #     (370175, 1425, 3144688242),
+            #     (370175, 1718, 3793527145),
+            #     (370175, 1731, 3819691934),
+            #     (370497, 97, 134903732),
+            #     (370497, 181, 314639380)
+            # ]
+            # mask = None
+            # for run, lumi, event in events_to_keep:
+            #     current_mask = (
+            #         (events_file["run"] == run)
+            #         & (events_file["luminosityBlock"] == lumi)
+            #         & (events_file["event"] == event)
+            #     )
+            #     if mask is None:
+            #         mask = current_mask
+            #     else:
+            #         mask = mask | current_mask
             
-            # # FIXME: DANGEROUS!
-            # events_file = events_file[(events_file["run"]==316470) & (events_file["luminosityBlock"]==370) & (events_file["event"]==486186232)]
+            # if mask is not None:
+            #     events_file = events_file[mask]
 
-            logger.debug("[AnalysisManager : Load samples] Sample type: %s" % events_file.type)
+            for field in events_file.fields:
+                if "jagged" in field:
+                    logger.debug("[AnalysisManager : Load events] Converting jagged array field '%s' to regular array." % field)
+                    if "PSWeight" in events_file[field].fields:
+                        events_file["PSWeight"] = events_file[field].PSWeight
 
             events.append(events_file)
 
             logger.debug("[AnalysisManager : load_events] Loaded %d events from file '%s'." % (len(events_file), file))
 
         events = awkward.concatenate(events)
+
+        logger.debug("[AnalysisManager : Load samples] Sample type: %s" % events.type)
 
         return events, float(sum_weights)
 

@@ -1,103 +1,90 @@
 import awkward
 import numpy
 from correctionlib import _core
+from higgs_dna.utils import misc_utils
 
-from higgs_dna.utils import awkward_utils, misc_utils
-from higgs_dna.systematics.utils import systematic_from_bins
-import logging
-logger = logging.getLogger(__name__)
-
-# Note: these are placeholders. You should update them with the actual paths to your correction files.
+# Base path placeholder
 base_path = "higgs_dna/systematics/data/"
 
-# Electron HLT files
+# -----------------------------------------------------------------------------------
+# File Definitions
+# -----------------------------------------------------------------------------------
 SingleElectron_HLT_FILE = {
     "2016preVFP":   f"{base_path}2016preVFP_UL/hzg_eltrig27_2016APV_efficiencies.json",
-    "2016postVFP":      f"{base_path}2016postVFP_UL/hzg_eltrig27_2016_efficiencies.json",
-    "2017":      f"{base_path}2017_UL/hzg_eltrig32_2017_efficiencies.json",
-    "2018":      f"{base_path}2018_UL/hzg_eltrig32_2018_efficiencies.json",
-    "2022preEE":      f"{base_path}2022preEE_UL/hzg_eltrig30_2022_efficiencies.json",
-    "2022postEE":    f"{base_path}2022postEE_UL/hzg_eltrig30_2022EE_efficiencies.json",
-    "2023preBPix":      f"{base_path}2023preBPix_UL/hzg_eltrig30_2023_efficiencies.json",
-    "2023postBPix":  f"{base_path}2023postBPix_UL/hzg_eltrig30_2023BPix_efficiencies.json",
+    "2016postVFP":  f"{base_path}2016postVFP_UL/hzg_eltrig27_2016_efficiencies.json",
+    "2017":         f"{base_path}2017_UL/hzg_eltrig32_2017_efficiencies.json",
+    "2018":         f"{base_path}2018_UL/hzg_eltrig32_2018_efficiencies.json",
+    "2022preEE":    f"{base_path}2022preEE_UL/hzg_eltrig30_2022_efficiencies.json",
+    "2022postEE":   f"{base_path}2022postEE_UL/hzg_eltrig30_2022EE_efficiencies.json",
+    "2023preBPix":  f"{base_path}2023preBPix_UL/hzg_eltrig30_2023_efficiencies.json",
+    "2023postBPix": f"{base_path}2023postBPix_UL/hzg_eltrig30_2023BPix_efficiencies.json",
 }
 DoubleElectron_HighLeg_HLT_FILE = {
     "2016preVFP":   f"{base_path}2016preVFP_UL/hzg_eltrig23_2016APV_efficiencies.json",
-    "2016postVFP":      f"{base_path}2016postVFP_UL/hzg_eltrig23_2016_efficiencies.json",
-    "2017":      f"{base_path}2017_UL/hzg_eltrig23_2017_efficiencies.json",
-    "2018":      f"{base_path}2018_UL/hzg_eltrig23_2018_efficiencies.json",
-    "2022preEE":      f"{base_path}2022preEE_UL/hzg_eltrig23_2022_efficiencies.json",
-    "2022postEE":    f"{base_path}2022postEE_UL/hzg_eltrig23_2022EE_efficiencies.json",
-    "2023preBPix":      f"{base_path}2023preBPix_UL/hzg_eltrig23_2023_efficiencies.json",
-    "2023postBPix":  f"{base_path}2023postBPix_UL/hzg_eltrig23_2023BPix_efficiencies.json",
+    "2016postVFP":  f"{base_path}2016postVFP_UL/hzg_eltrig23_2016_efficiencies.json",
+    "2017":         f"{base_path}2017_UL/hzg_eltrig23_2017_efficiencies.json",
+    "2018":         f"{base_path}2018_UL/hzg_eltrig23_2018_efficiencies.json",
+    "2022preEE":    f"{base_path}2022preEE_UL/hzg_eltrig23_2022_efficiencies.json",
+    "2022postEE":   f"{base_path}2022postEE_UL/hzg_eltrig23_2022EE_efficiencies.json",
+    "2023preBPix":  f"{base_path}2023preBPix_UL/hzg_eltrig23_2023_efficiencies.json",
+    "2023postBPix": f"{base_path}2023postBPix_UL/hzg_eltrig23_2023BPix_efficiencies.json",
 }
 DoubleElectron_LowLeg_HLT_FILE = {
     "2016preVFP":   f"{base_path}2016preVFP_UL/hzg_eltrig12_2016APV_efficiencies.json",
-    "2016postVFP":      f"{base_path}2016postVFP_UL/hzg_eltrig12_2016_efficiencies.json",
-    "2017":      f"{base_path}2017_UL/hzg_eltrig12_2017_efficiencies.json",
-    "2018":      f"{base_path}2018_UL/hzg_eltrig12_2018_efficiencies.json",
-    "2022preEE":      f"{base_path}2022preEE_UL/hzg_eltrig12_2022_efficiencies.json",
-    "2022postEE":    f"{base_path}2022postEE_UL/hzg_eltrig12_2022EE_efficiencies.json",
-    "2023preBPix":      f"{base_path}2023preBPix_UL/hzg_eltrig12_2023_efficiencies.json",
-    "2023postBPix":  f"{base_path}2023postBPix_UL/hzg_eltrig12_2023BPix_efficiencies.json",
+    "2016postVFP":  f"{base_path}2016postVFP_UL/hzg_eltrig12_2016_efficiencies.json",
+    "2017":         f"{base_path}2017_UL/hzg_eltrig12_2017_efficiencies.json",
+    "2018":         f"{base_path}2018_UL/hzg_eltrig12_2018_efficiencies.json",
+    "2022preEE":    f"{base_path}2022preEE_UL/hzg_eltrig12_2022_efficiencies.json",
+    "2022postEE":   f"{base_path}2022postEE_UL/hzg_eltrig12_2022EE_efficiencies.json",
+    "2023preBPix":  f"{base_path}2023preBPix_UL/hzg_eltrig12_2023_efficiencies.json",
+    "2023postBPix": f"{base_path}2023postBPix_UL/hzg_eltrig12_2023BPix_efficiencies.json",
 }
 
 # Hole files for 2023postBPix
-SingleElectron_HLT_FILE_HOLE = {
-    "2023postBPix" : f"{base_path}2023postBPix_UL/hzg_eltrig30_2023BPixHole_efficiencies.json"
-}
-DoubleElectron_LowLeg_HLT_FILE_HOLE = {
-    "2023postBPix" : f"{base_path}2023postBPix_UL/hzg_eltrig12_2023BPixHole_efficiencies.json"
-}
-DoubleElectron_HighLeg_HLT_FILE_HOLE = {
-    "2023postBPix" : f"{base_path}2023postBPix_UL/hzg_eltrig23_2023BPixHole_efficiencies.json"
-}
-
+SingleElectron_HLT_FILE_HOLE = { "2023postBPix" : f"{base_path}2023postBPix_UL/hzg_eltrig30_2023BPixHole_efficiencies.json" }
+DoubleElectron_LowLeg_HLT_FILE_HOLE = { "2023postBPix" : f"{base_path}2023postBPix_UL/hzg_eltrig12_2023BPixHole_efficiencies.json" }
+DoubleElectron_HighLeg_HLT_FILE_HOLE = { "2023postBPix" : f"{base_path}2023postBPix_UL/hzg_eltrig23_2023BPixHole_efficiencies.json" }
 
 # Muon HLT files
 SingleMuon_HLT_FILE = {
     "2016preVFP":   f"{base_path}2016preVFP_UL/hzg_mutrig24_2016APV_efficiencies.json",
-    "2016postVFP":      f"{base_path}2016postVFP_UL/hzg_mutrig24_2016_efficiencies.json",
-    "2017":      f"{base_path}2017_UL/hzg_mutrig27_2017_efficiencies.json",
-    "2018":      f"{base_path}2018_UL/hzg_mutrig24_2018_efficiencies.json",
-    "2022preEE":      f"{base_path}2022preEE_UL/hzg_mutrig24_2022_efficiencies.json",
-    "2022postEE":    f"{base_path}2022postEE_UL/hzg_mutrig24_2022EE_efficiencies.json",
-    "2023preBPix":      f"{base_path}2023preBPix_UL/hzg_mutrig24_2023_efficiencies.json",
-    "2023postBPix":  f"{base_path}2023postBPix_UL/hzg_mutrig24_2023BPix_efficiencies.json",
+    "2016postVFP":  f"{base_path}2016postVFP_UL/hzg_mutrig24_2016_efficiencies.json",
+    "2017":         f"{base_path}2017_UL/hzg_mutrig27_2017_efficiencies.json",
+    "2018":         f"{base_path}2018_UL/hzg_mutrig24_2018_efficiencies.json",
+    "2022preEE":    f"{base_path}2022preEE_UL/hzg_mutrig24_2022_efficiencies.json",
+    "2022postEE":   f"{base_path}2022postEE_UL/hzg_mutrig24_2022EE_efficiencies.json",
+    "2023preBPix":  f"{base_path}2023preBPix_UL/hzg_mutrig24_2023_efficiencies.json",
+    "2023postBPix": f"{base_path}2023postBPix_UL/hzg_mutrig24_2023BPix_efficiencies.json",
 }
 DoubleMuon_HighLeg_HLT_FILE = {
     "2016preVFP":   f"{base_path}2016preVFP_UL/hzg_mutrig17_2016APV_efficiencies.json",
-    "2016postVFP":      f"{base_path}2016postVFP_UL/hzg_mutrig17_2016_efficiencies.json",
-    "2017":      f"{base_path}2017_UL/hzg_mutrig17_2017_efficiencies.json",
-    "2018":      f"{base_path}2018_UL/hzg_mutrig17_2018_efficiencies.json",
-    "2022preEE":      f"{base_path}2022preEE_UL/hzg_mutrig17_2022_efficiencies.json",
-    "2022postEE":    f"{base_path}2022postEE_UL/hzg_mutrig17_2022EE_efficiencies.json",
-    "2023preBPix":      f"{base_path}2023preBPix_UL/hzg_mutrig17_2023_efficiencies.json",
-    "2023postBPix":  f"{base_path}2023postBPix_UL/hzg_mutrig17_2023BPix_efficiencies.json",
+    "2016postVFP":  f"{base_path}2016postVFP_UL/hzg_mutrig17_2016_efficiencies.json",
+    "2017":         f"{base_path}2017_UL/hzg_mutrig17_2017_efficiencies.json",
+    "2018":         f"{base_path}2018_UL/hzg_mutrig17_2018_efficiencies.json",
+    "2022preEE":    f"{base_path}2022preEE_UL/hzg_mutrig17_2022_efficiencies.json",
+    "2022postEE":   f"{base_path}2022postEE_UL/hzg_mutrig17_2022EE_efficiencies.json",
+    "2023preBPix":  f"{base_path}2023preBPix_UL/hzg_mutrig17_2023_efficiencies.json",
+    "2023postBPix": f"{base_path}2023postBPix_UL/hzg_mutrig17_2023BPix_efficiencies.json",
 }
 DoubleMuon_LowLeg_HLT_FILE = {
     "2016preVFP":   f"{base_path}2016preVFP_UL/hzg_mutrig8_2016APV_efficiencies.json",
-    "2016postVFP":      f"{base_path}2016postVFP_UL/hzg_mutrig8_2016_efficiencies.json",
-    "2017":      f"{base_path}2017_UL/hzg_mutrig8_2017_efficiencies.json",
-    "2018":      f"{base_path}2018_UL/hzg_mutrig8_2018_efficiencies.json",
-    "2022preEE":      f"{base_path}2022preEE_UL/hzg_mutrig8_2022_efficiencies.json",
-    "2022postEE":    f"{base_path}2022postEE_UL/hzg_mutrig8_2022EE_efficiencies.json",
-    "2023preBPix":      f"{base_path}2023preBPix_UL/hzg_mutrig8_2023_efficiencies.json",
-    "2023postBPix":  f"{base_path}2023postBPix_UL/hzg_mutrig8_2023BPix_efficiencies.json",
+    "2016postVFP":  f"{base_path}2016postVFP_UL/hzg_mutrig8_2016_efficiencies.json",
+    "2017":         f"{base_path}2017_UL/hzg_mutrig8_2017_efficiencies.json",
+    "2018":         f"{base_path}2018_UL/hzg_mutrig8_2018_efficiencies.json",
+    "2022preEE":    f"{base_path}2022preEE_UL/hzg_mutrig8_2022_efficiencies.json",
+    "2022postEE":   f"{base_path}2022postEE_UL/hzg_mutrig8_2022EE_efficiencies.json",
+    "2023preBPix":  f"{base_path}2023preBPix_UL/hzg_mutrig8_2023_efficiencies.json",
+    "2023postBPix": f"{base_path}2023postBPix_UL/hzg_mutrig8_2023BPix_efficiencies.json",
 }
 
 
-def get_lepton_probabilities(leptons, single_eval, high_eval, low_eval, is_electron, is_data, central_only, year, single_eval_hole=None, high_eval_hole=None, low_eval_hole=None):
+def get_lepton_efficiencies(leptons, single_eval, high_eval, low_eval, 
+                            is_electron, is_data, year, sigma=0.0,
+                            single_eval_hole=None, high_eval_hole=None, low_eval_hole=None):
     """
-    Computes the probabilities and systematics for each lepton to pass exclusive trigger categories.
+    Retrieves efficiencies from correctionlib for a specific shift (sigma).
+    Returns Awkward arrays of shape [N_events, N_leptons].
     """
-    n_leptons = awkward.num(leptons)
-    if awkward.all(n_leptons == 0):
-        # Return empty arrays with correct shape if there are no leptons
-        p_shape = (len(leptons), 0, 4)
-        s_shape = (len(leptons), 0, 4)
-        return awkward.Array(numpy.empty(p_shape)), awkward.Array(numpy.empty(s_shape))
-
     leptons_flat = awkward.flatten(leptons)
     lep_pt = awkward.to_numpy(leptons_flat.pt)
     lep_eta = awkward.to_numpy(leptons_flat.eta)
@@ -107,18 +94,22 @@ def get_lepton_probabilities(leptons, single_eval, high_eval, low_eval, is_elect
     eff_type = "effdata" if is_data else "effmc"
     syst_type = "systdata" if is_data else "systmc"
 
-    # Default efficiencies and systematics
+    # 1. Get Nominal Efficiencies
     eff_s = single_eval[eff_type].evalv(lep_pt, lep_eta)
     eff_h = high_eval[eff_type].evalv(lep_pt, lep_eta)
     eff_l = low_eval[eff_type].evalv(lep_pt, lep_eta)
-    
-    syst_s = syst_h = syst_l = numpy.zeros_like(lep_pt)
-    if not central_only:
+
+    # 2. Apply Systematics (if sigma != 0)
+    if sigma != 0.0:
         syst_s = single_eval[syst_type].evalv(lep_pt, lep_eta)
         syst_h = high_eval[syst_type].evalv(lep_pt, lep_eta)
         syst_l = low_eval[syst_type].evalv(lep_pt, lep_eta)
+        
+        eff_s = eff_s + (sigma * syst_s)
+        eff_h = eff_h + (sigma * syst_h)
+        eff_l = eff_l + (sigma * syst_l)
 
-    # Handle hole region for 2023postBPix electrons
+    # 3. Handle 2023postBPix Electron Holes
     if is_electron and year == "2023postBPix" and single_eval_hole is not None:
         lep_phi = awkward.to_numpy(leptons_flat.phi)
         hole_mask = (lep_eta > -1.566) & (lep_eta < 0) & (lep_phi > -1.2) & (lep_phi < -0.8)
@@ -126,225 +117,195 @@ def get_lepton_probabilities(leptons, single_eval, high_eval, low_eval, is_elect
         eff_s_hole = single_eval_hole[eff_type].evalv(lep_pt, lep_eta)
         eff_h_hole = high_eval_hole[eff_type].evalv(lep_pt, lep_eta)
         eff_l_hole = low_eval_hole[eff_type].evalv(lep_pt, lep_eta)
+        
+        if sigma != 0.0:
+            syst_s_hole = single_eval_hole[syst_type].evalv(lep_pt, lep_eta)
+            syst_h_hole = high_eval_hole[syst_type].evalv(lep_pt, lep_eta)
+            syst_l_hole = low_eval_hole[syst_type].evalv(lep_pt, lep_eta)
+            
+            eff_s_hole = eff_s_hole + (sigma * syst_s_hole)
+            eff_h_hole = eff_h_hole + (sigma * syst_h_hole)
+            eff_l_hole = eff_l_hole + (sigma * syst_l_hole)
+
         eff_s = numpy.where(hole_mask, eff_s_hole, eff_s)
         eff_h = numpy.where(hole_mask, eff_h_hole, eff_h)
         eff_l = numpy.where(hole_mask, eff_l_hole, eff_l)
 
-        if not central_only:
-            syst_s_hole = single_eval_hole[syst_type].evalv(lep_pt, lep_eta)
-            syst_h_hole = high_eval_hole[syst_type].evalv(lep_pt, lep_eta)
-            syst_l_hole = low_eval_hole[syst_type].evalv(lep_pt, lep_eta)
-            syst_s = numpy.where(hole_mask, syst_s_hole, syst_s)
-            syst_h = numpy.where(hole_mask, syst_h_hole, syst_h)
-            syst_l = numpy.where(hole_mask, syst_l_hole, syst_l)
-
-    # Probabilities for exclusive categories for each lepton
-    # 0: fail all, 1: pass low only, 2: pass high only, 3: pass single only
-
-    probs = awkward.unflatten(numpy.stack([1.0 - eff_l, eff_l, eff_h, eff_s], axis=1), n_leptons)
-    systs = awkward.unflatten(numpy.stack([syst_l, syst_l, syst_h, syst_s], axis=1), n_leptons)
+    # 4. Enforce Physical Hierarchy (Clipping)
+    # Ensure 0 <= Prob(Single) <= Prob(High) <= Prob(Low) <= 1
+    eff_s = numpy.clip(eff_s, 0.0, 1.0)
+    eff_h = numpy.clip(eff_h, 0.0, 1.0)
+    eff_l = numpy.clip(eff_l, 0.0, 1.0)
     
-    return probs, systs
+    eff_h = numpy.maximum(eff_h, eff_s)
+    eff_l = numpy.maximum(eff_l, eff_h)
+
+    # Restructure back to awkward arrays
+    eff_s = awkward.unflatten(eff_s, awkward.num(leptons))
+    eff_h = awkward.unflatten(eff_h, awkward.num(leptons))
+    eff_l = awkward.unflatten(eff_l, awkward.num(leptons))
+
+    return eff_s, eff_h, eff_l
 
 
-def calculate_single_lepton_trigger_prob(probs, systs):
+def calculate_exclusive_probability(eff_s, eff_h, eff_l):
     """
-    Calculates trigger probability for single-lepton events.
-    """
-    # For 1 lepton, only single trigger is possible. The probability is just eff_s.
-    prob = probs[:, 0, 3] # p3 = eff_s
-    unc_sq = systs[:, 0, 3]**2 # s3 = syst_s
-    return prob, unc_sq
-
-
-def calculate_multi_lepton_trigger_prob(probs, systs):
-    """
-    Calculates trigger probability for events with >= 2 leptons.
-    """
-    # Efficiencies for each lepton to pass different trigger legs
-    eff_s = probs[:, :, 3]
-    eff_h = probs[:, :, 2]
-    eff_l = probs[:, :, 1]
-
-    # Systematics for each lepton
-    syst_s = systs[:, :, 3]
-    syst_h = systs[:, :, 2]
-    syst_l = systs[:, :, 1]
-
-    # --- Single Lepton Trigger Probability ---
-    # P(single) = 1 - product(1 - P_i(single))
-    prob_single = 1.0 - awkward.prod(1.0 - eff_s, axis=1)
+    Calculates the total event probability using the Exclusive Probability Method.
+    Supports an arbitrary number of leptons by dynamic padding.
     
-    # Uncertainty propagation for single lepton trigger
-    # unc_sq_single = sum( (product_{j!=i}(1-p_j))^2 * unc_i^2 )
-    # Avoid division by zero if (1-eff_s) is zero
-    one_minus_eff_s = 1.0 - eff_s
-    prod_one_minus_eff_s = awkward.prod(one_minus_eff_s, axis=1)
-    # Add a small epsilon to avoid division by zero
-    safe_one_minus_eff_s = one_minus_eff_s + 1e-12
-    unc_sq_single = awkward.sum((prod_one_minus_eff_s / safe_one_minus_eff_s)**2 * (syst_s**2), axis=1)
-
-    # --- Dilepton Trigger Probability ---
-    # Create all 2-lepton combinations (pairs)
-    eff_h_pairs = awkward.combinations(eff_h, 2, fields=["l1", "l2"])
-    eff_l_pairs = awkward.combinations(eff_l, 2, fields=["l1", "l2"])
-    syst_h_pairs = awkward.combinations(syst_h, 2, fields=["l1", "l2"])
-    syst_l_pairs = awkward.combinations(syst_l, 2, fields=["l1", "l2"])
-
-    # Probability for a given pair to pass the dilepton trigger
-    # P(pair) = P(l1_h)*P(l2_l) + P(l1_l)*P(l2_h) - P(l1_h)*P(l2_h)
-    # This accounts for either lepton being the high or low leg, and subtracts the overlap (both passing high leg)
-    prob_pair_pass = (eff_h_pairs.l1 * eff_l_pairs.l2) + (eff_l_pairs.l1 * eff_h_pairs.l2) - (eff_h_pairs.l1 * eff_h_pairs.l2)
+    P_Event = 1 - (Fail_A + Fail_B)
+    """
     
-    # P(dilep) = 1 - product(1 - P(pair_i))
-    prob_dilep = 1.0 - awkward.prod(1.0 - prob_pair_pass, axis=1)
-
-    # Dilepton uncertainty (approximation)
-    # Uncertainty for P(pair)
-    # unc_sq_pair_pass = (eff_l_pairs.l2 * syst_h_pairs.l1)**2 + (eff_h_pairs.l1 * syst_l_pairs.l2)**2
-    unc_sq_pair_pass = (eff_l_pairs.l2 - eff_h_pairs.l2)**2 * syst_h_pairs.l1**2 + \
-                       (eff_h_pairs.l1)**2 * syst_l_pairs.l2**2 + \
-                       (eff_l_pairs.l1 - eff_h_pairs.l1)**2 * syst_h_pairs.l2**2 + \
-                       (eff_h_pairs.l2)**2 * syst_l_pairs.l1**2
+    # 1. Define Per-Lepton Probabilities for Exclusive States
+    # State S (Single): eff_s
+    # State H (High only): eff_h - eff_s
+    # State L (Low only): eff_l - eff_h
+    # State F (Fail Low): 1 - eff_l
     
-    one_minus_prob_pair = 1.0 - prob_pair_pass
-    prod_one_minus_prob_pair = awkward.prod(one_minus_prob_pair, axis=1)
-    safe_one_minus_prob_pair = one_minus_prob_pair #+ 1e-12
-    unc_sq_dilep = awkward.sum((prod_one_minus_prob_pair / safe_one_minus_prob_pair)**2 * unc_sq_pair_pass, axis=1)
+    p_fail_high = 1.0 - eff_h  # Fails High (and Single)
+    p_excl_H    = eff_h - eff_s # Passes High, Fails Single
+    p_F         = 1.0 - eff_l  # Fails Low (and High and Single)
 
-    # Total probability: P(total) = P(single) + P(dilep) - P(single) * P(dilep)
-    total_prob = prob_single + prob_dilep - prob_single * prob_dilep
+    # --- Scenario A: All leptons fail High Leg ---
+    # P(A) = Product_i (1 - epsilon_High_i)
+    # awkard.prod supports variable length arrays directly
+    term_A = awkward.prod(p_fail_high, axis=1)
+
+    # --- Scenario B: Exactly one exclusive High, others Fail Low ---
+    # P(B) = Sum_i [ p_excl_H_i * Product_{j!=i} (p_F_j) ]
     
-    # Total uncertainty
-    total_unc_sq = (1 - prob_dilep)**2 * unc_sq_single + (1 - prob_single)**2 * unc_sq_dilep
+    # To handle arbitrary N vectorized, we pad to the max multiplicity in the batch
+    # and loop over the columns (which is fast as max_N is small, e.g., 2, 3, 4).
+    max_n = awkward.max(awkward.num(eff_s))
+    if max_n is None or max_n == 0:
+        # Handle case with empty event batch or no leptons
+        return awkward.zeros_like(term_A)
 
-    return total_prob, total_unc_sq
+    # Pad arrays: 
+    # - p_excl_H padded with 0.0 (sum identity)
+    # - p_F padded with 1.0 (product identity)
+    def to_padded_numpy(arr, target_N, pad_val):
+        padded = awkward.fill_none(awkward.pad_none(arr, target_N, axis=1), pad_val)
+        return awkward.to_numpy(padded)
+
+    ph_np = to_padded_numpy(p_excl_H, max_n, 0.0)
+    pf_np = to_padded_numpy(p_F, max_n, 1.0)
+    
+    # Calculate term B by iterating columns to avoid 0/0 division issues
+    term_B = numpy.zeros_like(ph_np[:, 0])
+    
+    # Create a reusable mask of all Trues
+    # We will compute Product_{j!=i} using numpy.prod with a 'where' mask
+    all_indices = numpy.ones((ph_np.shape[0], max_n), dtype=bool)
+    
+    for i in range(max_n):
+        # Current lepton 'i' is the one Passing High (p_H)
+        # All others must Fail Low (p_F)
+        
+        # Mask out column i, keep others
+        all_indices[:, i] = False
+        
+        # Product of p_F for all other columns
+        # where=False elements are replaced by 1.0 (identity) in prod
+        prod_others = numpy.prod(pf_np, axis=1, where=all_indices)
+        
+        term_B += ph_np[:, i] * prod_others
+        
+        # Reset mask for next iteration
+        all_indices[:, i] = True
+
+    # Total Fail Probability
+    p_fail_event = term_A + term_B
+    
+    # Total Pass Probability
+    p_pass_event = numpy.clip(1.0 - p_fail_event, 0.0, 1.0)
+    
+    return awkward.Array(p_pass_event)
 
 
-def get_flavor_probability(leptons, single_eval, high_eval, low_eval,
-                           single_thresh, high_thresh, low_thresh,
-                           is_electron, is_data, central_only, year,
-                           single_eval_hole=None, high_eval_hole=None, low_eval_hole=None):
+def get_combined_flavor_sf(events, year, central_only):
     """
-    Calculate the total trigger probability for a single lepton flavor (electron or muon) for each event.
+    Main driver to calculate Scale Factors.
     """
-    n_leptons = awkward.num(leptons)
-    total_prob = numpy.zeros(len(leptons))
-    total_unc_sq = numpy.zeros(len(leptons))
-
-    # Get per-lepton probabilities and systematics for all events
-    probs, systs = get_lepton_probabilities(
-        leptons, single_eval, high_eval, low_eval,
-        is_electron, is_data, central_only, year,
-        single_eval_hole, high_eval_hole, low_eval_hole
-    )
-
-    # Case 1: One lepton
-    mask_1lep = (n_leptons == 1)
-    if numpy.any(mask_1lep):
-        prob_1lep, unc_sq_1lep = calculate_single_lepton_trigger_prob(probs[mask_1lep], systs[mask_1lep])
-        total_prob[mask_1lep] = prob_1lep
-        total_unc_sq[mask_1lep] = unc_sq_1lep
-
-    # Case 2 or more: Multiple leptons
-    mask_multi_lep = (n_leptons >= 2)
-    if numpy.any(mask_multi_lep):
-        prob_multi, unc_sq_multi = calculate_multi_lepton_trigger_prob(
-            probs[mask_multi_lep], systs[mask_multi_lep]
-        )
-        total_prob[mask_multi_lep] = awkward.to_numpy(prob_multi)
-        total_unc_sq[mask_multi_lep] = awkward.to_numpy(unc_sq_multi)
-
-    return total_prob, numpy.sqrt(total_unc_sq)
-
-
-def HLT_sf(events, year, central_only):
-    """
-    Calculate event-level HLT scale factors.
-    The logic is adapted from the C++ implementation, calculating a total event probability
-    for passing the trigger for data and MC, then taking the ratio.
-    """
-    # Load electron evaluators
+    # 1. Load Evaluators
     ele_single_eval = _core.CorrectionSet.from_file(misc_utils.expand_path(SingleElectron_HLT_FILE[year]))
     ele_high_eval = _core.CorrectionSet.from_file(misc_utils.expand_path(DoubleElectron_HighLeg_HLT_FILE[year]))
     ele_low_eval = _core.CorrectionSet.from_file(misc_utils.expand_path(DoubleElectron_LowLeg_HLT_FILE[year]))
     
-    ele_single_eval_hole = ele_high_eval_hole = ele_low_eval_hole = None
+    ele_hole_evals = [None, None, None]
     if year == "2023postBPix":
-        ele_single_eval_hole = _core.CorrectionSet.from_file(misc_utils.expand_path(SingleElectron_HLT_FILE_HOLE[year]))
-        ele_high_eval_hole = _core.CorrectionSet.from_file(misc_utils.expand_path(DoubleElectron_HighLeg_HLT_FILE_HOLE[year]))
-        ele_low_eval_hole = _core.CorrectionSet.from_file(misc_utils.expand_path(DoubleElectron_LowLeg_HLT_FILE_HOLE[year]))
+        ele_hole_evals = [
+            _core.CorrectionSet.from_file(misc_utils.expand_path(SingleElectron_HLT_FILE_HOLE[year])),
+            _core.CorrectionSet.from_file(misc_utils.expand_path(DoubleElectron_HighLeg_HLT_FILE_HOLE[year])),
+            _core.CorrectionSet.from_file(misc_utils.expand_path(DoubleElectron_LowLeg_HLT_FILE_HOLE[year]))
+        ]
 
-    # Load muon evaluators
     muon_single_eval = _core.CorrectionSet.from_file(misc_utils.expand_path(SingleMuon_HLT_FILE[year]))
     muon_high_eval = _core.CorrectionSet.from_file(misc_utils.expand_path(DoubleMuon_HighLeg_HLT_FILE[year]))
     muon_low_eval = _core.CorrectionSet.from_file(misc_utils.expand_path(DoubleMuon_LowLeg_HLT_FILE[year]))
 
     electrons = events.Electron
     muons = events.Muon
+    
+    # Sort by pT
     electrons = electrons[awkward.argsort(electrons.pt, ascending=False, axis=1)]
     muons = muons[awkward.argsort(muons.pt, ascending=False, axis=1)]
 
-    # Define pt thresholds
-    if "2016" in year:
-        ele_single_thresh, ele_high_thresh, ele_low_thresh = 27.0, 23.0, 12.0
-        muon_single_thresh, muon_high_thresh, muon_low_thresh = 24.0, 17.0, 8.0
-    elif year == "2017":
-        ele_single_thresh, ele_high_thresh, ele_low_thresh = 32.0, 23.0, 12.0
-        muon_single_thresh, muon_high_thresh, muon_low_thresh = 27.0, 17.0, 8.0
-    elif year == "2018":
-        ele_single_thresh, ele_high_thresh, ele_low_thresh = 32.0, 23.0, 12.0
-        muon_single_thresh, muon_high_thresh, muon_low_thresh = 24.0, 17.0, 8.0
-    else: # 2022/2023
-        ele_single_thresh, ele_high_thresh, ele_low_thresh = 30.0, 23.0, 12.0
-        muon_single_thresh, muon_high_thresh, muon_low_thresh = 24.0, 17.0, 8.0
-
-    # Calculate probabilities for data
-    prob_e_data, unc_e_data = get_flavor_probability(
-            electrons, ele_single_eval, ele_high_eval, ele_low_eval,
-            ele_single_thresh, ele_high_thresh, ele_low_thresh,
-            True, True, central_only, year,
-            ele_single_eval_hole, ele_high_eval_hole, ele_low_eval_hole)
-    prob_m_data, unc_m_data = get_flavor_probability(
-            muons, muon_single_eval, muon_high_eval, muon_low_eval,
-            muon_single_thresh, muon_high_thresh, muon_low_thresh,
-            False, True, central_only, year)
-    
-    # Calculate probabilities for MC
-    prob_e_mc, unc_e_mc = get_flavor_probability(
-            electrons, ele_single_eval, ele_high_eval, ele_low_eval,
-            ele_single_thresh, ele_high_thresh, ele_low_thresh,
-            True, False, central_only, year,
-            ele_single_eval_hole, ele_high_eval_hole, ele_low_eval_hole)
-    prob_m_mc, unc_m_mc = get_flavor_probability(
-            muons, muon_single_eval, muon_high_eval, muon_low_eval,
-            muon_single_thresh, muon_high_thresh, muon_low_thresh,
-            False, False, central_only, year)
-
-    # Combine probabilities: P = P_e + P_m - P_e * P_m
-    total_prob_data = prob_e_data + prob_m_data - prob_e_data * prob_m_data
-    total_prob_mc = prob_e_mc + prob_m_mc - prob_e_mc * prob_m_mc
-
-    # Calculate SF
-    sf = numpy.divide(total_prob_data, total_prob_mc, out=numpy.ones_like(total_prob_data), where=total_prob_mc!=0)
-    
-    variations = {"central": sf}
-
+    # 2. Define Variations to Calculate
+    variations_to_run = [("central", 0.0)]
     if not central_only:
-        # Propagate uncertainties
-        unc_data_sq = (1 - prob_m_data)**2 * unc_e_data**2 + (1 - prob_e_data)**2 * unc_m_data**2
-        unc_mc_sq = (1 - prob_m_mc)**2 * unc_e_mc**2 + (1 - prob_e_mc)**2 * unc_m_mc**2
-        
-        rel_unc_sq = numpy.divide(unc_data_sq, total_prob_data**2, out=numpy.zeros_like(unc_data_sq), where=total_prob_data!=0) + \
-                     numpy.divide(unc_mc_sq, total_prob_mc**2, out=numpy.zeros_like(unc_mc_sq), where=total_prob_mc!=0)
-        
-        unc_sf = sf * numpy.sqrt(rel_unc_sq)
-        
-        variations["up"] = sf + unc_sf
-        variations["down"] = sf - unc_sf
+        variations_to_run += [("up", 1.0), ("down", -1.0)]
 
-    # Clip values to be within a reasonable range, e.g., [0, 5] and convert to awkward array
-    for var in variations:
-        variations[var] = awkward.Array(numpy.clip(variations[var], 0, 5))
+    results = {}
 
-    return variations
+    for var_name, sigma in variations_to_run:
+        # --- Electron Probability ---
+        e_s, e_h, e_l = get_lepton_efficiencies(
+            electrons, ele_single_eval, ele_high_eval, ele_low_eval,
+            is_electron=True, is_data=True, year=year, sigma=sigma,
+            single_eval_hole=ele_hole_evals[0], high_eval_hole=ele_hole_evals[1], low_eval_hole=ele_hole_evals[2]
+        )
+        p_ele_data = calculate_exclusive_probability(e_s, e_h, e_l)
+
+        e_s_mc, e_h_mc, e_l_mc = get_lepton_efficiencies(
+            electrons, ele_single_eval, ele_high_eval, ele_low_eval,
+            is_electron=True, is_data=False, year=year, sigma=sigma,
+            single_eval_hole=ele_hole_evals[0], high_eval_hole=ele_hole_evals[1], low_eval_hole=ele_hole_evals[2]
+        )
+        p_ele_mc = calculate_exclusive_probability(e_s_mc, e_h_mc, e_l_mc)
+
+        # --- Muon Probability ---
+        m_s, m_h, m_l = get_lepton_efficiencies(
+            muons, muon_single_eval, muon_high_eval, muon_low_eval,
+            is_electron=False, is_data=True, year=year, sigma=sigma
+        )
+        p_muon_data = calculate_exclusive_probability(m_s, m_h, m_l)
+
+        m_s_mc, m_h_mc, m_l_mc = get_lepton_efficiencies(
+            muons, muon_single_eval, muon_high_eval, muon_low_eval,
+            is_electron=False, is_data=False, year=year, sigma=sigma
+        )
+        p_muon_mc = calculate_exclusive_probability(m_s_mc, m_h_mc, m_l_mc)
+
+        # --- Combine Flavors (Union of Independent Flavors) ---
+        # P_total = 1 - (1 - P_ele)(1 - P_muon)
+        p_total_data = 1.0 - (1.0 - p_ele_data) * (1.0 - p_muon_data)
+        p_total_mc   = 1.0 - (1.0 - p_ele_mc) * (1.0 - p_muon_mc)
+
+        # --- Calculate Scale Factor ---
+        # Safe division: convert to numpy for ufunc compatibility
+        p_total_data_np = awkward.to_numpy(p_total_data)
+        p_total_mc_np = awkward.to_numpy(p_total_mc)
+        
+        sf = numpy.divide(p_total_data_np, p_total_mc_np, out=numpy.ones_like(p_total_data_np), where=p_total_mc_np > 1e-6)
+        
+        # Clip reasonable range
+        results[var_name] = awkward.Array(numpy.clip(sf, 0.0, 10.0))
+
+    return results
+
+def HLT_sf(events, year, central_only):
+    """
+    Entry point function.
+    """
+    return get_combined_flavor_sf(events, year, central_only)

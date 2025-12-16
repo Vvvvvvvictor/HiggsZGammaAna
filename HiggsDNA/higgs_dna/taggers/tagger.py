@@ -221,8 +221,8 @@ class Tagger():
                     #TODO: add eff as N-1 cut
             }
 
-            logger.debug("[Tagger] : %s, syst variation : %s, cut type : %s, cut : %s, yields : %d"
-                    % (self.name, self.current_syst, cut_type, name, yields))
+            logger.debug("[Tagger] : %s, syst variation : %s, cut type : %s, cut : %s, yields : %d, eff : %.3f"
+                    % (self.name, self.current_syst, cut_type, name, yields, individual_eff))
 
 
     def get_summary(self):

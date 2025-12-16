@@ -51,13 +51,13 @@ python scripts/categorization_1D.py -r zero_to_one_jet -n 120 --score_max 1.1 --
 # # Tune 4 sets of hypers (skip)
 # python scripts/train_bdt.py -r two_jet --save --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --hyperparams_path "models/optuna_two_jet_0602"
 # Tune 1 set of hyperparameter
-# python scripts/train_bdt.py -r two_jet --optuna --n-calls 60 --continue-optuna 0 --optuna_metric 'sqrt_eval_auc_minus_train_auc' --oneHyperparameter --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new"
+# python scripts/train_bdt.py -r two_jet --optuna --n-calls 60 --continue-optuna 0 --optuna_metric 'eval_auc_minus_train_auc' --oneHyperparameter --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --reweight
 # # Train with 1 set of hyperparameter
-# python scripts/train_bdt.py -r two_jet --save --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --hyperparams_path "models/optuna_two_jet" --oneHyperparameter
+# python scripts/train_bdt.py -r two_jet --save --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --reweight --oneHyperparameter  --hyperparams_path "models/optuna_two_jet"
 # # Apply
 # python scripts/apply_bdt.py -r two_jet --inputFolder "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new" --outputFolder "/eos/home-j/jiehan/root/outputs/test"
 # # Nonimal Score
-python scripts/categorization_1D.py -r two_jet -b 4 --minSB 20 -n 120 --score_max 1.1 --score_min -0.1 --minN 4 -es "fullSimrw" --input "/eos/home-j/jiehan/root/outputs" #--floatB
+# python scripts/categorization_1D.py -r two_jet -b 4 --minSB 20 -n 120 --score_max 1.1 --score_min -0.1 --minN 4 -es "fullSimrw" --input "/eos/home-j/jiehan/root/outputs" #--floatB
 # # Transform BDT
 # python scripts/categorization_1D.py -r two_jet -b 4 --minSB 20 -n 100 -t True --minN 4 -es "fullSimrw" --input "/eos/home-j/jiehan/root/outputs" #--floatB
 
@@ -78,22 +78,22 @@ python scripts/categorization_1D.py -r two_jet -b 4 --minSB 20 -n 120 --score_ma
 # python scripts/calculate_fold_significance.py
 # # python scripts/categorization_2D.py -r all_jet -b 6 -v 3 --minN 2 -es "fullSimrw"
 
-#===========================================
-# Plotting the BDT results
-#===========================================
-# python scripts/calculate_fold_significance.py
-python scripts/calculate_fold_significance.py --region zero_to_one_jet --input test/significances/0_0_zero_to_one_jet_1D_4.json
-# # for chan in two_jet zero_to_one_jet all_jet;do
-# #     python ../plot_python/compare_data_bkg_bdt_sideband.py --channel $chan
-# # done
-python ../plot_python/plot_cats_hmass_dis.py --channel "two_jet"
+# #===========================================
+# # Plotting the BDT results
+# #===========================================
+# # python scripts/calculate_fold_significance.py
+# python scripts/calculate_fold_significance.py --region zero_to_one_jet --input test/significances/0_0_zero_to_one_jet_1D_4.json
+# # # for chan in two_jet zero_to_one_jet all_jet;do
+# # #     python ../plot_python/compare_data_bkg_bdt_sideband.py --channel $chan
+# # # done
+# python ../plot_python/plot_cats_hmass_dis.py --channel "two_jet"
 python ../plot_python/plot_cats_hmass_dis.py --channel "zero_to_one_jet"
-# # # python ../plot_python/plot_cats_hmass_dis.py --channel "all_jet"
-python ../plot_python/compare_sig_bkg_bdt_sosb.py
-python ../plot_python/compare_sig_bkg_bdt_sosb.py --channel zero_to_one_jet
-python ../plot_python/compare_data_bkg_bdt_sideband.py
-python ../plot_python/compare_data_bkg_bdt_sideband.py --channel two_jet
-# bash ../plot_python/run.sh
+# # # # python ../plot_python/plot_cats_hmass_dis.py --channel "all_jet"
+# python ../plot_python/compare_sig_bkg_bdt_sosb.py
+# python ../plot_python/compare_sig_bkg_bdt_sosb.py --channel zero_to_one_jet
+# python ../plot_python/compare_data_bkg_bdt_sideband.py
+# python ../plot_python/compare_data_bkg_bdt_sideband.py --channel two_jet
+# # bash ../plot_python/run.sh
 
 # # vbf category
 # for fold in {0..3};do

@@ -270,21 +270,9 @@ class ZGammaTaggerRun2(Tagger):
             awkward.fill_none(object_selections.delta_R(photons, electrons, 0.3), True)
         )
         photons = photons[clean_photon_mask]
-        
-        # Sort by pt and add photon properties
-        photons = photons[awkward.argsort(photons.pt, ascending=False, axis=1)]
-        photons = awkward.with_field(photons, photons.energyErr / photons.pt / numpy.cosh(photons.eta), "ptErrRel")
-        photons = awkward.with_field(photons, awkward.zeros_like(photons.pt), "mass")
-        
-        # Select highest pt photon and add to events
-        photons = awkward_utils.add_field(
-            events=events,
-            name="SelectedPhoton",
-            data=photons[:, :1]
-        )
-        
+
         # Jets
-        jet_cut, jet_veto = jet_selections.select_jets(
+        jet_cut, jet_veto, photon_removal, lepton_removal = jet_selections.select_jets(
             jets = events.Jet,
             options = self.options["jets"],
             clean = {
@@ -308,12 +296,48 @@ class ZGammaTaggerRun2(Tagger):
             event_runs = events.run
         )
 
+        # lepton_removal_jet = events.Jet[lepton_removal]
+        # photon_removal_jet = events.Jet[photon_removal]
+        # i, count = 0, 0
+        # for i in range(len(events)):
+        #     if len(events.Jet[i]) > 5:
+        #         print(f"{events.run[i]} {events.luminosityBlock[i]} {events.event[i]} {events.Jet[i].pt}")
+        #         count += 1
+        #     if count > 5:
+        #         break
+        # for i in range(len(lepton_removal_jet)):
+            # if len(lepton_removal_jet[i]) <= (len(photon_removal_jet[i]) - 3):
+            # print(f"{events.run[i]} {events.luminosityBlock[i]} {events.event[i]} {electrons[i].pt}")
+        #     # logger.debug(f"[ZGammaTagger] Run {events.run[i]}, LuminosityBlock {events.luminosityBlock[i]}, Event {events.event[i]}: ")
+        #     # logger.debug(f"[ZGammaTagger] Jets before lepton removal pt = {photon_removal_jet[i].pt}")
+        #     # logger.debug(f"[ZGammaTagger] Jets before photon removal eta = {photon_removal_jet[i].eta}")
+        #     # logger.debug(f"[ZGammaTagger] Jets before lepton removal phi = {photon_removal_jet[i].phi}")
+        #     # logger.debug(f"[ZGammaTagger] Electrons pt = {electrons[i].pt}")
+        #     # logger.debug(f"[ZGammaTagger] Electrons eta = {electrons[i].eta}")
+        #     # logger.debug(f"[ZGammaTagger] Electrons phi = {electrons[i].phi}")
+        #     # logger.debug(f"[ZGammaTagger] Muons pt = {muons[i].pt}")
+        #     # logger.debug(f"[ZGammaTagger] Muons eta = {muons[i].eta}")
+        #     # logger.debug(f"[ZGammaTagger] Muons phi = {muons[i].phi}")
+        #     # logger.debug(f"[ZGammaTagger] Jets after lepton removal pt = {lepton_removal_jet[i].pt}")
+
         jets = awkward_utils.add_field(
             events = events,
             name = "SelectedJet",
             data = events.Jet[jet_cut]
         )
-
+  
+        # Sort by pt and add photon properties
+        photons = photons[awkward.argsort(photons.pt, ascending=False, axis=1)]
+        photons = awkward.with_field(photons, photons.energyErr / photons.pt / numpy.cosh(photons.eta), "ptErrRel")
+        photons = awkward.with_field(photons, awkward.zeros_like(photons.pt), "mass")
+        
+        # Select highest pt photon and add to events
+        photons = awkward_utils.add_field(
+            events=events,
+            name="SelectedPhoton",
+            data=photons[:, :1]
+        )
+        
         MET_pt = awkward.where(
             awkward.sum(~jet_veto, axis=1) > 0,
             awkward.zeros_like(events.run, dtype=float),
@@ -323,39 +347,39 @@ class ZGammaTaggerRun2(Tagger):
         logger.debug(f"[ZGammaTagger] jet veto from events: {awkward.sum(~jet_veto, axis=1)[awkward.sum(~jet_veto, axis=1) > 0]}")
         logger.debug(f'[ZGammaTagger] MET_pt from events: {events[awkward.sum(~jet_veto, axis=1) > 0]["MET_pt"]}')
 
-        b_jet_cut = jets.btagDeepFlavB > self.options["btag_med"][self.year]
+        b_jet_cut = (jets.btagDeepFlavB > self.options["btag_med"][self.year]) & (abs(jets.eta) < 2.5)
         jets = awkward.with_field(jets, b_jet_cut, "is_med_bjet") 
 
-        # Add object fields to events array
-        if not self.is_data:
-            for objects, name in zip([unmatched_gen_muons, unmatched_gen_eles], ["gen_no_reco_muon", "gen_no_reco_electron"]):
-                for var in objects.fields:
-                    if var in ["charge", "pt", "eta", "phi", "mass", "id", "ptE_error", "p"]:
-                        awkward_utils.add_field(
-                            events,
-                            f"{name}_{var}",
-                            awkward.fill_none(objects[var], DUMMY_VALUE)
-                        )
-                    else:
-                        awkward_utils.add_field(
-                            events,
-                            f"{name}_{var}",
-                            awkward.fill_none(objects[var], 0)
-                        )
-        for objects, name in zip([electrons, muons, jets], ["electron", "muon", "jet"]):
-           for var in objects.fields:
-               if var in ["charge", "pt", "eta", "phi", "mass", "id", "ptE_error", "p"]:
-                   awkward_utils.add_field(
-                       events,
-                       f"{name}_{var}",
-                       awkward.fill_none(objects[var], DUMMY_VALUE)
-                   )
-               else:
-                   awkward_utils.add_field(
-                       events,
-                       f"{name}_{var}",
-                       awkward.fill_none(objects[var], 0)
-                   )
+        # # Add object fields to events array
+        # if not self.is_data:
+        #     for objects, name in zip([unmatched_gen_muons, unmatched_gen_eles], ["gen_no_reco_muon", "gen_no_reco_electron"]):
+        #         for var in objects.fields:
+        #             if var in ["charge", "pt", "eta", "phi", "mass", "id", "ptE_error", "p"]:
+        #                 awkward_utils.add_field(
+        #                     events,
+        #                     f"{name}_{var}",
+        #                     awkward.fill_none(objects[var], DUMMY_VALUE)
+        #                 )
+        #             else:
+        #                 awkward_utils.add_field(
+        #                     events,
+        #                     f"{name}_{var}",
+        #                     awkward.fill_none(objects[var], 0)
+        #                 )
+        # for objects, name in zip([electrons, muons, jets], ["electron", "muon", "jet"]):
+        #    for var in objects.fields:
+        #        if var in ["charge", "pt", "eta", "phi", "mass", "id", "ptE_error", "p"]:
+        #            awkward_utils.add_field(
+        #                events,
+        #                f"{name}_{var}",
+        #                awkward.fill_none(objects[var], DUMMY_VALUE)
+        #            )
+        #        else:
+        #            awkward_utils.add_field(
+        #                events,
+        #                f"{name}_{var}",
+        #                awkward.fill_none(objects[var], 0)
+        #            )
 
         if not self.is_data:
             dZ = events.GenVtx_z - events.PV_z
@@ -419,6 +443,23 @@ class ZGammaTaggerRun2(Tagger):
                             f"{name}_{var}",
                             awkward.fill_none(objects[var], 0)
                         )
+
+        for i in range(1,5):
+            awkward_utils.add_field(
+                events,
+                f"electron_{i}_ptErr",
+                awkward.fill_none(awkward.pad_none(electrons.ptE_error, i, axis=1)[:, i-1], DUMMY_VALUE)
+            )
+            awkward_utils.add_field(
+                events,
+                f"muon_{i}_ptErr",
+                awkward.fill_none(awkward.pad_none(muons.ptE_error, i, axis=1)[:, i-1], DUMMY_VALUE)
+            )
+            awkward_utils.add_field(
+                events,
+                f"muon_{i}_ptErr_store",
+                awkward.fill_none(awkward.pad_none(muons.ptErr_store, i, axis=1)[:, i-1], DUMMY_VALUE)
+            )
 
         # Sort objects by pt
         electrons = electrons[awkward.argsort(electrons.pt, ascending=False, axis=1)]
@@ -715,9 +756,7 @@ class ZGammaTaggerRun2(Tagger):
         if not self.is_data:
             gen_hzg = gen_selections.select_x_to_yz(events.GenPart, 25, 23, 22)
             events["GenHzgHiggs"] = gen_hzg.GenParent
-            for i, name in enumerate(["ISR_up", "FSR_up", "ISR_down", "FSR_down"]):
-                awkward_utils.add_field(events, f"PSWeight_{name}", events.PSWeight[:, i], overwrite=True)
-
+            
         elapsed_time = time.time() - start
         logger.debug("[ZGammaTagger] %s, syst variation : %s, total time to execute select_zgammas: %.6f s" % (self.name, self.current_syst, elapsed_time))
 

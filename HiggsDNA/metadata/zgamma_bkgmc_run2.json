@@ -20,6 +20,30 @@
     ],
     "systematics": {
         "weights": {
+            "ps_isr_sf": {
+                "type": "event",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.ps_systematics",
+                    "name": "ps_isr_sf"
+                },
+                "modify_central_weight": false,
+                "requires_branches": [
+                    "PSWeight"
+                ]
+            },
+            "ps_fsr_sf": {
+                "type": "event",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.ps_systematics",
+                    "name": "ps_fsr_sf"
+                },
+                "modify_central_weight": false,
+                "requires_branches": [
+                    "PSWeight"
+                ]
+            },
             "pu_reweight_sf": {
                 "type": "event",
                 "method": "from_function",
@@ -214,21 +238,6 @@
                     ]
                 ]
             },
-            "photon_fake_photon_sf": {
-                "type": "object",
-                "method": "from_function",
-                "function": {
-                    "module_name": "higgs_dna.systematics.photon_systematics",
-                    "name": "photon_fake_photon_sf"
-                },
-                "modify_central_weight": false,
-                "input_collection": "SelectedPhoton",
-                "target_collections": [
-                    [
-                        "SelectedPhoton"
-                    ]
-                ]
-            },
             "photon_id_shape_sf": {
                 "type": "object",
                 "method": "from_function",
@@ -244,146 +253,6 @@
                     ]
                 ]
             }
-        },
-        "independent_collections": {
-            "Scale": {
-                "method": "from_branch",
-                "branch_modified": [
-                    "Photon",
-                    "pt"
-                ],
-                "branches": {
-                    "up": [
-                        "Photon",
-                        "pt_ScaleUp"
-                    ],
-                    "down": [
-                        "Photon",
-                        "pt_ScaleDown"
-                    ]
-                }
-            },
-            "Smearing": {
-                "method": "from_branch",
-                "branch_modified": [
-                    "Photon",
-                    "pt"
-                ],
-                "branches": {
-                    "up": [
-                        "Photon",
-                        "dEsigmaUp"
-                    ],
-                    "down": [
-                        "Photon",
-                        "dEsigmaDown"
-                    ]
-                },
-                "additive": true
-            },
-            "Electron_scale": {
-                "method": "from_branch",
-                "branch_modified": [
-                    "Electron",
-                    "pt"
-                ],
-                "branches": {
-                    "up": [
-                        "Electron",
-                        "dEscaleUp"
-                    ],
-                    "down": [
-                        "Electron",
-                        "dEscaleDown"
-                    ]
-                },
-                "additive": true
-            },
-            "Electron_smear": {
-                "method": "from_branch",
-                "branch_modified": [
-                    "Electron",
-                    "pt"
-                ],
-                "branches": {
-                    "up": [
-                        "Electron",
-                        "dEsigmaUp"
-                    ],
-                    "down": [
-                        "Electron",
-                        "dEsigmaDown"
-                    ]
-                },
-                "additive": true
-            },
-            "JER": {
-                "method": "from_branch",
-                "branch_modified": [
-                    "Jet",
-                    "pt"
-                ],
-                "branches": {
-                    "up": [
-                        "Jet",
-                        "pt_jerUp"
-                    ],
-                    "down": [
-                        "Jet",
-                        "pt_jerDown"
-                    ]
-                }
-            },
-            "JES": {
-                "method": "from_branch",
-                "branch_modified": [
-                    "Jet",
-                    "pt"
-                ],
-                "branches": {
-                    "up": [
-                        "Jet",
-                        "pt_jesTotalUp"
-                    ],
-                    "down": [
-                        "Jet",
-                        "pt_jesTotalDown"
-                    ]
-                }
-            },
-            "MET_JES": {
-                "method": "from_branch",
-                "branch_modified": "MET_pt",
-                "branches": {
-                    "up": "MET_T1_pt_jesTotalUp",
-                    "down": "MET_T1_pt_jesTotalDown"
-                }
-            },
-            "MET_Unclustered": {
-                "method": "from_branch",
-                "branch_modified": "MET_pt",
-                "branches": {
-                    "up": "MET_T1_pt_unclustEnUp",
-                    "down": "MET_T1_pt_unclustEnDown"
-                }
-            },
-            "Muon_pt": {
-                "method": "from_branch",
-                "branch_modified": [
-                    "Muon",
-                    "pt"
-                ],
-                "branches": {
-                    "up": [
-                        "Muon",
-                        "correctedUp_pt"
-                    ],
-                    "down": [
-                        "Muon",
-                        "correctedDown_pt"
-                    ]
-                }
-            }
         }
     },
     "samples": {
@@ -392,7 +261,7 @@
             "ZGToLLG", "DYJetsToLL", "ZG2JToG2L2J", "EWKZ2J"
         ],
         "years": [
-            "2018"
+            "2016preVFP", "2016postVFP", "2017", "2018"
         ]
     },
     "variables_of_interest": [
@@ -535,6 +404,7 @@
         "z_ee"
     ],
     "branches": [
+        "PSWeight",
         "GenVtx_z",
         "PV_z",
         "L1PreFiringWeight_Nom",
@@ -664,6 +534,7 @@
         "Jet_mass",
         "Jet_btagDeepFlavB",
         "Jet_jetId",
+        "Jet_puId",
         "Jet_hadronFlavour",
         "MET_pt",
         "MET_phi",
@@ -744,36 +615,6 @@
                 ],
                 [
                     "Muon",
-                    "corrected_pt"
-                ]
-            ],
-            [
-                [
-                    "Muon",
-                    "ptErr"
-                ],
-                [
-                    "Muon",
-                    "bsConstrainedPtErr"
-                ]
-            ],
-            [
-                [
-                    "Electron",
-                    "pt"
-                ],
-                [
-                    "Electron",
-                    "corrected_pt"
-                ]
-            ],
-            [
-                [
-                    "Photon",
-                    "pt"
-                ],
-                [
-                    "Photon",
                     "corrected_pt"
                 ]
             ],

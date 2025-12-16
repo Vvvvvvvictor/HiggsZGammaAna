@@ -125,6 +125,7 @@ def compute_delta_phi_variables_vectorized(data):
     # MET and MHT delta phi with gamma
     delta_phi_vars['MET_deltaphi'] = true_delta_phi_vectorized(np.abs(data['MET_phi'] - data['gamma_phi']))
     delta_phi_vars['llphoton_hmiss_photon_dphi'] = true_delta_phi_vectorized(np.abs(data['MHT_phi'] + math.pi - data['gamma_phi']))
+    delta_phi_vars['photon_mht_deltaphi'] = true_delta_phi_vectorized(np.abs(data['MHT_phi'] + math.pi - data['gamma_phi']))
     
     # Jet delta phi with gamma
     for i in range(1, 5):
@@ -1054,6 +1055,10 @@ def decorate(data):
     data['pythia_weight'] = np.ones(data.shape[0]) / 0.96934
     
     # Type conversions
+    print("Converting data types...")
+    for i in data.dtypes.index:
+        if data.dtypes[i] == 'object':
+            data.drop(columns=[i], inplace=True)
     data = data.astype(float)
     data = data.astype({'is_center': int, 'is_center_refit': int, 'Z_lead_lepton_charge': int, 'Z_lead_lepton_id': int, 'Z_sublead_lepton_charge': int, 'Z_sublead_lepton_id': int, "n_jets": int, "n_b_jets": int, "n_leptons": int, "n_electrons": int, "n_muons": int, 'event': int})
 
@@ -1122,6 +1127,8 @@ def main():
 
     weight_list = [
         "weight_hlt_sf_central", 
+        "weight_ps_isr_sf_central",
+        "weight_ps_fsr_sf_central",
         "weight_pu_reweight_sf_central", 
         "weight_btag_deepjet_wp_sf_light_SelectedJet_central",
         "weight_btag_deepjet_wp_sf_heavy_SelectedJet_central",

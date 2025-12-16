@@ -8,32 +8,32 @@ def get_input_base(year):
 
 def get_systs(year):
     if any(run2_year in year for run2_year in ["2016", "2017", "2018"]):
-        return ["Photon_scale", "Photon_smear", "Electron_scale", "Electron_smear", "JER", "JES", "MET_JES", "MET_Unclustered", "Muon_pt_smear"]
-    return ["Photon_scale", "Photon_smear", "Electron_scale", "Electron_smear", "JER", "JES", "MET_JES", "MET_Unclustered", "Muon_pt_scale", "Muon_pt_smear"]
+        return ["Photon_scale", "Photon_smear", "Electron_scale", "Electron_smear", "JER", "JES", "MET_Unclustered", "Muon_pt"]
+    return ["Photon_scale", "Photon_smear", "Electron_scale", "Electron_smear", "JER", "JES", "MET_Unclustered", "Muon_pt_scale", "Muon_pt_smear"]
 
 def generate_condor_submission():
     # --- Configuration ---
     target_base = "/eos/home-j/jiehan/root/skimmed_ntuples/"
     script_path = "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py"
     
-    years = ["2016preVFP", "2016postVFP", "2017", "2018"] #["2016preVFP", "2016postVFP", "2017", "2018", "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"]
+    years = ["2023preBPix", "2023postBPix"] #["2016preVFP", "2016postVFP", "2017", "2018", "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"]
 
     signal_samples = [
-        "ggH_M125", "VBF_M125", "WplusH_M125", "WminusH_M125", "ZH_M125", "ttH_M125"
+        # "ggH_M125", "VBF_M125", "WplusH_M125", "WminusH_M125", "ZH_M125", "ttH_M125"
     ]
     nominal_only_samples = [
-        "ggH_M120", "VBF_M120", "WplusH_M120", "WminusH_M120", "ZH_M120", "ttH_M120",
-        "ggH_M130", "VBF_M130", "WplusH_M130", "WminusH_M130", "ZH_M130", "ttH_M130",
-        "ggH_up", "VBF_up", "WplusH_up", "WminusH_up", "ZH_up", "ttH_up",
-        "ggH_down", "VBF_down", "WplusH_down", "WminusH_down", "ZH_down", "ttH_down",
-        "ggH_mu", "VBF_mu", "WplusH_mu", "WminusH_mu", "ZH_mu", "ttH_mu"
+        # "ggH_M120", "VBF_M120", "WplusH_M120", "WminusH_M120", "ZH_M120", "ttH_M120",
+        # "ggH_M130", "VBF_M130", "WplusH_M130", "WminusH_M130", "ZH_M130", "ttH_M130",
+        # "ggH_up", "VBF_up", "WplusH_up", "WminusH_up", "ZH_up", "ttH_up",
+        # "ggH_down", "VBF_down", "WplusH_down", "WminusH_down", "ZH_down", "ttH_down",
+        # "ggH_mu", "VBF_mu", "WplusH_mu", "WminusH_mu", "ZH_mu", "ttH_mu"
     ]
     bkg_samples = [
-        # "ZGToLLG", "DYJetsToLL", "ZG2JToG2L2J", "EWKZ2J",
-        # "DYGto2LG_10to50", "DYGto2LG_50to100", "DYGto2LG_10to100"
+        "DYGto2LG_10to100" #, "DYJetsToLL", "ZG2JToG2L2J"
+        # "DYGto2LG_10to50", "DYGto2LG_50to100", "EWKZ2J", "ZGToLLG", 
     ]
     data_samples = [
-        "Data"
+        # "Data"
     ]
 
     all_commands = []
@@ -100,8 +100,7 @@ def generate_condor_submission():
             all_commands.append(command)
 
     # --- Setup output directories and file paths ---
-    current_dir = os.getcwd()
-    base_log_dir = os.path.join(current_dir, "eos_log")
+    base_log_dir = "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/eos_log"
     condor_log_dir = os.path.join(base_log_dir, "skimmed_ntuple_log")
     os.makedirs(condor_log_dir, exist_ok=True)
 
@@ -118,9 +117,12 @@ def generate_condor_submission():
 executable              = /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/run_condor_job.sh
 arguments               = "$(command)"
 output                  = /dev/null
-error                   = /dev/null
+error                   = {condor_log_dir}/$(ClusterId).$(ProcId).err
 log                     = /dev/null
 +JobFlavour             = "longlunch"
+
+RequestMemory = 16384
+RequestDisk = 20000
 
 # Use this to avoid transferring large root files
 should_transfer_files   = NO

@@ -20,7 +20,7 @@ def missing_fields(array, fields):
     """
 
     missing_fields = []
-
+    
     for field in fields: 
         if isinstance(field, str):
             if field not in array.fields:

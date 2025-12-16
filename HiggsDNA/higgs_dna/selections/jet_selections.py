@@ -38,7 +38,7 @@ def select_jets(jets, options, clean, year, name = "none", tagger = None, event_
 
     tagger_name = "none" if tagger is None else tagger.name 
 
-    standard_cuts = object_selections.select_objects(jets, options, clean, name, tagger)
+    standard_cuts, photon_removal, lepton_removal = object_selections.select_objects(jets, options, clean, name, tagger)
 
     # Pei-Zhu, Jet Horn 
     jets_horn_year = {"2017", "2018", "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"}
@@ -53,20 +53,26 @@ def select_jets(jets, options, clean, year, name = "none", tagger = None, event_
     
     # TODO: jet ID
     if options["looseID"]:
-        id_cut = jets.jetId >= 1 # jetID stored bitwise for loose/tight/tightLepVeto
+        if int(year[:4]) >= 2022:
+            id_cut = (
+                ((jets.jetId & 0b010) > 0)
+                & (
+                    (abs(jets.eta) <= 2.7)
+                    | (
+                        (abs(jets.eta) > 2.7)
+                        & (abs(jets.eta) <= 3.0)
+                        & (jets.neHEF < 0.99)
+                    )
+                    | (
+                        (abs(jets.eta) > 3.0)
+                        & (jets.neEmEF < 0.4)
+                    )
+                )
+            )
+        else:
+            id_cut = jets.jetId >= 1 & ((jets.puId >= 1) | (jets.pt > 50)) # jetID stored bitwise for loose/tight/tightLepVeto
     else:
         id_cut = jets.pt > 0
-        
-    if "photons" in clean:
-        photons = clean["photons"]["objects"]
-        jet_idx = awkward.local_index(jets.pt, axis=1)
-        new_jet = awkward.unflatten(awkward.unflatten(awkward.flatten(jet_idx), [1]*awkward.sum(awkward.num(jet_idx))), awkward.num(jet_idx, axis=1))
-        # Replace empty lists in photons.jetIdx with [-1]
-        photons_jetIdx = awkward.where(awkward.num(photons.jetIdx, axis=1) == 0, awkward.ones_like(awkward.num(photons.jetIdx, axis=1))*-1, photons.jetIdx)
-        new_pho = awkward.broadcast_arrays(photons_jetIdx[:, None], new_jet, depth_limit=2)[0]
-        photon_veto_cut = ~awkward.flatten(awkward.any(new_jet[:, :, None] == new_pho, axis=2), axis=-1)
-    else:
-        photon_veto_cut = jets.pt > 0
 
     jet_veto_map_evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(JET_VETO_MAP_FILE[year]))
     n_jets = awkward.num(jets) # save n_jets to convert back to jagged format at the end 
@@ -81,21 +87,24 @@ def select_jets(jets, options, clean, year, name = "none", tagger = None, event_
         -3.1415925,
         3.1415925
     )
-    jet_veto_sf = numpy.where(
-        jet_veto_map_evaluator["jetvetomap"].evalv(
-            "jetvetomap",
-            jet_eta,
-            jet_phi
-        ) > 0,
-        False,
-        True
-    )
-    jet_veto_sf = numpy.where(
-        (abs(jet_eta) >= 5.191) | (abs(jet_phi) >= 3.1415926),
-        True,
-        jet_veto_sf
-    )
-    jet_veto_cut = awkward.unflatten(jet_veto_sf, n_jets)
+
+    jet_veto_cut = jets.pt > 0  # default: keep all
+    if int(year[:4]) >= 2022:
+        jet_veto_sf = numpy.where(
+            jet_veto_map_evaluator["jetvetomap"].evalv(
+                "jetvetomap",
+                jet_eta,
+                jet_phi
+            ) > 0,
+            False,
+            True
+        )
+        jet_veto_sf = numpy.where(
+            (abs(jet_eta) >= 5.191) | (abs(jet_phi) >= 3.1415926),
+            True,
+            jet_veto_sf
+        )
+        jet_veto_cut = awkward.unflatten(jet_veto_sf, n_jets)
 
     # ---- 2018 HEM jet-level cleaning (moved from event-level) ----
     hem_mask = jets.pt > 0  # default: keep all
@@ -124,23 +133,22 @@ def select_jets(jets, options, clean, year, name = "none", tagger = None, event_
             else:
                 logger.warning("[HEM] event_runs length mismatch; skip HEM cleaning.")
 
-    all_cuts = standard_cuts & horn_cut & id_cut & photon_veto_cut & jet_veto_cut & hem_mask
+    all_cuts = standard_cuts & horn_cut & id_cut & jet_veto_cut & hem_mask
 
     jet_veto = jet_veto_cut & hem_mask
 
     standard_cuts = awkward.flatten(standard_cuts)
     id_cut = standard_cuts & awkward.flatten(id_cut)
     horn_cut = id_cut & awkward.flatten(horn_cut)
-    photon_veto_cut = horn_cut & awkward.flatten(photon_veto_cut)
-    jet_veto_cut = photon_veto_cut & awkward.flatten(jet_veto_cut)
+    jet_veto_cut = horn_cut & awkward.flatten(jet_veto_cut)
     hem_event_cut = jet_veto_cut & awkward.flatten(hem_mask)
     all_record_cut = hem_event_cut
 
     if tagger is not None:
         tagger.register_cuts(
-            names = ["std cuts", "id cut", "horn cut", "photon veto cut", "jet veto cut", "hem cut", "all cuts"],
-            results = [standard_cuts, id_cut, horn_cut, photon_veto_cut, jet_veto_cut, hem_event_cut, all_record_cut],
+            names = ["std cuts", "id cut", "horn cut", "jet veto cut", "hem cut", "all cuts"],
+            results = [standard_cuts, id_cut, horn_cut, jet_veto_cut, hem_event_cut, all_record_cut],
             cut_type = name
         )
 
-    return all_cuts, jet_veto
+    return all_cuts, jet_veto, photon_removal, lepton_removal

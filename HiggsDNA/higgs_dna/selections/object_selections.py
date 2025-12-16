@@ -51,17 +51,23 @@ def select_objects(objects, cuts = {}, clean = {}, name = "none", tagger = None)
 
         if cut_ is not None:
             cut_results.append(cut_)
-            
-    if "Jet" in name:
-        new_jet = awkward.flatten(objects)[:, None]
-        num_jet = awkward.num(objects)
 
     for other_objects, info in clean.items():
-        if "Jet" in name and other_objects in ["muons", "electrons"]:
-            unflatten_jet = awkward.unflatten(objects.pt, [1]*sum(num_jet), axis=-1)
-            new_obj = awkward.flatten(awkward.broadcast_arrays(awkward.unflatten(awkward.flatten(info["objects"]), [1]*awkward.fill_none(awkward.num(info["objects"]), 0))[:,None], objects.pt)[0])
-            mask = awkward.flatten(abs(new_jet.pt[:, :, None]-new_obj.pt), axis=-1) < new_obj.pt
-            cut_ = awkward.unflatten(awkward.flatten(delta_R(new_jet, new_obj[mask], info["min_dr"])), num_jet)
+        if "Jet" in name:
+            new_jet = awkward.flatten(objects)[:, None]
+            num_jet = awkward.num(objects)
+            if other_objects in ["muons", "electrons"]:
+                new_obj = awkward.flatten(awkward.broadcast_arrays(awkward.unflatten(awkward.flatten(info["objects"]), [1]*awkward.fill_none(awkward.num(info["objects"]), 0))[:,None], objects.pt)[0])
+                mask = awkward.flatten(new_jet.pt[:, :, None] < 2*new_obj.pt, axis=-1)
+                cut_ = awkward.unflatten(awkward.flatten(delta_R(new_jet, new_obj[mask], info["min_dr"])), num_jet)
+            elif other_objects in ["photons"]:
+                jet_idx = awkward.local_index(objects.pt, axis=1)
+                new_jet = awkward.unflatten(awkward.unflatten(awkward.flatten(jet_idx), [1]*awkward.sum(awkward.num(jet_idx))), awkward.num(jet_idx, axis=1))
+                # Replace empty lists in photons.jetIdx with [-1]
+                photons_jetIdx = awkward.where(awkward.num(info["objects"].jetIdx, axis=1) == 0, awkward.ones_like(awkward.num(info["objects"].jetIdx, axis=1))*-1, info["objects"].jetIdx)
+                new_pho = awkward.broadcast_arrays(photons_jetIdx[:, None], new_jet, depth_limit=2)[0]
+                photon_veto_cut = ~awkward.flatten(awkward.any(new_jet[:, :, None] == new_pho, axis=2), axis=-1)
+                cut_ = delta_R(objects, info["objects"], info["min_dr"]) | photon_veto_cut
         else:
             cut_ = delta_R(objects, info["objects"], info["min_dr"])
         cut_names.append("dR with '%s' > %.2f" % (other_objects, info["min_dr"]))
@@ -72,6 +78,10 @@ def select_objects(objects, cuts = {}, clean = {}, name = "none", tagger = None)
     all_cuts = objects.pt > 0
     for i, cut in enumerate(cut_results):
         all_cuts = (all_cuts) & cut
+        if i == 2:
+            photon_removal = all_cuts
+        if i == len(cut_results) -1:
+            lepton_removal = all_cuts
         if i == 0:
             cut_results[i] = awkward.flatten(cut)
         else:
@@ -83,6 +93,9 @@ def select_objects(objects, cuts = {}, clean = {}, name = "none", tagger = None)
                 results = cut_results,
                 cut_type = name
         )
+
+    if "Jet" in name:
+        return all_cuts, photon_removal, lepton_removal
 
     return all_cuts
 

@@ -17,7 +17,8 @@ target="/eos/home-j/jiehan/root/skimmed_ntuples/"
 
 # years=(2018)
 years=(2016preVFP 2016postVFP 2017 2018)
-systs=("Photon_scale" "Photon_smear" "Electron_scale" "Electron_smear" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt_smear")
+# systs=("Photon_scale" "Photon_smear" "Electron_scale" "Electron_smear" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt_smear")
+systs=()
 # systs=("Photon_scale" "Photon_smear" "Electron_scale" "Electron_smear" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt")
 # years=(2022preEE 2022postEE)
 # years=(2023preBPix 2023postBPix)
@@ -111,19 +112,19 @@ process_sample_syst() {
 
 # 处理 signal 样本
 
-# samples=(ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125 ggH_M120 VBFH_M120 WplusH_M120 WminusH_M120 ZH_M120 ttH_M120 ggH_M130 VBFH_M130 WplusH_M130 WminusH_M130 ZH_M130 ttH_M130 ggH_mix VBF_mix ggH VBF WplusH WminusH ZH ttH)
+samples=(ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125) # ggH_M120 VBFH_M120 WplusH_M120 WminusH_M120 ZH_M120 ttH_M120 ggH_M130 VBFH_M130 WplusH_M130 WminusH_M130 ZH_M130 ttH_M130 ggH_mix VBF_mix ggH VBF WplusH WminusH ZH ttH)
 
 # samples=(ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125) 
 # # # samples=(ggH_M125)
-# type="signal"
-# for sample in "${samples[@]}"; do
-#     mkdir -p "$target${sample}/"
-#     # 存储后台任务的进程ID列表
-#     pid_list=()
+type="signal"
+for sample in "${samples[@]}"; do
+    mkdir -p "$target${sample}/"
+    # 存储后台任务的进程ID列表
+    pid_list=()
 
-#     # 调用函数处理样本数据
-#     process_sample "$sample" "$type"
-# done
+    # 调用函数处理样本数据
+    process_sample "$sample" "$type"
+done
 
 # samples=(ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125) # ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125
 # type="signal"
@@ -167,16 +168,16 @@ process_sample_syst() {
 # samples=(ZGToLLG DYJetsToLL WGToLNuG ZG2JToG2L2J EWKZ2J TT TTGJets TGJets ttWJets ttZJets WW WZ ZZ DYGto2LG_10to50 DYGto2LG_50to100)
 # samples=(DYGto2LG_10to50 DYGto2LG_50to100)
 # samples=(DYGto2LG_10to100)
-# samples=(ZGToLLG DYJetsToLL ZG2JToG2L2J EWKZ2J)
-# type="background"
-# for sample in "${samples[@]}"; do
-#     mkdir -p "$target$sample"
-#     # 存储后台任务的进程ID列表
-#     pid_list=()
+samples=(ZGToLLG DYJetsToLL ZG2JToG2L2J EWKZ2J)
+type="background"
+for sample in "${samples[@]}"; do
+    mkdir -p "$target$sample"
+    # 存储后台任务的进程ID列表
+    pid_list=()
 
-#     # 调用函数处理样本数据
-#     process_sample "$sample" "$type"
-# done
+    # 调用函数处理样本数据
+    process_sample "$sample" "$type"
+done
 
 # samples=(ZGToLLG DYJetsToLL WGToLNuG ZG2JToG2L2J EWKZ2J TT TTGJets TGJets ttWJets ttZJets WW WZ ZZ DYGto2LG_10to50 DYGto2LG_50to100)
 # samples=(DYGto2LG_10to50 DYGto2LG_50to100)

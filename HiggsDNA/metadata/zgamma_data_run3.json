@@ -28,7 +28,7 @@
             "Data"
         ],
         "years": [
-            "2023postBPix"
+            "2023preBPix", "2023postBPix"
         ]
     },
     "variables_of_interest": [
@@ -265,6 +265,12 @@
         "Electron_mvaFall17V2Iso_WPL",
         "Electron_energyErr",
         "Electron_r9",
+        "Electron_seedGain",
+        "Jet_area",
+        "Jet_rawFactor",
+        "Rho_fixedGridRhoFastjetAll",
+        "Jet_neHEF",
+        "Jet_neEmEF",
         "Jet_pt",
         "Jet_eta",
         "Jet_phi",
@@ -274,6 +280,8 @@
         "Jet_hadronFlavour",
         "MET_pt",
         "MET_phi",
+        "PuppiMET_pt",
+        "PuppiMET_phi",
         "genWeight",
         "run",
         "event",
@@ -292,5 +300,86 @@
         "Flag_BadPFMuonDzFilter",
         "TrigObj_id",
         "TrigObj_filterBits"
-    ]
+    ],
+    "branch_map": {
+        "mc": [],
+        "data": [
+            [
+                [
+                    "Muon",
+                    "pt"
+                ],
+                [
+                    "Muon",
+                    "corrected_pt"
+                ]
+            ],
+            [
+                [
+                    "Electron",
+                    "pt"
+                ],
+                [
+                    "Electron",
+                    "corrected_pt"
+                ]
+            ],
+            [
+                [
+                    "Electron",
+                    "energyErr"
+                ],
+                [
+                    "Electron",
+                    "corrected_energyErr"
+                ]
+            ],
+            [
+                [
+                    "Photon",
+                    "pt"
+                ],
+                [
+                    "Photon",
+                    "corrected_pt"
+                ]
+            ],
+            [
+                [
+                    "Photon",
+                    "energyErr"
+                ],
+                [
+                    "Photon",
+                    "corrected_energyErr"
+                ]
+            ],
+            [
+                [
+                    "Jet",
+                    "pt"
+                ],
+                [
+                    "Jet",
+                    "corrected_pt"
+                ]
+            ],
+            [
+                [
+                    "MET_pt"
+                ],
+                [
+                    "PuppiMET_pt"
+                ]
+            ],
+            [
+                [
+                    "MET_phi"
+                ],
+                [
+                    "PuppiMET_phi"
+                ]
+            ]
+        ]
+    }
 }

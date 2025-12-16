@@ -19,7 +19,7 @@ def parse_yields_from_file(file_path):
             linearized_content = ' '.join(content.split())
             
             # This regex is now much simpler and more robust thanks to the linearization.
-            regex = re.compile(r"cut type : SelectedJet, cut : (.*?), yields : (\d+)")
+            regex = re.compile(r"syst variation : nominal, cut type : SelectedJet, cut : (.*?), yields : (\d+)")
             matches = regex.finditer(linearized_content)
             
             for match in matches:
@@ -38,7 +38,8 @@ def main():
 
     year = args.year
     # Using glob to find all matching log files based on the user-provided path structure.
-    path_pattern = f'HiggsDNA/eos_logs/data/Data_{year}/job_*/*.out'
+    path_pattern = f'HiggsDNA/nanov12/signal_test/ggH_M125_{year}/job_1/*.log'
+    # path_pattern = f'HiggsDNA/nanov12/data_test/Data_{year}/job_*/*.log'
     log_files = glob(path_pattern)
 
     if not log_files:
