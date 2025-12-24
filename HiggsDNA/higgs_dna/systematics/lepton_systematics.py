@@ -891,17 +891,17 @@ electron_scale_FILE = {
 }
 
 electron_smear_names = {
-    "2022preEE" : "EGMSmearAndSyst_ElePTsplit_2022preEE",
-    "2022postEE" : "EGMSmearAndSyst_ElePTsplit_2022postEE",
-    "2023preBPix" : "EGMSmearAndSyst_ElePTsplit_2023preBPIX", 
-    "2023postBPix" : "EGMSmearAndSyst_ElePTsplit_2023postBPIX"
+    "2022preEE" : "SmearAndSyst",
+    "2022postEE" : "SmearAndSyst",
+    "2023preBPix" : "SmearAndSyst", 
+    "2023postBPix" : "SmearAndSyst"
 }
 
 electron_scale_names = {
-    "2022preEE": "EGMScale_Compound_Ele_2022preEE",
-    "2022postEE": "EGMScale_Compound_Ele_2022postEE",
-    "2023preBPix": "EGMScale_Compound_Ele_2023preBPIX",
-    "2023postBPix": "EGMScale_Compound_Ele_2023postBPIX"
+    "2022preEE": "Scale",
+    "2022postEE": "Scale",
+    "2023preBPix": "Scale",
+    "2023postBPix": "Scale"
 }
 
 def electron_scale_smear_run3(events, year, is_data):
@@ -948,7 +948,7 @@ def electron_scale_smear_run3(events, year, is_data):
         scale = awkward.where(
             (electrons_AbsScEta > 3.0) | (electrons_pt < 20.0),
             awkward.ones_like(electrons_pt, dtype=float),
-            evaluator.compound[electron_scale_names[year]].evaluate("scale", run_arr_flattened, electrons_scEta, electrons_r9, electrons_AbsScEta, electrons_pt, electrons_seedGain)
+            evaluator.compound[electron_scale_names[year]].evaluate("scale", run_arr_flattened, electrons_scEta, electrons_r9, electrons_pt, electrons_seedGain)
         )
         corrected_pt = awkward.to_numpy(electrons_pt * scale)
         events["Electron", "corrected_pt"] = awkward.unflatten(corrected_pt, n_electrons)

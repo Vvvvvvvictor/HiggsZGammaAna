@@ -258,10 +258,10 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "DYJetsToLL", "ZG2JToG2L2J", "DYGto2LG_10to100"
+            "DYJetsToLL", "ZG2JToG2L2J"
         ],
         "years": [
-            "2023preBPix", "2023postBPix"
+            "2022preEE",  "2022postEE", "2023preBPix", "2023postBPix"
         ]
     },
     "variables_of_interest": [
@@ -293,14 +293,18 @@
         "Z_sublead_lepton_charge",
         "Z_sublead_lepton_id",
         "Z_sublead_lepton_ptE_error",
-        "electron_1_energyErr",
-        "electron_2_energyErr",
-        "electron_3_energyErr",
-        "electron_4_energyErr",
+        "electron_1_ptErr",
+        "electron_2_ptErr",
+        "electron_3_ptErr",
+        "electron_4_ptErr",
         "muon_1_ptErr",
         "muon_2_ptErr",
         "muon_3_ptErr",
         "muon_4_ptErr",
+        "muon_1_ptErr_store",
+        "muon_2_ptErr_store",
+        "muon_3_ptErr_store",
+        "muon_4_ptErr_store",
         "gamma_pt",
         "gamma_eta",
         "gamma_phi",
@@ -504,6 +508,7 @@
         "Muon_highPtId",
         "Muon_ptErr",
         "Muon_genPartIdx",
+        "Muon_nTrackerLayers",
         "Electron_pt",
         "Electron_eta",
         "Electron_deltaEtaSC",
@@ -537,8 +542,12 @@
         "Jet_btagDeepFlavB",
         "Jet_jetId",
         "Jet_hadronFlavour",
+        "Jet_chEmEF",
+        "Jet_muonSubtrFactor",
         "MET_pt",
         "MET_phi",
+        "RawPuppiMET_pt",
+        "RawPuppiMET_phi",
         "PuppiMET_pt",
         "PuppiMET_phi",
         "PuppiMET_ptJESUp",
@@ -692,7 +701,7 @@
                     "MET_pt"
                 ],
                 [
-                    "PuppiMET_pt"
+                    "PuppiMET_pt_corrected"
                 ]
             ],
             [
@@ -700,7 +709,7 @@
                     "MET_phi"
                 ],
                 [
-                    "PuppiMET_phi"
+                    "PuppiMET_phi_corrected"
                 ]
             ]
         ],

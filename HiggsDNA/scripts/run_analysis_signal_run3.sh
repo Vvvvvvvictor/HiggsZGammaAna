@@ -1,5 +1,5 @@
-outdir="/eos/home-j/jiehan/parquet/nanov12/signal_test"
+outdir="/eos/home-j/jiehan/parquet/nanov12/signal"
 # outdir="/afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/HiggsDNA/Parquet/Sig_MC"
 
-python scripts/run_analysis.py --config "metadata/zgamma_signal_run3.json" --log-level "DEBUG" --n_cores 10 --output_dir $outdir --unretire_jobs --batch_system "local" --short #--with_skimmed #--short
+python scripts/run_analysis.py --config "metadata/zgamma_signal_run3.json" --log-level "DEBUG" --n_cores 10 --output_dir $outdir --unretire_jobs --batch_system "condor" #--short #--with_skimmed
 # python scripts/run_analysis.py --config "metadata/zgamma_signal_run3_ext.json" --log-level "DEBUG" --n_cores 10 --output_dir $outdir --unretire_jobs --batch_system "condor" #--with_skimmed #--short #

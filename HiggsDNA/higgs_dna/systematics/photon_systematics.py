@@ -736,17 +736,17 @@ photon_scale_FILE = {"2022preEE" : "jsonpog-integration/POG/EGM/2022_Summer22/ph
 }
 
 smear_names = {
-    "2022preEE" : "EGMSmearAndSyst_PhoPTsplit_2022preEE",
-    "2022postEE" : "EGMSmearAndSyst_PhoPTsplit_2022postEE",
-    "2023preBPix" : "EGMSmearAndSyst_PhoPTsplit_2023preBPIX",
-    "2023postBPix" : "EGMSmearAndSyst_PhoPTsplit_2023postBPIX"
+    "2022preEE" : "SmearAndSyst",
+    "2022postEE" : "SmearAndSyst",
+    "2023preBPix" : "SmearAndSyst",
+    "2023postBPix" : "SmearAndSyst"
 }
 
 scale_names = {
-    "2022preEE" : "EGMScale_Compound_Pho_2022preEE",
-    "2022postEE" : "EGMScale_Compound_Pho_2022postEE",
-    "2023preBPix" : "EGMScale_Compound_Pho_2023preBPIX",
-    "2023postBPix" : "EGMScale_Compound_Pho_2023postBPIX"
+    "2022preEE" : "Scale",
+    "2022postEE" : "Scale",
+    "2023preBPix" : "Scale",
+    "2023postBPix" : "Scale"
 }
 
 def photon_scale_smear_run3(events, year, is_data):
@@ -793,7 +793,7 @@ def photon_scale_smear_run3(events, year, is_data):
         scale = awkward.where(
             (photons_AbsScEta > 3.0) | (photons_pt < 20.0),
             awkward.ones_like(photons_pt, dtype=float),
-            evaluator.compound[scale_names[year]].evaluate("scale", run_arr_flattened, photons_scEta, photons_r9, photons_AbsScEta, photons_pt, photons_seedGain)
+            evaluator.compound[scale_names[year]].evaluate("scale", run_arr_flattened, photons_scEta, photons_r9, photons_pt, photons_seedGain)
         )
         corrected_pt = awkward.to_numpy(photons_pt * scale)
         events["Photon", "corrected_pt"] = awkward.unflatten(corrected_pt, n_photons)

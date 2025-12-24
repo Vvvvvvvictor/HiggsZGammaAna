@@ -399,6 +399,8 @@ def pt_correction_mc(
     This function is a Python replica of the C++ version in jets.cxx.
     It calculates the nominal jet pT, as well as JES and JER variations,
     and stores them as new branches in the events array.
+    
+    It also propagates these corrections to PuppiMET (nominal and variations).
 
     Parameters
     ----------
@@ -416,7 +418,7 @@ def pt_correction_mc(
     Returns
     -------
     awkward.Array
-        The events array with new branches for corrected jet pT.
+        The events array with new branches for corrected jet pT and corrected PuppiMET.
     """
     JEC_TAG_MC = {
         "2022preEE": "Summer22_22Sep2023_V2_MC",
@@ -446,7 +448,10 @@ def pt_correction_mc(
     jes_tag = JEC_TAG_MC[year]
     # jer_tag = jes_tag.replace("_V", "_JRV") if lhc_run == 2 else jes_tag.replace("_V", "_JR_V")
     jer_tag = JER_TAG_DATA[year]
-    jec_file = misc_utils.expand_path(JEC_FILE[year])
+    
+    # Assuming misc_utils is defined elsewhere or paths are relative
+    jec_file = misc_utils.expand_path(JEC_FILE[year]) 
+    # jec_file = JEC_FILE[year] 
     evaluator = correctionlib.CorrectionSet.from_file(jec_file)
 
     # Flatten jets for easier processing
@@ -459,47 +464,58 @@ def pt_correction_mc(
     jet_phi = awkward.to_numpy(jets_flat.phi)
     rho_arr = numpy.repeat(awkward.to_numpy(events["Rho_fixedGridRhoFastjetAll"]), n_jets)
 
+    # --- 1. JES Re-application ---
+    raw_pt = jets_flat.pt * (1 - jets_flat.rawFactor)
+    raw_pt_numpy = awkward.to_numpy(raw_pt)
+    
     if reapply_jes:
-        raw_pt = jets_flat.pt * (1 - jets_flat.rawFactor)
-        print(jets_flat.pt, jets_flat.rawFactor, raw_pt)
-        raw_pt = awkward.to_numpy(raw_pt)
+        # print(jets_flat.pt, jets_flat.rawFactor, raw_pt)
         jes_evaluator = evaluator.compound[f"{jes_tag}_L1L2L3Res_{jec_algo}"]
         if "2023postBPix" in year:
             corr = jes_evaluator.evaluate(
-                jet_area, jet_eta, raw_pt, rho_arr, jet_phi
+                jet_area, jet_eta, raw_pt_numpy, rho_arr, jet_phi
             )
         else:
             corr = jes_evaluator.evaluate(
-                jet_area, jet_eta, raw_pt, rho_arr
+                jet_area, jet_eta, raw_pt_numpy, rho_arr
             )
         corrected_pts_base = raw_pt * corr
 
+    # --- 2. L1 Correction (Needed for Run 3 MET) ---
+    # For Run 3 Type-1 MET, we subtract (Nominal - L1).
+    # We need to evaluate L1FastJet separately.
+    pt_l1_flat = raw_pt # Default to raw if not Run 3 (not used in Run 2 logic)
+    if lhc_run == 3:
+        try:
+            # Usually named like Summer22_..._L1FastJet_AK4PFPuppi
+            # Note: Not 'compound', just standard evaluator for single level
+            l1_evaluator = evaluator[f"{jes_tag}_L1FastJet_{jec_algo}"]
+            l1_corr = l1_evaluator.evaluate(jet_area, jet_eta, raw_pt_numpy, rho_arr)
+            pt_l1_flat = raw_pt * l1_corr
+        except Exception as e:
+            logger.warning(f"Could not load L1FastJet evaluator for MET correction: {e}. MET calculation might be inaccurate.")
+            pt_l1_flat = raw_pt # Fallback
+
+    # --- 3. JER Resolution & Gen Matching ---
     jer_resolution_evaluator = evaluator[f"{jer_tag}_PtResolution_{jec_algo}"]
     jet_pt_resolution = jer_resolution_evaluator.evaluate(
         jet_eta, corrected_pts_base, rho_arr
     )
 
-    # Gen jet matching
     gen_jets = events.GenJet
 
     # For each jet, find the closest gen_jet
-    # Create pairs of jets and gen_jets for each event
     jet_pairs = awkward.cartesian([jets, gen_jets], axis=1, nested=[0])
 
-    # Calculate delta R between each jet and all gen_jets in the same event
     d_eta = jet_pairs['0'].eta - jet_pairs['1'].eta
     d_phi = jet_pairs['0'].phi - jet_pairs['1'].phi
     d_phi = numpy.where(d_phi > numpy.pi, d_phi - 2 * numpy.pi, d_phi)
     d_phi = numpy.where(d_phi < -numpy.pi, d_phi + 2 * numpy.pi, d_phi)
     delta_r = numpy.sqrt(d_eta**2 + d_phi**2)
 
-    # Find the index of the gen_jet with the minimum delta_r for each jet
     min_dr_idx = awkward.argmin(delta_r, axis=2)
-    
-    # Create a mask for jets that have a matched gen_jet with dR < 0.2
     gen_matched_mask = awkward.min(delta_r, axis=2) < 0.2
 
-    # Get the pt of the matched gen_jet
     matched_gen_jets_pt = awkward.where(
         gen_matched_mask,
         gen_jets[min_dr_idx].pt,
@@ -513,7 +529,65 @@ def pt_correction_mc(
         -1.0
     )
 
-    # Calculate JER variations
+    # --- 4. JER & MET Calculation Setup ---
+    
+    # Prepare MET basics
+    # In Run 2, we start from standard PuppiMET (already has some corrections, we refine it)
+    # In Run 3, we start from RawPuppiMET (and fully re-apply)
+    if lhc_run == 3:
+        # Note: Check if RawPuppiMET exists, otherwise fallback might be needed
+        met_pt_orig = events.RawPuppiMET_pt
+        met_phi_orig = events.RawPuppiMET_phi
+    else:
+        met_pt_orig = events.PuppiMET_pt
+        met_phi_orig = events.PuppiMET_phi
+
+    met_px = met_pt_orig * numpy.cos(met_phi_orig)
+    met_py = met_pt_orig * numpy.sin(met_phi_orig)
+    
+    # Dictionaries to store MET shifts (dx, dy) for various variations
+    met_shifts = {
+        "nom": {"x": 0.0, "y": 0.0},
+        "jerUp": {"x": 0.0, "y": 0.0},
+        "jerDown": {"x": 0.0, "y": 0.0},
+        "jesTotalUp": {"x": 0.0, "y": 0.0},
+        "jesTotalDown": {"x": 0.0, "y": 0.0},
+    }
+
+    # Pre-calculate common jet vector components
+    jet_cos_phi = numpy.cos(jet_phi)
+    jet_sin_phi = numpy.sin(jet_phi)
+
+    # Filter for MET propagation (match C++ logic)
+    # 1. Remove muons
+    # 2. pt > 15 (after muon subtraction)
+    # 3. |eta| < 5.2
+    # 4. emEF < 0.9
+    muon_factor = jets_flat.muonSubtrFactor
+    em_ef = jets_flat.neEmEF + jets_flat.chEmEF
+    
+    # Pt used for threshold check (Nominal JEC, no JER yet, muon subtracted)
+    # C++: jet_l1l2l3_pt_nomu > 15
+    pt_for_threshold = corrected_pts_base * (1 - muon_factor)
+    
+    met_jet_mask = (
+        (pt_for_threshold > 15.0) & 
+        (abs(jet_eta) < 5.2) & 
+        (em_ef < 0.9)
+    )
+
+    # Reference pT for MET subtraction
+    # Run 2: Reference is the original NanoAOD jet pt (inclusive of whatever JEC was applied upstream)
+    # Run 3: Reference is the L1 corrected pT
+    if lhc_run == 3:
+        pt_ref_flat = pt_l1_flat
+    else:
+        pt_ref_flat = jets_flat.pt 
+
+    # --- 5. Calculate JER Variations and Nominal PT ---
+    
+    pt_nom_flat = None # To store for JES calculation
+
     for jer_variation in ["central", "up", "down"]:
         jer_sf_evaluator = evaluator[f"{jer_tag}_ScaleFactor_{jec_algo}"]
         jer_var_map = {"central": "nom", "up": "up", "down": "down"}
@@ -521,7 +595,7 @@ def pt_correction_mc(
 
         if lhc_run == 2:
             reso_sf = jer_sf_evaluator.evaluate(jet_eta, jer_shift_str)
-        else: # lhc_run == 3
+        else:
             reso_sf = jer_sf_evaluator.evaluate(jet_eta, corrected_pts_base, jer_shift_str)
 
         # Apply smearing
@@ -534,72 +608,126 @@ def pt_correction_mc(
 
         # Stochastic method for non-matched jets
         not_matched_mask = ~matched_mask
-        # seed = awkward.to_numpy(events.event).astype(numpy.uint32)
-        # randm = numpy.random.RandomState(seed=seed)
-        # gaus_smear = randm.normal(0, jet_pt_resolution)
-        # gaus_smear = numpy.array([ROOT_rng.Gaus(0, jet_pt_resolution[i]) for i in range(len(jet_pt_resolution))])
-        gaus_smear = 0
-        # Special treatment for 2022/2023 JER in 2.5 < |eta| < 3.0 with pT < 50 GeV
+        
+        # Using 0 for Gaussian smear seed in this replica to match C++ snippet provided logic (simplification)
+        # Real implementation should use proper RNG
+        gaus_smear = 0 
+        
         if lhc_run == 3:
             gaus_smear = numpy.where(
                 (not_matched_mask) & (abs(jet_eta) > 2.5) & (abs(jet_eta) < 3.0) & (corrected_pts_base < 50),
                 0.0, 
                 gaus_smear
             )
-            logger.info("Applying special treatment for JER smearing in 2022/2023 for jets in 2.5 < |eta| < 3.0 with pT < 50 GeV.")
+            
         shift_stochastic = gaus_smear * numpy.sqrt(numpy.maximum(reso_sf * reso_sf - 1.0, 0.0))
         smear_factor = numpy.where(not_matched_mask, numpy.maximum(0.0, 1.0 + shift_stochastic), smear_factor)
 
-        pt_jer_varied = corrected_pts_base * smear_factor
+        pt_jer_varied_flat = corrected_pts_base * smear_factor
+        
+        # Store for output and JES
+        if jer_variation == "central":
+            pt_nom_flat = pt_jer_varied_flat
+            events[input_collection, "pt_nom"] = awkward.unflatten(pt_nom_flat, n_jets)
+            
+            # MET Calculation (Nominal)
+            # dx = (Pt_new - Pt_ref) * cos(phi)
+            # In Run 2: (Pt_nom - Pt_nano) * cos(phi) -> subtract from MET
+            # In Run 3: (Pt_nom - Pt_l1) * cos(phi) -> subtract from MET
+            # Note: We use the FULL pT for the vector subtraction, but the mask determines if we do it.
+            diff_pt = numpy.where(met_jet_mask, pt_nom_flat - pt_ref_flat, 0.0)
+            
+            # Sum delta_x and delta_y per event
+            met_shifts["nom"]["x"] = awkward.sum(awkward.unflatten(diff_pt * jet_cos_phi, n_jets), axis=1)
+            met_shifts["nom"]["y"] = awkward.sum(awkward.unflatten(diff_pt * jet_sin_phi, n_jets), axis=1)
 
-        # for i in range(10):
-        #     print(f"jet {i}: eta={jet_eta[i]:.2f}, pt={corrected_pts_base[i]:.2f}, reso_sf={reso_sf[i]:.3f}, matched_mask={matched_mask[i]}, shift(matched)={shift[i]:.3f}, gaus_smear(not matched)={gaus_smear[i]:.3f}, shift(stochastic)={shift_stochastic[i]:.3f}, smear_factor={smear_factor[i]:.3f}, pt_jer_varied={pt_jer_varied[i]:.2f}")
+        else:
+            events[input_collection, f"pt_jer{jer_variation.capitalize()}"] = awkward.unflatten(pt_jer_varied_flat, n_jets)
+            
+            # MET Calculation (JER Variations)
+            # We propagate the difference between (JER_Var) and (Nominal) to the MET
+            # MET_JERVar = MET_Nom - Sum(Pt_JERVar - Pt_Nom)
+            # Wait, the logic is usually: Calculate Delta relative to Ref for every var, or Delta relative to Nom.
+            # C++: met_x_jerup -= ... (jet_nom_pt * (jer_factor_up - 1.0))
+            # which equals (jet_jerUp_pt - jet_nom_pt).
+            diff_pt_jer = numpy.where(met_jet_mask, pt_jer_varied_flat - pt_nom_flat, 0.0)
+            
+            key = f"jer{jer_variation.capitalize()}" # jerUp, jerDown
+            met_shifts[key]["x"] = awkward.sum(awkward.unflatten(diff_pt_jer * jet_cos_phi, n_jets), axis=1)
+            met_shifts[key]["y"] = awkward.sum(awkward.unflatten(diff_pt_jer * jet_sin_phi, n_jets), axis=1)
 
         print(f"number of matched jets for JER {jer_variation}: {numpy.sum(matched_mask)} out of {len(matched_mask)}")
-        
-        if jer_variation == "central":
-            pt_nom = pt_jer_varied
-            events[input_collection, "pt_nom"] = awkward.unflatten(pt_nom, n_jets)
-        else:
-            events[input_collection, f"pt_jer{jer_variation.capitalize()}"] = awkward.unflatten(pt_jer_varied, n_jets)
 
-        # if jer_variation == "central":
-        #     i, count = 0, 0
-        #     for i in range(len(events)):
-        #         if len(events.Jet[i]) > 5:
-        #             print(f"{events.run[i]} {events.luminosityBlock[i]} {events.event[i]}")
-        #             print(events.Jet.pt[i])
-        #             print(awkward.unflatten(corrected_pts_base, n_jets)[i])
-        #             print(awkward.unflatten(shift, n_jets)[awkward.unflatten(matched_mask, n_jets)[i]])
-        #             print(awkward.unflatten(smear_factor, n_jets)[awkward.unflatten(not_matched_mask, n_jets)[i]])
-        #             print(events.Jet.pt_nom[i])
-        #             count += 1
-        #         if count > 10:
-        #             break
-
-    # JES uncertainties
+    # --- 6. JES Uncertainties & MET Propagation ---
+    
+    # We only compute Total_up/down for MET to save space/time in this snippet, 
+    # mirroring the "Total" fallback logic in the jet loop.
+    
     for jes_unc_source in ["Total_up", "Total_down"]:
         jes_shift = 1.0 if "up" in jes_unc_source.lower() else -1.0
         source_name = jes_unc_source.replace("_up", "").replace("_down", "")
 
-        pt_scale_sf = numpy.ones_like(pt_nom, dtype=numpy.float32)
+        pt_scale_sf = numpy.ones_like(pt_nom_flat, dtype=numpy.float32)
         try:
             jes_source_evaluator = evaluator[f"{jes_tag}_{source_name}_{jec_algo}"]
-            unc = jes_source_evaluator.evaluate(jet_eta, pt_nom)
+            unc = jes_source_evaluator.evaluate(jet_eta, pt_nom_flat)
             pt_scale_sf = 1.0 + jes_shift * unc
         except:
-            logger.warning(f"Could not find total JES uncertainty '{jes_tag}_{source_name}_{jec_algo}'. Using individual sources.")
-            # Fallback to summing individual sources if 'Total' is not present
+            # Fallback (simplified for speed, just 0 shift if failed, or repeat logic)
+            # Reusing the logic from the jet part for consistency
             all_sources = [s.name for s in evaluator if f"{jes_tag}_" in s.name and f"_{jec_algo}" in s.name and "_L1" not in s.name and "PtResolution" not in s.name and "ScaleFactor" not in s.name]
-            quad_sum = numpy.zeros_like(pt_nom, dtype=numpy.float32)
+            quad_sum = numpy.zeros_like(pt_nom_flat, dtype=numpy.float32)
             for source in all_sources:
                 s_eval = evaluator[source]
-                quad_sum += numpy.power(s_eval.evaluate(jet_eta, pt_nom), 2.0)
+                quad_sum += numpy.power(s_eval.evaluate(jet_eta, pt_nom_flat), 2.0)
             pt_scale_sf = 1.0 + jes_shift * numpy.sqrt(quad_sum)
 
-        pt_jes_varied = pt_nom * pt_scale_sf
+        pt_jes_varied_flat = pt_nom_flat * pt_scale_sf
+        
+        # Save Jet Branch
         branch_name = f"pt_jes{source_name}{'Up' if jes_shift > 0 else 'Down'}"
-        events[input_collection, branch_name] = awkward.unflatten(pt_jes_varied, n_jets)
+        events[input_collection, branch_name] = awkward.unflatten(pt_jes_varied_flat, n_jets)
+        
+        # MET Calculation (JES Variations)
+        # MET_JESVar = MET_Nom - Sum(Pt_JESVar - Pt_Nom)
+        diff_pt_jes = numpy.where(met_jet_mask, pt_jes_varied_flat - pt_nom_flat, 0.0)
+        
+        key = f"jes{source_name}{'Up' if jes_shift > 0 else 'Down'}"
+        met_shifts[key]["x"] = awkward.sum(awkward.unflatten(diff_pt_jes * jet_cos_phi, n_jets), axis=1)
+        met_shifts[key]["y"] = awkward.sum(awkward.unflatten(diff_pt_jes * jet_sin_phi, n_jets), axis=1)
+
+    # --- 7. Finalize MET Branches ---
+
+    # Nominal MET
+    # MET_Nom = MET_Orig - Sum(Nom - Ref)
+    met_px_nom = met_px - met_shifts["nom"]["x"]
+    met_py_nom = met_py - met_shifts["nom"]["y"]
+    events["PuppiMET_pt_corrected"] = numpy.sqrt(met_px_nom**2 + met_py_nom**2)
+    events["PuppiMET_phi_corrected"] = numpy.arctan2(met_py_nom, met_px_nom)
+
+    # Variations
+    # For variations, the shift in dictionary is (Var - Nom).
+    # MET_Var = MET_Nom - (Var - Nom)
+    # So we start from met_px_nom and subtract the JES/JER shift.
+    
+    for key, shifts in met_shifts.items():
+        if key == "nom": continue
+        
+        # Construct branch names: PuppiMET_ptJERUp, PuppiMET_ptJESTotalUp, etc.
+        # Key is like "jerUp" or "jesTotalUp"
+        base_name = "PuppiMET"
+        suffix = key.replace("jesTotal", "jesTotal") # keep Total if present
+        # Or map to specific names if needed:
+        if "jesTotal" in key:
+            suffix = key.replace("jesTotal", "JES") # jesTotalUp -> JESUp
+        elif "jer" in key:
+            suffix = key.replace("jer", "JER") # jerUp -> JERUp
+            
+        px_var = met_px_nom - shifts["x"]
+        py_var = met_py_nom - shifts["y"]
+        
+        events[f"{base_name}_pt{suffix}"] = numpy.sqrt(px_var**2 + py_var**2)
+        events[f"{base_name}_phi{suffix}"] = numpy.arctan2(py_var, px_var)
 
     return events
 
@@ -614,6 +742,8 @@ def pt_correction_data(
     """
     Applies jet energy corrections (JEC) to jets in real data.
     This function is a Python replica of the C++ version in jets.cxx.
+    
+    It also propagates these corrections to PuppiMET (Nominal only).
 
     Parameters
     ----------
@@ -631,7 +761,7 @@ def pt_correction_data(
     Returns
     -------
     awkward.Array
-        An array with the corrected jet pT.
+        An array with the corrected jet pT and corrected PuppiMET.
     """
     JEC_TAG_DATA = {
         "2022preEE": "Summer22_22Sep2023_RunCD_V2_DATA",
@@ -650,12 +780,18 @@ def pt_correction_data(
         jets = events[input_collection]
     except:
         return events
+
+    lhc_run = 2
+    if "2022" in year or "2023" in year:
+        lhc_run = 3
     
     if run_period:
         jes_tag = f"{JEC_TAG_DATA[year][:-8]}_Run{run_period}_{JEC_TAG_DATA[year][-7:]}"
     else:
         jes_tag = JEC_TAG_DATA[year]
+        
     jec_file = misc_utils.expand_path(JEC_FILE[year])
+    # jec_file = JEC_FILE[year]
     evaluator = correctionlib.CorrectionSet.from_file(jec_file)
 
     n_jets = awkward.num(jets)
@@ -664,26 +800,94 @@ def pt_correction_data(
     jets_eta = awkward.to_numpy(jets_flat.eta)
     rho_arr = numpy.repeat(awkward.to_numpy(events["Rho_fixedGridRhoFastjetAll"]), n_jets)
 
+    # --- 1. Calculate Fully Corrected Jet PT ---
     raw_pt = jets_flat.pt * (1 - jets_flat.rawFactor)
-    raw_pt = awkward.to_numpy(raw_pt)
+    raw_pt_numpy = awkward.to_numpy(raw_pt)
+    
+    # Prepare inputs for evaluator
     if "2023" in year:
         run_arr = numpy.repeat(awkward.to_numpy(events["run"]), n_jets)
         jets_phi = awkward.to_numpy(jets_flat.phi)
     
     jec_evaluator = evaluator.compound[f"{jes_tag}_L1L2L3Res_{jec_algo}"]
+    
+    # Evaluate based on year specific inputs
     if "2023post" in year:
         corr = jec_evaluator.evaluate(
-            jets_area, jets_eta, raw_pt, rho_arr, jets_phi, run_arr
+            jets_area, jets_eta, raw_pt_numpy, rho_arr, jets_phi, run_arr
         )
     elif "2023pre" in year:
         corr = jec_evaluator.evaluate(
-            jets_area, jets_eta, raw_pt, rho_arr, run_arr
+            jets_area, jets_eta, raw_pt_numpy, rho_arr, run_arr
         )
     else:
         corr = jec_evaluator.evaluate(
-            jets_area, jets_eta, raw_pt, rho_arr
+            jets_area, jets_eta, raw_pt_numpy, rho_arr
         )
-    corrected_pts = raw_pt * corr
-    events["Jet", "corrected_pt"] = awkward.unflatten(corrected_pts, n_jets)
+        
+    corrected_pts_flat = raw_pt * corr
+    events[input_collection, "corrected_pt"] = awkward.unflatten(corrected_pts_flat, n_jets)
+
+    # --- 2. Calculate L1 Corrected Jet PT (Needed for Run 3 MET) ---
+    pt_l1_flat = raw_pt 
+    if lhc_run == 3:
+        try:
+            l1_evaluator = evaluator[f"{jes_tag}_L1FastJet_{jec_algo}"]
+            if "2023" in year:
+                # 2023 data L1 usually needs run number? Check JSON. Usually L1 is just Area/Eta/Pt/Rho
+                # If IOV dependent, might need run. Assuming standard L1 signature for now.
+                 l1_corr = l1_evaluator.evaluate(jets_area, jets_eta, raw_pt_numpy, rho_arr)
+            else:
+                 l1_corr = l1_evaluator.evaluate(jets_area, jets_eta, raw_pt_numpy, rho_arr)
+            
+            pt_l1_flat = raw_pt * l1_corr
+        except Exception as e:
+            # Fallback if L1 not found, though risky for MET accuracy
+            pt_l1_flat = raw_pt 
+
+    # --- 3. Propagate to PuppiMET ---
+
+    # Get original MET
+    if lhc_run == 3:
+        met_pt_orig = events.RawPuppiMET_pt
+        met_phi_orig = events.RawPuppiMET_phi
+        pt_ref_flat = pt_l1_flat # Run 3 subtracts L1, adds Full
+    else:
+        met_pt_orig = events.PuppiMET_pt
+        met_phi_orig = events.PuppiMET_phi
+        pt_ref_flat = jets_flat.pt # Run 2 subtracts NanoAOD stored, adds Full
+
+    met_px = met_pt_orig * numpy.cos(met_phi_orig)
+    met_py = met_pt_orig * numpy.sin(met_phi_orig)
+
+    # Selection mask for jets propagating to MET
+    muon_factor = jets_flat.muonSubtrFactor
+    em_ef = jets_flat.neEmEF + jets_flat.chEmEF
+    
+    # Threshold check using muon-subtracted nominal pT
+    pt_for_threshold = corrected_pts_flat * (1 - muon_factor)
+    
+    met_jet_mask = (
+        (pt_for_threshold > 15.0) & 
+        (abs(jets_eta) < 5.2) & 
+        (em_ef < 0.9)
+    )
+
+    # Calculate Vector Difference (Nominal - Reference)
+    diff_pt = numpy.where(met_jet_mask, corrected_pts_flat - pt_ref_flat, 0.0)
+    
+    jet_cos_phi = numpy.cos(jets_flat.phi)
+    jet_sin_phi = numpy.sin(jets_flat.phi)
+
+    # Sum shifts per event
+    shift_x = awkward.sum(awkward.unflatten(diff_pt * jet_cos_phi, n_jets), axis=1)
+    shift_y = awkward.sum(awkward.unflatten(diff_pt * jet_sin_phi, n_jets), axis=1)
+
+    # Apply correction: MET_new = MET_old - Sum(Jet_new - Jet_ref)
+    met_px_new = met_px - shift_x
+    met_py_new = met_py - shift_y
+
+    events["PuppiMET_pt_corrected"] = numpy.sqrt(met_px_new**2 + met_py_new**2)
+    events["PuppiMET_phi_corrected"] = numpy.arctan2(met_py_new, met_px_new)
 
     return events

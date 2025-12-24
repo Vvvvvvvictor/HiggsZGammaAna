@@ -269,8 +269,11 @@ background_weight_list = [
     "kin_weight"
 ]
 for year in years:
-    data = uproot.open(f"/eos/home-j/jiehan/root/skimmed_ntuples/ggH_M125/{year}.root")['inclusive'].arrays(library='pd')
-    # data = pd.read_parquet(f"/eos/home-j/jiehan/parquet/cutflow_ggf/ggH_M125_{year}/merged_nominal.parquet")
+    data = uproot.open(f"/eos/home-j/jiehan/root/skimmed_ntuples_test/ggH_M125/{year}.root")['inclusive'].arrays(library='pd')
+#     # data = pd.read_parquet(f"/eos/home-j/jiehan/parquet/cutflow_ggf/ggH_M125_{year}/merged_nominal.parquet")
+    min_data = data[0:10]
+    for row in min_data.itertuples():
+        print(f'Run: {row.run}, Lumi: {row.luminosityBlock}, Event: {row.event}, id sf: {row.weight_photon_id_sf_SelectedPhoton_central}, csev sf: {row.weight_photon_csev_sf_SelectedPhoton_central}, id shape sf: {row.weight_photon_id_shape_sf_SelectedPhoton_central}')
     # for i in data.columns:
     #     if "weight" in i and "central" in i:
     #         print(i)
@@ -293,6 +296,12 @@ for year in years:
             print(f'{"total events:":>35}{len(temp)}')
             weight = weight * temp["pythia_weight"]
             print(f'{"lumi weight:":>35}{weight.sum():.4f}')
+
+            for weight_name, display_name in zip(weight_list, name_list):
+                print(f'{"only " + display_name + ":":>35}{(weight*temp[weight_name]).sum():.4f}')
+            
+            for weight_name, display_name in zip(ggH_weight_list, ggH_name_list):
+                print(f'{"only " + display_name + ":":>35}{(weight*temp[weight_name]).sum():.4f}')
             
             # Apply weights from weight_list
             for weight_name, display_name in zip(weight_list, name_list):
@@ -303,6 +312,8 @@ for year in years:
             for weight_name, display_name in zip(ggH_weight_list, ggH_name_list):
                 weight = weight * temp[weight_name]
                 print(f'{display_name + ":":>35}{weight.sum():.4f}')
+
+
 
 # =====================================
 # Have a look at the hgg data

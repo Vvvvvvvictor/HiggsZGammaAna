@@ -455,11 +455,14 @@ class ZGammaTaggerRun2(Tagger):
                 f"muon_{i}_ptErr",
                 awkward.fill_none(awkward.pad_none(muons.ptE_error, i, axis=1)[:, i-1], DUMMY_VALUE)
             )
-            awkward_utils.add_field(
-                events,
-                f"muon_{i}_ptErr_store",
-                awkward.fill_none(awkward.pad_none(muons.ptErr_store, i, axis=1)[:, i-1], DUMMY_VALUE)
-            )
+            try:
+                awkward_utils.add_field(
+                    events,
+                    f"muon_{i}_ptErr_store",
+                    awkward.fill_none(awkward.pad_none(muons.ptErr_store, i, axis=1)[:, i-1], DUMMY_VALUE)
+                )
+            except:
+                pass
 
         # Sort objects by pt
         electrons = electrons[awkward.argsort(electrons.pt, ascending=False, axis=1)]
