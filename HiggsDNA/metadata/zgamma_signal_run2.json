@@ -20,6 +20,30 @@
     ],
     "systematics": {
         "weights": {
+            "ps_isr_sf": {
+                "type": "event",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.ps_systematics",
+                    "name": "ps_isr_sf"
+                },
+                "modify_central_weight": false,
+                "requires_branches": [
+                    "PSWeight"
+                ]
+            },
+            "ps_fsr_sf": {
+                "type": "event",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.ps_systematics",
+                    "name": "ps_fsr_sf"
+                },
+                "modify_central_weight": false,
+                "requires_branches": [
+                    "PSWeight"
+                ]
+            },
             "pu_reweight_sf": {
                 "type": "event",
                 "method": "from_function",
@@ -32,12 +56,24 @@
                     "Pileup_nTrueInt"
                 ]
             },
-            "btag_deepjet_wp_sf" : {
+            "btag_deepjet_wp_sf_heavy" : {
                 "type" : "object",
                 "method" : "from_function",
                 "function" : {
                     "module_name" : "higgs_dna.systematics.jet_systematics",
-                    "name" : "btag_deepjet_wp_sf"
+                    "name" : "btag_deepjet_wp_sf_heavy"
+                },
+                "modify_central_weight" : false,
+                "input_collection" : "Jet",
+                "target_collections" : ["SelectedJet"],
+                "working_point" : "M"
+            },
+            "btag_deepjet_wp_sf_light" : {
+                "type" : "object",
+                "method" : "from_function",
+                "function" : {
+                    "module_name" : "higgs_dna.systematics.jet_systematics",
+                    "name" : "btag_deepjet_wp_sf_light"
                 },
                 "modify_central_weight" : false,
                 "input_collection" : "Jet",
@@ -219,7 +255,7 @@
             }
         },
         "independent_collections": {
-            "Scale": {
+            "Photon_scale": {
                 "method": "from_branch",
                 "branch_modified": [
                     "Photon",
@@ -236,7 +272,7 @@
                     ]
                 }
             },
-            "Smearing": {
+            "Photon_smear": {
                 "method": "from_branch",
                 "branch_modified": [
                     "Photon",
@@ -310,26 +346,21 @@
             "JES": {
                 "method": "from_branch",
                 "branch_modified": [
-                    "Jet",
-                    "pt"
+                    ["Jet",
+                    "pt"],
+                    "MET_pt"
                 ],
                 "branches": {
                     "up": [
-                        "Jet",
-                        "pt_jesTotalUp"
+                        ["Jet",
+                        "pt_jesTotalUp"],
+                        "MET_T1_pt_jesTotalUp"
                     ],
                     "down": [
-                        "Jet",
-                        "pt_jesTotalDown"
+                        ["Jet",
+                        "pt_jesTotalDown"],
+                        "MET_T1_pt_jesTotalDown"
                     ]
-                }
-            },
-            "MET_JES": {
-                "method": "from_branch",
-                "branch_modified": "MET_pt",
-                "branches": {
-                    "up": "MET_T1_pt_jesTotalUp",
-                    "down": "MET_T1_pt_jesTotalDown"
                 }
             },
             "MET_Unclustered": {
@@ -362,10 +393,10 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "ggH_M125", "VBF_M125", "WminusH_M125", "WplusH_M125", "ZH_M125", "ttH_M125"
+            "ggH_M125", "VBF_M125", "WplusH_M125", "WminusH_M125", "ZH_M125", "ttH_M125"
         ],
         "years": [
-             "2018"
+             "2016preVFP", "2016postVFP", "2017", "2018"
         ]
     },
     "variables_of_interest": [
@@ -397,10 +428,10 @@
         "Z_sublead_lepton_charge",
         "Z_sublead_lepton_id",
         "Z_sublead_lepton_ptE_error",
-        "electron_1_energyErr",
-        "electron_2_energyErr",
-        "electron_3_energyErr",
-        "electron_4_energyErr",
+        "electron_1_ptErr",
+        "electron_2_ptErr",
+        "electron_3_ptErr",
+        "electron_4_ptErr",
         "muon_1_ptErr",
         "muon_2_ptErr",
         "muon_3_ptErr",
@@ -508,6 +539,7 @@
         "z_ee"
     ],
     "branches": [
+        "PSWeight",
         "GenVtx_z",
         "PV_z",
         "L1PreFiringWeight_Nom",
@@ -637,6 +669,7 @@
         "Jet_mass",
         "Jet_btagDeepFlavB",
         "Jet_jetId",
+        "Jet_puId",
         "Jet_hadronFlavour",
         "MET_pt",
         "MET_phi",

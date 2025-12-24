@@ -119,6 +119,7 @@ class BDTScoreComparator:
                 data1 = tree1.arrays([self.event1, self.score1, 'njet'],
                                      library="pd",
                                      entry_stop=entry_stop)
+                # data1 = data1.query('njet == 0')
 
             logging.info(f"File 1 loaded, number of events: {len(data1)}")
 
@@ -144,6 +145,7 @@ class BDTScoreComparator:
                 data2 = tree2.arrays([self.event2, self.score2, "njet"],
                                      library="pd",
                                      entry_stop=entry_stop)
+                # data2 = data2.query('njet == 0')
 
             logging.info(f"File 2 loaded, number of events: {len(data2)}")
 

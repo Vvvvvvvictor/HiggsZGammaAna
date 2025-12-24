@@ -47,7 +47,6 @@ channel = args.channel
 # --- End of new code ---
 
 boundaries = read_config(f"{output_dir}test/significances/bin_boundaries_1D_{channel}.txt")
-# backgrounds = ["ZGToLLG", "DYJetsToLL", "EWKZ2J"]
 backgrounds = ["ZGToLLG", "DYJetsToLL_ext", "EWKZ2J"]
 signal = ["ggH_M125", "VBF_M125"] #, "ZH_M125", "WplusH_M125", "WminusH_M125", "ttH_M125"]
 data = ["Data"]

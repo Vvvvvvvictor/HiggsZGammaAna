@@ -21,26 +21,31 @@ from pdb import set_trace
 # # Test yields in categories
 # # ==================================
 # cats = ['zero_to_one_jet', "two_jet", "VH", "ZH", "ttH_had", "ttH_lep"]
-# # years = ["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"]
-# years = ["2016preVFP", "2016postVFP", "2017", "2018"]
+# years = ["2018"] #"2016preVFP", "2016postVFP", "2017", "2018", "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"
 # cats_yields = {'zero_to_one_jet': 0, "two_jet": 0, "VH": 0, "ZH": 0, "ttH_had": 0, "ttH_lep": 0}
-# for year in years:
-#     data = uproot.open(f"/eos/home-j/jiehan/root/skimmed_ntuples_run2/ggH_M125/{year}.root")
-#     for cat in cats:
-#         cat_data = data[cat].arrays(['weight', 'H_mass'], library='pd').query('H_mass > 120 & H_mass < 130')
-#         cats_yields[cat] += cat_data['weight'].sum()
-# print(cats_yields)
+# # for year in years:
+# #     data = uproot.open(f"/eos/home-j/jiehan/root/skimmed_ntuples/ggH_M125/{year}.root")
+# #     for cat in cats:
+# #         cat_data = data[cat].arrays(['weight', 'H_mass'], library='pd').query('H_mass > 120 & H_mass < 130')
+# #         cats_yields[cat] += cat_data['weight'].sum()
+# # print(cats_yields)
 
 # for year in years:
-#     data = uproot.open(f"/eos/home-j/jiehan/root/skimmed_ntuples_run2/ggH_M125/{year}.root")
-#     data_inc = data["inclusive"].arrays(['z_mumu', 'z_ee', 'H_mass'], library='pd').query('H_mass > 100')
-#     print(f'Year {year} inclusive z_mumu: {data_inc["z_mumu"].sum()}, z_ee: {data_inc["z_ee"].sum()}')
+#     data = uproot.open(f"/eos/home-j/jiehan/root/skimmed_ntuples/ggH_M125/{year}.root")
+#     data_inc = data["inclusive"].arrays(['z_mumu', 'z_ee', 'H_mass', 'n_leptons', 'n_jets', 'n_b_jets', 'MET_pt'], library='pd').query('H_mass > 100 & H_mass < 180')
+#     print(f'{year} inclusive z_mumu: {data_inc["z_mumu"].sum()}, z_ee: {data_inc["z_ee"].sum()}')
+#     print("================================================================================================")
+#     print(f'{year} {"nl=2":<20} z_mumu: {data_inc.query("n_leptons==2")["z_mumu"].sum():>10.1f}, z_ee: {data_inc.query("n_leptons==2")["z_ee"].sum():>10.1f}')
+#     print(f'{year} {"nl=2 nj>=2":<20} z_mumu: {data_inc.query("n_leptons==2 & n_jets>=2")["z_mumu"].sum():>10.1f}, z_ee: {data_inc.query("n_leptons==2 & n_jets>=2")["z_ee"].sum():>10.1f}')
+#     print(f'{year} {"nl=2 nj>=2 nb=0":<20} z_mumu: {data_inc.query("n_leptons==2 & n_jets>=2 & n_b_jets==0")["z_mumu"].sum():>10.1f}, z_ee: {data_inc.query("n_leptons==2 & n_jets>=2 & n_b_jets==0")["z_ee"].sum():>10.1f}')
+#     print(f'{year} {"nl=2 nj<2":<20} z_mumu: {data_inc.query("n_leptons==2 & n_jets<2")["z_mumu"].sum():>10.1f}, z_ee: {data_inc.query("n_leptons==2 & n_jets<2")["z_ee"].sum():>10.1f}')
+#     print(f'{year} {"nl=2 nj<2 met<90":<20} z_mumu: {data_inc.query("n_leptons==2 & n_jets<2 & MET_pt<90")["z_mumu"].sum():>10.1f}, z_ee: {data_inc.query("n_leptons==2 & n_jets<2 & MET_pt<90")["z_ee"].sum():>10.1f}')
 #     for cat in cats:
 #         cat_data = data[cat].arrays(['z_mumu', 'z_ee', 'H_mass'], library='pd')
 #         if "jet" in cat:
-#             cat_data = cat_data.query('H_mass > 100')
+#             cat_data = cat_data.query('H_mass > 100 & H_mass < 180')
 #         else:
-#             cat_data = cat_data.query('H_mass > 100 & (H_mass < 120 | H_mass > 130)')
+#             cat_data = cat_data.query('H_mass > 100 & (H_mass < 120 | H_mass > 130) & H_mass < 180')
 #         print(f'{year} {cat} z_mumu: {cat_data["z_mumu"].sum()}, z_ee: {cat_data["z_ee"].sum()}')
 #     print("================================================================================================")
 
@@ -217,14 +222,15 @@ from pdb import set_trace
 # Get weight with syst
 # =====================================
 cats = ["inclusive"]
-years = ['2016preVFP', '2016postVFP', '2017', '2018'] # '2016preVFP', '2016postVFP', '2017', '2018', '2022preEE', '2022postEE', '2023preBPix', '2023postBPix'
+years = ['2023preBPix'] # '2016preVFP', '2016postVFP', '2017', '2018', '2022preEE', '2022postEE', '2023preBPix', '2023postBPix'
 types = ["mumu", "ee"]
 
 # Define weight lists and corresponding display names
 # Comment out any weight you don't want to apply by adding # at the beginning
 weight_configs = [
     ("weight_pu_reweight_sf_central", "pileup weight"),
-    ("weight_btag_deepjet_wp_sf_SelectedJet_central", "btag weight"),
+    ("weight_btag_deepjet_wp_sf_light_SelectedJet_central", "btag weight light"),
+    ("weight_btag_deepjet_wp_sf_heavy_SelectedJet_central", "btag weight heavy"),
     ("weight_hlt_sf_central", "hlt weight"),
     ("weight_electron_wplid_sf_SelectedElectron_central", "electron wplid weight"),
     ("weight_electron_wplid_sf_nomatch_SelectedGenNoRecoElectron_central", "electron wplid nomatch weight"),
@@ -263,8 +269,11 @@ background_weight_list = [
     "kin_weight"
 ]
 for year in years:
-    data = uproot.open(f"/eos/home-j/jiehan/root/skimmed_ntuples/ggH_M125/{year}.root")['inclusive'].arrays(library='pd')
-    # data = pd.read_parquet(f"/eos/home-j/jiehan/parquet/cutflow_ggf/ggH_M125_{year}/merged_nominal.parquet")
+    data = uproot.open(f"/eos/home-j/jiehan/root/skimmed_ntuples_test/ggH_M125/{year}.root")['inclusive'].arrays(library='pd')
+#     # data = pd.read_parquet(f"/eos/home-j/jiehan/parquet/cutflow_ggf/ggH_M125_{year}/merged_nominal.parquet")
+    min_data = data[0:10]
+    for row in min_data.itertuples():
+        print(f'Run: {row.run}, Lumi: {row.luminosityBlock}, Event: {row.event}, id sf: {row.weight_photon_id_sf_SelectedPhoton_central}, csev sf: {row.weight_photon_csev_sf_SelectedPhoton_central}, id shape sf: {row.weight_photon_id_shape_sf_SelectedPhoton_central}')
     # for i in data.columns:
     #     if "weight" in i and "central" in i:
     #         print(i)
@@ -287,6 +296,12 @@ for year in years:
             print(f'{"total events:":>35}{len(temp)}')
             weight = weight * temp["pythia_weight"]
             print(f'{"lumi weight:":>35}{weight.sum():.4f}')
+
+            for weight_name, display_name in zip(weight_list, name_list):
+                print(f'{"only " + display_name + ":":>35}{(weight*temp[weight_name]).sum():.4f}')
+            
+            for weight_name, display_name in zip(ggH_weight_list, ggH_name_list):
+                print(f'{"only " + display_name + ":":>35}{(weight*temp[weight_name]).sum():.4f}')
             
             # Apply weights from weight_list
             for weight_name, display_name in zip(weight_list, name_list):
@@ -297,6 +312,8 @@ for year in years:
             for weight_name, display_name in zip(ggH_weight_list, ggH_name_list):
                 weight = weight * temp[weight_name]
                 print(f'{display_name + ":":>35}{weight.sum():.4f}')
+
+
 
 # =====================================
 # Have a look at the hgg data
@@ -416,3 +433,23 @@ for year in years:
 #     ax.set_title('Weight Distributions')
 #     ax.legend()
 #     plt.savefig('weight_distributions.png')
+
+# import numpy as np
+# import ROOT
+
+# # ROOT 方式
+# ROOT_rng = ROOT.TRandom3(4357)
+
+# jer = np.random.normal(1.01, 0.03, 1000000)
+# # NumPy 方式
+# np_rng = np.random.RandomState(seed=4357)
+
+# root_val = np.array([ROOT_rng.Gaus(0, r) for r in jer])
+# numpy_val = np.array([np_rng.normal(0, r) for r in jer])
+# print(np.maximum(jer**2-1, 0.0))
+# print(root_val*np.sqrt(np.maximum(jer**2-1, 0.0)))
+# root_val = 1 + root_val * np.sqrt(np.maximum(jer**2-1, 0.0))
+# numpy_val = 1 + numpy_val * np.sqrt(np.maximum(jer**2-1, 0.0))
+
+# print("ROOT mean:", np.mean(root_val), "std:", np.std(root_val))
+# print("NumPy mean:", np.mean(numpy_val), "std:", np.std(numpy_val))

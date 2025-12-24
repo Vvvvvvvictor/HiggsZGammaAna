@@ -6,9 +6,11 @@ import json
 import pickle
 import dill
 import numpy
+import re
 
 import uproot
 import awkward
+import pyarrow.parquet
 
 import logging
 import orjson
@@ -28,7 +30,9 @@ from higgs_dna.utils.metis_utils import do_cmd
 from higgs_dna.taggers.duplicated_samples_tagger import DuplicatedSamplesTagger
 from higgs_dna.taggers.mc_overlap_tagger import MCOverlapTagger
 from higgs_dna.systematics.photon_systematics import photon_scale_smear_run3
-from higgs_dna.systematics.lepton_systematics import electron_scale_smear_run3
+from higgs_dna.systematics.lepton_systematics import electron_scale_smear_run3, muon_scale_run3
+from higgs_dna.systematics.jet_systematics import pt_correction_data, pt_correction_mc
+from higgs_dna.systematics.ps_systematics import ps_isr_sf, ps_fsr_sf
 
 condor=False
 def run_analysis(config):
@@ -69,11 +73,11 @@ def run_analysis(config):
         if branch_map:
             for x in branch_map:
                 logger.debug("[run_analysis] Replacing %s with %s." % (str(x[0]), str(x[1])))
-                print("[DEBUG]: ", str(x[0]), list, tuple(x[0]), tuple(x[1]))
-                print("[DEBUG]: ", awkward.fields(events))
-                print("[DEBUG]: ", awkward.fields(events["Jet"]))
                 if isinstance(x[0], list):
-                    events[tuple(x[0])] = events[tuple(x[1])]
+                    try:
+                        events[tuple(x[0])] = events[tuple(x[1])]
+                    except:
+                        print("[run_analysis] Failed to map branches:", x)
                 else:
                     events[x[0]] = events[x[1]]
 
@@ -517,16 +521,6 @@ class AnalysisManager():
         with open(self.summary_file, "w") as f_out:
             json.dump(self.summary, f_out, sort_keys = True, indent = 4)
 
-    # def get_file_handler(file):
-    #     xrootd_src = file.startswith("root://")
-    #     if not xrootd_src:
-    #         return {"file_handler": uproot.MultithreadedFileSource} # otherwise the memory maps overload available Vmem
-    #     elif xrootd_src:
-    #         # uncomment below for MultithreadedXRootDSource
-    #         return {"xrootd_handler": uproot.source.xrootd.MultithreadedXRootDSource}
-    #     # return {}
-    #  **get_file_handler(file),
-
     @staticmethod
     def get_file_handler(filename):
         xrootd_src = filename.startswith("root://")
@@ -572,14 +566,6 @@ class AnalysisManager():
                 f = uproot.open(f'/tmp/{os.getpid()}/{os.path.basename(file)}',timeout = 300, num_workers=1)
 
             runs = f["Runs"]
-            # if "genEventCount" in runs.keys() and "genEventSumw" in runs.keys():
-            #     # sum_weights += numpy.sum(runs["genEventSumw"].array()) #FIXME: use genWeight or Generator_weight
-            #     sum_genWeight = numpy.sum(runs["genEventSumw"].array())
-            #     logger.debug("[AnalysisManager : genEventSumw] genEventSumw: {}".format(sum_genWeight))
-            # elif "genEventCount_" in runs.keys() and "genEventSumw_" in runs.keys():
-            #     # sum_weights += numpy.sum(runs["genEventSumw_"].array()) #FIXME: use genWeight or Generator_weight
-            #     sum_genWeight = numpy.sum(runs["genEventSumw_"].array())
-            #     logger.debug("[AnalysisManager : genEventSumw_] genEventSumw_: {}".format(sum_genWeight))
             tree = f["Events"]
 
             if "Generator_weight" in tree.keys():
@@ -590,14 +576,6 @@ class AnalysisManager():
                 for i, value in enumerate(unique_values):
                     unique_counts = numpy.sum(tree["Generator_weight"] == value)
                     logger.debug("[AnalysisManager : GeneratorWeight] Unique values of Generator_weight: {}, numbers: {}".format(value, unique_counts))
-
-            # if "genWeight" in tree.keys():
-            #     sum_genWeight = numpy.sum(tree["genWeight"])
-            #     # sum_weights += sum_genWeight #FIXME: use genWeight or Generator_weight
-            #     logger.debug("[AnalysisManager : GenWeightSum] Sum of genWeight: {}".format(sum_genWeight))
-            #     unique_values = numpy.unique(tree["genWeight"])
-            #     for value in unique_values:
-            #         logger.debug("[AnalysisManager : GenWeight] Unique values of genWeight: ".format(value))
                     
             # Get events that is not duplicated or overlapped
             if is_data:
@@ -615,9 +593,18 @@ class AnalysisManager():
                 events_file = tree.arrays(trimmed_branches, library = "ak", how = "zip")
                 events_file = events_file[overlap_cut]
 
-                if int(year[:4]) > 2020:
-                    events_file = photon_scale_smear_run3(events_file, year)
-                    events_file = electron_scale_smear_run3(events_file, year)
+            if int(year[:4]) > 2020:
+                events_file = photon_scale_smear_run3(events_file, year, is_data)
+                events_file = electron_scale_smear_run3(events_file, year, is_data)
+                events_file = muon_scale_run3(events_file, year, is_data)
+                if is_data:
+                    if "2022postEE" in year:
+                        period = re.search(r"Run2022([A-Z]+)", file).group(1)
+                        events_file = pt_correction_data(events_file, year, period)
+                    else:
+                        events_file = pt_correction_data(events_file, year)
+                else:
+                    events_file = pt_correction_mc(events_file, year)
 
             f.close()
             
@@ -653,7 +640,7 @@ class AnalysisManager():
 
                 # Merge skimmed file data into main events
                 # add muon sys
-                if "Muon" in events_file.fields and "Muon" in events_skimmed_file.fields:
+                if "Muon" in events_file.fields and "Muon" in events_skimmed_file.fields and int(year[:4]) < 2020:
                     events_keys_muon = events_file.Muon.fields  
                     skimmed_keys_muon = events_skimmed_file.Muon.fields
                     extra_keys = [key for key in skimmed_keys_muon if key not in events_keys_muon] 
@@ -669,7 +656,7 @@ class AnalysisManager():
                         events_file['Photon'] = awkward.with_field(events_file['Photon'], events_skimmed_file['Photon'][key], key)
                 
                 # add jets sys
-                if "Jet" in events_file.fields and "Jet" in events_skimmed_file.fields:
+                if "Jet" in events_file.fields and "Jet" in events_skimmed_file.fields and int(year[:4]) < 2020:
                     events_keys_jet = events_file.Jet.fields
                     skimmed_keys_jet = events_skimmed_file.Jet.fields
                     extra_keys = [key for key in skimmed_keys_jet if key not in events_keys_jet]
@@ -683,17 +670,42 @@ class AnalysisManager():
                 for key in extra_keys:
                     events_file = awkward.with_field(events_file, events_skimmed_file[key], key)
                     
+            # # # FIXME: DANGEROUS!
+            # events_to_keep = [
+            #     (370175, 1425, 3144688242),
+            #     (370175, 1718, 3793527145),
+            #     (370175, 1731, 3819691934),
+            #     (370497, 97, 134903732),
+            #     (370497, 181, 314639380)
+            # ]
+            # mask = None
+            # for run, lumi, event in events_to_keep:
+            #     current_mask = (
+            #         (events_file["run"] == run)
+            #         & (events_file["luminosityBlock"] == lumi)
+            #         & (events_file["event"] == event)
+            #     )
+            #     if mask is None:
+            #         mask = current_mask
+            #     else:
+            #         mask = mask | current_mask
             
-            # # FIXME: DANGEROUS!
-            # events_file = events_file[(events_file["run"]==316470) & (events_file["luminosityBlock"]==370) & (events_file["event"]==486186232)]
+            # if mask is not None:
+            #     events_file = events_file[mask]
 
-            logger.debug("[AnalysisManager : Load samples] Sample type: %s" % events_file.type)
+            for field in events_file.fields:
+                if "jagged" in field:
+                    logger.debug("[AnalysisManager : Load events] Converting jagged array field '%s' to regular array." % field)
+                    if "PSWeight" in events_file[field].fields:
+                        events_file["PSWeight"] = events_file[field].PSWeight
 
             events.append(events_file)
 
             logger.debug("[AnalysisManager : load_events] Loaded %d events from file '%s'." % (len(events_file), file))
 
         events = awkward.concatenate(events)
+
+        logger.debug("[AnalysisManager : Load samples] Sample type: %s" % events.type)
 
         return events, float(sum_weights)
 
@@ -714,8 +726,10 @@ class AnalysisManager():
         """
         out_name = "%s_%s.parquet" % (name, syst_tag)
 
-        if not len(events) >= 1:
-            return out_name 
+        if len(events) == 0:
+            logger.info("[bold yellow]Empty events array, skipping writing to parquet.[/bold yellow]")
+            return out_name
+
         save_map = {}
         for branch in save_branches:
             if isinstance(branch, tuple) or isinstance(branch, list):
@@ -737,12 +751,19 @@ class AnalysisManager():
             if "weight_" in field and not field in save_map.keys():
                 save_map[field] = events[field]
 
-        events = awkward.zip(save_map, depth_limit=1)    
+        events = awkward.zip(save_map, depth_limit=1)
         logger.debug("[AnalysisManager : write_events] Writing output file '%s'." % (out_name))
-        if condor:
-       	  #awkward.to_parquet(events, out_name.split("/")[-1],list_to32=True) 
-            awkward.to_parquet(events, out_name.split("/")[-1]) 
+
+        if len(events) == 1:
+            logger.info("[bold yellow]Single event found, converting to pyarrow table before writing to parquet.[/bold yellow]")
+            arrow_table = awkward.to_arrow_table(events)
+            if condor:
+                pyarrow.parquet.write_table(arrow_table, out_name.split("/")[-1])
+            else:
+                pyarrow.parquet.write_table(arrow_table, out_name)
         else:
-          #awkward.to_parquet(events, out_name,list_to32=True) 
-            awkward.to_parquet(events, out_name) 
+            if condor:
+                awkward.to_parquet(events, out_name.split("/")[-1])
+            else:
+                awkward.to_parquet(events, out_name)
         return out_name

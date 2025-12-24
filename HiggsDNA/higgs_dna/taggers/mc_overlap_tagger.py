@@ -27,6 +27,7 @@ class MCOverlapTagger(Tagger):
         self.input = INPUT
     
     def overlap_selection(self, file, tree):
+        logger.debug("MC_overlap_samples:  file: %s, tree keys: %s" % (file, list(tree.keys())))
         # Use HLT to select the events that is not duplicated
         self.branch = [x for x in self.input if x in tree.keys()]
         self.branch.append("run")
@@ -36,9 +37,12 @@ class MCOverlapTagger(Tagger):
         cut = data.run>=0
         if self.is_data:
             return cut
+        elif "DYto2L" in file or "DYJetsToLL" in file or "EWKZ2Jets" in file or "TTTo2L2Nu" in file or "WJets" in file or "WZ_" in file or "WW_" in file or "ZZ_" in file or "DYGto2LG" in file or "ZGToLLG" in file or "ZGamma2J" in file or "ZG2J" in file or "TTGJets" in file or "WGTo" in file or "WZG_" in file or "WWG_" in file or "ZZG_" in file:
+            pass
+        else:
+            return cut
 
         # Only use specific events in different MC NanoAOD
-        logger.debug("MC_overlap_samples:  file: %s" % file)
         if "DYto2L" in file or "DYJetsToLL" in file or "EWKZ2Jets" in file or "TTTo2L2Nu" in file or "WJets" in file or "WZ_" in file or "WW_" in file or "ZZ_" in file:
             cut = self.get_n_iso_photon(data, file) == 0
         elif "DYGto2LG" in file or "ZGToLLG" in file or "ZGamma2J" in file or "ZG2J" in file or "TTGJets" in file or "WGTo" in file or "WZG_" in file or "WWG_" in file or "ZZG_" in file:

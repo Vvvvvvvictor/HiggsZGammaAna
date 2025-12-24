@@ -17,8 +17,8 @@ from pdb import set_trace as bp
 plt.style.use(hep.style.CMS)
 
 # Configuration
-TREE = "two_jet"  # Tree name for both folders
-VAR = "llphoton_hmiss_photon_dphi"  # Variable to compare
+TREE = "zero_to_one_jet"  # Tree name for both folders
+VAR = "H_mass"  # Variable to compare
 WEIGHT = "weight_corr"  # Weight variable (will check if exists)
 PATH1 = "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new/DYJetsToLL/"
 PATH2 = "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new/DYJetsToLL_ext/"
@@ -42,9 +42,9 @@ color_dict = {
 
 # Variable configuration
 var_config = {
-    "range": (0, 3.2),
-    "bins": 32,
-    "title": r"$\Delta\phi(ll\gamma-rev, photon)$"
+    "range": (95, 180),
+    "bins": 85,
+    "title": r"$m_{\ell\ell\gamma}$"
 }
 
 def read_root_file(filepath, tree_name, variables):
@@ -52,7 +52,7 @@ def read_root_file(filepath, tree_name, variables):
     try:
         with uproot.open(f"{filepath}:{tree_name}") as tree:
             data = tree.arrays(variables, library="pd")
-            data = data.query(f"H_mass>100 & H_mass<180")
+            data = data.query(f"H_mass>95 & H_mass<180")
         return data
     except Exception as e:
         print(f"Error reading {filepath}:{tree_name} - {e}")
@@ -69,7 +69,9 @@ def get_histogram_data(path, year, tree_name):
     
     print(f"Reading {filepath}:{tree_name}")
     
-    variables = [VAR, "H_mass"]
+    variables = [VAR]
+    if VAR != "H_mass":
+        variables.append("H_mass")
     
     # Check if weight exists
     try:
@@ -97,19 +99,39 @@ def get_histogram_data(path, year, tree_name):
     
     return data[VAR].values, weights
 
-def create_comparison_plot(year):
-    """Create comparison plot for a specific year"""
-    print(f"\n=== Processing year {year} ===")
+def create_combined_plot(years):
+    """Create a single comparison plot combining all specified years"""
+    print(f"\n=== Processing all years: {years} ===")
     
-    # Read data from both folders
-    dy_data, dy_weights = get_histogram_data(PATH1, year, TREE)
-    dy_ext_data, dy_ext_weights = get_histogram_data(PATH2, year, TREE)
-    
-    # Check if we have data to make a plot
-    if dy_data is None and dy_ext_data is None:
-        print(f"No data found for year {year}, skipping...")
+    all_dy_data = []
+    all_dy_weights = []
+    all_dy_ext_data = []
+    all_dy_ext_weights = []
+
+    for year in years:
+        print(f"--- Reading data for year {year} ---")
+        # Read data from both folders
+        dy_data, dy_weights = get_histogram_data(PATH1, year, TREE)
+        dy_ext_data, dy_ext_weights = get_histogram_data(PATH2, year, TREE)
+        
+        if dy_data is not None:
+            all_dy_data.append(dy_data)
+            all_dy_weights.append(dy_weights)
+        
+        if dy_ext_data is not None:
+            all_dy_ext_data.append(dy_ext_data)
+            all_dy_ext_weights.append(dy_ext_weights)
+
+    # Concatenate data from all years
+    if not all_dy_data and not all_dy_ext_data:
+        print("No data found for any year, skipping plot generation.")
         return
-    
+
+    final_dy_data = np.concatenate(all_dy_data) if all_dy_data else None
+    final_dy_weights = np.concatenate(all_dy_weights) if all_dy_weights else None
+    final_dy_ext_data = np.concatenate(all_dy_ext_data) if all_dy_ext_data else None
+    final_dy_ext_weights = np.concatenate(all_dy_ext_weights) if all_dy_ext_weights else None
+
     # Create histogram bins
     bins = np.linspace(var_config["range"][0], var_config["range"][1], var_config["bins"] + 1)
     bin_centers = (bins[:-1] + bins[1:]) / 2
@@ -121,14 +143,12 @@ def create_comparison_plot(year):
     dy_ext_hist = None
     dy_ext_hist_err = None
     
-    if dy_data is not None:
-        dy_hist, _ = np.histogram(dy_data, bins=bins, weights=dy_weights)
-        # Calculate errors (assuming Poisson, handle negative weights)
+    if final_dy_data is not None:
+        dy_hist, _ = np.histogram(final_dy_data, bins=bins, weights=final_dy_weights)
         dy_hist_err = np.sqrt(np.abs(dy_hist))
     
-    if dy_ext_data is not None:
-        dy_ext_hist, _ = np.histogram(dy_ext_data, bins=bins, weights=dy_ext_weights)
-        # Calculate errors (assuming Poisson, handle negative weights)
+    if final_dy_ext_data is not None:
+        dy_ext_hist, _ = np.histogram(final_dy_ext_data, bins=bins, weights=final_dy_ext_weights)
         dy_ext_hist_err = np.sqrt(np.abs(dy_ext_hist))
     
     # Create the plot
@@ -169,7 +189,7 @@ def create_comparison_plot(year):
     ax1.set_ylim(0, 1.4 * max_y)
     
     # Add year annotation
-    ax1.annotate(f"Year: {year}", xy=(0.02, 0.98), xycoords='axes fraction', 
+    ax1.annotate(f"All Years Combined", xy=(0.02, 0.98), xycoords='axes fraction', 
                  fontsize=14, ha="left", va="top",
                  bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.8))
     
@@ -207,15 +227,15 @@ def create_comparison_plot(year):
     output_dir = Path("plots/dy_comparison")
     output_dir.mkdir(parents=True, exist_ok=True)
     
-    output_file = output_dir / f"H_mass_comparison_{year}.png"
+    output_file = output_dir / f"H_mass_comparison_all_years.png"
     plt.tight_layout()
     plt.savefig(output_file, dpi=200, bbox_inches='tight')
     plt.close()
     
-    print(f"Saved plot: {output_file}")
+    print(f"Saved combined plot: {output_file}")
     
     # Print summary
-    print(f"Summary for {year}:")
+    print(f"Summary for all years combined:")
     if dy_hist is not None:
         print(f"  DYJetsToLL events: {np.sum(dy_hist):.1f}")
     if dy_ext_hist is not None:
@@ -234,13 +254,11 @@ def main():
     
     print(f"\nProcessing years: {available_years}")
     
-    # Process each year
-    for year in available_years:
-        try:
-            create_comparison_plot(year)
-        except Exception as e:
-            print(f"Error processing year {year}: {e}")
-            continue
+    # Process all years together
+    try:
+        create_combined_plot(available_years)
+    except Exception as e:
+        print(f"Error processing combined years: {e}")
     
     print("\nAnalysis completed!")
     print("Check the 'plots/dy_comparison/' directory for output plots.")

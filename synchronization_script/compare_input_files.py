@@ -4,11 +4,42 @@ import pandas as pd
 from collections import defaultdict
 import sys
 
-# 文件路径和树名
-input1_file = "/eos/project-h/htozg-dy-privatemc/rzou/bdt/BDT_input_new/SM1_2018_pinnacles_all_fixedjet.root"
-tree1 = "TreeB"
+# 分支映射表
+variable_mapping = {
+    "cosTheta": "Z_cos_theta",
+    "phi": "lep_phi",
+    "costheta": "lep_cos_theta",
+    "l1_rapidity": "Z_lead_lepton_eta",
+    "l2_rapidity": "Z_sublead_lepton_eta",
+    "photon_rapidity": "gamma_eta",
+    "min_dR": "l2g_deltaR",
+    "max_dR": "l1g_deltaR",
+    "photon_mva": "gamma_mvaID",
+    "photon_res": "gamma_ptRelErr",
+    "pt_mass": "H_relpt",
+    "llphoton_dijet_dphi": "delta_phi_zgjj",
+    "dijet_m": "mass_jj",
+    "dijet_deta": "delta_eta_jj",
+    "llphoton_dijet_balance": "pt_balance",
+    "njet": "n_jets",
+    "dijet_dphi": "delta_phi_jj",
+    "photon_zeppenfeld": "photon_zeppenfeld",
+    "photon_jet1_dr": "jet1G_deltaR",
+    "photon_jet2_dr": "jet2G_deltaR",
+    "j1_pt": "jet_1_pt",
+    "j2_pt": "jet_2_pt",
+    "j1_eta": "jet_1_eta",
+    "j1_m": "jet_1_mass",
+    "llphoton_hmiss_photon_dphi": "llphoton_hmiss_photon_dphi"
+}
 
-input2_file = "/eos/project-h/htozg-dy-privatemc/rzou/bdt/Output_ggF_rui_commonparam/SM1_2018_output.root"
+# 文件路径和树名
+# input1_file = "/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_input_redwood/SM1_2018_redwood_v1_ggf.root"
+# tree1 = "TreeB"
+input1_file = "/eos/home-j/jiehan/root/skimmed_ntuples_rui_new/ZGToLLG/2018.root"
+tree1 = "zero_to_one_jet"
+
+input2_file = "/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/Output_ggF_rui_redwood_v1_ext_val/SM1_2018_output.root"
 tree2 = "outtree"
 
 def compare_root_trees(file1, tree1_name, file2, tree2_name):
@@ -65,22 +96,36 @@ def compare_root_trees(file1, tree1_name, file2, tree2_name):
             common_branches = branches1.intersection(branches2)
             only_in_1 = branches1 - branches2
             only_in_2 = branches2 - branches1
-            
+
             print(f"共同分支数: {len(common_branches)}")
-            
+
             if only_in_1:
                 print(f"只在文件1中存在的分支 ({len(only_in_1)}): {sorted(only_in_1)}")
             if only_in_2:
                 print(f"只在文件2中存在的分支 ({len(only_in_2)}): {sorted(only_in_2)}")
-            
+
             # 移除event分支，因为它用作索引
-            comparison_branches = common_branches - {'event'}
-            
-            if not comparison_branches:
-                print("错误: 除了event分支外，没有找到其他共同的分支!")
+            comparison_branches = set(common_branches) - {'event'}
+
+            # 利用映射补充可对比分支
+            mapped_branches = []
+            for b1 in only_in_1:
+                if b1 in variable_mapping and variable_mapping[b1] in branches2:
+                    mapped_branches.append((b1, variable_mapping[b1]))
+            for b2 in only_in_2:
+                # 反向映射
+                for k, v in variable_mapping.items():
+                    if v == b2 and k in branches1:
+                        mapped_branches.append((k, b2))
+
+            if mapped_branches:
+                print(f"通过映射补充可对比分支 ({len(mapped_branches)}): {mapped_branches}")
+
+            if not comparison_branches and not mapped_branches:
+                print("错误: 除了event分支外，没有找到其他共同或可映射的分支!")
                 return False
-            
-            print(f"将比较的分支数 (除event外): {len(comparison_branches)}")
+
+            print(f"将比较的分支数 (除event外): {len(comparison_branches) + len(mapped_branches)}")
             print("-" * 80)
             
             # 读取event分支作为事件标识符
@@ -120,7 +165,7 @@ def compare_root_trees(file1, tree1_name, file2, tree2_name):
             # 读取所有需要比较的分支数据
             branch_data1 = {}
             branch_data2 = {}
-            
+
             print("正在读取分支数据...")
             for branch in comparison_branches:
                 try:
@@ -129,27 +174,49 @@ def compare_root_trees(file1, tree1_name, file2, tree2_name):
                 except Exception as e:
                     print(f"  ⚠️  读取分支 {branch} 时出错: {e}")
                     continue
+
+            # 读取映射分支数据
+            for b1, b2 in mapped_branches:
+                try:
+                    branch_data1[b1] = tree1_obj[b1].array(library="np")
+                    branch_data2[b2] = tree2_obj[b2].array(library="np")
+                except Exception as e:
+                    print(f"  ⚠️  读取映射分支 {b1} <-> {b2} 时出错: {e}")
+                    continue
             
             # 比较每个分支的共同事件
             differences_found = False
             total_mismatches = 0
-            
+
             for branch in sorted(branch_data1.keys()):
-                print(f"正在比较分支: {branch}")
-                
+                # 判断是否为映射分支
+                mapped_pair = None
+                for b1, b2 in mapped_branches:
+                    if branch == b1:
+                        mapped_pair = (b1, b2)
+                        break
+                if mapped_pair:
+                    print(f"正在比较映射分支: {mapped_pair[0]} <-> {mapped_pair[1]}")
+                else:
+                    print(f"正在比较分支: {branch}")
+
                 data1 = branch_data1[branch]
-                data2 = branch_data2[branch]
-                
+                # 如果是映射分支，取映射后的分支名
+                if mapped_pair:
+                    data2 = branch_data2[mapped_pair[1]]
+                else:
+                    data2 = branch_data2[branch]
+
                 branch_mismatches = 0
                 mismatch_details = []
-                
+
                 for event_id in sorted(common_events):
                     idx1 = event_to_idx1[event_id]
                     idx2 = event_to_idx2[event_id]
-                    
+
                     val1 = data1[idx1]
                     val2 = data2[idx2]
-                    
+
                     # 比较数值
                     is_equal = False
                     if isinstance(val1, (int, np.integer)) and isinstance(val2, (int, np.integer)):
@@ -160,12 +227,12 @@ def compare_root_trees(file1, tree1_name, file2, tree2_name):
                     else:
                         # 其他类型直接比较
                         is_equal = val1 == val2
-                    
+
                     if not is_equal:
                         branch_mismatches += 1
                         if len(mismatch_details) < 5:  # 只记录前5个不匹配的详情
                             mismatch_details.append((event_id, val1, val2))
-                
+
                 if branch_mismatches > 0:
                     print(f"  ❌ 发现 {branch_mismatches} 个事件的数值不匹配")
                     for event_id, val1, val2 in mismatch_details:

@@ -1,8 +1,14 @@
 import awkward
 import numpy
 import json
+try:
+    from scipy.special import erf as scipy_erf, erfinv as scipy_erfinv
+    HAS_SCIPY = True
+except ImportError:
+    HAS_SCIPY = False
 
 from correctionlib import _core
+import correctionlib
 # logger = logging.getLogger(__name__)
 from higgs_dna.utils.logger_utils import simple_logger
 logger = simple_logger(__name__)
@@ -884,25 +890,33 @@ electron_scale_FILE = {
     "2023postBPix" : "jsonpog-integration/POG/EGM/2023_Summer23BPix/electronSS_EtDependent.json"
 }
 
-electron_year_names = {
-    "2022preEE" : "EGMSmearAndSyst_ElePTsplit_2022preEE",
-    "2022postEE" : "EGMSmearAndSyst_ElePTsplit_2022postEE",
-    "2023preBPix" : "EGMSmearAndSyst_ElePTsplit_2023preBPIX", 
-    "2023postBPix" : "EGMSmearAndSyst_ElePTsplit_2023postBPIX"
+electron_smear_names = {
+    "2022preEE" : "SmearAndSyst",
+    "2022postEE" : "SmearAndSyst",
+    "2023preBPix" : "SmearAndSyst", 
+    "2023postBPix" : "SmearAndSyst"
 }
 
+electron_scale_names = {
+    "2022preEE": "Scale",
+    "2022postEE": "Scale",
+    "2023preBPix": "Scale",
+    "2023postBPix": "Scale"
+}
 
-def electron_scale_smear_run3(events, year):
+def electron_scale_smear_run3(events, year, is_data):
     """
-    This function applies electron scale and smear corrections on the electron pt.
-    It returns events with the corrected electron pt values.
-    Based on the photon_scale_smear_run3 function but adapted for electrons.
+    See:
+        - https://gitlab.cern.ch/cms-egamma/EgammaPostRecoTools/-/tree/master/EgammaAnalysis/ElectronTools/data/Run3
     """
     logger.info("[Lepton Systematics] Applying electron scale and smear corrections for year %s", year)
 
     required_fields = [
         ("Electron", "eta"), ("Electron", "pt"), ("Electron", "r9"), ("Electron", "deltaEtaSC")
     ]
+    if is_data:
+        required_fields.append(("Electron", "seedGain"))
+        required_fields.append("run")
 
     missing_fields = awkward_utils.missing_fields(events, required_fields)
 
@@ -912,46 +926,86 @@ def electron_scale_smear_run3(events, year):
         )
         return events
 
-    evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(electron_scale_FILE[year]))
+    if is_data:
+        evaluator = correctionlib.CorrectionSet.from_file(misc_utils.expand_path(electron_scale_FILE[year]))
+    else:
+        evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(electron_scale_FILE[year]))
 
     electrons = events["Electron"]
     n_electrons = awkward.num(electrons)
     electrons_flattened = awkward.flatten(electrons)
 
-    electrons_AbsEta = numpy.abs(awkward.to_numpy(electrons_flattened.eta+electrons_flattened.deltaEtaSC))
+    electrons_scEta = awkward.to_numpy(electrons_flattened.eta + electrons_flattened.deltaEtaSC)
+    electrons_AbsScEta = numpy.abs(electrons_scEta)
     electrons_pt = awkward.to_numpy(electrons_flattened.pt)
     electrons_r9 = awkward.to_numpy(electrons_flattened.r9)
+    electrons_energyErr = awkward.to_numpy(electrons_flattened.energyErr)
+    if is_data:
+        electrons_seedGain = awkward.to_numpy(electrons_flattened.seedGain)
+        run_arr_flattened = numpy.repeat(awkward.to_numpy(events["run"]), n_electrons)
+
+    if is_data:
+        scale = awkward.where(
+            (electrons_AbsScEta > 3.0) | (electrons_pt < 20.0),
+            awkward.ones_like(electrons_pt, dtype=float),
+            evaluator.compound[electron_scale_names[year]].evaluate("scale", run_arr_flattened, electrons_scEta, electrons_r9, electrons_pt, electrons_seedGain)
+        )
+        corrected_pt = awkward.to_numpy(electrons_pt * scale)
+        events["Electron", "corrected_pt"] = awkward.unflatten(corrected_pt, n_electrons)
+        logger.info("[Lepton Systematics] Electron pt before scale correction (data): %s", electrons.pt)
+        logger.info("[Lepton Systematics] Electron pt after scale correction (data): %s", corrected_pt)
 
     # Apply smear corrections first
-    smear = evaluator[electron_year_names[year]].evalv("smear", electrons_pt, electrons_r9, electrons_AbsEta)
+    if is_data:
+        evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(electron_scale_FILE[year]))
+        smear = awkward.where(
+            (electrons_AbsScEta > 3.0) | (electrons_pt < 20.0),
+            awkward.zeros_like(electrons_pt, dtype=float),
+            evaluator[electron_smear_names[year]].evalv("smear", corrected_pt, electrons_r9, electrons_AbsScEta)
+        )
+        corrected_energyErr = numpy.sqrt((electrons_energyErr)**2 + (electrons_pt * numpy.cosh(electrons_scEta) * smear)**2) * scale
+        return events
+    smear = awkward.where(
+        (electrons_AbsScEta > 3.0) | (electrons_pt < 20.0),
+        awkward.zeros_like(electrons_pt, dtype=float),
+        evaluator[electron_smear_names[year]].evalv("smear", electrons_pt, electrons_r9, electrons_AbsScEta)
+    )
     rng = numpy.random.default_rng(seed=8011)
     smear_val = awkward.where(
-        (electrons_AbsEta > 3.0) | (electrons_pt < 20.0),
+        (electrons_AbsScEta > 3.0) | (electrons_pt < 20.0),
         awkward.ones_like(electrons_pt, dtype=float),
         rng.normal(loc=1., scale=numpy.abs(smear))
     )
     
     # Apply central smear correction to electron pt
-    corrected_pt = awkward.to_numpy(electrons_pt * smear_val)
+    corrected_pt = electrons_pt * smear_val
+    corrected_energyErr = numpy.sqrt((electrons_energyErr)**2 + (electrons_pt * numpy.cosh(electrons_scEta) * smear)**2) * smear_val
 
     # Calculate smear systematics
     for syst in ["smear_up", "smear_down"]:
-        smear_syst = evaluator[electron_year_names[year]].evalv(syst, electrons_pt, electrons_r9, electrons_AbsEta)
+        smear_syst = awkward.where(
+            (electrons_AbsScEta > 3.0) | (electrons_pt < 20.0),
+            awkward.zeros_like(electrons_pt, dtype=float),
+            evaluator[electron_smear_names[year]].evalv(syst, electrons_pt, electrons_r9, electrons_AbsScEta)
+        )
         smear_val_syst = awkward.where(
-            (electrons_AbsEta > 3.0) | (electrons_pt < 20.0),
+            (electrons_AbsScEta > 3.0) | (electrons_pt < 20.0),
             awkward.ones_like(electrons_pt, dtype=float),
             rng.normal(loc=1., scale=numpy.abs(smear_syst))
         )
-        events["Electron", "dEsigma" + syst.replace("smear_", "").capitalize()] = awkward.unflatten(corrected_pt * (smear_val_syst - 1), n_electrons)
+        events["Electron", "dEsigma" + syst.replace("smear_", "").capitalize()] = awkward.unflatten(corrected_pt * smear_val_syst, n_electrons)
+        events["Electron", "energyErr_dEsigma" + syst.replace("smear_", "").capitalize()] = awkward.unflatten(numpy.sqrt((electrons_energyErr)**2 + (electrons_pt * numpy.cosh(electrons_scEta) * smear_syst)**2) * smear_val_syst, n_electrons)
 
-    print("Electron pt before scale correction:", electrons.pt)
+    print("Electron pt before smear correction:", electrons.pt)
     events["Electron", "corrected_pt"] = awkward.unflatten(corrected_pt, n_electrons)
+    events["Electron", "corrected_energyErr"] = awkward.unflatten(corrected_energyErr, n_electrons)
     electrons = events["Electron"]
 
     # Calculate scale systematics
     for syst in ["scale_up", "scale_down"]:
-        scale_syst = evaluator[electron_year_names[year]].evalv(syst, electrons_pt, electrons_r9, electrons_AbsEta)
+        scale_syst = evaluator[electron_smear_names[year]].evalv(syst, electrons_pt, electrons_r9, electrons_AbsScEta)
         events["Electron", "dEscale" + syst.replace("scale_", "").capitalize()] = awkward.unflatten(corrected_pt * scale_syst, n_electrons)
+        events["Electron", "energyErr_dEscale" + syst.replace("scale_", "").capitalize()] = awkward.unflatten(corrected_energyErr * scale_syst, n_electrons)
 
     logger.info("[Lepton Systematics] Electron scale and smear corrections applied successfully")
     print("Electron pt after scale and smear corrections:", events["Electron", "corrected_pt"])
@@ -961,3 +1015,389 @@ def electron_scale_smear_run3(events, year):
     print("Electron pt Smear Down:", events["Electron", "dEsigmaDown"])
 
     return events
+
+##########################
+### Muon Scale Run3 ###
+##########################
+
+MUON_SCALE_FILE = {
+    "2022preEE" : "higgs_dna/systematics/data/2022preEE_UL/muon_scale_2022preEE.json",
+    "2022postEE" : "higgs_dna/systematics/data/2022postEE_UL/muon_scale_2022postEE.json",
+    "2023preBPix" : "higgs_dna/systematics/data/2023preBPix_UL/muon_scale_2023preBPix.json",
+    "2023postBPix" : "higgs_dna/systematics/data/2023postBPix_UL/muon_scale_2023postBPix.json"
+}
+
+def muon_scale_run3(events, year, is_data):
+    """
+    Apply muon scale corrections for Run3.
+    - Data: only scale correction
+    - MC: scale + smear correction, with up/down variations
+    Based on MuonScaRe package.
+    
+    Now includes ptErr correction mimicking the EGamma method.
+    See:
+        - https://github.com/CMS-MUO-POG/MuonScaRe
+    """
+    logger.info("[Lepton Systematics] Applying muon scale/smear corrections for year %s, is_data=%s", year, is_data)
+
+    # Added ptErr to required fields
+    required_fields = [
+        ("Muon", "eta"), ("Muon", "pt"), ("Muon", "phi"), ("Muon", "charge"), ("Muon", "ptErr")
+    ]
+    
+    if not is_data:
+        required_fields.append(("Muon", "nTrackerLayers"))
+
+    missing_fields = awkward_utils.missing_fields(events, required_fields)
+
+    if missing_fields:
+        logger.warning(
+            "[Lepton Systematics] Muon scale corrections will not be applied, because the following fields are missing: %s" % str(missing_fields)
+        )
+        return events
+
+    evaluator = correctionlib.CorrectionSet.from_file(misc_utils.expand_path(MUON_SCALE_FILE[year]))
+
+    muons = events["Muon"]
+    n_muons = awkward.num(muons)
+    muons_flattened = awkward.flatten(muons)
+
+    muon_pt = awkward.to_numpy(muons_flattened.pt)
+    muon_eta = awkward.to_numpy(muons_flattened.eta)
+    muon_phi = awkward.to_numpy(muons_flattened.phi)
+    muon_charge = awkward.to_numpy(muons_flattened.charge)
+    # Get original pt error
+    muon_ptErr = awkward.to_numpy(muons_flattened.ptErr)
+    muon_abseta = numpy.abs(muon_eta)
+    
+    events["Muon", "ptErr_store"] = muons.ptErr
+    
+    LOW_PT_THRESHOLD = 26.0
+    HIGH_PT_THRESHOLD = 200.0
+
+    if is_data:
+        # Data: only scale correction
+        a_data = evaluator["a_data"].evaluate(muon_eta, muon_phi, "nom")
+        m_data = evaluator["m_data"].evaluate(muon_eta, muon_phi, "nom")
+
+        # Apply scale correction: pt_corr = 1 / (m/pt + charge * a)
+        pt_corr = 1.0 / (m_data / muon_pt + muon_charge * a_data)
+
+        # Filter boundaries: only apply corrections for pt in [26, 200] GeV
+        pt_corr = numpy.where((muon_pt < LOW_PT_THRESHOLD) | (muon_pt > HIGH_PT_THRESHOLD), muon_pt, pt_corr)
+        
+        # Filter out NaN entries
+        pt_corr = numpy.where(numpy.isnan(pt_corr), muon_pt, pt_corr)
+
+        # Calculate Scale Factor for Data
+        with numpy.errstate(divide='ignore', invalid='ignore'):
+            scale_factor_data = pt_corr / muon_pt
+        scale_factor_data = numpy.where(numpy.isnan(scale_factor_data) | (scale_factor_data == 0), 1.0, scale_factor_data)
+
+        # Correct ptErr for Data (Just scaling)
+        corrected_ptErr = muon_ptErr * scale_factor_data
+
+        # Store corrected pt and ptErr
+        events["Muon", "corrected_pt"] = awkward.unflatten(pt_corr, n_muons)
+        events["Muon", "corrected_ptErr"] = awkward.unflatten(corrected_ptErr, n_muons)
+        
+        logger.info("[Lepton Systematics] Muon pt before scale correction (data): mean = %.2f", awkward.mean(muons.pt))
+        logger.info("[Lepton Systematics] Muon pt after scale correction (data): mean = %.2f", awkward.mean(events["Muon", "corrected_pt"]))
+
+    else:
+        # MC: scale + smear correction with up/down variations
+        muon_nTrackerLayers = awkward.to_numpy(muons_flattened.nTrackerLayers).astype(float)
+        
+        # ========================
+        # Step 1: MC Scale correction
+        # ========================
+        a_mc = evaluator["a_mc"].evaluate(muon_eta, muon_phi, "nom")
+        m_mc = evaluator["m_mc"].evaluate(muon_eta, muon_phi, "nom")
+        
+        # Apply scale correction: pt_scaled = 1 / (m/pt + charge * a)
+        pt_scaled = 1.0 / (m_mc / muon_pt + muon_charge * a_mc)
+        
+        # Filter boundaries
+        pt_scaled = numpy.where((muon_pt < LOW_PT_THRESHOLD) | (muon_pt > HIGH_PT_THRESHOLD), muon_pt, pt_scaled)
+        pt_scaled = numpy.where(numpy.isnan(pt_scaled), muon_pt, pt_scaled)
+        
+        # Calculate Scale Factor (MC) to propagate to ptErr first
+        with numpy.errstate(divide='ignore', invalid='ignore'):
+            scale_factor_mc = pt_scaled / muon_pt
+        scale_factor_mc = numpy.where(numpy.isnan(scale_factor_mc) | (scale_factor_mc == 0), 1.0, scale_factor_mc)
+        
+        # Scaled input error (before smearing)
+        ptErr_scaled = muon_ptErr * scale_factor_mc
+
+        # ========================
+        # Step 2: MC Smear (Resolution) correction
+        # ========================
+        # Get CB parameters
+        cb_mean = evaluator["cb_params"].evaluate(muon_abseta, muon_nTrackerLayers, 0)
+        cb_sigma = evaluator["cb_params"].evaluate(muon_abseta, muon_nTrackerLayers, 1)
+        cb_n = evaluator["cb_params"].evaluate(muon_abseta, muon_nTrackerLayers, 2)
+        cb_alpha = evaluator["cb_params"].evaluate(muon_abseta, muon_nTrackerLayers, 3)
+        
+        # Get polynomial parameters for sigma(pt) (relative resolution sigma_pt)
+        poly_p0 = evaluator["poly_params"].evaluate(muon_abseta, muon_nTrackerLayers, 0)
+        poly_p1 = evaluator["poly_params"].evaluate(muon_abseta, muon_nTrackerLayers, 1)
+        poly_p2 = evaluator["poly_params"].evaluate(muon_abseta, muon_nTrackerLayers, 2)
+        
+        sigma_pt = poly_p0 + poly_p1 * pt_scaled + poly_p2 * pt_scaled * pt_scaled
+        sigma_pt = numpy.maximum(sigma_pt, 0.0)
+        
+        # Get k factor
+        k_data = evaluator["k_data"].evaluate(muon_abseta, "nom")
+        k_mc = evaluator["k_mc"].evaluate(muon_abseta, "nom")
+        k_diff_sq = numpy.maximum(k_data**2 - k_mc**2, 0.0)
+        k_factor = numpy.sqrt(k_diff_sq)
+        
+        # Generate random numbers
+        rndm = _sample_crystal_ball(cb_mean, cb_sigma, cb_alpha, cb_n, len(muon_pt))
+        
+        # Apply smearing to pt
+        # Formula: pt_smeared = pt_scaled * (1 + k * sigma * rndm)
+        smear_term_central = k_factor * sigma_pt # Relative width
+        pt_smeared = pt_scaled * (1.0 + smear_term_central * rndm)
+        
+        # Safety checks
+        pt_smeared = numpy.where(numpy.isnan(pt_smeared), pt_scaled, pt_smeared)
+        with numpy.errstate(divide='ignore', invalid='ignore'):
+            pt_ratio = pt_smeared / pt_scaled
+        pt_smeared = numpy.where(
+            (pt_ratio > 2) | (pt_ratio < 0.1) | (pt_smeared < 0) | 
+            (muon_pt < LOW_PT_THRESHOLD) | (muon_pt > HIGH_PT_THRESHOLD),
+            pt_scaled, pt_smeared
+        )
+        
+        # --- Correct ptErr (Central) ---
+        # Mimic Electron: sqrt(Err^2 + (Pt * smear_width)^2) * fluctuation
+        # For Muons: smear_width (absolute) = pt_scaled * (k * sigma_pt)
+        # fluctuation = pt_smeared / pt_scaled
+        
+        smear_width_abs = pt_scaled * smear_term_central
+        
+        with numpy.errstate(divide='ignore', invalid='ignore'):
+             smear_val = pt_smeared / pt_scaled # The random fluctuation factor
+        smear_val = numpy.where(numpy.isnan(smear_val) | (pt_scaled == 0), 1.0, smear_val)
+
+        corrected_ptErr = numpy.sqrt(ptErr_scaled**2 + smear_width_abs**2) * smear_val
+        
+        events["Muon", "corrected_pt"] = awkward.unflatten(pt_smeared, n_muons)
+        events["Muon", "corrected_ptErr"] = awkward.unflatten(corrected_ptErr, n_muons)
+        
+        # ========================
+        # Step 3: Scale Up/Down variations
+        # ========================
+        stat_a = evaluator["a_mc"].evaluate(muon_eta, muon_phi, "stat")
+        stat_m = evaluator["m_mc"].evaluate(muon_eta, muon_phi, "stat")
+        stat_rho = evaluator["m_mc"].evaluate(muon_eta, muon_phi, "rho_stat")
+        
+        with numpy.errstate(divide='ignore', invalid='ignore'):
+            scale_unc = pt_smeared * pt_smeared * numpy.sqrt(
+                stat_m**2 / (pt_smeared**2) + 
+                stat_a**2 + 
+                2 * muon_charge * stat_rho * stat_m / pt_smeared * stat_a
+            )
+        scale_unc = numpy.where(numpy.isnan(scale_unc), 0.0, scale_unc)
+        
+        pt_scale_up = pt_smeared + scale_unc
+        pt_scale_down = pt_smeared - scale_unc
+        
+        # Safety checks
+        pt_scale_up = numpy.where(numpy.isnan(pt_scale_up), pt_smeared, pt_scale_up)
+        pt_scale_down = numpy.where(numpy.isnan(pt_scale_down), pt_smeared, pt_scale_down)
+        pt_scale_down = numpy.maximum(pt_scale_down, 0.0)
+        
+        events["Muon", "scaleUp_pt"] = awkward.unflatten(pt_scale_up, n_muons)
+        events["Muon", "scaleDown_pt"] = awkward.unflatten(pt_scale_down, n_muons)
+
+        # Apply Scale Variation to ptErr
+        # Just scale the corrected_ptErr by the ratio of new_pt / old_pt
+        with numpy.errstate(divide='ignore', invalid='ignore'):
+             scale_factor_up = pt_scale_up / pt_smeared
+             scale_factor_down = pt_scale_down / pt_smeared
+        
+        scale_factor_up = numpy.where(numpy.isnan(scale_factor_up) | (pt_smeared == 0), 1.0, scale_factor_up)
+        scale_factor_down = numpy.where(numpy.isnan(scale_factor_down) | (pt_smeared == 0), 1.0, scale_factor_down)
+
+        events["Muon", "ptErr_scaleUp"] = awkward.unflatten(corrected_ptErr * scale_factor_up, n_muons)
+        events["Muon", "ptErr_scaleDown"] = awkward.unflatten(corrected_ptErr * scale_factor_down, n_muons)
+
+        # ========================
+        # Step 4: Smear Up/Down variations
+        # ========================
+        k_unc = evaluator["k_mc"].evaluate(muon_abseta, "stat")
+        
+        with numpy.errstate(divide='ignore', invalid='ignore'):
+            std_x_rndm = numpy.where(
+                k_factor > 0,
+                (pt_smeared / pt_scaled - 1.0) / k_factor,
+                0.0
+            )
+        
+        # Prepare lists for loop
+        syst_names = ["smearUp", "smearDown"]
+        # Determine modified k factors
+        k_syst_vals = [k_factor + k_unc, numpy.maximum(k_factor - k_unc, 0.0)]
+
+        for syst, k_syst in zip(syst_names, k_syst_vals):
+            # 1. Calculate new pt
+            pt_syst = pt_scaled * (1.0 + k_syst * std_x_rndm)
+            
+            # Handle k=0 case
+            pt_syst = numpy.where(k_factor == 0, pt_smeared, pt_syst)
+            pt_syst = numpy.where(numpy.isnan(pt_syst), pt_smeared, pt_syst)
+            
+            # Safety checks (clamping)
+            with numpy.errstate(divide='ignore', invalid='ignore'):
+                ratio_syst = pt_syst / pt_scaled
+            pt_syst = numpy.where(
+                (ratio_syst > 2) | (ratio_syst < 0.1) | (pt_syst < 0),
+                pt_scaled, pt_syst
+            )
+
+            # 2. Calculate new ptErr
+            # smear_syst = k_syst * sigma_pt (relative width)
+            # smear_abs_syst = pt_scaled * smear_syst
+            # smear_val_syst = pt_syst / pt_scaled
+            
+            smear_term_syst = k_syst * sigma_pt
+            smear_width_abs_syst = pt_scaled * smear_term_syst
+            
+            with numpy.errstate(divide='ignore', invalid='ignore'):
+                smear_val_syst = pt_syst / pt_scaled
+            smear_val_syst = numpy.where(numpy.isnan(smear_val_syst) | (pt_scaled == 0), 1.0, smear_val_syst)
+            
+            # The core logic mimicking electron: sqrt(err^2 + smear_width^2) * fluctuation
+            corrected_ptErr_syst = numpy.sqrt(ptErr_scaled**2 + smear_width_abs_syst**2) * smear_val_syst
+
+            # Save to events
+            events["Muon", f"{syst}_pt"] = awkward.unflatten(pt_syst, n_muons)
+            events["Muon", f"ptErr_{syst}"] = awkward.unflatten(corrected_ptErr_syst, n_muons)
+
+        logger.info("[Lepton Systematics] Muon pt/ptErr corrections applied successfully.")
+
+    return events
+
+
+def _sample_crystal_ball(mean, sigma, alpha, n, size):
+    """
+    Sample random numbers from a Crystal Ball distribution using inverse CDF method.
+    This is a vectorized implementation matching the C++ code in MuonScaRe.cc
+    
+    Parameters:
+    - mean, sigma, alpha, n: CB parameters (arrays)
+    - size: number of samples
+    
+    Returns:
+    - array of random numbers following the CB distribution
+    """
+    sqrt2 = numpy.sqrt(2.0)
+    sqrtPiOver2 = numpy.sqrt(numpy.pi / 2.0)
+    
+    fa = numpy.abs(alpha)
+    # Avoid division by zero: ensure fa > 0 and n > 1
+    fa = numpy.maximum(fa, 1e-10)
+    n = numpy.maximum(n, 1.0 + 1e-10)
+    sigma = numpy.maximum(sigma, 1e-10)
+    
+    ex = numpy.exp(-fa * fa / 2.0)
+    
+    # CB normalization and helper terms
+    with numpy.errstate(divide='ignore', invalid='ignore'):
+        C1 = n / fa / (n - 1) * ex
+        D1 = 2.0 * sqrtPiOver2 * _erf_vectorized(fa / sqrt2)
+        
+        B = n / fa - fa
+        C = (D1 + 2 * C1) / C1
+        D = (D1 + 2 * C1) / 2.0
+        N = 1.0 / sigma / (D1 + 2 * C1)
+        k = 1.0 / (n - 1)
+        Ns = N * sigma
+        NC = Ns * C1
+        F = 1.0 - fa * fa / n
+        G = sigma * n / fa
+        
+        # CDF at m-a*s and m+a*s
+        cdfMa = NC / numpy.power(F + fa * sigma / G, n - 1)
+        cdfPa = NC * (C - numpy.power(F + fa * sigma / G, 1 - n))
+    
+    # Handle NaN values in CDF calculations
+    cdfMa = numpy.where(numpy.isnan(cdfMa), 0.0, cdfMa)
+    cdfPa = numpy.where(numpy.isnan(cdfPa), 1.0, cdfPa)
+    
+    # Generate uniform random numbers
+    u = numpy.random.uniform(0, 1, size)
+    
+    # Inverse CDF
+    result = numpy.zeros(size)
+    
+    # Case 1: u < cdfMa (left tail)
+    mask1 = u < cdfMa
+    if numpy.any(mask1):
+        with numpy.errstate(over='ignore', invalid='ignore'):
+            result[mask1] = mean[mask1] + G[mask1] * (F[mask1] - numpy.power(NC[mask1] / u[mask1], k[mask1]))
+    
+    # Case 2: u > cdfPa (right tail)
+    mask2 = u > cdfPa
+    if numpy.any(mask2):
+        with numpy.errstate(over='ignore', invalid='ignore'):
+            result[mask2] = mean[mask2] - G[mask2] * (F[mask2] - numpy.power(C[mask2] - u[mask2] / NC[mask2], -k[mask2]))
+    
+    # Case 3: cdfMa <= u <= cdfPa (Gaussian core)
+    mask3 = ~mask1 & ~mask2
+    if numpy.any(mask3):
+        result[mask3] = mean[mask3] - sqrt2 * sigma[mask3] * _erfinv_vectorized(
+            (D[mask3] - u[mask3] / Ns[mask3]) / sqrtPiOver2
+        )
+    
+    # Handle NaN or inf values in result
+    result = numpy.where(numpy.isnan(result) | numpy.isinf(result), mean, result)
+    
+    return result
+
+
+def _erf_vectorized(x):
+    """Vectorized error function using numpy approximation or scipy if available"""
+    if HAS_SCIPY:
+        return scipy_erf(x)
+    else:
+        # Abramowitz and Stegun approximation (eq. 7.1.26)
+        # Maximum error: 1.5e-7
+        a1 = 0.254829592
+        a2 = -0.284496736
+        a3 = 1.421413741
+        a4 = -1.453152027
+        a5 = 1.061405429
+        p = 0.3275911
+        
+        sign = numpy.sign(x)
+        x = numpy.abs(x)
+        t = 1.0 / (1.0 + p * x)
+        y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * numpy.exp(-x * x)
+        return sign * y
+
+
+def _erfinv_vectorized(x):
+    """Vectorized inverse error function using numpy approximation or scipy if available"""
+    if HAS_SCIPY:
+        return scipy_erfinv(x)
+    else:
+        # Winitzki approximation for inverse error function
+        # Works well for |x| < 0.99
+        a = 0.147
+        ln_term = numpy.log(1 - x * x)
+        
+        term1 = 2.0 / (numpy.pi * a) + ln_term / 2.0
+        term2 = ln_term / a
+        
+        # Handle edge cases
+        result = numpy.sign(x) * numpy.sqrt(numpy.sqrt(term1 * term1 - term2) - term1)
+        
+        # Handle extreme values
+        result = numpy.where(x >= 1, numpy.inf, result)
+        result = numpy.where(x <= -1, -numpy.inf, result)
+        result = numpy.where(numpy.isnan(result), 0.0, result)
+        
+        return result

@@ -8,6 +8,8 @@ from pdb import set_trace
 plt.style.use(hep.style.CMS)
 
 config_dict = {
+    # "gamma_ptRelErr": {"range": (0, 5), "bins": 50, "title": r"$\sigma_{E^{\gamma}}$"},
+    "gamma_pt": {"range": (15, 65), "bins": 50, "title": r"$p_{T_{\gamma}}(GeV/c)$"},
     # "Z_relpt": {"range": (0, 1), "title": r"${p_T^{ll}\cdot c}/{m_{ll\gamma}}$"},
     # "gamma_relpt": {"range": (0.1, 1), "title": r"${p_T^{\gamma}\cdot c}/{m_{ll\gamma}}$"},
     # "pt_balance_0j": {"range": (0, 1), "title": r"$Zeppenfeld_{\gamma}(0j)$"},
@@ -17,8 +19,8 @@ config_dict = {
     # "jet_2_btagDeepFlavB": {"range": (0, 0.15), "title": "j2 btag"},
     # "HZ_deltaRap": {"range": (-0.7, 0.7), "title": r"$\Delta y(ll,ll\gamma)$"},
 
-    "jet_1_mass": {"range": (0, 40), "bins": 50, "title": r"$m_{j}(GeV/c^{2})$"},
-    "jet_1_eta": {"range": (-5, 5), "bins": 50, "title": r"$\eta_{j1}$"},
+    # "jet_1_mass": {"range": (0, 40), "bins": 50, "title": r"$m_{j}(GeV/c^{2})$"},
+    # "jet_1_eta": {"range": (-5, 5), "bins": 50, "title": r"$\eta_{j1}$"},
 
     # "mass_jj": {"range": (0, 1000), "bins": 50, "title": r"$m_{jj}(GeV/c^{2})$"},
     # "delta_eta_jj": {"range": (0, 8), "bins": 40, "title": r"$\Delta\eta_{j}$"},
@@ -26,35 +28,35 @@ config_dict = {
     # "jet_2_pt": {"range": (30, 150), "bins": 50, "title": r"$p_{T_{j2}}(GeV/c)$"},
     # "jet2G_deltaR": {"range": (0.4, 6.4), "bins": 40, "title": r"$\Delta R(\gamma,j2)$"},
 
-    "n_jets": {"range": (0, 2), "bins": 2, "title": r"$N_{jets}$"},
+    # "n_jets": {"range": (0, 2), "bins": 2, "title": r"$N_{jets}$"},
 
-    "llphoton_hmiss_photon_dphi": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi(ll\gamma-rev, photon)$"},
-    "delta_phi_zgjj": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi_{ll\gamma,j}$"},
-    "gamma_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta_{\gamma}$"},
-    "gamma_mvaID": {"range": (0.14, 1), "bins": 43, "title": "photon MVA"},
-    "jet_1_pt": {"range": (30, 330), "bins": 50, "title": r"$p_{T_{j1}}(GeV/c)$"},
-    "jet1G_deltaR": {"range": (0.4, 6.4), "bins": 40, "title": r"$\Delta R(\gamma,j1)$"},
-    "l1g_deltaR": {"range": (0.3, 4.3), "bins": 40, "title": r"max($\Delta R(l,\gamma)$)"},
-    "l2g_deltaR": {"range": (0.3, 3.3), "bins": 40, "title": r"min($\Delta R(l,\gamma)$)"},
-    "lep_cos_theta": {"range": (-1, 1), "bins": 40, "title": r"$\cos\theta$"},
-    "lep_phi": {"range": (-3.2, 3.2), "bins": 40, "title": r"$\phi$"},
-    "photon_zeppenfeld": {"range": (0, 5), "bins": 50, "title": "Zeppenfeld $\gamma$"},
-    "pt_balance": {"range": (0, 1), "bins": 50, "title": "system balance"},
-    "Z_cos_theta": {"range": (-1, 1), "bins": 50, "title": r"$\cos\Theta$"},
-    "Z_lead_lepton_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta_{l1}$"},
-    "Z_sublead_lepton_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta_{l2}$"},
-    "H_relpt": {"range": (0, 3), "bins": 50, "title": r"${p_{T_{ll\gamma}}\cdot c}/{m_{ll\gamma}}$"},
+    # "llphoton_hmiss_photon_dphi": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi(ll\gamma-rev, photon)$"},
+    # "delta_phi_zgjj": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi_{ll\gamma,j}$"},
+    # "gamma_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta_{\gamma}$"},
+    # "gamma_mvaID": {"range": (0.14, 1), "bins": 43, "title": "photon MVA"},
+    # "jet_1_pt": {"range": (30, 330), "bins": 50, "title": r"$p_{T_{j1}}(GeV/c)$"},
+    # "jet1G_deltaR": {"range": (0.4, 6.4), "bins": 40, "title": r"$\Delta R(\gamma,j1)$"},
+    # "l1g_deltaR": {"range": (0.3, 4.3), "bins": 40, "title": r"max($\Delta R(l,\gamma)$)"},
+    # "l2g_deltaR": {"range": (0.3, 3.3), "bins": 40, "title": r"min($\Delta R(l,\gamma)$)"},
+    # "lep_cos_theta": {"range": (-1, 1), "bins": 40, "title": r"$\cos\theta$"},
+    # "lep_phi": {"range": (-3.2, 3.2), "bins": 40, "title": r"$\phi$"},
+    # "photon_zeppenfeld": {"range": (0, 5), "bins": 50, "title": "Zeppenfeld $\gamma$"},
+    # "pt_balance": {"range": (0, 1), "bins": 50, "title": "system balance"},
+    # "Z_cos_theta": {"range": (-1, 1), "bins": 50, "title": r"$\cos\Theta$"},
+    # "Z_lead_lepton_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta_{l1}$"},
+    # "Z_sublead_lepton_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta_{l2}$"},
+    # "H_relpt": {"range": (0, 3), "bins": 50, "title": r"${p_{T_{ll\gamma}}\cdot c}/{m_{ll\gamma}}$"},
     "gamma_ptRelErr": {"range": (0.01, 0.11), "bins": 50, "title": r"$\sigma_{p_T^{\gamma}}/p_T^{\gamma}$"}
 }
 
 TREE = "zero_to_one_jet"
 WEIGHT = "weight_corr"
-PATH = "/eos/user/j/jiehan/root/skimmed_ntuples_rui_new/"
-years = ["2016preVFP", "2016postVFP", "2017", "2018", "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"] #"2016preVFP", "2016postVFP", "2017", "2018", "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"
+PATH = "/eos/user/j/jiehan/root/skimmed_ntuples/"
+years = [ "2023preBPix", "2023postBPix"] #"2016preVFP", "2016postVFP", "2017", "2018", "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"
 
 data = {"data": ["Data"]}
 # bkg = {r"Z$+\gamma$": ["ZGToLLG"], "Z+Fake Photon": ["DYJetsToLL", "EWKZ2J"], r"VBSZ+$\gamma$": ["ZG2JToG2L2J"], r"t$\bar{t}$": ["TT"], r"t$\gamma$/t$\bar{t}\gamma$": ["TTGJets", "TGJets"], "multiboson": ["WW", "WZ", "ZZ", "WWG", "WZG", "ZZG",], r"t$\bar{t}$+X": ["ttZJets", "ttWJets"]}
-bkg = {r"Z$+\gamma$": ["ZGToLLG"], "Z+Fake Photon": ["DYJetsToLL"], r"VBSZ+$\gamma$": ["EWKZ2J"]}
+bkg = {r"Z$+\gamma$": ["DYGto2LG_10to100"], "Z+Fake Photon": ["DYJetsToLL"], r"VBSZ+$\gamma$": ["ZG2JToG2L2J"]}
 color_dict = {r"Z$+\gamma$": "#3f90da", "Z+Fake Photon": "#ffa90e", r"VBSZ+$\gamma$": "#92dadd", r"t$\bar{t}$": "#e76300", r"t$\gamma$/t$\bar{t}\gamma$": "#bd1f01", "multiboson": "#832db6", r"t$\bar{t}$+X": "#94a4a2"}
 
 def get_sf(bkg_dict, data_dict, sf_var, range, selection=""):

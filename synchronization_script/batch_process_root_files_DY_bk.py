@@ -28,7 +28,7 @@ def parse_arguments():
                         help='Directory to save output files')
     parser.add_argument('--dry-run', action='store_true',
                         help='If set, only list files without processing them')
-    parser.add_argument('--years', type=str, nargs='+', default=["2022", "2022EE", "2023", "2023BPix"],
+    parser.add_argument('--years', type=str, nargs='+', default=["2016", "2016APV", "2017", "2018"],
                         help='List of years to process (default: "2016", "2016APV", "2017", "2018", "2022", "2022EE", "2023", "2023BPix")')
     return parser.parse_args()
 
@@ -74,29 +74,29 @@ def main():
     
     # Branch renaming mapping
     branch_mapping = {
-        # "pt_mass": "H_relpt",
-        # "llphoton_m": "H_mass",
-        # "ll_m": "Z_mass",
-        # "llphoton_dijet_dphi": "delta_phi_zgjj",
-        # "llphoton_pTt": "H_ptt",
-        # "costheta": "lep_cos_theta",
-        # "phi": "lep_phi",
-        # "llphoton_dijet_balance": "pt_balance",
-        # "cosTheta": "Z_cos_theta",
+        "llphoton_pTt": "H_ptt",
+        "pt_mass": "H_relpt",
+        "llphoton_m": "H_mass",
+        "ll_m": "Z_mass",
+        "llphoton_dijet_dphi": "delta_phi_zgjj",
+        "costheta": "lep_cos_theta",
+        "phi": "lep_phi",
+        "llphoton_dijet_balance": "pt_balance",
+        "cosTheta": "Z_cos_theta",
 
         "j1_m": "jet_1_mass",
         "j1_eta": "jet_1_eta",
 
-        "llphoton_refit_pTt": "H_ptt",
-        "pt_mass_refit": "H_relpt",
-        "llphoton_refit_m": "H_mass",
-        "ll_refit_m": "Z_mass",
-        "llphoton_refit_dijet_dphi": "delta_phi_zgjj",
-        "llphoton_refit_pTt": "H_ptt",
-        "llphoton_refit_costheta": "lep_cos_theta",
-        "llphoton_refit_psi": "lep_phi",
-        "llphoton_refit_dijet_balance": "pt_balance",
-        "llphoton_refit_cosTheta": "Z_cos_theta",
+        # "llphoton_refit_pTt": "H_ptt",
+        # "pt_mass_refit": "H_relpt",
+        # "llphoton_refit_m": "H_mass",
+        # "ll_refit_m": "Z_mass",
+        # "llphoton_refit_dijet_dphi": "delta_phi_zgjj",
+        # "llphoton_refit_pTt": "H_ptt",
+        # "llphoton_refit_costheta": "lep_cos_theta",
+        # "llphoton_refit_psi": "lep_phi",
+        # "llphoton_refit_dijet_balance": "pt_balance",
+        # "llphoton_refit_cosTheta": "Z_cos_theta",
 
         "photon_pt_ratio": "gamma_relpt",
         "dijet_m": "mass_jj",
@@ -125,8 +125,8 @@ def main():
     logging.info(f"Found {len(input_files)} files")
     
     # 修改正则表达式以匹配DY相关文件和其他格式
-    # 匹配格式如: DYfilter_2016_redwood_v1_vbf.root
-    pattern = re.compile(r'(DY0|DYfilter|DYmix|[^_]+)_((?:2016APV)|(?:2022EE)|(?:2023BPix)|[0-9]{4})_redwood_v1_(?:(?:all|ggf|vbf)_)?(?:fixedjet_)?(ggf_ext|vbf_ext)\.root')
+    # 匹配格式如: DYmix_2017_redwood_v1_vbf_vbf_ext_nll.root， DYmix_2018_redwood_v1_ggf_ggf_ext.root
+    pattern = re.compile(r'(DY0|DYfilter|DYmix)_((?:2016APV)|(?:2022EE)|(?:2023BPix)|[0-9]{4})_redwood_v1_(?:(?:all|ggf|vbf)_)?(?:fixedjet_)?(?:ggf|vbf)_(ggf_ext|vbf_ext_nll_drop|vbf_ext_nll)\.root')
     
     # Statistics for processing results
     stats = {"success": 0, "skipped": 0, "recovered": 0, "failed": 0}
@@ -163,7 +163,7 @@ def main():
             
             if ext == "ggf_ext":
                 dy_files_by_year[year]["ggf_ext"].append(file_path)
-            elif ext == "vbf_ext":
+            elif "vbf_ext_nll" in ext:
                 dy_files_by_year[year]["vbf_ext"].append(file_path)
             # Skip files without special suffix
         else:

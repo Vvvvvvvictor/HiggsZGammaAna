@@ -108,7 +108,28 @@ class Systematic():
         :raises ValueError: if the fields are not present
         """
         
-        missing_fields = awkward_utils.missing_fields(events, [field for var, field in self.branches.items()])
+        fields_to_check = []
+        for var, field in self.branches.items():
+            if isinstance(field, str):
+                print("str:", field)
+                fields_to_check.append(field)
+            elif isinstance(field, tuple):
+                if any(isinstance(f, list) for f in field):
+                    print("list in tuple:", field)
+                    fields_to_check.extend(list(field))
+                elif all(isinstance(f, str) for f in field):
+                    if all("PuppiMET_" not in f for f in field):
+                        print("No list in tuple w/o PuppiMET:", field)
+                        fields_to_check.append(tuple(field))
+                    else:
+                        print("list in tuple with PuppiMET:", field)
+                        fields_to_check.extend(field)
+            else:
+                message = "[Systematic : check_fields] Systematic: %s, each entry in the 'branches' dict should be either a str or tuple, not %s which is the type of entry %s" % (self.name, str(type(field)), str(field))
+                logger.exception(message)
+                raise TypeError(message)
+        
+        missing_fields = awkward_utils.missing_fields(events, tuple(fields_to_check))
         if missing_fields:
             message = "[Systematic : check_fields] Systematic: %s, the events array is missing the following fields: %s, which were specified as the input branches to calculate this systematic." % (self.name, str(missing_fields))
             logger.exception(message)
@@ -479,8 +500,8 @@ class SystematicWithIndependentCollection(Systematic):
     Abstract class for a systematic which modifies event content, i.e. a field in the original events array has its values modified. 
     Derives from higgs_dna.systematics.systematic.Systematic
 
-    :param branch_modified: the field in the events array which will be modified by the up/down variations of this systematic
-    :type branch_modified: str or tuple
+    :param branch_modified: the field(s) in the events array which will be modified by the up/down variations of this systematic. Can be a single branch (str or tuple) or a list of branches to modify multiple fields simultaneously
+    :type branch_modified: str, tuple, or list
     :param modify_nominal: whether to modify the nominal value of <branch_modified> 
     :type modify_nominal: bool 
     :param nominal_only: whether to calculate only the nominal correction (and not up/down variations)
@@ -562,15 +583,52 @@ class SystematicWithIndependentCollection(Systematic):
             if not variation == NOMINAL_TAG and self.nominal_only:
                 continue
             name = self.name + "_" + variation
-            if self.additive:
-                new_branch_content = events[self.branch_modified] + events[branch]
+            
+            # Check if branch_modified is a list (multiple branches to modify)
+            logger.debug("type of branch_modified: tuple %s, list %s, str %s, other %s", isinstance(self.branch_modified, tuple), isinstance(self.branch_modified, list), isinstance(self.branch_modified, str), not isinstance(self.branch_modified, (str, list, tuple)))
+            for sub in (self.branch_modified if isinstance(self.branch_modified, (list, tuple)) else [self.branch_modified]):
+                logger.debug("  sub-type of branch_modified: tuple %s, list %s, str %s, other %s", isinstance(sub, tuple), isinstance(sub, list), isinstance(sub, str), not isinstance(sub, (str, list, tuple)))
+
+            if isinstance(self.branch_modified, tuple) and (any(isinstance(b, list) for b in self.branch_modified) or any("PuppiMET_" in b for b in branch)):
+                # Multiple branches to modify
+                if not isinstance(branch, list) and not isinstance(branch, tuple):
+                    message = "[SystematicWithIndependentCollection : produce_from_branch] SystematicWithIndependentCollection: %s, branch_modified is a list but branch for variation '%s' is not a list." % (self.name, variation)
+                    logger.exception(message)
+                    raise ValueError(message)
+                
+                if len(self.branch_modified) != len(branch):
+                    message = "[SystematicWithIndependentCollection : produce_from_branch] SystematicWithIndependentCollection: %s, branch_modified has %d elements but branch for variation '%s' has %d elements." % (self.name, len(self.branch_modified), variation, len(branch))
+                    logger.exception(message)
+                    raise ValueError(message)
+                
+                # Start with original events
+                events_var = events
+                # Apply modifications for each branch
+                for branch_mod, branch_val in zip(self.branch_modified, branch):
+                    logger.debug("[SystematicWithIndependentCollection : produce_from_branch] SystematicWithIndependentCollection: %s, modifying branch '%s' for variation '%s' with branch '%s'" % (self.name, branch_mod, variation, branch_val))
+                    branch_mod = tuple(branch_mod) if isinstance(branch_mod, list)else branch_mod
+                    branch_val = tuple(branch_val) if isinstance(branch_val, list) else branch_val
+                    if self.additive:
+                        new_branch_content = events_var[branch_mod] + events_var[branch_val]
+                    else:
+                        new_branch_content = events_var[branch_val]
+                    events_var = awkward.with_field(
+                            events_var,
+                            new_branch_content,
+                            branch_mod
+                    )
+                independent_collections[variation] = events_var
             else:
-                new_branch_content = events[branch]
-            independent_collections[variation] = awkward.with_field(
-                    events,
-                    new_branch_content,
-                    self.branch_modified
-            )
+                # Single branch to modify (original behavior)
+                if self.additive:
+                    new_branch_content = events[self.branch_modified] + events[branch]
+                else:
+                    new_branch_content = events[branch]
+                independent_collections[variation] = awkward.with_field(
+                        events,
+                        new_branch_content,
+                        self.branch_modified
+                )
 
         return independent_collections
 
@@ -597,10 +655,36 @@ class SystematicWithIndependentCollection(Systematic):
             if not variation == NOMINAL_TAG and self.nominal_only:
                 continue 
             name = self.name + "_" + variation
-            independent_collections[variation] = awkward.with_field(
-                    events,
-                    branch,
-                    self.branch_modified
-            )
+            
+            # Check if branch_modified is a list (multiple branches to modify)
+            if isinstance(self.branch_modified, list):
+                # Multiple branches to modify
+                if not isinstance(branch, list):
+                    message = "[SystematicWithIndependentCollection : produce_from_function] SystematicWithIndependentCollection: %s, branch_modified is a list but branch for variation '%s' is not a list." % (self.name, variation)
+                    logger.exception(message)
+                    raise ValueError(message)
+                
+                if len(self.branch_modified) != len(branch):
+                    message = "[SystematicWithIndependentCollection : produce_from_function] SystematicWithIndependentCollection: %s, branch_modified has %d elements but branch for variation '%s' has %d elements." % (self.name, len(self.branch_modified), variation, len(branch))
+                    logger.exception(message)
+                    raise ValueError(message)
+                
+                # Start with original events
+                events_var = events
+                # Apply modifications for each branch
+                for branch_mod, branch_val in zip(self.branch_modified, branch):
+                    events_var = awkward.with_field(
+                            events_var,
+                            branch_val,
+                            branch_mod
+                    )
+                independent_collections[variation] = events_var
+            else:
+                # Single branch to modify (original behavior)
+                independent_collections[variation] = awkward.with_field(
+                        events,
+                        branch,
+                        self.branch_modified
+                )
 
         return independent_collections

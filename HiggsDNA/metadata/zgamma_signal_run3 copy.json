@@ -20,6 +20,30 @@
     ],
     "systematics": {
         "weights": {
+            "ps_isr_sf": {
+                "type": "event",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.ps_systematics",
+                    "name": "ps_isr_sf"
+                },
+                "modify_central_weight": false,
+                "requires_branches": [
+                    "PSWeight"
+                ]
+            },
+            "ps_fsr_sf": {
+                "type": "event",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.ps_systematics",
+                    "name": "ps_fsr_sf"
+                },
+                "modify_central_weight": false,
+                "requires_branches": [
+                    "PSWeight"
+                ]
+            },
             "pu_reweight_sf": {
                 "type": "event",
                 "method": "from_function",
@@ -32,12 +56,24 @@
                     "Pileup_nTrueInt"
                 ]
             },
-            "btag_deepjet_wp_sf" : {
+            "btag_deepjet_wp_sf_heavy" : {
                 "type" : "object",
                 "method" : "from_function",
                 "function" : {
                     "module_name" : "higgs_dna.systematics.jet_systematics",
-                    "name" : "btag_deepjet_wp_sf"
+                    "name" : "btag_deepjet_wp_sf_heavy"
+                },
+                "modify_central_weight" : false,
+                "input_collection" : "Jet",
+                "target_collections" : ["SelectedJet"],
+                "working_point" : "M"
+            },
+            "btag_deepjet_wp_sf_light" : {
+                "type" : "object",
+                "method" : "from_function",
+                "function" : {
+                    "module_name" : "higgs_dna.systematics.jet_systematics",
+                    "name" : "btag_deepjet_wp_sf_light"
                 },
                 "modify_central_weight" : false,
                 "input_collection" : "Jet",
@@ -327,16 +363,16 @@
                 "method": "from_branch",
                 "branch_modified": "MET_pt",
                 "branches": {
-                    "up": "MET_T1_pt_jesTotalUp",
-                    "down": "MET_T1_pt_jesTotalDown"
+                    "up": "PuppiMET_ptJESUp",
+                    "down": "PuppiMET_ptJESDown"
                 }
             },
             "MET_Unclustered": {
                 "method": "from_branch",
                 "branch_modified": "MET_pt",
                 "branches": {
-                    "up": "MET_T1_pt_unclustEnUp",
-                    "down": "MET_T1_pt_unclustEnDown"
+                    "up": "PuppiMET_ptUnclusteredUp",
+                    "down": "PuppiMET_ptUnclusteredDown"
                 }
             },
             "Muon_pt_scale": {
@@ -378,10 +414,10 @@
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "ggH_M125", "VBF_M125", "ttH_M125", "WminusH_M125", "WplusH_M125", "ZH_M125"
+            "ggH_M125", "VBF_M125", "WplusH_M125", "WminusH_M125", "ZH_M125", "ttH_M125"
         ],
         "years": [
-             "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"
+            "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"
         ]
     },
     "variables_of_interest": [
@@ -524,6 +560,7 @@
         "z_ee"
     ],
     "branches": [
+        "PSWeight",
         "GenVtx_z",
         "PV_z",
         "L1PreFiringWeight_Nom",
@@ -644,6 +681,11 @@
         "Electron_energyErr",
         "Electron_r9",  
         "Electron_genPartIdx",
+        "Jet_area",
+        "Jet_rawFactor",
+        "Rho_fixedGridRhoFastjetAll",
+        "Jet_neHEF",
+        "Jet_neEmEF",
         "Jet_pt",
         "Jet_eta",
         "Jet_phi",
@@ -653,6 +695,16 @@
         "Jet_hadronFlavour",
         "MET_pt",
         "MET_phi",
+        "PuppiMET_pt",
+        "PuppiMET_phi",
+        "PuppiMET_ptJESUp",
+        "PuppiMET_ptJESDown",
+        "PuppiMET_ptUnclusteredUp",
+        "PuppiMET_ptUnclusteredDown",
+        "GenJet_eta",
+        "GenJet_mass",
+        "GenJet_phi",
+        "GenJet_pt",
         "GenPart_eta",
         "GenPart_genPartIdxMother",
         "GenPart_mass",
@@ -755,17 +807,19 @@
             ],
             [
                 [
-                    "Photon",
-                    "pt"
+                    "MET_pt"
                 ],
                 [
-                    "Photon",
-                    "corrected_pt"
+                    "PuppiMET_pt"
                 ]
             ],
             [
-                "MET_pt",
-                "MET_T1_pt"
+                [
+                    "MET_phi"
+                ],
+                [
+                    "PuppiMET_phi"
+                ]
             ]
         ],
         "data": []

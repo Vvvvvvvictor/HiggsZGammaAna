@@ -7,7 +7,7 @@
 
 # Activate environment
 echo "Activating hzgml environment..."
-source /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/setup.sh || echo "Failed to activate environment, continuing..."
+# source /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/setup.sh || echo "Failed to activate environment, continuing..."
 
 # Set output directory with timestamp
 OUTPUT_DIR="/eos/user/j/jiehan/root/outputs/bdt_comparison_$(date +%Y%m%d_%H%M%S)"
@@ -17,7 +17,7 @@ echo "Output directory: $OUTPUT_DIR"
 echo "Starting BDT model comparison..."
 
 # Define samples and regions to process
-SAMPLES=("VBF_M125" "ggH_M125" "ZGToLLG" "EWKZ2J")
+SAMPLES=("ZGToLLG") #"VBF_M125" "ggH_M125" "ZGToLLG" "EWKZ2J" "DYJetsToLL"
 REGIONS=("zero_to_one_jet" "two_jet") # 
 YEARS=("2018") #"2016preVFP" "2016postVFP" "2017" "2018" "2022preEE" "2022postEE" "2023preBPix" "2023postBpix"
 
@@ -41,7 +41,7 @@ for region in "${REGIONS[@]}"; do
             --output-dir $OUTPUT_DIR/$region/ \
             --input-dir /eos/user/j/jiehan/root/skimmed_ntuples_rui_new/ \
             --your-model-dir /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/models \
-            --external-model-dir /eos/project/h/htozg-dy-privatemc/rzou/bdt/XGB_scores/ \
+            --external-model-dir /eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/ \
             --config-dir /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/data
         
         if [ $? -eq 0 ]; then

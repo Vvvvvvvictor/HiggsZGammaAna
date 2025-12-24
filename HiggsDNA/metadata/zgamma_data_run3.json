@@ -60,10 +60,10 @@
         "Z_sublead_lepton_charge",
         "Z_sublead_lepton_id",
         "Z_sublead_lepton_ptE_error",
-        "electron_1_energyErr",
-        "electron_2_energyErr",
-        "electron_3_energyErr",
-        "electron_4_energyErr",
+        "electron_1_ptErr",
+        "electron_2_ptErr",
+        "electron_3_ptErr",
+        "electron_4_ptErr",
         "muon_1_ptErr",
         "muon_2_ptErr",
         "muon_3_ptErr",
@@ -265,6 +265,12 @@
         "Electron_mvaFall17V2Iso_WPL",
         "Electron_energyErr",
         "Electron_r9",
+        "Electron_seedGain",
+        "Jet_area",
+        "Jet_rawFactor",
+        "Rho_fixedGridRhoFastjetAll",
+        "Jet_neHEF",
+        "Jet_neEmEF",
         "Jet_pt",
         "Jet_eta",
         "Jet_phi",
@@ -272,8 +278,14 @@
         "Jet_btagDeepFlavB",
         "Jet_jetId",
         "Jet_hadronFlavour",
+        "Jet_chEmEF",
+        "Jet_muonSubtrFactor",
+        "RawPuppiMET_pt",
+        "RawPuppiMET_phi",
         "MET_pt",
         "MET_phi",
+        "PuppiMET_pt",
+        "PuppiMET_phi",
         "genWeight",
         "run",
         "event",
@@ -292,5 +304,86 @@
         "Flag_BadPFMuonDzFilter",
         "TrigObj_id",
         "TrigObj_filterBits"
-    ]
+    ],
+    "branch_map": {
+        "mc": [],
+        "data": [
+            [
+                [
+                    "Muon",
+                    "pt"
+                ],
+                [
+                    "Muon",
+                    "corrected_pt"
+                ]
+            ],
+            [
+                [
+                    "Electron",
+                    "pt"
+                ],
+                [
+                    "Electron",
+                    "corrected_pt"
+                ]
+            ],
+            [
+                [
+                    "Electron",
+                    "energyErr"
+                ],
+                [
+                    "Electron",
+                    "corrected_energyErr"
+                ]
+            ],
+            [
+                [
+                    "Photon",
+                    "pt"
+                ],
+                [
+                    "Photon",
+                    "corrected_pt"
+                ]
+            ],
+            [
+                [
+                    "Photon",
+                    "energyErr"
+                ],
+                [
+                    "Photon",
+                    "corrected_energyErr"
+                ]
+            ],
+            [
+                [
+                    "Jet",
+                    "pt"
+                ],
+                [
+                    "Jet",
+                    "corrected_pt"
+                ]
+            ],
+            [
+                [
+                    "MET_pt"
+                ],
+                [
+                    "PuppiMET_pt_corrected"
+                ]
+            ],
+            [
+                [
+                    "MET_phi"
+                ],
+                [
+                    "PuppiMET_phi_corrected"
+                ]
+            ]
+        ]
+    }
 }

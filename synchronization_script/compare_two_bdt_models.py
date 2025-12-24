@@ -58,15 +58,15 @@ def get_args():
                         default='/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/models',
                         help='Directory containing your trained models')
     parser.add_argument('--external-model-dir', type=str,
-                        default='/eos/project/h/htozg-dy-privatemc/rzou/bdt/XGB_scores/',
+                        default='/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_output_redwood/',
                         help='Directory containing external models')
     parser.add_argument('--config-dir', type=str,
                         default='/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/data',
                         help='Directory containing configuration files')
     parser.add_argument('--sample', type=str, nargs='+', 
-                        default=['VBF_M125', 'ggH_M125', 'ZGToLLG', 'EWKZ2J'],
+                        default=['DYJetsToLL'], #'VBF_M125', 'ggH_M125', 'ZGToLLG', 'EWKZ2J'
                         help='Samples to process')
-    parser.add_argument('--year', type=str, default='2018', 
+    parser.add_argument('--year', type=str, default='2016preVFP', 
                         help='Year to process')
     
     return parser.parse_args()
@@ -242,7 +242,7 @@ class BDTModelComparator:
             
             # Load external models (4 folds)
             for fold in range(4):
-                model_path = os.path.join(self.external_model_dir, f'model_xgb_{fold}_{model_type}.json')
+                model_path = os.path.join(self.external_model_dir, f'model_xgb_{fold}_{model_type}_redwood_v1_ext_val.json')
                 if os.path.exists(model_path):
                     model = xgb.Booster()
                     model.load_model(model_path)
@@ -366,6 +366,23 @@ class BDTModelComparator:
                         external_data = self.map_variables(data_fold, self.external_model_vars, is_external=True)
                         if not external_data.empty:
                             try:
+                                # # for column_name in self.external_model_vars:
+                                # #     external_data.loc[:, column_name] = 1.0
+                                # external_data = external_data[:1]
+                                # event1 = [1.0, -0.668896, 0.111204, -0.506836, -1.183105, 0.186646, -1.970355, 0.447510, 0.080442, 2.203866, 2.207445, 0.264801, -999.0, -999.0, -999.0, 0.270044, -999.0, -999.0, -999.0, 0]
+                                # for i, column_name in enumerate(self.external_model_vars):
+                                #     # external_data_temp = external_data.copy(deep=True)
+                                #     # if column_name in external_data.columns:
+                                #     external_data.loc[:, column_name] = event1[i]
+                                #     # print("fold: ", fold, " dataframe: ", external_data_temp[self.external_model_vars])
+                                #     # for col in self.external_model_vars:
+                                #     #     print(f"fold: {fold}, col: {col}, data: ", external_data_temp[col].values)
+                                # dmatrix = xgb.DMatrix(external_data[self.external_model_vars])
+                                # preds = self.external_models[fold].predict(dmatrix)
+                                # print("fold: ", fold, " preds: ", preds)
+                                # break
+
+
                                 # Ensure column order matches external_model_vars
                                 dmatrix = xgb.DMatrix(external_data[self.external_model_vars])
                                 external_scores = self.external_models[fold].predict(dmatrix)

@@ -53,6 +53,7 @@ def getArgs():
 
     parser.add_argument('-s', '--shield', action='store', type=int, default=-1, help='Which variables needs to be shielded')
     parser.add_argument('-a', '--add', action='store', type=int, default=-1, help='Which variables needs to be added')
+    parser.add_argument('--reweight', action='store_true', default=False, help='Apply reweighting to background to make H_mass uniform')
 
     return parser.parse_args()
 
@@ -84,8 +85,10 @@ class XGBoostHandler(object):
         self._shield = args.shield
         self._add = args.add
         self.oneHyperparameter = args.oneHyperparameter
+        self._reweight = args.reweight
 
         self._region = region
+        self._current_fold = 0  # Track current fold for diagnostic plots
 
         self._inputFolder = args.inputFolder
         # 原本為 'models'，改為 hzgml_PATH/models 的絕對路徑
@@ -363,7 +366,7 @@ class XGBoostHandler(object):
             if col in data.columns:
                 data = data.rename(columns={col: rename_map[col]})
         columns = list(data.columns)
-        for rem in ("is_center", "weight", "event", "gamma_mvaID_WP80", "gamma_mvaID_WPL", "n_iso_photons", "n_b_jets", "n_jets", "H_mass", "gamma_pt"):
+        for rem in ("is_center", "weight", "event", "gamma_mvaID_WP80", "gamma_mvaID_WPL", "n_iso_photons", "n_b_jets", "n_jets", "gamma_pt"):
             if rem in columns:
                 columns.remove(rem)
                 data = data.drop(rem, axis=1)
@@ -419,7 +422,7 @@ class XGBoostHandler(object):
     def reweightSignal(self):
         min_mass, max_mass = 100, 180
         if (self.m_data_bkg["H_mass"] > min_mass).all() and (self.m_data_bkg["H_mass"] < max_mass).all():
-            n_bins = 100
+            n_bins = 80
             bin_edges = np.linspace(min_mass, max_mass, n_bins + 1)
             
             sig_hist, _ = np.histogram(self.m_data_sig['H_mass'], bins=bin_edges, weights=self.m_data_sig['weight'], density=True)
@@ -434,15 +437,18 @@ class XGBoostHandler(object):
 
 
     def prepareData(self, fold=0):
+        # Store current fold for diagnostic plots
+        self._current_fold = fold
+        
         # training, validation, test split
         print('----------------------------------------------------------')
         print('XGB INFO: Splitting samples to training, validation, and test...')
-        test_sig = self.m_data_sig[self.m_data_sig[self.randomIndex]%314159%4 == fold]
-        test_bkg = self.m_data_bkg[self.m_data_bkg[self.randomIndex]%314159%4 == fold]
-        val_sig = self.m_data_sig[(self.m_data_sig[self.randomIndex]-1)%314159%4 == fold]
-        val_bkg = self.m_data_bkg[(self.m_data_bkg[self.randomIndex]-1)%314159%4 == fold]
-        train_sig = self.m_data_sig[((self.m_data_sig[self.randomIndex]-2)%314159%4 == fold) | ((self.m_data_sig[self.randomIndex]-3)%314159%4 == fold)]
-        train_bkg = self.m_data_bkg[((self.m_data_bkg[self.randomIndex]-2)%314159%4 == fold) | ((self.m_data_bkg[self.randomIndex]-3)%314159%4 == fold)]
+        test_sig = self.m_data_sig[self.m_data_sig[self.randomIndex]%314159%4 == fold].copy()
+        test_bkg = self.m_data_bkg[self.m_data_bkg[self.randomIndex]%314159%4 == fold].copy()
+        val_sig = self.m_data_sig[(self.m_data_sig[self.randomIndex]-1)%314159%4 == fold].copy()
+        val_bkg = self.m_data_bkg[(self.m_data_bkg[self.randomIndex]-1)%314159%4 == fold].copy()
+        train_sig = self.m_data_sig[((self.m_data_sig[self.randomIndex]-2)%314159%4 == fold) | ((self.m_data_sig[self.randomIndex]-3)%314159%4 == fold)].copy()
+        train_bkg = self.m_data_bkg[((self.m_data_bkg[self.randomIndex]-2)%314159%4 == fold) | ((self.m_data_bkg[self.randomIndex]-3)%314159%4 == fold)].copy()
 
         headers = ['Sample', 'Total', 'Training', 'Validation']
         sample_size_table = [
@@ -467,6 +473,16 @@ class XGBoostHandler(object):
 
         # setup the weights
         print('XGB INFO: Setting the event weights...')
+
+        # Apply reweight if requested
+        if self._reweight:
+            # Compute reweight factors for background to make H_mass uniform
+            print('XGB INFO: Computing reweight factors for background on H_mass...')
+            train_bkg_reweight = self.compute_reweight_factors(train_bkg, mass_var='H_mass')
+            val_bkg_reweight = self.compute_reweight_factors(val_bkg, mass_var='H_mass')
+        
+            train_bkg.loc[:, self.weight] = train_bkg[self.weight].values * train_bkg_reweight
+            val_bkg.loc[:, self.weight] = val_bkg[self.weight].values * val_bkg_reweight
 
         if self.SF == -1: self.SF = 1.*train_sig.shape[0]/train_bkg.shape[0]
         train_sig_wt = train_sig[[self.weight]] * ( train_sig.shape[0] + train_bkg.shape[0] ) * self.SF / ( train_sig[self.weight].mean() * (1.+self.SF) * train_sig.shape[0] )
@@ -783,22 +799,22 @@ class XGBoostHandler(object):
 
         def objective(trial):
             params = {
-                'max_depth': trial.suggest_int('max_depth', 3, 40),
+                'max_depth': trial.suggest_int('max_depth', 3, 25),
                 'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.03, log=True),
-                'subsample': trial.suggest_float('subsample', 0.4, 1.0),
+                'subsample': trial.suggest_float('subsample', 0.3, 1.0),
                 'colsample_bytree': trial.suggest_float('colsample_bytree', 0.4, 1.0),
-                'gamma': trial.suggest_float('gamma', 1e-6, 10, log=True),
+                'gamma': trial.suggest_float('gamma', 1e-6, 1, log=True),
                 'min_child_weight': trial.suggest_int('min_child_weight', 1, 50),
-                'max_delta_step': trial.suggest_int('max_delta_step', 10, 50),
+                'max_delta_step': trial.suggest_int('max_delta_step', 1, 50),
             }
             
             # Helper function to calculate metrics for a single fold
             def calculate_fold_metrics(fold_idx):
                 eval_auc = self.getAUC(fold_idx)[-1]
                 train_auc = self.getAUC(fold_idx, 'train')[-1]
-                eval_signi, eval_signi_err = self.getSignificance(fold_idx, 'val')
-                train_signi, train_signi_err = self.getSignificance(fold_idx, 'train')
-                mass_shape_factor = self.get_mass_shape_factor(fold_idx, 'val')
+                # eval_signi, eval_signi_err = self.getSignificance(fold_idx, 'val')
+                # train_signi, train_signi_err = self.getSignificance(fold_idx, 'train')
+                # mass_shape_factor = self.get_mass_shape_factor(fold_idx, 'val')
                 
                 return {
                     'train_auc': train_auc,
@@ -806,10 +822,10 @@ class XGBoostHandler(object):
                     'sqrt_eval_auc_minus_train_auc': np.sqrt(train_auc * (2 * eval_auc - train_auc)),
                     'eval_auc_minus_train_auc': eval_auc * 2 - train_auc,
                     'eval_auc_over_train_auc': eval_auc ** 2 / ((eval_auc + train_auc) / 2),
-                    'eval_significance': eval_signi,
-                    'train_significance': train_signi,
-                    'sqrt_eval_significance_minus_train_significance': np.sqrt(train_signi * (2 * eval_signi - train_signi)),
-                    'eval_auc_with_mass_shape_factor': eval_auc + mass_shape_factor
+                    # 'eval_significance': eval_signi,
+                    # 'train_significance': train_signi,
+                    # 'sqrt_eval_significance_minus_train_significance': np.sqrt(train_signi * (2 * eval_signi - train_signi)),
+                    # 'eval_auc_with_mass_shape_factor': eval_auc + mass_shape_factor
                 }
             
             # Helper function to log and print results

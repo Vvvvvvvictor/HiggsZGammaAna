@@ -20,6 +20,30 @@
     ],
     "systematics": {
         "weights": {
+            "ps_isr_sf": {
+                "type": "event",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.ps_systematics",
+                    "name": "ps_isr_sf"
+                },
+                "modify_central_weight": false,
+                "requires_branches": [
+                    "PSWeight"
+                ]
+            },
+            "ps_fsr_sf": {
+                "type": "event",
+                "method": "from_function",
+                "function": {
+                    "module_name": "higgs_dna.systematics.ps_systematics",
+                    "name": "ps_fsr_sf"
+                },
+                "modify_central_weight": false,
+                "requires_branches": [
+                    "PSWeight"
+                ]
+            },
             "pu_reweight_sf": {
                 "type": "event",
                 "method": "from_function",
@@ -32,12 +56,24 @@
                     "Pileup_nTrueInt"
                 ]
             },
-            "btag_deepjet_wp_sf" : {
+            "btag_deepjet_wp_sf_heavy" : {
                 "type" : "object",
                 "method" : "from_function",
                 "function" : {
                     "module_name" : "higgs_dna.systematics.jet_systematics",
-                    "name" : "btag_deepjet_wp_sf"
+                    "name" : "btag_deepjet_wp_sf_heavy"
+                },
+                "modify_central_weight" : false,
+                "input_collection" : "Jet",
+                "target_collections" : ["SelectedJet"],
+                "working_point" : "M"
+            },
+            "btag_deepjet_wp_sf_light" : {
+                "type" : "object",
+                "method" : "from_function",
+                "function" : {
+                    "module_name" : "higgs_dna.systematics.jet_systematics",
+                    "name" : "btag_deepjet_wp_sf_light"
                 },
                 "modify_central_weight" : false,
                 "input_collection" : "Jet",
@@ -202,21 +238,6 @@
                     ]
                 ]
             },
-            "photon_fake_photon_sf": {
-                "type": "object",
-                "method": "from_function",
-                "function": {
-                    "module_name": "higgs_dna.systematics.photon_systematics",
-                    "name": "photon_fake_photon_sf"
-                },
-                "modify_central_weight": false,
-                "input_collection": "SelectedPhoton",
-                "target_collections": [
-                    [
-                        "SelectedPhoton"
-                    ]
-                ]
-            },
             "photon_id_shape_sf": {
                 "type": "object",
                 "method": "from_function",
@@ -232,155 +253,15 @@
                     ]
                 ]
             }
-        },
-        "independent_collections": {
-            "Scale": {
-                "method": "from_branch",
-                "branch_modified": [
-                    "Photon",
-                    "pt"
-                ],
-                "branches": {
-                    "up": [
-                        "Photon",
-                        "pt_ScaleUp"
-                    ],
-                    "down": [
-                        "Photon",
-                        "pt_ScaleDown"
-                    ]
-                }
-            },
-            "Smearing": {
-                "method": "from_branch",
-                "branch_modified": [
-                    "Photon",
-                    "pt"
-                ],
-                "branches": {
-                    "up": [
-                        "Photon",
-                        "dEsigmaUp"
-                    ],
-                    "down": [
-                        "Photon",
-                        "dEsigmaDown"
-                    ]
-                },
-                "additive": true
-            },
-            "Electron_scale": {
-                "method": "from_branch",
-                "branch_modified": [
-                    "Electron",
-                    "pt"
-                ],
-                "branches": {
-                    "up": [
-                        "Electron",
-                        "dEscaleUp"
-                    ],
-                    "down": [
-                        "Electron",
-                        "dEscaleDown"
-                    ]
-                },
-                "additive": true
-            },
-            "Electron_smear": {
-                "method": "from_branch",
-                "branch_modified": [
-                    "Electron",
-                    "pt"
-                ],
-                "branches": {
-                    "up": [
-                        "Electron",
-                        "dEsigmaUp"
-                    ],
-                    "down": [
-                        "Electron",
-                        "dEsigmaDown"
-                    ]
-                },
-                "additive": true
-            },
-            "JER": {
-                "method": "from_branch",
-                "branch_modified": [
-                    "Jet",
-                    "pt"
-                ],
-                "branches": {
-                    "up": [
-                        "Jet",
-                        "pt_jerUp"
-                    ],
-                    "down": [
-                        "Jet",
-                        "pt_jerDown"
-                    ]
-                }
-            },
-            "JES": {
-                "method": "from_branch",
-                "branch_modified": [
-                    "Jet",
-                    "pt"
-                ],
-                "branches": {
-                    "up": [
-                        "Jet",
-                        "pt_jesTotalUp"
-                    ],
-                    "down": [
-                        "Jet",
-                        "pt_jesTotalDown"
-                    ]
-                }
-            },
-            "MET_JES": {
-                "method": "from_branch",
-                "branch_modified": "MET_pt",
-                "branches": {
-                    "up": "MET_T1_pt_jesTotalUp",
-                    "down": "MET_T1_pt_jesTotalDown"
-                }
-            },
-            "MET_Unclustered": {
-                "method": "from_branch",
-                "branch_modified": "MET_pt",
-                "branches": {
-                    "up": "MET_T1_pt_unclustEnUp",
-                    "down": "MET_T1_pt_unclustEnDown"
-                }
-            },
-            "Muon_pt": {
-                "method": "from_branch",
-                "branch_modified": [
-                    "Muon",
-                    "pt"
-                ],
-                "branches": {
-                    "up": [
-                        "Muon",
-                        "correctedUp_pt"
-                    ],
-                    "down": [
-                        "Muon",
-                        "correctedDown_pt"
-                    ]
-                }
-            }
         }
     },
     "samples": {
         "catalog": "metadata/samples/zgamma_tutorial.json",
         "sample_list": [
-            "DYGto2LG_10to100"
+            "DYJetsToLL", "ZG2JToG2L2J"
         ],
         "years": [
-            "2023preBPix", "2023postBPix"
+            "2022preEE",  "2022postEE", "2023preBPix", "2023postBPix"
         ]
     },
     "variables_of_interest": [
@@ -412,14 +293,18 @@
         "Z_sublead_lepton_charge",
         "Z_sublead_lepton_id",
         "Z_sublead_lepton_ptE_error",
-        "electron_1_energyErr",
-        "electron_2_energyErr",
-        "electron_3_energyErr",
-        "electron_4_energyErr",
+        "electron_1_ptErr",
+        "electron_2_ptErr",
+        "electron_3_ptErr",
+        "electron_4_ptErr",
         "muon_1_ptErr",
         "muon_2_ptErr",
         "muon_3_ptErr",
         "muon_4_ptErr",
+        "muon_1_ptErr_store",
+        "muon_2_ptErr_store",
+        "muon_3_ptErr_store",
+        "muon_4_ptErr_store",
         "gamma_pt",
         "gamma_eta",
         "gamma_phi",
@@ -523,6 +408,7 @@
         "z_ee"
     ],
     "branches": [
+        "PSWeight",
         "GenVtx_z",
         "PV_z",
         "L1PreFiringWeight_Nom",
@@ -607,6 +493,7 @@
         "Muon_mass",
         "Muon_charge",
         "Muon_ptErr",
+        "Muon_bsConstrainedPt",
         "Muon_bsConstrainedPtErr",
         "Muon_miniPFRelIso_all",
         "Muon_pfRelIso03_all",
@@ -621,6 +508,7 @@
         "Muon_highPtId",
         "Muon_ptErr",
         "Muon_genPartIdx",
+        "Muon_nTrackerLayers",
         "Electron_pt",
         "Electron_eta",
         "Electron_deltaEtaSC",
@@ -628,10 +516,6 @@
         "Electron_mass",
         "Electron_energyErr",
         "Electron_ptErr",
-        "Electron_dEscaleUp",
-        "Electron_dEscaleDown",
-        "Electron_dEsigmaUp",
-        "Electron_dEsigmaDown",
         "Electron_charge",
         "Electron_miniPFRelIso_all",
         "Electron_pfRelIso03_all",
@@ -646,6 +530,11 @@
         "Electron_energyErr",
         "Electron_r9",  
         "Electron_genPartIdx",
+        "Jet_area",
+        "Jet_rawFactor",
+        "Rho_fixedGridRhoFastjetAll",
+        "Jet_neHEF",
+        "Jet_neEmEF",
         "Jet_pt",
         "Jet_eta",
         "Jet_phi",
@@ -653,8 +542,30 @@
         "Jet_btagDeepFlavB",
         "Jet_jetId",
         "Jet_hadronFlavour",
+        "Jet_chEmEF",
+        "Jet_muonSubtrFactor",
         "MET_pt",
         "MET_phi",
+        "RawPuppiMET_pt",
+        "RawPuppiMET_phi",
+        "PuppiMET_pt",
+        "PuppiMET_phi",
+        "PuppiMET_ptJESUp",
+        "PuppiMET_phiJESUp",
+        "PuppiMET_ptJESDown",
+        "PuppiMET_phiJESDown",
+        "PuppiMET_ptJERUp",
+        "PuppiMET_phiJERUp",
+        "PuppiMET_ptJERDown",
+        "PuppiMET_phiJERDown",
+        "PuppiMET_ptUnclusteredUp",
+        "PuppiMET_phiUnclusteredUp",
+        "PuppiMET_ptUnclusteredDown",
+        "PuppiMET_phiUnclusteredDown",
+        "GenJet_eta",
+        "GenJet_mass",
+        "GenJet_phi",
+        "GenJet_pt",
         "GenPart_eta",
         "GenPart_genPartIdxMother",
         "GenPart_mass",
@@ -757,6 +668,16 @@
             ],
             [
                 [
+                    "Electron",
+                    "energyErr"
+                ],
+                [
+                    "Electron",
+                    "corrected_energyErr"
+                ]
+            ],
+            [
+                [
                     "Photon",
                     "pt"
                 ],
@@ -766,8 +687,30 @@
                 ]
             ],
             [
-                "MET_pt",
-                "MET_T1_pt"
+                [
+                    "Photon",
+                    "energyErr"
+                ],
+                [
+                    "Photon",
+                    "corrected_energyErr"
+                ]
+            ],
+            [
+                [
+                    "MET_pt"
+                ],
+                [
+                    "PuppiMET_pt_corrected"
+                ]
+            ],
+            [
+                [
+                    "MET_phi"
+                ],
+                [
+                    "PuppiMET_phi_corrected"
+                ]
             ]
         ],
         "data": []

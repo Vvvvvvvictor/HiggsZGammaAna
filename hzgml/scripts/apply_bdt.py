@@ -314,16 +314,13 @@ class ApplyXGBHandler(object):
                         data_o[xgb_basename] = scores
                         data_o[xgb_basename+'_t'] = scores_t
                     
-                    # Save immediately to temp file
+                    # Save immediately to temp ROOT file
                     if len(data_o) > 0:
-                        if PYARROW_AVAILABLE:
-                            temp_file = tempfile.NamedTemporaryFile(suffix='.parquet', delete=False)
-                            data_o.to_parquet(temp_file.name, engine='pyarrow')
-                        else:
-                            temp_file = tempfile.NamedTemporaryFile(suffix='.pkl', delete=False)
-                            data_o.to_pickle(temp_file.name)
-                        temp_files.append(temp_file.name)
+                        temp_file = tempfile.NamedTemporaryFile(suffix='.root', delete=False)
                         temp_file.close()
+                        with uproot.recreate(temp_file.name) as root_file:
+                            root_file[self._region] = data_o
+                        temp_files.append(temp_file.name)
                     
                     # Clear immediately
                     del data_o
@@ -364,71 +361,31 @@ class ApplyXGBHandler(object):
         
         print(f"XGB INFO: Ultra-low memory combination of {len(temp_files)} files...")
         
-        # Convert temporary files to ROOT files
-        root_temp_files = []
-        total_rows = 0
-        
-        for i, temp_file in enumerate(temp_files):
-            try:
-                if PYARROW_AVAILABLE and temp_file.endswith('.parquet'):
-                    df = pd.read_parquet(temp_file, engine='pyarrow')
-                else:
-                    df = pd.read_pickle(temp_file)
-                
-                # Remove index column if it exists
-                if "index" in df.columns:
-                    df = df.drop('index', axis=1)
-                
-                # Create temporary ROOT file
-                import tempfile
-                root_temp = tempfile.NamedTemporaryFile(suffix='.root', delete=False)
-                root_temp.close()
-                
-                with uproot.recreate(root_temp.name) as root_file:
-                    root_file[self._region] = df
-                
-                root_temp_files.append(root_temp.name)
-                total_rows += len(df)
-                del df
-                gc.collect()
-                
-                if (i + 1) % 50 == 0:  # Report every 50 files
-                    current_memory = get_memory_usage()
-                    print(f"XGB INFO: Converted {i+1}/{len(temp_files)} temp files to ROOT, Memory: {current_memory:.2f} GB")
-                    
-            except Exception as e:
-                print(f"XGB WARNING: Failed to process temp file {temp_file}: {e}")
-                continue
+        # Temporary files are already in ROOT format, no conversion needed
+        print(f"XGB INFO: All {len(temp_files)} temporary files are already in ROOT format")
         
         # Use ROOT's hadd to combine all files
-        if root_temp_files:
+        if temp_files:
             if HADD_AVAILABLE:
                 print("XGB INFO: Using ROOT hadd to combine files...")
-                hadd_command = f"hadd -f {output_path} " + " ".join(root_temp_files)
+                hadd_command = f"hadd -f {output_path} " + " ".join(temp_files)
                 
                 import subprocess
                 try:
                     result = subprocess.run(hadd_command, shell=True, capture_output=True, text=True)
                     if result.returncode == 0:
-                        print(f"XGB INFO: Successfully combined {total_rows} rows using hadd")
+                        print(f"XGB INFO: Successfully combined {len(temp_files)} files using hadd")
                     else:
                         print(f"XGB ERROR: hadd failed: {result.stderr}")
                         # Fallback to manual combination
-                        self._fallback_combine_files(root_temp_files, output_path)
+                        self._fallback_combine_files(temp_files, output_path)
                 except Exception as e:
                     print(f"XGB ERROR: Failed to run hadd: {e}")
                     # Fallback to manual combination
-                    self._fallback_combine_files(root_temp_files, output_path)
+                    self._fallback_combine_files(temp_files, output_path)
             else:
                 print("XGB WARNING: hadd not available, using manual combination...")
-                self._fallback_combine_files(root_temp_files, output_path)
-            
-            # Clean up temporary ROOT files
-            for root_file in root_temp_files:
-                try:
-                    os.remove(root_file)
-                except:
-                    pass
+                self._fallback_combine_files(temp_files, output_path)
     
     def _fallback_combine_files(self, root_files, output_path):
         """Fallback method to combine ROOT files manually if hadd fails."""
