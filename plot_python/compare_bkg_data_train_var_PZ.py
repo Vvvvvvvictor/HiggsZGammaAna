@@ -7,8 +7,8 @@ import numpy as np
 from pdb import set_trace
 plt.style.use(hep.style.CMS)
 
-# Tree_dict = {"ggF": "zero_to_one_jet", "VBF": "two_jet"}
-Tree_dict = {"ggF": "zero_to_one_jet"}
+Tree_dict = {"ggF": "zero_to_one_jet", "VBF": "two_jet"}
+# Tree_dict = {"ggF": "zero_to_one_jet"}
 # Tree_dict = {"ggF": "one_jet", "VBF": "two_jet"}
 # name_dict_ggF = {"H_relpt": "1_Higgs_Relative_pT", "gamma_mvaID": "2_Photon_ID_MVA", "gamma_ptRelErr": "3_Photon_Energy_Resolution", "l1g_deltaR": "4_dR_Lep1_gamma", "l2g_deltaR": "5_dR_Lep2_gamma", "Z_cos_theta": "6_cosTheta", "lep_cos_theta": "7_costheta", "lep_phi": "8_phi", "Z_lead_lepton_eta": "9_eta_Lep1", "Z_sublead_lepton_eta": "10_eta_Lep2", "gamma_eta": "11_eta_gamma", "jet_1_eta": "jet_1_eta", "jet_2_eta": "jet_2_eta", "n_jets": "n_jets", "jet_1_pt":"jet_1_pt", "jet_2_pt":"jet_2_pt"}
 name_dict_ggF = {
@@ -29,7 +29,9 @@ name_dict_ggF = {
     "pt_balance": "15_System_pT_Balance",
     "jet_1_mass": "16_Jet1_mass",
     "jet_1_eta": "17_Jet1_eta",
-    "n_jets": "n_jets"
+    "n_jets": "n_jets",
+    "gamma_energyErr": "gamma_energyErr"
+
 }
 name_dict_VBF = {
     "H_relpt": "1_Higgs_Relative_pT",
@@ -54,7 +56,8 @@ name_dict_VBF = {
     "delta_phi_zgjj": "20_dPhi_jj_llgamma",
     "jet_1_eta": "jet_1_eta",
     "jet_2_eta": "jet_2_eta",
-    "n_jets": "n_jets"
+    "n_jets": "n_jets",
+    "gamma_energyErr": "gamma_energyErr"
 }
 
 for primary_process_name, tree_name in Tree_dict.items(): 
@@ -99,7 +102,7 @@ for primary_process_name, tree_name in Tree_dict.items():
         # #13
         # "gamma_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta(\gamma)$"},
         # #14
-        "jet_1_pt": {"range": (20, 280), "bins": 50, "title": r"$Jet1\;p_{T}\;[GeV]$"},
+        # "jet_1_pt": {"range": (20, 280), "bins": 50, "title": r"$Jet1\;p_{T}\;[GeV]$"},
         #15
         # "pt_balance": {"range": (0, 1), "bins": 50, "title": r"System $p_{T}$ Balance"},
         #16
@@ -107,66 +110,73 @@ for primary_process_name, tree_name in Tree_dict.items():
         # #17
         # "jet_1_eta": {"range": (-5, 5), "bins": 50, "title": r"$\eta(Jet1)$"},
         # #njet
-        # "n_jets": {"range": (0, 6), "bins": 6, "title": "Number of Jet(s)"}
+        # "n_jets": {"range": (0, 6), "bins": 6, "title": "Number of Jet(s)"},
+        # #photon energy error
+        "gamma_energyErr": {"range": (0, 10), "bins": 50, "title": r"$\sigma(E_{\gamma})$"}
         }
 
     elif primary_process_name == "VBF":     
             
         config_dict = {
         # VBF Training Variables
-        #1
-        "H_relpt": {"range": (0, 2.5), "bins": 50, "title": r"${p_{T_{ll\gamma}}}\;/\;{m_{ll\gamma}}$"},
-        #2
-        "gamma_mvaID": {"range": (0.14, 1), "bins": 43, "title": r"$\gamma$ ID MVA"},
+        # #1
+        # "H_relpt": {"range": (0, 2.5), "bins": 50, "title": r"${p_{T_{ll\gamma}}}\;/\;{m_{ll\gamma}}$"},
+        # #2
+        # "gamma_mvaID": {"range": (0.14, 1), "bins": 43, "title": r"$\gamma$ ID MVA"},
         #3
-        "gamma_ptRelErr": {"range": (0.01, 0.1), "bins": 50, "title": r"$\sigma_{\gamma}\;/\;E_{\gamma}$"},
-        #4
-        "l1g_deltaR": {"range": (0.3, 4.3), "bins": 40, "title": r"$\Delta R(Lep1,\;\gamma)$"},
-        #5
-        "l2g_deltaR": {"range": (0.3, 3.3), "bins": 40, "title": r"$\Delta R(Lep2,\;\gamma)$"},
-        #6
-        "Z_cos_theta": {"range": (-1, 1), "bins": 40, "title": r"$\cos\Theta$"},
-        #7
-        "lep_cos_theta": {"range": (-1, 1), "bins": 40, "title": r"$\cos\theta$"},
-        #8
-        "lep_phi": {"range": (-3.2, 3.2), "bins": 40, "title": r"$\phi$"},
-        #9
-        "photon_zeppenfeld": {"range": (0, 5), "bins": 50, "title": "$\gamma$ Zeppenfeld"},
-        #10
-        "jet1G_deltaR": {"range": (0.4, 6.4), "bins": 40, "title": r"$\Delta R(Jet1,\;\gamma)$"},
-        #11
-        "jet2G_deltaR": {"range": (0.4, 6.4), "bins": 40, "title": r"$\Delta R(Jet2,\;\gamma)$"},
-        #12
-        "Z_lead_lepton_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta(Lep1)$"},
-        #13
-        "Z_sublead_lepton_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta(Lep2)$"},
-        #14
-        "gamma_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta(\gamma)$"},
-        #15
-        "delta_eta_jj": {"range": (0, 8), "bins": 40, "title": r"$\Delta\eta(Jet1,\;Jet2)$"},
-        #16
-        "delta_phi_jj": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi(Jet1,\;Jet2)$"},
-        #17
-        "jet_1_pt": {"range": (30, 280), "bins": 50, "title": r"$Jet1\;p_{T}\;[GeV]$"},
-        #18
-        "jet_2_pt": {"range": (30, 130), "bins": 50, "title": r"$Jet2\;p_{T}\;[GeV]$"},
-        #19
-        "pt_balance": {"range": (0, 1), "bins": 50, "title": r"System $p_{T}$ Balance"},
-        #20
-        "delta_phi_zgjj": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi(jj,\;ll\gamma)$"},
-        #jet eta1
-        "jet_1_eta": {"range": (-5, 5), "bins": 50, "title": r"$\eta(Jet1)$"},
-        #jet eta2
-        "jet_2_eta": {"range": (-5, 5), "bins": 50, "title": r"$\eta(Jet2)$"},
-        #njet
-        "n_jets": {"range": (0, 6), "bins": 6, "title": "Number of Jet(s)"}
+        # "gamma_ptRelErr": {"range": (0.01, 0.1), "bins": 50, "title": r"$\sigma_{\gamma}\;/\;E_{\gamma}$"},
+        # #4
+        # "l1g_deltaR": {"range": (0.3, 4.3), "bins": 40, "title": r"$\Delta R(Lep1,\;\gamma)$"},
+        # #5
+        # "l2g_deltaR": {"range": (0.3, 3.3), "bins": 40, "title": r"$\Delta R(Lep2,\;\gamma)$"},
+        # #6
+        # "Z_cos_theta": {"range": (-1, 1), "bins": 40, "title": r"$\cos\Theta$"},
+        # #7
+        # "lep_cos_theta": {"range": (-1, 1), "bins": 40, "title": r"$\cos\theta$"},
+        # #8
+        # "lep_phi": {"range": (-3.2, 3.2), "bins": 40, "title": r"$\phi$"},
+        # #9
+        # "photon_zeppenfeld": {"range": (0, 5), "bins": 50, "title": "$\gamma$ Zeppenfeld"},
+        # #10
+        # "jet1G_deltaR": {"range": (0.4, 6.4), "bins": 40, "title": r"$\Delta R(Jet1,\;\gamma)$"},
+        # #11
+        # "jet2G_deltaR": {"range": (0.4, 6.4), "bins": 40, "title": r"$\Delta R(Jet2,\;\gamma)$"},
+        # #12
+        # "Z_lead_lepton_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta(Lep1)$"},
+        # #13
+        # "Z_sublead_lepton_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta(Lep2)$"},
+        # #14
+        # "gamma_eta": {"range": (-2.5, 2.5), "bins": 50, "title": r"$\eta(\gamma)$"},
+        # #15
+        # "delta_eta_jj": {"range": (0, 8), "bins": 40, "title": r"$\Delta\eta(Jet1,\;Jet2)$"},
+        # #16
+        # "delta_phi_jj": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi(Jet1,\;Jet2)$"},
+        # #17
+        # "jet_1_pt": {"range": (30, 280), "bins": 50, "title": r"$Jet1\;p_{T}\;[GeV]$"},
+        # #18
+        # "jet_2_pt": {"range": (30, 130), "bins": 50, "title": r"$Jet2\;p_{T}\;[GeV]$"},
+        # #19
+        # "pt_balance": {"range": (0, 1), "bins": 50, "title": r"System $p_{T}$ Balance"},
+        # #20
+        # "delta_phi_zgjj": {"range": (0, 3.2), "bins": 40, "title": r"$\Delta\phi(jj,\;ll\gamma)$"},
+        # #jet eta1
+        # "jet_1_eta": {"range": (-5, 5), "bins": 50, "title": r"$\eta(Jet1)$"},
+        # #jet eta2
+        # "jet_2_eta": {"range": (-5, 5), "bins": 50, "title": r"$\eta(Jet2)$"},
+        # #njet
+        # "n_jets": {"range": (0, 6), "bins": 6, "title": "Number of Jet(s)"},
+        # #photon energy error
+        "gamma_energyErr": {"range": (0, 10), "bins": 50, "title": r"$\sigma(E_{\gamma})$"}
         }
 
     # inclusive, zero_jet, one_jet, zero_to_one_jet, two_jet, VH_ttH, VH, ZH, ttH_had, ttH_lep
     # TREE = "zero_to_one_jet"
     TREE = tree_name
     WEIGHT = "weight"
-    PATH = "/eos/user/j/jiehan/root/skimmed_ntuples_rui_new/"
+    # Jeihan's Sample
+    PATH = "/eos/home-j/jiehan/root/skimmed_ntuples/"
+    # Rui's Sample
+    # PATH = "/eos/user/j/jiehan/root/skimmed_ntuples_rui_new/"
     # PATH = "/eos/home-p/pelai/HZgamma/Root_Dataset/run3/NanoV12/"
     # PATH = "/eos/user/j/jiehan/root/skimmed_ntuples_run2/"
 
@@ -176,11 +186,15 @@ for primary_process_name, tree_name in Tree_dict.items():
     # bkg = {"Multiboson": ["WW", "WZ", "ZZ"], r"t$\bar{t}$": ["TT", "TTtoLNu2Q"], r"VBS Z+$\gamma$": ["ZG2JToG2L2J"], r"Z$+\gamma$": ["DYGto2LG"], "Z+Fake Photon": ["DYJetsToLL"]}
     # bkg = {r"Z$+\gamma$": ["DYGto2LG"], "Z+Fake Photon": ["DYJetsToLL"]}
     # Rui's Sample
-    bkg = {r"Z$+\gamma$": ["ZGToLLG"], "Z+Fake Photon": ["DYJetsToLL","EWKZ2J"]}
+    # bkg = {r"Z$+\gamma$": ["ZGToLLG"], "Z+Fake Photon": ["DYJetsToLL","EWKZ2J"]}
+    # Jeihan's Sample
+    bkg = {r"Z$+\gamma$": ["DYGto2LG_10to100"], "Z+Fake Photon": ["DYJetsToLL"]}
     color_dict = {r"Z$+\gamma$": "#3f90da", "Z+Fake Photon": "#ffa90e", r"VBS Z+$\gamma$": "#92dadd", r"t$\bar{t}$": "#e76300", r"t$\gamma$/t$\bar{t}\gamma$": "#bd1f01", "Multiboson": "#832db6", r"t$\bar{t}$+X": "#94a4a2"}
     
-    years = {"run2":["2016preVFP", "2016postVFP", "2017", "2018"],"run3":["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"]}
-    lumis = {"run2": 138, "run3": 62}  # fb^-1
+    # years = {"run2":["2016preVFP", "2016postVFP", "2017", "2018"],"run3":["2022preEE", "2022postEE", "2023preBPix", "2023postBPix"]}
+    years = {"run2":["2016preVFP", "2016postVFP", "2017", "2018"],"run3":["2023preBPix", "2023postBPix"]}
+    # lumis = {"run2": 138, "run3": 62}  # fb^-1
+    lumis = {"run2": 138, "run3": 27}  # fb^-1
 
     # 新增：動態建立 selection，並同時回傳需要在 uproot 中載入的欄位集合
     def build_selection(var: str):
@@ -318,7 +332,8 @@ for primary_process_name, tree_name in Tree_dict.items():
         print("\n\n", VAR, RMIN, RMAX, "\n\n")
 
         # 針對 run2 與 run3 各跑一遍
-        for run_key in ["run2", "run3"]:
+        # for run_key in ["run2", "run3"]:
+        for run_key in ["run3"]:
             selection_str, required_cols = build_selection(VAR)
             print(f"[{run_key}] VAR={VAR} selection => {selection_str}")
 
