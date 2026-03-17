@@ -921,6 +921,17 @@ def preselect(data):
 
     return data
 
+def add_columns_batch(data, columns):
+    if not columns:
+        return data
+
+    new_columns = pd.DataFrame(columns, index=data.index)
+    overlapping = [col for col in new_columns.columns if col in data.columns]
+    if overlapping:
+        data = data.drop(columns=overlapping)
+
+    return pd.concat([data, new_columns], axis=1)
+
 def decorate(data):
     """Main decoration function with optimized vectorized operations"""
     if data.shape[0] == 0: 
@@ -936,123 +947,113 @@ def decorate(data):
     rel_vars_orig = compute_relative_variables_vectorized(data, '')
     rel_vars_refit = compute_relative_variables_vectorized(data, '_refit')
     
-    # Add to dataframe
-    for key, value in rel_vars_orig.items():
-        data[key] = value
-    for key, value in rel_vars_refit.items():
-        data[key] = value
+    data = add_columns_batch(data, {**rel_vars_orig, **rel_vars_refit})
     
     print("Computing delta phi variables...")
     # Compute delta phi variables
     delta_phi_vars = compute_delta_phi_variables_vectorized(data)
-    for key, value in delta_phi_vars.items():
-        data[key] = value
+    data = add_columns_batch(data, delta_phi_vars)
     
     print("Computing simple jet variables...")
     # Compute simple jet variables
     jet_simple_vars = compute_simple_jet_variables_vectorized(data)
-    for key, value in jet_simple_vars.items():
-        data[key] = value
+    data = add_columns_batch(data, jet_simple_vars)
     
     print("Computing complex variables...")
     # Compute complex variables that need LorentzVector operations
     complex_vars_orig = compute_complex_variables_optimized(data, vectors_orig, '')
     complex_vars_refit = compute_complex_variables_optimized(data, vectors_refit, '_refit')
     
-    for key, value in complex_vars_orig.items():
-        data[key] = value
-    for key, value in complex_vars_refit.items():
-        data[key] = value
+    data = add_columns_batch(data, {**complex_vars_orig, **complex_vars_refit})
     
     print("Computing jet complex variables...")
     # Compute jet complex variables
     jet_complex_orig = compute_jet_complex_variables_optimized(data, vectors_orig, '')
     jet_complex_refit = compute_jet_complex_variables_optimized(data, vectors_refit, '_refit')
     
-    for key, value in jet_complex_orig.items():
-        data[key] = value
-    for key, value in jet_complex_refit.items():
-        data[key] = value
+    data = add_columns_batch(data, {**jet_complex_orig, **jet_complex_refit})
     
     print("Computing is_center variables...")
     # Compute is_center variables
-    data['is_center'] = compute_is_center_vectorized(data, '')
-    data['is_center_refit'] = compute_is_center_vectorized(data, '_refit')
+    simple_features = {
+        'is_center': compute_is_center_vectorized(data, ''),
+        'is_center_refit': compute_is_center_vectorized(data, '_refit'),
+    }
     
     print("Computing remaining simple variables...")
     # Add simple calculations that don't need optimization
     if 'weight_central' in data.columns:
-        data['weight'] = data.weight_central
+        simple_features['weight'] = data.weight_central
     else:
         print("Warning: weight_central column not found, using default weight of 1.0")
-        data['weight'] = np.ones(len(data))
+        simple_features['weight'] = np.ones(len(data))
     
     # Use vectorized gamma_ptRelErr computation
-    data['gamma_ptRelErr'] = compute_gamma_ptRelErr_vectorized(data)
+    simple_features['gamma_ptRelErr'] = compute_gamma_ptRelErr_vectorized(data)
     
     # Add vectorized additional delta phi variables
     print("Computing additional delta phi variables...")
     additional_vars = compute_additional_delta_phi_vectorized(data)
-    for key, value in additional_vars.items():
-        data[key] = value
+    simple_features.update(additional_vars)
     
     # Add vectorized jet delta phi and deltaR variables
     print("Computing jet delta phi and deltaR variables...")
     jet_delta_vars = compute_jet_delta_phi_variables_vectorized(data)
-    for key, value in jet_delta_vars.items():
-        data[key] = value
+    simple_features.update(jet_delta_vars)
     
     # Add vectorized l1g and l2g deltaR variables
     print("Computing l1g and l2g deltaR variables...")
     l1g_l2g_vars = compute_l1g_l2g_deltaR_vectorized(data)
-    for key, value in l1g_l2g_vars.items():
-        data[key] = value
+    simple_features.update(l1g_l2g_vars)
     
     l1g_l2g_refit_vars = compute_l1g_l2g_deltaR_refit_vectorized(data)
-    for key, value in l1g_l2g_refit_vars.items():
-        data[key] = value
+    simple_features.update(l1g_l2g_refit_vars)
     
     # Add vectorized jet pair variables
     print("Computing jet pair variables...")
     jet_pair_vars = compute_jet_pair_variables_vectorized(data, vectors_orig)
-    for key, value in jet_pair_vars.items():
-        data[key] = value
+    simple_features.update(jet_pair_vars)
     
     # Add vectorized jet btag variables
     print("Computing jet btag variables...")
     jet_btag_vars = compute_jet_btag_variables_vectorized(data)
-    for key, value in jet_btag_vars.items():
-        data[key] = value
+    simple_features.update(jet_btag_vars)
     
     # Add vectorized zeppenfeld variables
     print("Computing zeppenfeld variables...")
     zep_vars = compute_zeppenfeld_variables_vectorized(data)
-    for key, value in zep_vars.items():
-        data[key] = value
+    simple_features.update(zep_vars)
+    data = add_columns_batch(data, simple_features)
     
     # Complex angular calculations that need apply (most complex physics calculations)
     print("Computing complex angular variables...")
-    data['l_rapCM'] = data.apply(lambda x:compute_l_rapCM(x), axis=1)
-    data['l_cosProdAngle'] = data.apply(lambda x:compute_l_prodAngle(x), axis=1)
-    data['Z_cosProdAngle'] = data.apply(lambda x:compute_Z_prodAngle(x), axis=1)
-    data['Z_cos_theta'] = data.apply(lambda x:compute_Z_cosTheta(x), axis=1)
-    data['lep_cos_theta'] = data.apply(lambda x: compute_l_costheta(x), axis=1)
-    data['lep_phi'] = data.apply(lambda x: compute_l_phi(x), axis=1)
+    angular_features = {
+        'l_rapCM': data.apply(lambda x:compute_l_rapCM(x), axis=1),
+        'l_cosProdAngle': data.apply(lambda x:compute_l_prodAngle(x), axis=1),
+        'Z_cosProdAngle': data.apply(lambda x:compute_Z_prodAngle(x), axis=1),
+        'Z_cos_theta': data.apply(lambda x:compute_Z_cosTheta(x), axis=1),
+        'lep_cos_theta': data.apply(lambda x: compute_l_costheta(x), axis=1),
+        'lep_phi': data.apply(lambda x: compute_l_phi(x), axis=1),
+    }
     
     # Refit versions of angular calculations
-    data['l_rapCM_refit'] = data.apply(lambda x:compute_l_rapCM_refit(x), axis=1)
-    data['l_cosProdAngle_refit'] = data.apply(lambda x:compute_l_prodAngle_refit(x), axis=1)
-    data['Z_cosProdAngle_refit'] = data.apply(lambda x:compute_Z_prodAngle_refit(x), axis=1)
-    data['Z_cos_theta_refit'] = data.apply(lambda x:compute_Z_cosTheta_refit(x), axis=1)
-    data['lep_cos_theta_refit'] = data.apply(lambda x: compute_l_costheta_refit(x), axis=1)
-    data['lep_phi_refit'] = data.apply(lambda x: compute_l_phi_refit(x), axis=1)
+    angular_features.update({
+        'l_rapCM_refit': data.apply(lambda x:compute_l_rapCM_refit(x), axis=1),
+        'l_cosProdAngle_refit': data.apply(lambda x:compute_l_prodAngle_refit(x), axis=1),
+        'Z_cosProdAngle_refit': data.apply(lambda x:compute_Z_prodAngle_refit(x), axis=1),
+        'Z_cos_theta_refit': data.apply(lambda x:compute_Z_cosTheta_refit(x), axis=1),
+        'lep_cos_theta_refit': data.apply(lambda x: compute_l_costheta_refit(x), axis=1),
+        'lep_phi_refit': data.apply(lambda x: compute_l_phi_refit(x), axis=1),
+    })
     
     # Kinematic DNN weighting 
     print("Computing kinematic weighting...")
-    data['kin_weight'] = data.apply(lambda x: compute_kin_weight(x), axis=1)
-    data['kin_weight_refit'] = data.apply(lambda x: compute_kin_weight_refit(x), axis=1)
-
-    data['pythia_weight'] = np.ones(data.shape[0]) / 0.96934
+    angular_features.update({
+        'kin_weight': data.apply(lambda x: compute_kin_weight(x), axis=1),
+        'kin_weight_refit': data.apply(lambda x: compute_kin_weight_refit(x), axis=1),
+        'pythia_weight': np.ones(data.shape[0]) / 0.96934,
+    })
+    data = add_columns_batch(data, angular_features)
     
     # Type conversions
     print("Converting data types...")
