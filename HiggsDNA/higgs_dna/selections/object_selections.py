@@ -67,7 +67,7 @@ def select_objects(objects, cuts = {}, clean = {}, name = "none", tagger = None)
                 photons_jetIdx = awkward.where(awkward.num(info["objects"].jetIdx, axis=1) == 0, awkward.ones_like(awkward.num(info["objects"].jetIdx, axis=1))*-1, info["objects"].jetIdx)
                 new_pho = awkward.broadcast_arrays(photons_jetIdx[:, None], new_jet, depth_limit=2)[0]
                 photon_veto_cut = ~awkward.flatten(awkward.any(new_jet[:, :, None] == new_pho, axis=2), axis=-1)
-                cut_ = delta_R(objects, info["objects"], info["min_dr"]) | photon_veto_cut
+                cut_ = delta_R(objects, info["objects"], info["min_dr"]) & photon_veto_cut
         else:
             cut_ = delta_R(objects, info["objects"], info["min_dr"])
         cut_names.append("dR with '%s' > %.2f" % (other_objects, info["min_dr"]))
@@ -345,4 +345,3 @@ so in the photons collection, where you don't simply want the nearest photon, bu
     base_objects["%sdR" % name] = base_objects.deltaR(base_best_target)
 
     return base_objects
-
