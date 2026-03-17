@@ -46,6 +46,9 @@ def select_jets(jets, options, clean, year, name = "none", tagger = None, event_
         name,
         None
     )
+    eta_cut = abs(jets.eta) < options["eta"]
+    standard_cuts = standard_cuts & eta_cut
+    clean_eta_cuts = clean_eta_cuts & eta_cut
 
     jet_pt_for_veto = jets.raw_pt if "raw_pt" in jets.fields else jets.pt
 
