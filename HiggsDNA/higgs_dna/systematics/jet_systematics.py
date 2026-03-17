@@ -90,6 +90,24 @@ DEEPJET_VARIATIONS = { # b, c, light
 }
 
 
+def _jet_pt_for_btag(jets):
+    if "pt_nom" in jets.fields:
+        return jets.pt_nom
+    if "corrected_pt" in jets.fields:
+        return jets.corrected_pt
+    return jets.pt
+
+
+def _scale_mass_from_pt(reference_pt, varied_pt, reference_mass):
+    scale = numpy.divide(
+        varied_pt,
+        reference_pt,
+        out=numpy.ones_like(varied_pt, dtype=numpy.float32),
+        where=reference_pt > 0.0,
+    )
+    return reference_mass * scale
+
+
 def btag_deepjet_wp_sf_heavy(events, year, central_only, input_collection):
     """
     See:
@@ -108,24 +126,26 @@ def btag_deepjet_wp_sf_heavy(events, year, central_only, input_collection):
    
     jets = events[input_collection]
     jets["flavor"] = jets.hadronFlavour
+    jets_pt_for_sf = _jet_pt_for_btag(jets)
     n_jets = awkward.num(jets) # save n_jets to convert back to jagged format at the end
     logger.debug(f"Number of jets(syst): {n_jets[:10]}")
     jets_flattened = awkward.flatten(jets)
+    jets_flattened_pt_for_sf = awkward.flatten(jets_pt_for_sf)
 
     jet_flavor = awkward.to_numpy(jets_flattened.flavor)
     jet_btag_deepjet = awkward.to_numpy(jets_flattened.btagDeepFlavB)
     jet_abs_eta = numpy.clip(
         awkward.to_numpy(abs(jets_flattened.eta)),
         0.0,
-        2.39999 # SFs only valid up to eta 2.5
+        2.49999 # SFs only valid up to eta 2.5
     )
     jet_eta = numpy.clip(
         awkward.to_numpy(jets_flattened.eta),
-        -2.39999,
-        2.39999
+        -2.49999,
+        2.49999
     )
     jet_pt = numpy.clip(
-        awkward.to_numpy(jets_flattened.pt),
+        awkward.to_numpy(jets_flattened_pt_for_sf),
         20.0, # SFs only valid for pT > 20.
         999.99999
     )
@@ -136,10 +156,10 @@ def btag_deepjet_wp_sf_heavy(events, year, central_only, input_collection):
 
     variations = {}
 
-    central_sf = numpy.ones_like(jet_flavor)
-    jet_mc_eff, jet_mc_eff_syst = numpy.ones_like(jet_flavor), numpy.ones_like(jet_flavor)
+    central_sf = numpy.ones_like(jet_flavor, dtype=numpy.float32)
+    jet_mc_eff = numpy.ones_like(jet_flavor, dtype=numpy.float32)
     for f in [4, 5]:
-        evaluator_key = "deepJet_mujets" if f > 0 else "deepJet_light" if int(year[:4]) > 2020 else "deepJet_incl"
+        evaluator_key = "deepJet_comb"
         central_sf = numpy.where(
             jet_flavor == f,
             evaluator[evaluator_key].evalv(
@@ -161,22 +181,9 @@ def btag_deepjet_wp_sf_heavy(events, year, central_only, input_collection):
             ),
             jet_mc_eff
         )
-        jet_mc_eff_syst = numpy.where(
-            jet_flavor == f,
-            jet_mc_eff_evaluator["Btag_{}_WPmedium_MCeff".format(flavour_name
-            )].evalv(
-                "systmc",
-                jet_eta,
-                jet_pt
-            ),
-            jet_mc_eff_syst
-        )
 
     logger.debug(f"First 10 jet flavor before clipping: {jet_flavor[:10]} in length {len(jet_flavor)}")
     logger.debug(f"First 10 central jet mc eff before clipping: {jet_mc_eff[:10]} in length {len(jet_mc_eff)}")
-    logger.debug(f"First 10 central jet mc eff syst before clipping: {jet_mc_eff_syst[:10]} in length {len(jet_mc_eff_syst)}")
-    jet_mc_eff_up = jet_mc_eff + jet_mc_eff_syst
-    jet_mc_eff_down = jet_mc_eff - jet_mc_eff_syst
 
     central_sf = numpy.where(
         jet_btag_deepjet > BATG_MED[year],
@@ -198,7 +205,7 @@ def btag_deepjet_wp_sf_heavy(events, year, central_only, input_collection):
         for f in applicable_flavors:
             if f not in [4, 5]:
                 continue
-            evaluator_key = "deepJet_mujets" if f > 0 else "deepJet_light" if int(year[:4]) > 2020 else "deepJet_incl"
+            evaluator_key = "deepJet_comb"
             var_sf = numpy.where(
                 jet_flavor == f,
                 evaluator[evaluator_key].evalv(
@@ -210,17 +217,15 @@ def btag_deepjet_wp_sf_heavy(events, year, central_only, input_collection):
                 ),
                 var_sf
             )
-        eff_to_use = jet_mc_eff_up if "up_" in var else jet_mc_eff_down if "down_" in var else jet_mc_eff
         logger.debug(f"var: {var}, First 10 jet flavour before clipping: {jet_flavor[:10]} in length {len(jet_flavor)}")
         logger.debug(f"var: {var}, First 10 central jet mc eff before clipping: {jet_mc_eff[:10]} in length {len(jet_mc_eff)}")
-        logger.debug(f"var: {var}, First 10 eff_to_use before clipping: {eff_to_use[:10]} in length {len(eff_to_use)}")
         logger.debug(f"var: {var}, First 10 var_sf before clipping: {var_sf[:10]} in length {len(var_sf)}")
         var_sf = numpy.where(
             jet_btag_deepjet > BATG_MED[year],
             var_sf,
             numpy.where(
-                (eff_to_use < 1.0) & (jet_mc_eff < 1.0),
-                (1 - var_sf * jet_mc_eff) / (1 - eff_to_use),
+                jet_mc_eff < 1.0,
+                (1 - var_sf * jet_mc_eff) / (1 - jet_mc_eff),
                 var_sf
             )
         )
@@ -231,7 +236,7 @@ def btag_deepjet_wp_sf_heavy(events, year, central_only, input_collection):
     for var in variations.keys():
         # Set SFs = 1 for jets which are not applicable (pt <= 20 or |eta| >= 2.5)
         variations[var] = awkward.where(
-                (jets.pt <= 20.0) | (abs(jets.eta) >= 2.4),
+                (jets_pt_for_sf <= 20.0) | (abs(jets.eta) >= 2.5),
                 awkward.ones_like(variations[var]),
                 variations[var]
         )
@@ -261,24 +266,26 @@ def btag_deepjet_wp_sf_light(events, year, central_only, input_collection):
 
     jets = events[input_collection]
     jets["flavor"] = jets.hadronFlavour
+    jets_pt_for_sf = _jet_pt_for_btag(jets)
     n_jets = awkward.num(jets) # save n_jets to convert back to jagged format at the end
     logger.debug(f"Number of jets(syst): {n_jets[:10]}")
     jets_flattened = awkward.flatten(jets)
+    jets_flattened_pt_for_sf = awkward.flatten(jets_pt_for_sf)
 
     jet_flavor = awkward.to_numpy(jets_flattened.flavor)
     jet_btag_deepjet = awkward.to_numpy(jets_flattened.btagDeepFlavB)
     jet_abs_eta = numpy.clip(
         awkward.to_numpy(abs(jets_flattened.eta)),
         0.0,
-        2.39999 # SFs only valid up to eta 2.5
+        2.49999 # SFs only valid up to eta 2.5
     )
     jet_eta = numpy.clip(
         awkward.to_numpy(jets_flattened.eta),
-        -2.39999,
-        2.39999
+        -2.49999,
+        2.49999
     )
     jet_pt = numpy.clip(
-        awkward.to_numpy(jets_flattened.pt),
+        awkward.to_numpy(jets_flattened_pt_for_sf),
         20.0, # SFs only valid for pT > 20.
         999.99999
     )
@@ -289,8 +296,8 @@ def btag_deepjet_wp_sf_light(events, year, central_only, input_collection):
 
     variations = {}
 
-    central_sf = numpy.ones_like(jet_flavor)
-    jet_mc_eff, jet_mc_eff_syst = numpy.ones_like(jet_flavor), numpy.ones_like(jet_flavor)
+    central_sf = numpy.ones_like(jet_flavor, dtype=numpy.float32)
+    jet_mc_eff = numpy.ones_like(jet_flavor, dtype=numpy.float32)
     for f in [0]:
         evaluator_key = "deepJet_mujets" if f > 0 else "deepJet_light" if int(year[:4]) > 2020 else "deepJet_incl"
         central_sf = numpy.where(
@@ -314,19 +321,6 @@ def btag_deepjet_wp_sf_light(events, year, central_only, input_collection):
             ),
             jet_mc_eff
         )
-        jet_mc_eff_syst = numpy.where(
-            jet_flavor == f,
-            jet_mc_eff_evaluator["Btag_{}_WPmedium_MCeff".format(flavour_name
-            )].evalv(
-                "systmc",
-                jet_eta,
-                jet_pt
-            ),
-            jet_mc_eff_syst
-        )
-
-    jet_mc_eff_up = jet_mc_eff + jet_mc_eff_syst
-    jet_mc_eff_down = jet_mc_eff - jet_mc_eff_syst
  
     central_sf = numpy.where(
         jet_btag_deepjet > BATG_MED[year],
@@ -360,13 +354,12 @@ def btag_deepjet_wp_sf_light(events, year, central_only, input_collection):
                 ),
                 var_sf
             )
-        eff_to_use = jet_mc_eff_up if "up_" in var else jet_mc_eff_down if "down_" in var else jet_mc_eff
         var_sf = numpy.where(
             jet_btag_deepjet > BATG_MED[year],
             var_sf,
             numpy.where(
-                (eff_to_use < 1.0) & (jet_mc_eff < 1.0),
-                (1 - var_sf * jet_mc_eff) / (1 - eff_to_use),
+                jet_mc_eff < 1.0,
+                (1 - var_sf * jet_mc_eff) / (1 - jet_mc_eff),
                 var_sf
             )
         )
@@ -375,7 +368,7 @@ def btag_deepjet_wp_sf_light(events, year, central_only, input_collection):
     for var in variations.keys():
         # Set SFs = 1 for jets which are not applicable (pt <= 20 or |eta| >= 2.5)
         variations[var] = awkward.where(
-                (jets.pt <= 20.0) | (abs(jets.eta) >= 2.4),
+                (jets_pt_for_sf <= 20.0) | (abs(jets.eta) >= 2.5),
                 awkward.ones_like(variations[var]),
                 variations[var]
         )
@@ -457,7 +450,9 @@ def pt_correction_mc(
     # Flatten jets for easier processing
     n_jets = awkward.num(jets)
     jets_flat = awkward.flatten(jets)
-    corrected_pts_base = jets_flat.pt
+    jet_pt_flat = awkward.to_numpy(jets_flat.pt)
+    jet_mass_flat = awkward.to_numpy(jets_flat.mass)
+    corrected_pts_base = jet_pt_flat.copy()
 
     jet_area = awkward.to_numpy(jets_flat.area)
     jet_eta = awkward.to_numpy(jets_flat.eta)
@@ -479,22 +474,22 @@ def pt_correction_mc(
             corr = jes_evaluator.evaluate(
                 jet_area, jet_eta, raw_pt_numpy, rho_arr
             )
-        corrected_pts_base = raw_pt * corr
+        corrected_pts_base = raw_pt_numpy * corr
 
     # --- 2. L1 Correction (Needed for Run 3 MET) ---
     # For Run 3 Type-1 MET, we subtract (Nominal - L1).
     # We need to evaluate L1FastJet separately.
-    pt_l1_flat = raw_pt # Default to raw if not Run 3 (not used in Run 2 logic)
+    pt_l1_flat = raw_pt_numpy # Default to raw if not Run 3 (not used in Run 2 logic)
     if lhc_run == 3:
         try:
             # Usually named like Summer22_..._L1FastJet_AK4PFPuppi
             # Note: Not 'compound', just standard evaluator for single level
             l1_evaluator = evaluator[f"{jes_tag}_L1FastJet_{jec_algo}"]
             l1_corr = l1_evaluator.evaluate(jet_area, jet_eta, raw_pt_numpy, rho_arr)
-            pt_l1_flat = raw_pt * l1_corr
+            pt_l1_flat = raw_pt_numpy * l1_corr
         except Exception as e:
             logger.warning(f"Could not load L1FastJet evaluator for MET correction: {e}. MET calculation might be inaccurate.")
-            pt_l1_flat = raw_pt # Fallback
+            pt_l1_flat = raw_pt_numpy # Fallback
 
     # --- 3. JER Resolution & Gen Matching ---
     jer_resolution_evaluator = evaluator[f"{jer_tag}_PtResolution_{jec_algo}"]
@@ -503,8 +498,10 @@ def pt_correction_mc(
     )
 
     gen_jets = events.GenJet
+    corrected_pts_nested = awkward.unflatten(corrected_pts_base, n_jets)
+    jet_pt_resolution_nested = awkward.unflatten(jet_pt_resolution, n_jets)
 
-    # For each jet, find the closest gen_jet
+    # For each jet, find the closest gen_jet passing the nano2pico dR and dpt requirements
     jet_pairs = awkward.cartesian([jets, gen_jets], axis=1, nested=[0])
 
     d_eta = jet_pairs['0'].eta - jet_pairs['1'].eta
@@ -513,20 +510,26 @@ def pt_correction_mc(
     d_phi = numpy.where(d_phi < -numpy.pi, d_phi + 2 * numpy.pi, d_phi)
     delta_r = numpy.sqrt(d_eta**2 + d_phi**2)
 
-    min_dr_idx = awkward.argmin(delta_r, axis=2)
-    gen_matched_mask = awkward.min(delta_r, axis=2) < 0.2
-
-    matched_gen_jets_pt = awkward.where(
-        gen_matched_mask,
-        gen_jets[min_dr_idx].pt,
-        -1.0
+    corrected_pts_pairs, gen_pt_pairs = awkward.broadcast_arrays(
+        corrected_pts_nested,
+        jet_pairs["1"].pt
     )
-    matched_gen_jets_pt = awkward.flatten(matched_gen_jets_pt)
+    jet_pt_resolution_pairs, _ = awkward.broadcast_arrays(
+        jet_pt_resolution_nested,
+        jet_pairs["1"].pt
+    )
+    gen_match_mask = (
+        (delta_r < 0.2)
+        & (abs(corrected_pts_pairs - gen_pt_pairs) < (3.0 * jet_pt_resolution_pairs * corrected_pts_pairs))
+    )
+    delta_r_masked = awkward.mask(delta_r, gen_match_mask)
+    min_dr_idx = awkward.argmin(delta_r_masked, axis=2)
+    gen_jet_pt = awkward.fill_none(gen_jets[min_dr_idx].pt, -1.0)
+    gen_jet_pt = awkward.to_numpy(awkward.flatten(gen_jet_pt))
 
-    gen_jet_pt = awkward.where(
-        (matched_gen_jets_pt > 0) & (abs(corrected_pts_base - matched_gen_jets_pt) < (3.0 * jet_pt_resolution * corrected_pts_base)),
-        matched_gen_jets_pt,
-        -1.0
+    stochastic_rand = numpy.array(
+        [ROOT_rng.Gaus(0.0, float(sigma)) if sigma > 0.0 else 0.0 for sigma in jet_pt_resolution],
+        dtype=numpy.float32,
     )
 
     # --- 4. JER & MET Calculation Setup ---
@@ -563,8 +566,8 @@ def pt_correction_mc(
     # 2. pt > 15 (after muon subtraction)
     # 3. |eta| < 5.2
     # 4. emEF < 0.9
-    muon_factor = jets_flat.muonSubtrFactor
-    em_ef = jets_flat.neEmEF + jets_flat.chEmEF
+    muon_factor = awkward.to_numpy(jets_flat.muonSubtrFactor)
+    em_ef = awkward.to_numpy(jets_flat.neEmEF + jets_flat.chEmEF)
     
     # Pt used for threshold check (Nominal JEC, no JER yet, muon subtracted)
     # C++: jet_l1l2l3_pt_nomu > 15
@@ -582,7 +585,7 @@ def pt_correction_mc(
     if lhc_run == 3:
         pt_ref_flat = pt_l1_flat
     else:
-        pt_ref_flat = jets_flat.pt 
+        pt_ref_flat = jet_pt_flat 
 
     # --- 5. Calculate JER Variations and Nominal PT ---
     
@@ -608,19 +611,13 @@ def pt_correction_mc(
 
         # Stochastic method for non-matched jets
         not_matched_mask = ~matched_mask
-        
-        # Using 0 for Gaussian smear seed in this replica to match C++ snippet provided logic (simplification)
-        # Real implementation should use proper RNG
-        gaus_smear = 0 
-        
-        if lhc_run == 3:
-            gaus_smear = numpy.where(
-                (not_matched_mask) & (abs(jet_eta) > 2.5) & (abs(jet_eta) < 3.0) & (corrected_pts_base < 50),
-                0.0, 
-                gaus_smear
+        shift_stochastic = stochastic_rand * numpy.sqrt(numpy.maximum(reso_sf * reso_sf - 1.0, 0.0))
+        if int(year[:4]) >= 2017:
+            shift_stochastic = numpy.where(
+                (not_matched_mask) & (abs(jet_eta) > 2.5) & (abs(jet_eta) < 3.0) & (jet_pt_flat < 50.0),
+                0.0,
+                shift_stochastic
             )
-            
-        shift_stochastic = gaus_smear * numpy.sqrt(numpy.maximum(reso_sf * reso_sf - 1.0, 0.0))
         smear_factor = numpy.where(not_matched_mask, numpy.maximum(0.0, 1.0 + shift_stochastic), smear_factor)
 
         pt_jer_varied_flat = corrected_pts_base * smear_factor
@@ -629,6 +626,10 @@ def pt_correction_mc(
         if jer_variation == "central":
             pt_nom_flat = pt_jer_varied_flat
             events[input_collection, "pt_nom"] = awkward.unflatten(pt_nom_flat, n_jets)
+            events[input_collection, "mass_nom"] = awkward.unflatten(
+                _scale_mass_from_pt(jet_pt_flat, pt_nom_flat, jet_mass_flat),
+                n_jets
+            )
             
             # MET Calculation (Nominal)
             # dx = (Pt_new - Pt_ref) * cos(phi)
@@ -643,6 +644,10 @@ def pt_correction_mc(
 
         else:
             events[input_collection, f"pt_jer{jer_variation.capitalize()}"] = awkward.unflatten(pt_jer_varied_flat, n_jets)
+            events[input_collection, f"mass_jer{jer_variation.capitalize()}"] = awkward.unflatten(
+                _scale_mass_from_pt(jet_pt_flat, pt_jer_varied_flat, jet_mass_flat),
+                n_jets
+            )
             
             # MET Calculation (JER Variations)
             # We propagate the difference between (JER_Var) and (Nominal) to the MET
@@ -656,7 +661,12 @@ def pt_correction_mc(
             met_shifts[key]["x"] = awkward.sum(awkward.unflatten(diff_pt_jer * jet_cos_phi, n_jets), axis=1)
             met_shifts[key]["y"] = awkward.sum(awkward.unflatten(diff_pt_jer * jet_sin_phi, n_jets), axis=1)
 
-        print(f"number of matched jets for JER {jer_variation}: {numpy.sum(matched_mask)} out of {len(matched_mask)}")
+        logger.debug(
+            "number of matched jets for JER %s: %s out of %s",
+            jer_variation,
+            numpy.sum(matched_mask),
+            len(matched_mask)
+        )
 
     # --- 6. JES Uncertainties & MET Propagation ---
     
@@ -687,6 +697,11 @@ def pt_correction_mc(
         # Save Jet Branch
         branch_name = f"pt_jes{source_name}{'Up' if jes_shift > 0 else 'Down'}"
         events[input_collection, branch_name] = awkward.unflatten(pt_jes_varied_flat, n_jets)
+        mass_branch_name = f"mass_jes{source_name}{'Up' if jes_shift > 0 else 'Down'}"
+        events[input_collection, mass_branch_name] = awkward.unflatten(
+            _scale_mass_from_pt(jet_pt_flat, pt_jes_varied_flat, jet_mass_flat),
+            n_jets
+        )
         
         # MET Calculation (JES Variations)
         # MET_JESVar = MET_Nom - Sum(Pt_JESVar - Pt_Nom)
@@ -796,6 +811,8 @@ def pt_correction_data(
 
     n_jets = awkward.num(jets)
     jets_flat = awkward.flatten(jets)
+    jet_pt_flat = awkward.to_numpy(jets_flat.pt)
+    jet_mass_flat = awkward.to_numpy(jets_flat.mass)
     jets_area = awkward.to_numpy(jets_flat.area)
     jets_eta = awkward.to_numpy(jets_flat.eta)
     rho_arr = numpy.repeat(awkward.to_numpy(events["Rho_fixedGridRhoFastjetAll"]), n_jets)
@@ -825,11 +842,15 @@ def pt_correction_data(
             jets_area, jets_eta, raw_pt_numpy, rho_arr
         )
         
-    corrected_pts_flat = raw_pt * corr
+    corrected_pts_flat = raw_pt_numpy * corr
     events[input_collection, "corrected_pt"] = awkward.unflatten(corrected_pts_flat, n_jets)
+    events[input_collection, "corrected_mass"] = awkward.unflatten(
+        _scale_mass_from_pt(jet_pt_flat, corrected_pts_flat, jet_mass_flat),
+        n_jets
+    )
 
     # --- 2. Calculate L1 Corrected Jet PT (Needed for Run 3 MET) ---
-    pt_l1_flat = raw_pt 
+    pt_l1_flat = raw_pt_numpy
     if lhc_run == 3:
         try:
             l1_evaluator = evaluator[f"{jes_tag}_L1FastJet_{jec_algo}"]
@@ -840,10 +861,10 @@ def pt_correction_data(
             else:
                  l1_corr = l1_evaluator.evaluate(jets_area, jets_eta, raw_pt_numpy, rho_arr)
             
-            pt_l1_flat = raw_pt * l1_corr
+            pt_l1_flat = raw_pt_numpy * l1_corr
         except Exception as e:
             # Fallback if L1 not found, though risky for MET accuracy
-            pt_l1_flat = raw_pt 
+            pt_l1_flat = raw_pt_numpy
 
     # --- 3. Propagate to PuppiMET ---
 
@@ -855,14 +876,14 @@ def pt_correction_data(
     else:
         met_pt_orig = events.PuppiMET_pt
         met_phi_orig = events.PuppiMET_phi
-        pt_ref_flat = jets_flat.pt # Run 2 subtracts NanoAOD stored, adds Full
+        pt_ref_flat = jet_pt_flat # Run 2 subtracts NanoAOD stored, adds Full
 
     met_px = met_pt_orig * numpy.cos(met_phi_orig)
     met_py = met_pt_orig * numpy.sin(met_phi_orig)
 
     # Selection mask for jets propagating to MET
-    muon_factor = jets_flat.muonSubtrFactor
-    em_ef = jets_flat.neEmEF + jets_flat.chEmEF
+    muon_factor = awkward.to_numpy(jets_flat.muonSubtrFactor)
+    em_ef = awkward.to_numpy(jets_flat.neEmEF + jets_flat.chEmEF)
     
     # Threshold check using muon-subtracted nominal pT
     pt_for_threshold = corrected_pts_flat * (1 - muon_factor)

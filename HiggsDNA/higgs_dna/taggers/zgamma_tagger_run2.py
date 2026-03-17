@@ -287,8 +287,22 @@ class ZGammaTaggerRun2(Tagger):
         photons = photons[clean_photon_mask]
 
         # Jets
+        jets_for_selection = events.Jet
+        if use_run3_nominal_corrections:
+            jets_for_selection = awkward.with_field(jets_for_selection, jets_for_selection.pt, "raw_pt")
+            if "mass" in jets_for_selection.fields:
+                jets_for_selection = awkward.with_field(jets_for_selection, jets_for_selection.mass, "raw_mass")
+            if (not self.is_data) and ("pt_nom" in jets_for_selection.fields):
+                jets_for_selection = awkward.with_field(jets_for_selection, jets_for_selection.pt_nom, "pt")
+                if "mass_nom" in jets_for_selection.fields:
+                    jets_for_selection = awkward.with_field(jets_for_selection, jets_for_selection.mass_nom, "mass")
+            elif self.is_data and ("corrected_pt" in jets_for_selection.fields):
+                jets_for_selection = awkward.with_field(jets_for_selection, jets_for_selection.corrected_pt, "pt")
+                if "corrected_mass" in jets_for_selection.fields:
+                    jets_for_selection = awkward.with_field(jets_for_selection, jets_for_selection.corrected_mass, "mass")
+
         jet_cut, jet_veto, photon_removal, lepton_removal = jet_selections.select_jets(
-            jets = events.Jet,
+            jets = jets_for_selection,
             options = self.options["jets"],
             clean = {
                 "photons" : {
@@ -308,7 +322,8 @@ class ZGammaTaggerRun2(Tagger):
             year = self.year,
             name = "SelectedJet",
             tagger = self,
-            event_runs = events.run
+            event_runs = events.run,
+            event_numbers = events.event
         )
 
         # lepton_removal_jet = events.Jet[lepton_removal]
@@ -338,7 +353,7 @@ class ZGammaTaggerRun2(Tagger):
         jets = awkward_utils.add_field(
             events = events,
             name = "SelectedJet",
-            data = events.Jet[jet_cut]
+            data = jets_for_selection[jet_cut]
         )
   
         # Sort by pt and add photon properties

@@ -26,7 +26,7 @@ DEFAULT_JETS = {
     "looseID" : True
 }
 
-def select_jets(jets, options, clean, year, name = "none", tagger = None, event_runs = None):
+def select_jets(jets, options, clean, year, name = "none", tagger = None, event_runs = None, event_numbers = None):
     """
 
     """
@@ -39,6 +39,8 @@ def select_jets(jets, options, clean, year, name = "none", tagger = None, event_
     tagger_name = "none" if tagger is None else tagger.name 
 
     standard_cuts, photon_removal, lepton_removal = object_selections.select_objects(jets, options, clean, name, tagger)
+
+    jet_pt_for_veto = jets.raw_pt if "raw_pt" in jets.fields else jets.pt
 
     # Pei-Zhu, Jet Horn 
     jets_horn_year = {"2017", "2018", "2022preEE", "2022postEE", "2023preBPix", "2023postBPix"}
@@ -82,6 +84,7 @@ def select_jets(jets, options, clean, year, name = "none", tagger = None, event_
         -5.19099,
         5.19099
     )
+    jet_pt_flattened_for_veto = awkward.to_numpy(awkward.flatten(jet_pt_for_veto))
     jet_phi = numpy.clip(
         awkward.to_numpy(jets_flattened.phi),
         -3.1415925,
@@ -91,18 +94,17 @@ def select_jets(jets, options, clean, year, name = "none", tagger = None, event_
     jet_veto_cut = jets.pt > 0  # default: keep all
     if int(year[:4]) >= 2022:
         jet_veto_sf = numpy.where(
-            jet_veto_map_evaluator["jetvetomap"].evalv(
-                "jetvetomap",
-                jet_eta,
-                jet_phi
-            ) > 0,
+            (jet_pt_flattened_for_veto > 15.0)
+            & (abs(jet_eta) < 5.191)
+            & (
+                jet_veto_map_evaluator["jetvetomap"].evalv(
+                    "jetvetomap",
+                    jet_eta,
+                    jet_phi
+                ) > 0
+            ),
             False,
             True
-        )
-        jet_veto_sf = numpy.where(
-            (abs(jet_eta) >= 5.191) | (abs(jet_phi) >= 3.1415926),
-            True,
-            jet_veto_sf
         )
         jet_veto_cut = awkward.unflatten(jet_veto_sf, n_jets)
 
@@ -110,24 +112,27 @@ def select_jets(jets, options, clean, year, name = "none", tagger = None, event_
     hem_mask = jets.pt > 0  # default: keep all
     if year == "2018":
         if tagger is not None and event_runs is not None:
-            # broadcast event-level info to jet dimension
             if len(jets) == len(event_runs):
-                print("Min and Max of event_runs:", numpy.min(event_runs), " , ", numpy.max(event_runs))
                 run_broadcast = awkward.broadcast_arrays(event_runs, jets.pt)[0]
-                region = ((jets.phi > -1.57) & (jets.phi < -0.87) &
-                          (jets.eta > -3.0) & (jets.eta < -1.3))
+                region = (
+                    (jet_pt_for_veto > 15.0)
+                    & (jets.phi > -1.57)
+                    & (jets.phi < -0.87)
+                    & (jets.eta > -3.2)
+                    & (jets.eta < -1.3)
+                )
                 if tagger.is_data:
-                    print("Data detected: removing all jets in HEM region for affected runs.")
-                    run_region = (run_broadcast > 319077)
+                    run_region = run_broadcast >= 319077
                     hem_mask = ~(region & run_region)
                 else:
-                    print("MC detected: applying probabilistic HEM jet removal for affected runs.")
-                    fraction = 0.6515623538907509
-                    # 產生一次 per-event 隨機數 (可重複執行時保持非決定性；若需可加種子)
-                    rand = numpy.random.random(len(event_runs))
-                    hem_run = rand < fraction
-                    hem_run_broadcast = awkward.broadcast_arrays(hem_run, jets.pt)[0]
-                    hem_mask = ~(region & hem_run_broadcast)
+                    if event_numbers is not None:
+                        event_broadcast = awkward.broadcast_arrays(event_numbers, jets.pt)[0]
+                        hem_region = (event_broadcast % 10000) > 3564
+                    else:
+                        fraction = 0.6515623538907509
+                        rand = numpy.random.random(len(event_runs))
+                        hem_region = awkward.broadcast_arrays(rand < fraction, jets.pt)[0]
+                    hem_mask = ~(region & hem_region)
                 if awkward.any(~hem_mask):
                     logger.debug(f"[HEM] Removed jets: {awkward.sum(~hem_mask, axis=1)[:10]}")
             else:

@@ -327,17 +327,20 @@
                 "method": "from_branch",
                 "branch_modified": [
                    ["Jet", "pt"],
+                   ["Jet", "mass"],
                     "MET_pt",
                     "MET_phi"
                 ],
                 "branches": {
                     "up": [
                         ["Jet", "pt_jerUp"],
+                        ["Jet", "mass_jerUp"],
                         "PuppiMET_ptJERUp",
                         "PuppiMET_phiJERUp"
                     ],
                     "down": [
                         ["Jet", "pt_jerDown"],
+                        ["Jet", "mass_jerDown"],
                         "PuppiMET_ptJERDown",
                         "PuppiMET_phiJERDown"
                     ]
@@ -347,17 +350,20 @@
                 "method": "from_branch",
                 "branch_modified": [
                     ["Jet", "pt"],
+                    ["Jet", "mass"],
                     "MET_pt",
                     "MET_phi"
                 ],
                 "branches": {
                     "up": [
                         ["Jet", "pt_jesTotalUp"],
+                        ["Jet", "mass_jesTotalUp"],
                         "PuppiMET_ptJESUp",
                         "PuppiMET_phiJESUp"
                     ],
                     "down": [
                         ["Jet", "pt_jesTotalDown"],
+                        ["Jet", "mass_jesTotalDown"],
                         "PuppiMET_ptJESDown",
                         "PuppiMET_phiJESDown"
                     ]
