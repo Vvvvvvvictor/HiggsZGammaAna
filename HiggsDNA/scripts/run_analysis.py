@@ -116,6 +116,26 @@ def parse_arguments():
         action="store_true",
         help="Read and merge skimmed files into events. If not specified, skimmed files will not be processed.")
 
+    parser.add_argument(
+        "--yield_trace",
+        required=False,
+        default=None,
+        type=str,
+        help="Path to JSONL output for stage-by-stage yield tracing.")
+
+    parser.add_argument(
+        "--yield_trace_truncate",
+        required=False,
+        action="store_true",
+        help="Truncate the yield trace JSONL file before writing.")
+
+    parser.add_argument(
+        "--yield_trace_inputs",
+        required=False,
+        default=None,
+        type=str,
+        help="Optional input override for trace mode: CSV list of files/patterns or @filelist.")
+
     return parser.parse_args()
 
 
@@ -125,6 +145,15 @@ def main(args):
     if args.config is not None:
         with open(expand_path(args.config), "r") as f_in:
             args.config = json.load(f_in)
+
+    if args.yield_trace is not None:
+        args.yield_trace = {
+            "path": args.yield_trace,
+            "truncate": bool(args.yield_trace_truncate),
+        }
+    else:
+        args.yield_trace = None
+    args.yield_trace_truncate = None
 
     logger.debug("Running HiggsDNA analysis with config:")
 

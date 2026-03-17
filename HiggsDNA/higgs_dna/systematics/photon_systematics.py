@@ -10,6 +10,7 @@ from higgs_dna.utils.logger_utils import simple_logger
 logger = simple_logger(__name__)
 
 from higgs_dna.utils import awkward_utils, misc_utils
+from higgs_dna.systematics.lepton_systematics import _make_run3_rng
 from higgs_dna.systematics.utils import systematic_from_bins, ic_systematic_from_bins
 
 ########################
@@ -785,45 +786,51 @@ def photon_scale_smear_run3(events, year, is_data):
     photons_pt = awkward.to_numpy(photons_flattened.pt)
     photons_r9 = awkward.to_numpy(photons_flattened.r9)
     photons_energyerr = awkward.to_numpy(photons_flattened.energyErr)
+    min_correction_pt = 15.0
     if is_data:
         photons_seedGain = awkward.to_numpy(photons_flattened.seedGain)
         run_arr_flattened = numpy.repeat(awkward.to_numpy(events.run), n_photons)
 
     if is_data:
         scale = awkward.where(
-            (photons_AbsScEta > 3.0) | (photons_pt < 20.0),
+            (photons_AbsScEta > 3.0) | (photons_pt < min_correction_pt),
             awkward.ones_like(photons_pt, dtype=float),
             evaluator.compound[scale_names[year]].evaluate("scale", run_arr_flattened, photons_scEta, photons_r9, photons_pt, photons_seedGain)
         )
         corrected_pt = awkward.to_numpy(photons_pt * scale)
         events["Photon", "corrected_pt"] = awkward.unflatten(corrected_pt, n_photons)
-        print("Photon pt before scale corrections:", photons.pt)
-        print("Photon pt after scale corrections:", events["Photon", "corrected_pt"])
 
     # Apply smear corrections first
     if is_data:
         evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(photon_scale_FILE[year]))
         smear = awkward.where(
-            (photons_AbsScEta > 3.0) | (photons_pt < 20.0),
+            (photons_AbsScEta > 3.0) | (photons_pt < min_correction_pt),
             awkward.zeros_like(photons_pt, dtype=float),
             evaluator[smear_names[year]].evalv("smear", corrected_pt, photons_r9, photons_AbsScEta)
         )
         corrected_energyErr = numpy.sqrt((photons_energyerr)**2 + (photons_pt * numpy.cosh(photons_scEta) * smear)**2) * scale
         events["Photon", "corrected_energyErr"] = awkward.unflatten(corrected_energyErr, n_photons)
-        print("Photon energy err correction:", photons.energyErr)
-        print("Photon energy err correction:", events["Photon", "corrected_energyErr"])
         return events
 
     smear = awkward.where(
-            (photons_AbsScEta > 3.0) | (photons_pt < 20.0),
+            (photons_AbsScEta > 3.0) | (photons_pt < min_correction_pt),
             awkward.zeros_like(photons_pt, dtype=float),
             evaluator[smear_names[year]].evalv("smear", photons_pt, photons_r9, photons_AbsScEta)
         )
-    rng = numpy.random.default_rng(seed=123)
+    valid_smear = (photons_AbsScEta <= 3.0) & (photons_pt >= min_correction_pt)
+    rng = _make_run3_rng()
+    random_gaus = numpy.zeros_like(photons_pt, dtype=float)
+    if numpy.any(valid_smear):
+        valid_count = int(numpy.count_nonzero(valid_smear))
+        random_gaus[valid_smear] = numpy.fromiter(
+            (rng.gaus() for _ in range(valid_count)),
+            dtype=numpy.float64,
+            count=valid_count,
+        )
     smear_val = awkward.where(
-        (photons_AbsScEta > 3.0) | (photons_pt < 20.0),
+        valid_smear,
+        1.0 + random_gaus * numpy.abs(smear),
         awkward.ones_like(photons_pt, dtype=float),
-        rng.normal(loc=1., scale=numpy.abs(smear))
     )
     
     # Apply central smear correction to photon pt
@@ -833,20 +840,19 @@ def photon_scale_smear_run3(events, year, is_data):
     # Calculate smear systematics
     for syst in ["smear_up", "smear_down"]:
         smear_syst = awkward.where(
-            (photons_AbsScEta > 3.0) | (photons_pt < 20.0),
+            (photons_AbsScEta > 3.0) | (photons_pt < min_correction_pt),
             awkward.zeros_like(photons_pt, dtype=float),
             evaluator[smear_names[year]].evalv(syst, photons_pt, photons_r9, photons_AbsScEta)
         )
 
         smear_syst_val = awkward.where(
-            (abs(photons_AbsScEta) > 3.0) | (photons_pt < 20.0),
+            valid_smear,
+            1.0 + random_gaus * numpy.abs(smear_syst),
             awkward.ones_like(photons_pt, dtype=float),
-            rng.normal(loc=1., scale=numpy.abs(smear_syst))
         )
         events["Photon", "dEsigma" + syst.replace("smear_", "").capitalize()] = photons.pt * awkward.unflatten(smear_syst_val, n_photons)
         events["Photon", "energyErr_dEsigma" + syst.replace("smear_", "").capitalize()] = awkward.unflatten(numpy.sqrt((photons_energyerr)**2 + (photons_pt * numpy.cosh(photons_scEta) * smear_syst)**2) * smear_syst_val, n_photons)
       
-    print("Photon pt before smear corrections:", photons.pt)
     events["Photon", "corrected_pt"] = awkward.unflatten(corrected_pt, n_photons)
     events["Photon", "corrected_energyErr"] = awkward.unflatten(corrected_energyErr, n_photons)
     photons = events["Photon"]
@@ -854,17 +860,11 @@ def photon_scale_smear_run3(events, year, is_data):
     # Calculate scale systematics
     for syst in ["scale_up", "scale_down"]:
         scale = awkward.where(
-            (abs(photons.eta) > 3.0) | (photons.pt < 20.0),
+            (abs(photons.eta) > 3.0) | (photons.pt < min_correction_pt),
             awkward.ones_like(photons.pt, dtype=float),
             awkward.unflatten(evaluator[smear_names[year]].evalv(syst, photons_pt, photons_r9, photons_AbsScEta), n_photons)
         )
         events["Photon", "pt_Scale" + syst.replace("scale_", "").capitalize()] = photons.corrected_pt * scale
         events["Photon", "energyErr_Scale" + syst.replace("scale_", "").capitalize()] = photons.corrected_energyErr * scale
-
-    print("Photon pt after scale and smear corrections:", events["Photon", "corrected_pt"])
-    print("Photon pt Scale Up:", events["Photon", "pt_ScaleUp"])
-    print("Photon pt Scale Down:", events["Photon", "pt_ScaleDown"])
-    print("Photon pt Smear Up:", events["Photon", "dEsigmaUp"])
-    print("Photon pt Smear Down:", events["Photon", "dEsigmaDown"])
 
     return events

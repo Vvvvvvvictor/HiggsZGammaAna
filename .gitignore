@@ -197,3 +197,6 @@ HiggsDNA/nanov9
 HiggsDNA/eos
 HiggsDNA/log
 HiggsDNA/Parquet
+.DS_Store
+HiggsDNA/.DS_Store
+HiggsDNA/higgs_dna/.DS_Store

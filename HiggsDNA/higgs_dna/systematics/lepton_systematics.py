@@ -1,6 +1,7 @@
 import awkward
 import numpy
 import json
+import math
 try:
     from scipy.special import erf as scipy_erf, erfinv as scipy_erfinv
     HAS_SCIPY = True
@@ -15,6 +16,148 @@ logger = simple_logger(__name__)
 
 from higgs_dna.utils import awkward_utils, misc_utils
 from higgs_dna.systematics.utils import systematic_from_bins
+
+RUN3_RANDOM_SEED = 4357
+
+
+class _RootTRandom3:
+    _COUNT = 624
+    _OFFSET = 397
+    _TEMPERING_MASK_B = 0x9D2C5680
+    _TEMPERING_MASK_C = 0xEFC60000
+    _UPPER_MASK = 0x80000000
+    _LOWER_MASK = 0x7FFFFFFF
+    _MATRIX_A = 0x9908B0DF
+    _UINT_SCALE = 2.3283064365386963e-10
+
+    def __init__(self, seed):
+        self._mt = [0] * self._COUNT
+        self._count624 = self._COUNT
+        self.set_seed(seed)
+
+    def set_seed(self, seed):
+        seed = int(seed) & 0xFFFFFFFF
+        self._count624 = self._COUNT
+        self._mt[0] = seed
+        for idx in range(1, self._COUNT):
+            prev = self._mt[idx - 1]
+            self._mt[idx] = (
+                1812433253 * (prev ^ (prev >> 30)) + idx
+            ) & 0xFFFFFFFF
+
+    def rndm(self):
+        if self._count624 >= self._COUNT:
+            for idx in range(self._COUNT - self._OFFSET):
+                y = (self._mt[idx] & self._UPPER_MASK) | (self._mt[idx + 1] & self._LOWER_MASK)
+                self._mt[idx] = self._mt[idx + self._OFFSET] ^ (y >> 1) ^ (self._MATRIX_A if (y & 0x1) else 0)
+
+            for idx in range(self._COUNT - self._OFFSET, self._COUNT - 1):
+                y = (self._mt[idx] & self._UPPER_MASK) | (self._mt[idx + 1] & self._LOWER_MASK)
+                self._mt[idx] = self._mt[idx + self._OFFSET - self._COUNT] ^ (y >> 1) ^ (self._MATRIX_A if (y & 0x1) else 0)
+
+            y = (self._mt[self._COUNT - 1] & self._UPPER_MASK) | (self._mt[0] & self._LOWER_MASK)
+            self._mt[self._COUNT - 1] = self._mt[self._OFFSET - 1] ^ (y >> 1) ^ (self._MATRIX_A if (y & 0x1) else 0)
+            self._count624 = 0
+
+        y = self._mt[self._count624]
+        self._count624 += 1
+
+        y ^= (y >> 11)
+        y ^= ((y << 7) & self._TEMPERING_MASK_B)
+        y ^= ((y << 15) & self._TEMPERING_MASK_C)
+        y ^= (y >> 18)
+        y &= 0xFFFFFFFF
+
+        if y:
+            return float(y) * self._UINT_SCALE
+        return self.rndm()
+
+    def uniform(self, low=0.0, high=1.0, size=None):
+        span = high - low
+        if size is None:
+            return low + span * self.rndm()
+        return numpy.fromiter(
+            (low + span * self.rndm() for _ in range(size)),
+            dtype=numpy.float64,
+            count=size,
+        )
+
+    def gaus(self, mean=0.0, sigma=1.0):
+        kC1 = 1.448242853
+        kC2 = 3.307147487
+        kC3 = 1.46754004
+        kD1 = 1.036467755
+        kD2 = 5.295844968
+        kD3 = 3.631288474
+        kHm = 0.483941449
+        kZm = 0.107981933
+        kHp = 4.132731354
+        kZp = 18.52161694
+        kPhln = 0.4515827053
+        kHm1 = 0.516058551
+        kHp1 = 3.132731354
+        kHzm = 0.375959516
+        kHzmp = 0.591923442
+        kAs = 0.8853395638
+        kBs = 0.2452635696
+        kCs = 0.2770276848
+        kB = 0.5029324303
+        kX0 = 0.4571828819
+        kYm = 0.187308492
+        kS = 0.7270572718
+        kT = 0.03895759111
+
+        while True:
+            y = self.rndm()
+            if y > kHm1:
+                result = kHp * y - kHp1
+                break
+            if y < kZm:
+                rn = kZp * y - 1.0
+                result = 1.0 + rn if rn > 0.0 else -1.0 + rn
+                break
+            if y < kHm:
+                rn = 2.0 * self.rndm() - 1.0
+                z = 2.0 - rn if rn > 0.0 else -2.0 - rn
+                if (kC1 - y) * (kC3 + abs(z)) < kC2:
+                    result = z
+                    break
+                x = rn * rn
+                if (y + kD1) * (kD3 + x) < kD2:
+                    result = rn
+                    break
+                if kHzmp - y < math.exp(-(z * z + kPhln) / 2.0):
+                    result = z
+                    break
+                if y + kHzm < math.exp(-(x + kPhln) / 2.0):
+                    result = rn
+                    break
+                continue
+
+            while True:
+                x = self.rndm()
+                y = kYm * self.rndm()
+                z = kX0 - kS * x - y
+                if z > 0.0:
+                    rn = 2.0 + y / x
+                else:
+                    x = 1.0 - x
+                    y = kYm - y
+                    rn = -(2.0 + y / x)
+                if (y - kAs + x) * (kCs + x) + kBs < 0.0:
+                    result = rn
+                    break
+                if y < x + kT and rn * rn < 4.0 * (kB - math.log(x)):
+                    result = rn
+                    break
+            break
+
+        return mean + sigma * result
+
+
+def _make_run3_rng():
+    # Keep the Run3 lepton smearing stream aligned with nano2pico/ROOT TRandom3.
+    return _RootTRandom3(RUN3_RANDOM_SEED)
 
 MUON_ID_SF_FILE = {
     "2016" : "higgs_dna/systematics/data/2016postVFP_UL/muid_2016_2016APV.json",
@@ -940,41 +1083,50 @@ def electron_scale_smear_run3(events, year, is_data):
     electrons_pt = awkward.to_numpy(electrons_flattened.pt)
     electrons_r9 = awkward.to_numpy(electrons_flattened.r9)
     electrons_energyErr = awkward.to_numpy(electrons_flattened.energyErr)
+    min_correction_pt = 15.0
     if is_data:
         electrons_seedGain = awkward.to_numpy(electrons_flattened.seedGain)
         run_arr_flattened = numpy.repeat(awkward.to_numpy(events["run"]), n_electrons)
 
     if is_data:
         scale = awkward.where(
-            (electrons_AbsScEta > 3.0) | (electrons_pt < 20.0),
+            (electrons_AbsScEta > 3.0) | (electrons_pt < min_correction_pt),
             awkward.ones_like(electrons_pt, dtype=float),
             evaluator.compound[electron_scale_names[year]].evaluate("scale", run_arr_flattened, electrons_scEta, electrons_r9, electrons_pt, electrons_seedGain)
         )
         corrected_pt = awkward.to_numpy(electrons_pt * scale)
         events["Electron", "corrected_pt"] = awkward.unflatten(corrected_pt, n_electrons)
-        logger.info("[Lepton Systematics] Electron pt before scale correction (data): %s", electrons.pt)
-        logger.info("[Lepton Systematics] Electron pt after scale correction (data): %s", corrected_pt)
 
     # Apply smear corrections first
     if is_data:
         evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(electron_scale_FILE[year]))
         smear = awkward.where(
-            (electrons_AbsScEta > 3.0) | (electrons_pt < 20.0),
+            (electrons_AbsScEta > 3.0) | (electrons_pt < min_correction_pt),
             awkward.zeros_like(electrons_pt, dtype=float),
             evaluator[electron_smear_names[year]].evalv("smear", corrected_pt, electrons_r9, electrons_AbsScEta)
         )
         corrected_energyErr = numpy.sqrt((electrons_energyErr)**2 + (electrons_pt * numpy.cosh(electrons_scEta) * smear)**2) * scale
+        events["Electron", "corrected_energyErr"] = awkward.unflatten(corrected_energyErr, n_electrons)
         return events
     smear = awkward.where(
-        (electrons_AbsScEta > 3.0) | (electrons_pt < 20.0),
+        (electrons_AbsScEta > 3.0) | (electrons_pt < min_correction_pt),
         awkward.zeros_like(electrons_pt, dtype=float),
         evaluator[electron_smear_names[year]].evalv("smear", electrons_pt, electrons_r9, electrons_AbsScEta)
     )
-    rng = numpy.random.default_rng(seed=8011)
+    valid_smear = (electrons_AbsScEta <= 3.0) & (electrons_pt >= min_correction_pt)
+    rng = _make_run3_rng()
+    random_gaus = numpy.zeros_like(electrons_pt, dtype=float)
+    if numpy.any(valid_smear):
+        valid_count = int(numpy.count_nonzero(valid_smear))
+        random_gaus[valid_smear] = numpy.fromiter(
+            (rng.gaus() for _ in range(valid_count)),
+            dtype=numpy.float64,
+            count=valid_count,
+        )
     smear_val = awkward.where(
-        (electrons_AbsScEta > 3.0) | (electrons_pt < 20.0),
+        valid_smear,
+        1.0 + random_gaus * numpy.abs(smear),
         awkward.ones_like(electrons_pt, dtype=float),
-        rng.normal(loc=1., scale=numpy.abs(smear))
     )
     
     # Apply central smear correction to electron pt
@@ -984,19 +1136,18 @@ def electron_scale_smear_run3(events, year, is_data):
     # Calculate smear systematics
     for syst in ["smear_up", "smear_down"]:
         smear_syst = awkward.where(
-            (electrons_AbsScEta > 3.0) | (electrons_pt < 20.0),
+            (electrons_AbsScEta > 3.0) | (electrons_pt < min_correction_pt),
             awkward.zeros_like(electrons_pt, dtype=float),
             evaluator[electron_smear_names[year]].evalv(syst, electrons_pt, electrons_r9, electrons_AbsScEta)
         )
         smear_val_syst = awkward.where(
-            (electrons_AbsScEta > 3.0) | (electrons_pt < 20.0),
+            valid_smear,
+            1.0 + random_gaus * numpy.abs(smear_syst),
             awkward.ones_like(electrons_pt, dtype=float),
-            rng.normal(loc=1., scale=numpy.abs(smear_syst))
         )
         events["Electron", "dEsigma" + syst.replace("smear_", "").capitalize()] = awkward.unflatten(corrected_pt * smear_val_syst, n_electrons)
         events["Electron", "energyErr_dEsigma" + syst.replace("smear_", "").capitalize()] = awkward.unflatten(numpy.sqrt((electrons_energyErr)**2 + (electrons_pt * numpy.cosh(electrons_scEta) * smear_syst)**2) * smear_val_syst, n_electrons)
 
-    print("Electron pt before smear correction:", electrons.pt)
     events["Electron", "corrected_pt"] = awkward.unflatten(corrected_pt, n_electrons)
     events["Electron", "corrected_energyErr"] = awkward.unflatten(corrected_energyErr, n_electrons)
     electrons = events["Electron"]
@@ -1008,11 +1159,6 @@ def electron_scale_smear_run3(events, year, is_data):
         events["Electron", "energyErr_dEscale" + syst.replace("scale_", "").capitalize()] = awkward.unflatten(corrected_energyErr * scale_syst, n_electrons)
 
     logger.info("[Lepton Systematics] Electron scale and smear corrections applied successfully")
-    print("Electron pt after scale and smear corrections:", events["Electron", "corrected_pt"])
-    print("Electron pt Scale Up:", events["Electron", "dEscaleUp"])
-    print("Electron pt Scale Down:", events["Electron", "dEscaleDown"])
-    print("Electron pt Smear Up:", events["Electron", "dEsigmaUp"])
-    print("Electron pt Smear Down:", events["Electron", "dEsigmaDown"])
 
     return events
 
@@ -1062,12 +1208,16 @@ def muon_scale_run3(events, year, is_data):
     n_muons = awkward.num(muons)
     muons_flattened = awkward.flatten(muons)
 
-    muon_pt = awkward.to_numpy(muons_flattened.pt)
+    use_bs_constrained = "bsConstrainedPt" in muons.fields and "bsConstrainedPtErr" in muons.fields
+    if use_bs_constrained:
+        muon_pt = awkward.to_numpy(muons_flattened.bsConstrainedPt)
+        muon_ptErr = awkward.to_numpy(muons_flattened.bsConstrainedPtErr)
+    else:
+        muon_pt = awkward.to_numpy(muons_flattened.pt)
+        muon_ptErr = awkward.to_numpy(muons_flattened.ptErr)
     muon_eta = awkward.to_numpy(muons_flattened.eta)
     muon_phi = awkward.to_numpy(muons_flattened.phi)
     muon_charge = awkward.to_numpy(muons_flattened.charge)
-    # Get original pt error
-    muon_ptErr = awkward.to_numpy(muons_flattened.ptErr)
     muon_abseta = numpy.abs(muon_eta)
     
     events["Muon", "ptErr_store"] = muons.ptErr
@@ -1153,7 +1303,8 @@ def muon_scale_run3(events, year, is_data):
         k_factor = numpy.sqrt(k_diff_sq)
         
         # Generate random numbers
-        rndm = _sample_crystal_ball(cb_mean, cb_sigma, cb_alpha, cb_n, len(muon_pt))
+        rng = _make_run3_rng()
+        rndm = _sample_crystal_ball(cb_mean, cb_sigma, cb_alpha, cb_n, len(muon_pt), rng=rng)
         
         # Apply smearing to pt
         # Formula: pt_smeared = pt_scaled * (1 + k * sigma * rndm)
@@ -1281,7 +1432,7 @@ def muon_scale_run3(events, year, is_data):
     return events
 
 
-def _sample_crystal_ball(mean, sigma, alpha, n, size):
+def _sample_crystal_ball(mean, sigma, alpha, n, size, rng=None):
     """
     Sample random numbers from a Crystal Ball distribution using inverse CDF method.
     This is a vectorized implementation matching the C++ code in MuonScaRe.cc
@@ -1328,7 +1479,10 @@ def _sample_crystal_ball(mean, sigma, alpha, n, size):
     cdfPa = numpy.where(numpy.isnan(cdfPa), 1.0, cdfPa)
     
     # Generate uniform random numbers
-    u = numpy.random.uniform(0, 1, size)
+    if rng is None:
+        u = numpy.random.uniform(0, 1, size)
+    else:
+        u = rng.uniform(0.0, 1.0, size)
     
     # Inverse CDF
     result = numpy.zeros(size)

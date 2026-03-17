@@ -1,6 +1,7 @@
 import os
 import json
 import subprocess
+import sys
 
 import logging
 # logger = logging.getLogger(__name__)
@@ -271,8 +272,7 @@ class LocalJob(Job):
     def submit_to_batch(self):
         with open(self.log_file, "w") as f:
             self.p = subprocess.Popen(
-                    "python %s" % (self.python_executable_file),
-                    shell = True,
+                    [sys.executable, self.python_executable_file],
                     stdout = f,
                     stderr = f
             )

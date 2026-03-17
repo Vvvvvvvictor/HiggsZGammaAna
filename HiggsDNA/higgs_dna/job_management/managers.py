@@ -5,7 +5,10 @@ import awkward
 import numpy
 import json
 import glob
-import pyarrow
+try:
+    import pyarrow  # noqa: F401
+except ModuleNotFoundError:
+    pyarrow = None
 import datetime
 import sys
 from tqdm import tqdm
@@ -135,8 +138,11 @@ class JobsManager():
         """
 
         """
-
-        columns, lines = os.get_terminal_size()
+        try:
+            columns, lines = os.get_terminal_size()
+        except OSError:
+            columns = int(os.environ.get("COLUMNS", 120))
+            lines = int(os.environ.get("LINES", 40))
 
         if len(self.tasks) > int(lines/2): # don't take up more than half the terminal window
             scrolling = True

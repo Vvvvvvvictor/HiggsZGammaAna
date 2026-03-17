@@ -3,6 +3,7 @@ import time
 import datetime
 import copy
 import json
+import glob
 import pickle
 import dill
 import numpy
@@ -10,7 +11,10 @@ import re
 
 import uproot
 import awkward
-import pyarrow.parquet
+try:
+    import pyarrow.parquet as pyarrow_parquet
+except ModuleNotFoundError:
+    pyarrow_parquet = None
 
 import logging
 import orjson
@@ -33,8 +37,64 @@ from higgs_dna.systematics.photon_systematics import photon_scale_smear_run3
 from higgs_dna.systematics.lepton_systematics import electron_scale_smear_run3, muon_scale_run3
 from higgs_dna.systematics.jet_systematics import pt_correction_data, pt_correction_mc
 from higgs_dna.systematics.ps_systematics import ps_isr_sf, ps_fsr_sf
+from higgs_dna.utils.yield_trace import YieldTracer, set_global_tracer
 
 condor=False
+
+
+def _expand_yield_trace_inputs(input_spec):
+    if input_spec is None:
+        return None
+
+    tokens = [x.strip() for x in str(input_spec).split(",") if x.strip()]
+    resolved = []
+
+    for token in tokens:
+        if token.startswith("@"):
+            list_file = token[1:]
+            if not os.path.exists(list_file):
+                continue
+            with open(list_file, "r", encoding="utf-8") as handle:
+                for line in handle:
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    resolved.append(line)
+            continue
+
+        if os.path.isfile(token) and token.endswith(".txt"):
+            with open(token, "r", encoding="utf-8") as handle:
+                for line in handle:
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    resolved.append(line)
+            continue
+
+        if any(wildcard in token for wildcard in ["*", "?", "["]):
+            resolved.extend(sorted(glob.glob(token)))
+            continue
+
+        resolved.append(token)
+
+    return resolved
+
+
+def _weight_component_note(weight_name):
+    name = weight_name.lower()
+    if "pileup" in name or name.startswith("pu"):
+        return "pileup weight applied"
+    if "prefire" in name:
+        return "L1 prefiring weight applied"
+    if "trigger" in name or "trig" in name:
+        return "trigger scale factor applied"
+    if any(x in name for x in ["electron", "muon", "lepton", "photon", "reco", "id"]):
+        return "lepton/photon ID or reco scale factor applied"
+    if any(x in name for x in ["nnlo", "nlo", "kfactor", "isr", "ht", "stitch"]):
+        return "k-factor, ISR, or stitching-like correction applied"
+    return "additional central weight component applied"
+
+
 def run_analysis(config):
     """
     Function that gets run for each individual job. Performs the following:
@@ -54,6 +114,41 @@ def run_analysis(config):
     t_start = time.time()
 
     config = load_config(config)
+    yield_trace_cfg = config.get("yield_trace")
+    if isinstance(yield_trace_cfg, str):
+        yield_trace_cfg = {"path": yield_trace_cfg}
+    elif yield_trace_cfg is True:
+        yield_trace_cfg = {"path": "HiggsZGammaAna_yield_trace.jsonl"}
+    elif not isinstance(yield_trace_cfg, dict):
+        yield_trace_cfg = {}
+
+    trace_path = yield_trace_cfg.get("path")
+    tracer = None
+    trace_only = False
+    if trace_path:
+        tracer = YieldTracer(trace_path, truncate=bool(yield_trace_cfg.get("truncate", False)))
+        set_global_tracer(tracer)
+        trace_only = bool(yield_trace_cfg.get("trace_only", False))
+        if pyarrow_parquet is None:
+            trace_only = True
+            logger.warning(
+                "[run_analysis] pyarrow is unavailable. Enabling trace-only mode: output parquet writing will be skipped."
+            )
+    else:
+        set_global_tracer(None)
+
+    trace_inputs = config.get("yield_trace_inputs")
+    if trace_inputs:
+        resolved_trace_files = _expand_yield_trace_inputs(trace_inputs)
+        if resolved_trace_files:
+            config["files"] = resolved_trace_files
+            if "skimmed_files" in config:
+                config["skimmed_files"] = []
+            logger.info(
+                "[run_analysis] Yield trace input override enabled with %d files.",
+                len(resolved_trace_files),
+            )
+
     job_summary = { 
             "config" : config
     }
@@ -61,6 +156,12 @@ def run_analysis(config):
     ### 1. Load events ###
     t_start_load = time.time()
     events, sum_weights = AnalysisManager.load_events(config)
+    if tracer is not None:
+        tracer.record(
+            stage="after_reading_events",
+            weights=numpy.ones(len(events), dtype=numpy.float64),
+            notes="after reading events and before object selection",
+        )
 
     # Optional branch mapping in case you have different naming schemes, e.g. you want MET_T1smear_pt to be recast as MET_pt
     # Can be separate for data and MC
@@ -98,6 +199,12 @@ def run_analysis(config):
     ### 2. Add relevant sample metadata to events ###
     t_start_samples = time.time()
     sample = Sample(**config["sample"])
+    if tracer is not None and (not sample.is_data) and sum_weights != 0.0:
+        weight_scale = (sample.norm_factor * 1000.0 / sum_weights) * sample.lumi
+    else:
+        weight_scale = 1.0
+    if tracer is not None:
+        tracer.set_weight_scale(weight_scale)
     events = sample.prep(events)
     t_elapsed_samples = time.time() - t_start_samples
 
@@ -145,13 +252,68 @@ def run_analysis(config):
             events_ic = systematics_producer.apply_remaining_weight_systs(events_ic, syst_tag, tag_idx_map)
             t_elapsed_syst += time.time() - current_time
 
-            job_summary["outputs"][syst_tag] = AnalysisManager.write_events(events_ic, config["variables_of_interest"], output_name, syst_tag)       
+            if trace_only:
+                job_summary["outputs"][syst_tag] = None
+            else:
+                job_summary["outputs"][syst_tag] = AnalysisManager.write_events(events_ic, config["variables_of_interest"], output_name, syst_tag)
             job_summary["n_events_selected"][syst_tag] = len(events_ic) 
 
     # Nominal events
     events, tag_idx_map = tag_sequence.run(events, NOMINAL_TAG)
     events = systematics_producer.apply_remaining_weight_systs(events, NOMINAL_TAG, tag_idx_map)
-    job_summary["outputs"][NOMINAL_TAG] = AnalysisManager.write_events(events, config["variables_of_interest"], output_name, NOMINAL_TAG)
+
+    if tracer is not None:
+        if len(events) > 0:
+            if (not sample.is_data) and ("Generator_weight" in events.fields):
+                running_weights = awkward.to_numpy(events.Generator_weight).astype(numpy.float64) * tracer.weight_scale
+            else:
+                running_weights = numpy.ones(len(events), dtype=numpy.float64)
+
+            tracer.record(
+                stage="weight:genWeight+lumi_norm",
+                weights=running_weights,
+                notes="normalized generator weight with job-level xsec*BR*lumi/sumw",
+            )
+
+            traced_branches = set()
+            for _, weight_systs in systematics_producer.weights.items():
+                for weight_syst in weight_systs:
+                    branch = f"weight_{weight_syst.name}_central"
+                    if branch in traced_branches:
+                        continue
+                    if branch not in events.fields:
+                        continue
+                    component = awkward.to_numpy(events[branch]).astype(numpy.float64)
+                    running_weights = running_weights * component
+                    tracer.record(
+                        stage=f"weight:{weight_syst.name}",
+                        weights=running_weights,
+                        notes=_weight_component_note(weight_syst.name),
+                    )
+                    traced_branches.add(branch)
+
+            framework_weight = awkward.to_numpy(events[CENTRAL_WEIGHT]).astype(numpy.float64) * tracer.weight_scale
+            tracer.record(
+                stage="weight:framework_central",
+                weights=framework_weight,
+                notes="framework central weight with job-level lumi normalization",
+            )
+            tracer.record(
+                stage="after_final_selection",
+                weights=framework_weight,
+                notes="events after full nominal selection",
+            )
+        else:
+            tracer.record(
+                stage="after_final_selection",
+                weights=numpy.array([], dtype=numpy.float64),
+                notes="events after full nominal selection",
+            )
+
+    if trace_only:
+        job_summary["outputs"][NOMINAL_TAG] = None
+    else:
+        job_summary["outputs"][NOMINAL_TAG] = AnalysisManager.write_events(events, config["variables_of_interest"], output_name, NOMINAL_TAG)
     job_summary["n_events_selected"][NOMINAL_TAG] = len(events)
     t_elapsed = time.time() - t_start
 
@@ -177,6 +339,7 @@ def run_analysis(config):
       with open(config["summary_file"], "w") as f_out:
         # json.dump(job_summary, f_out, sort_keys = True, indent = 4)
         f_out.write(orjson.dumps(job_summary, option=orjson.OPT_SERIALIZE_NUMPY).decode("utf-8"))
+    set_global_tracer(None)
     return job_summary
 
 class AnalysisManager():
@@ -283,6 +446,11 @@ class AnalysisManager():
             # make output dir
             os.system("mkdir -p %s" % (self.output_dir))
 
+            # If yield-trace input override is specified, inject the resolved local files
+            # into a temporary catalog before SampleManager resolves inputs. This avoids
+            # contacting DAS/xrootd for trace-only local studies.
+            self._apply_yield_trace_input_override()
+
             if self.variables_of_interest is None:
                 self.variables_of_interest = []
             
@@ -304,6 +472,75 @@ class AnalysisManager():
             self.test_construction()
 
             self.prepared_analysis = False
+
+    def _apply_yield_trace_input_override(self):
+        if not hasattr(self, "yield_trace_inputs"):
+            return
+        if not self.yield_trace_inputs:
+            return
+        if "catalog" not in self.samples:
+            return
+
+        resolved_files = _expand_yield_trace_inputs(self.yield_trace_inputs)
+        if not resolved_files:
+            logger.warning(
+                "[AnalysisManager : _apply_yield_trace_input_override] "
+                "yield_trace_inputs was provided but no files were resolved."
+            )
+            return
+
+        sample_list = self.samples.get("sample_list", [])
+        years = self.samples.get("years", [])
+        if len(sample_list) != 1 or len(years) != 1:
+            logger.warning(
+                "[AnalysisManager : _apply_yield_trace_input_override] "
+                "yield_trace_inputs override requires exactly one sample and one year, "
+                "but got sample_list=%s, years=%s. Skipping override.",
+                str(sample_list),
+                str(years),
+            )
+            return
+
+        sample_name = sample_list[0]
+        year = years[0]
+        catalog_path = self.samples["catalog"]
+        catalog = load_config(catalog_path)
+        if sample_name not in catalog:
+            logger.warning(
+                "[AnalysisManager : _apply_yield_trace_input_override] "
+                "Sample '%s' not found in catalog '%s'. Skipping override.",
+                sample_name,
+                catalog_path,
+            )
+            return
+        if "files" not in catalog[sample_name]:
+            logger.warning(
+                "[AnalysisManager : _apply_yield_trace_input_override] "
+                "Sample '%s' has no 'files' entry in catalog '%s'. Skipping override.",
+                sample_name,
+                catalog_path,
+            )
+            return
+
+        catalog[sample_name]["files"][year] = [str(path) for path in resolved_files]
+
+        hdna_base = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        override_catalog_rel = os.path.join("metadata", "yield_trace_catalog_override.json")
+        override_catalog = os.path.join(hdna_base, override_catalog_rel)
+        with open(override_catalog, "w") as f_out:
+            json.dump(catalog, f_out, indent=4)
+
+        # SampleManager.load_config() expects catalog paths relative to HiggsDNA.
+        self.samples["catalog"] = override_catalog_rel
+        logger.info(
+            "[AnalysisManager : _apply_yield_trace_input_override] "
+            "Applied local input override for sample '%s', year '%s' with %d files. "
+            "Temporary catalog: %s",
+            sample_name,
+            year,
+            len(resolved_files),
+            override_catalog,
+        )
 
 
     def update_samples(self):
@@ -476,6 +713,10 @@ class AnalysisManager():
 
             for x in ["systematics", "tag_sequence", "function", "variables_of_interest"]:
                 config[x] = copy.deepcopy(getattr(self, x))
+
+            for x in ["yield_trace", "yield_trace_inputs"]:
+                if hasattr(self, x):
+                    config[x] = copy.deepcopy(getattr(self, x))
 
             if "branch_map" in self.config.keys():
                 config["branch_map"] = copy.deepcopy(self.config["branch_map"])
@@ -756,11 +997,13 @@ class AnalysisManager():
 
         if len(events) == 1:
             logger.info("[bold yellow]Single event found, converting to pyarrow table before writing to parquet.[/bold yellow]")
+            if pyarrow_parquet is None:
+                raise RuntimeError("pyarrow is required to write parquet outputs.")
             arrow_table = awkward.to_arrow_table(events)
             if condor:
-                pyarrow.parquet.write_table(arrow_table, out_name.split("/")[-1])
+                pyarrow_parquet.write_table(arrow_table, out_name.split("/")[-1])
             else:
-                pyarrow.parquet.write_table(arrow_table, out_name)
+                pyarrow_parquet.write_table(arrow_table, out_name)
         else:
             if condor:
                 awkward.to_parquet(events, out_name.split("/")[-1])
