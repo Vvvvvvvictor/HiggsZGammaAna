@@ -99,7 +99,7 @@ DEFAULT_MUONS = {
         "pfRelIso03_all" : 0.35,
         #"dr_photons" : 0.2,
         "sip3d" : 4,
-        "global" : True
+        "global" : False
 }
 
 def select_muons(muons, options, clean, name = "none", tagger = None):

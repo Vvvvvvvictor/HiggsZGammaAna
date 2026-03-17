@@ -9,9 +9,10 @@ from datetime import datetime
 CMD = ["bash", "scripts/run_analysis_data_run2.sh"]
 # NUM_CYCLES = 5            # 週期次數
 # NUM_CYCLES = 10           # 週期次數
-NUM_CYCLES = 10            # 週期次數
-# WORK_SECONDS = 3600       # 單輪跑多久（秒）= 1 小時
-WORK_SECONDS = 1800       # 單輪跑多久（秒）= 30 分鐘
+NUM_CYCLES = 100            # 週期次數
+WORK_SECONDS = 2700       # 單輪跑多久（秒）= 45 分鐘
+# WORK_SECONDS = 3600       # 單輪跑多久（秒）= 30 分鐘
+# WORK_SECONDS = 1800       # 單輪跑多久（秒）= 30 分鐘
 # WORK_SECONDS = 900        # 單輪跑多久（秒）= 15 分鐘
 # WORK_SECONDS = 600        # 單輪跑多久（秒）= 10 分鐘
 RESTART_DELAY = 10        # 殺掉後等多久再重啟（秒）

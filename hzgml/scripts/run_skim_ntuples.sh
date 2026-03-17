@@ -1,22 +1,22 @@
 #!/bin/bash                                                                                                                                                                       
 echo "==============STARTED=============="
 
-input="/eos/user/j/jiehan/parquet/nanov9/"
-target="/eos/home-j/jiehan/root/skimmed_ntuples/"
+# input="/eos/user/j/jiehan/parquet/nanov9/"
+# target="/eos/home-j/jiehan/root/skimmed_ntuples/"
 # input="/eos/user/j/jiehan/parquet/nanov12/"
 # target="/eos/home-j/jiehan/root/skimmed_ntuples_run3/"
 # target="./"
 
 # Run3
-# input="/eos/home-p/pelai/HZgamma/Parquet/NanoV12/run3_jetsmear_pt50/"
-# target="/eos/home-p/pelai/HZgamma/Root_Dataset/run3_jetsmear_pt50/NanoV12/"
+input="/eos/home-p/pelai/HZgamma/parquet_DNA/run3"
+target="/eos/home-p/pelai/HZgamma/root_P2Root/synchronization"
 
 # Run2
 # input="/eos/home-p/pelai/HZgamma/Parquet/NanoV9/run2/"
 # target="/eos/home-p/pelai/HZgamma/Root_Dataset/run2/NanoV9/"
 
-# years=(2018)
-years=(2016preVFP 2016postVFP 2017 2018)
+years=(2023postBPix)
+# years=(2016preVFP 2016postVFP 2017 2018)
 # systs=("Photon_scale" "Photon_smear" "Electron_scale" "Electron_smear" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt_smear")
 systs=()
 # systs=("Photon_scale" "Photon_smear" "Electron_scale" "Electron_smear" "JER" "JES" "MET_JES" "MET_Unclustered" "Muon_pt")
@@ -55,14 +55,14 @@ process_sample() {
     fi
     
     for year in "${years[@]}"; do
-        command="python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py "
-        command+="-i ${input}${type}/${sample}_${year}/merged_${corr}.parquet "
+        command="python /afs/cern.ch/work/p/pelai/HZgamma/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py "
+        command+="-i ${input}/${type}/${sample}_${year}/merged_${corr}.parquet "
         if [ "$type" = "Data" ]; then
-            command+="-o ${target}Data/${year}.root"
+            command+="-o ${target}/Data/${year}.root"
         # elif [ "$type" = "signal" ]; then
         #     command+="-o ${target}${sample}_M125/${year}.root"
         else
-            command+="-o ${target}${sample}/${year}.root"
+            command+="-o ${target}/${sample}/${year}.root"
         fi
         
         # 使用函数执行命令
@@ -88,8 +88,8 @@ process_sample_syst() {
     for syst in "${systs[@]}"; do
         corr="${syst}_${uod}"
         command="python /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/hzgml/scripts/skim_ntuples.py "
-        command+="-i ${input}${type}/${sample}_${year}/merged_${corr}.parquet "
-        command+="-o ${target}${sample}_${syst}_${uod}/${year}.root"
+        command+="-i ${input}/${type}/${sample}_${year}/merged_${corr}.parquet "
+        command+="-o ${target}/${sample}_${syst}_${uod}/${year}.root"
 
         echo "Running command: $command"
 
@@ -112,13 +112,14 @@ process_sample_syst() {
 
 # 处理 signal 样本
 
-samples=(ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125) # ggH_M120 VBFH_M120 WplusH_M120 WminusH_M120 ZH_M120 ttH_M120 ggH_M130 VBFH_M130 WplusH_M130 WminusH_M130 ZH_M130 ttH_M130 ggH_mix VBF_mix ggH VBF WplusH WminusH ZH ttH)
+# samples=(ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125) # ggH_M120 VBFH_M120 WplusH_M120 WminusH_M120 ZH_M120 ttH_M120 ggH_M130 VBFH_M130 WplusH_M130 WminusH_M130 ZH_M130 ttH_M130 ggH_mix VBF_mix ggH VBF WplusH WminusH ZH ttH)
 
 # samples=(ggH_M125 VBF_M125 WplusH_M125 WminusH_M125 ZH_M125 ttH_M125) 
+samples=(ggH_M125)
 # # # samples=(ggH_M125)
 type="signal"
 for sample in "${samples[@]}"; do
-    mkdir -p "$target${sample}/"
+    mkdir -p "${target}/${sample}/"
     # 存储后台任务的进程ID列表
     pid_list=()
 
@@ -131,7 +132,7 @@ done
 # for sample in "${samples[@]}"; do
 #     for sf in "up" "down"; do #  "up" "down"
 #         for syst in "${systs[@]}"; do
-#             mkdir -p "$target${sample}_${syst}_${sf}"
+#             mkdir -p "${target}/${sample}_${syst}_${sf}"
 #         done
 #         for year in "${years[@]}"; do
 #             # 存储后台任务的进程ID列表
@@ -168,16 +169,16 @@ done
 # samples=(ZGToLLG DYJetsToLL WGToLNuG ZG2JToG2L2J EWKZ2J TT TTGJets TGJets ttWJets ttZJets WW WZ ZZ DYGto2LG_10to50 DYGto2LG_50to100)
 # samples=(DYGto2LG_10to50 DYGto2LG_50to100)
 # samples=(DYGto2LG_10to100)
-samples=(ZGToLLG DYJetsToLL ZG2JToG2L2J EWKZ2J)
-type="background"
-for sample in "${samples[@]}"; do
-    mkdir -p "$target$sample"
-    # 存储后台任务的进程ID列表
-    pid_list=()
+# samples=(ZGToLLG DYJetsToLL ZG2JToG2L2J EWKZ2J)
+# type="background"
+# for sample in "${samples[@]}"; do
+#     mkdir -p "${target}/${sample}"
+#     # 存储后台任务的进程ID列表
+#     pid_list=()
 
-    # 调用函数处理样本数据
-    process_sample "$sample" "$type"
-done
+#     # 调用函数处理样本数据
+#     process_sample "$sample" "$type"
+# done
 
 # samples=(ZGToLLG DYJetsToLL WGToLNuG ZG2JToG2L2J EWKZ2J TT TTGJets TGJets ttWJets ttZJets WW WZ ZZ DYGto2LG_10to50 DYGto2LG_50to100)
 # samples=(DYGto2LG_10to50 DYGto2LG_50to100)
@@ -187,7 +188,7 @@ done
 # for sample in "${samples[@]}"; do
 #     for sf in "down"; do #  "up" "down"
 #         for syst in "${systs[@]}"; do
-#             mkdir -p "$target${sample}_${syst}_${sf}"
+#             mkdir -p "${target}/${sample}_${syst}_${sf}"
 #         done
 #         for year in "${years[@]}"; do
 #             # 存储后台任务的进程ID列表
@@ -201,16 +202,16 @@ done
 
 # # # # 处理 data 样本
 
-samples=(Data)
-type="data"
-for sample in "${samples[@]}"; do
-    mkdir -p "$target$sample"
-    # 存储后台任务的进程ID列表
-    pid_list=()
+# samples=(Data)
+# type="data"
+# for sample in "${samples[@]}"; do
+#     mkdir -p "${target}${sample}"
+#     # 存储后台任务的进程ID列表
+#     pid_list=()
 
-    # 调用函数处理样本数据
-    process_sample "$sample" "$type"
-done
+#     # 调用函数处理样本数据
+#     process_sample "$sample" "$type"
+# done
 
 # Use fake photon background estimation with data-driven
 

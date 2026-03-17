@@ -4,7 +4,6 @@ import numpy
 import numba
 import vector
 import math
-import json
 
 from pdb import set_trace
 
@@ -19,8 +18,6 @@ from higgs_dna.taggers.tagger import Tagger, NOMINAL_TAG
 from higgs_dna.utils import awkward_utils, misc_utils
 from higgs_dna.selections import object_selections, lepton_selections, jet_selections, tau_selections, physics_utils
 from higgs_dna.selections import gen_selections
-from higgs_dna.constants import CENTRAL_WEIGHT
-from higgs_dna.utils.yield_trace import get_global_tracer
 
 DUMMY_VALUE = -999.
 DEFAULT_OPTIONS = {
@@ -211,12 +208,6 @@ class ZGammaTaggerRun2(Tagger):
         electron_idx = awkward.mask(arr, awkward.num(arr) > 0)
         awkward_utils.add_field(events = electrons, name = "Idx", data = electron_idx)
 
-        use_run3_nominal_corrections = (
-            (self.year is not None)
-            and (int(self.year[:4]) > 2020)
-            and (self.current_syst == NOMINAL_TAG)
-        )
-
         # Muons
         muon_cut = lepton_selections.select_muons(
             muons = events.Muon,
@@ -265,21 +256,15 @@ class ZGammaTaggerRun2(Tagger):
             )
 
         # Photons
-        photons_for_selection = events.Photon
-        if use_run3_nominal_corrections and "corrected_pt" in photons_for_selection.fields:
-            photons_for_selection = awkward.with_field(photons_for_selection, photons_for_selection.corrected_pt, "pt")
-            if "corrected_energyErr" in photons_for_selection.fields:
-                photons_for_selection = awkward.with_field(photons_for_selection, photons_for_selection.corrected_energyErr, "energyErr")
-
         photon_selection = self.select_photons(
-                photons = photons_for_selection,
+                photons = events.Photon,
                 electrons = electrons,
                 rho = rho,
                 options = self.options["photons"]
         )
 
         # Apply photon selection and lepton-photon overlap removal
-        photons = photons_for_selection[photon_selection]
+        photons = events.Photon[photon_selection]
         clean_photon_mask = (
             awkward.fill_none(object_selections.delta_R(photons, muons, 0.3), True) & 
             awkward.fill_none(object_selections.delta_R(photons, electrons, 0.3), True)
@@ -706,11 +691,12 @@ class ZGammaTaggerRun2(Tagger):
         event_filter = (events.Flag_goodVertices & 
                         events.Flag_globalSuperTightHalo2016Filter & 
                         # Wrong one, to synchronize with Cornell
-                        events.Flag_HBHENoiseFilter & 
-                        events.Flag_HBHENoiseIsoFilter & 
+                        # events.Flag_HBHENoiseFilter & 
+                        # events.Flag_HBHENoiseIsoFilter & 
                         # Correct One
-                        # ((awkward.num(events.Photon) >= 0) if "202" in self.year else events.Flag_HBHENoiseFilter) & 
-                        # ((awkward.num(events.Photon) >= 0) if "202" in self.year else events.Flag_HBHENoiseIsoFilter) & 
+                        ((awkward.num(events.Photon) >= 0) if "202" in self.year else events.Flag_HBHENoiseFilter) & 
+                        ((awkward.num(events.Photon) >= 0) if "202" in self.year else events.Flag_HBHENoiseIsoFilter) & 
+
                         events.Flag_EcalDeadCellTriggerPrimitiveFilter & 
                         events.Flag_BadPFMuonFilter & 
                         events.Flag_BadPFMuonDzFilter & 
@@ -720,114 +706,6 @@ class ZGammaTaggerRun2(Tagger):
                         )
         
         all_cuts = trigger_pt_cut & has_z_cand & has_gamma_cand & sel_h_1 & sel_h_2 & event_filter & sel_h_3 #& awkward.fill_none((h_cand.mass>80) & (h_cand.mass < options["mass_h"][1]), False)
-
-        tracer = get_global_tracer()
-        if tracer is not None and self.current_syst == NOMINAL_TAG:
-            stage_all = awkward.num(events.Photon) >= 0
-            stage_lep = awkward.fill_none(z_ee_cut | z_mumu_cut, False)
-            stage_trigger = awkward.fill_none((z_ee_cut & ele_trigger_cut) | (z_mumu_cut & mu_trigger_cut), False)
-            stage_lep_pt = awkward.fill_none((z_ee_cut & ele_trigger_pt_cut) | (z_mumu_cut & mu_trigger_pt_cut), False)
-            stage_photon = awkward.fill_none(stage_lep_pt & has_gamma_cand, False)
-            stage_mll = awkward.fill_none(stage_photon & has_z_cand, False)
-            stage_ratio = awkward.fill_none(stage_mll & sel_h_1, False)
-            stage_mll_mllg = awkward.fill_none(stage_ratio & sel_h_2, False)
-            stage_mllg = awkward.fill_none(stage_mll_mllg & sel_h_3, False)
-            stage_filter = awkward.fill_none(stage_mllg & event_filter, False)
-            stage_final = stage_filter
-
-            if (not self.is_data) and (CENTRAL_WEIGHT in events.fields):
-                trace_weights = awkward.to_numpy(events[CENTRAL_WEIGHT]).astype(numpy.float64) * tracer.weight_scale
-            else:
-                trace_weights = numpy.ones(len(events), dtype=numpy.float64)
-
-            trace_event_ids_path = tracer.path.replace(".jsonl", "_event_ids.jsonl")
-            stage_event_masks = {
-                "cut:pt_over_mllg": stage_ratio,
-                "cut:mll_plus_mllg": stage_mll_mllg,
-            }
-            with open(trace_event_ids_path, "a", encoding="utf-8") as id_out:
-                for stage_name, stage_mask in stage_event_masks.items():
-                    selected = events[stage_mask]
-                    for run, lumi, event in zip(selected.run, selected.luminosityBlock, selected.event):
-                        id_out.write(
-                            json.dumps(
-                                {
-                                    "stage": stage_name,
-                                    "run": int(run),
-                                    "luminosityBlock": int(lumi),
-                                    "event": int(event),
-                                },
-                                ensure_ascii=True,
-                            )
-                            + "\n"
-                        )
-
-            tracer.record(
-                stage="after_object_building",
-                weights=trace_weights,
-                mask=stage_all,
-                notes="after object building in ZGammaTaggerRun2 and before baseline cuts",
-            )
-            tracer.record(
-                stage="cut:lepton_selection",
-                weights=trace_weights,
-                mask=stage_lep,
-                notes="requires dilepton candidate channel mask (ee or mumu)",
-            )
-            tracer.record(
-                stage="cut:trigger",
-                weights=trace_weights,
-                mask=stage_trigger,
-                notes="requires channel-matched trigger decision",
-            )
-            tracer.record(
-                stage="cut:lepton_pt",
-                weights=trace_weights,
-                mask=stage_lep_pt,
-                notes="requires channel-matched trigger leg pT thresholds",
-            )
-            tracer.record(
-                stage="cut:photon_selection",
-                weights=trace_weights,
-                mask=stage_photon,
-                notes="requires at least one selected photon candidate",
-            )
-            tracer.record(
-                stage="cut:mll_window",
-                weights=trace_weights,
-                mask=stage_mll,
-                notes="requires selected dilepton candidate in 80 to 100 GeV",
-            )
-            tracer.record(
-                stage="cut:pt_over_mllg",
-                weights=trace_weights,
-                mask=stage_ratio,
-                notes="requires pTgamma over mllg threshold",
-            )
-            tracer.record(
-                stage="cut:mll_plus_mllg",
-                weights=trace_weights,
-                mask=stage_mll_mllg,
-                notes="requires mll plus mllg threshold",
-            )
-            tracer.record(
-                stage="cut:mllg_window",
-                weights=trace_weights,
-                mask=stage_mllg,
-                notes="requires mllg in configured Higgs mass window",
-            )
-            tracer.record(
-                stage="cut:event_filters",
-                weights=trace_weights,
-                mask=stage_filter,
-                notes="requires event cleaning filters",
-            )
-            tracer.record(
-                stage="cut:final_selection",
-                weights=trace_weights,
-                mask=stage_final,
-                notes="final baseline selection used by ZGammaTaggerRun2",
-            )
 
         for cut_type in ["zgammas", "zgammas_ele", "zgammas_mu", "zgammas_w", "zgammas_ele_w", "zgammas_mu_w"]:
             if "_w" in cut_type:
