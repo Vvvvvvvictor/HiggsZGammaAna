@@ -377,7 +377,7 @@ class ZGammaTaggerRun2(Tagger):
         logger.debug(f"[ZGammaTagger] jet veto from events: {awkward.sum(~jet_veto, axis=1)[awkward.sum(~jet_veto, axis=1) > 0]}")
         logger.debug(f'[ZGammaTagger] MET_pt from events: {events[awkward.sum(~jet_veto, axis=1) > 0]["MET_pt"]}')
 
-        b_jet_cut = (jets.btagDeepFlavB > self.options["btag_med"][self.year]) & (abs(jets.eta) < 2.5)
+        b_jet_cut = jets.btagDeepFlavB > self.options["btag_med"][self.year]
         jets = awkward.with_field(jets, b_jet_cut, "is_med_bjet") 
 
         # # Add object fields to events array

@@ -39,6 +39,13 @@ def select_jets(jets, options, clean, year, name = "none", tagger = None, event_
     tagger_name = "none" if tagger is None else tagger.name 
 
     standard_cuts, photon_removal, lepton_removal = object_selections.select_objects(jets, options, clean, name, tagger)
+    clean_eta_cuts, _, _ = object_selections.select_objects(
+        jets,
+        {"eta": options["eta"]},
+        clean,
+        name,
+        None
+    )
 
     jet_pt_for_veto = jets.raw_pt if "raw_pt" in jets.fields else jets.pt
 
@@ -92,21 +99,29 @@ def select_jets(jets, options, clean, year, name = "none", tagger = None, event_
     )
 
     jet_veto_cut = jets.pt > 0  # default: keep all
+    jet_event_veto_cut = jets.pt > 0
     if int(year[:4]) >= 2022:
-        jet_veto_sf = numpy.where(
+        jet_veto_values = jet_veto_map_evaluator["jetvetomap"].evalv(
+            "jetvetomap",
+            jet_eta,
+            jet_phi
+        )
+        jet_veto_mask = (
             (jet_pt_flattened_for_veto > 15.0)
             & (abs(jet_eta) < 5.191)
-            & (
-                jet_veto_map_evaluator["jetvetomap"].evalv(
-                    "jetvetomap",
-                    jet_eta,
-                    jet_phi
-                ) > 0
-            ),
+            & (jet_veto_values > 0)
+        )
+        jet_veto_sf = numpy.where(
+            jet_veto_mask,
             False,
             True
         )
         jet_veto_cut = awkward.unflatten(jet_veto_sf, n_jets)
+        isgood_min_flat = awkward.to_numpy(awkward.flatten(clean_eta_cuts & id_cut))
+        jet_event_veto_cut = awkward.unflatten(
+            numpy.where(jet_veto_mask & isgood_min_flat, False, True),
+            n_jets
+        )
 
     # ---- 2018 HEM jet-level cleaning (moved from event-level) ----
     hem_mask = jets.pt > 0  # default: keep all
@@ -140,7 +155,7 @@ def select_jets(jets, options, clean, year, name = "none", tagger = None, event_
 
     all_cuts = standard_cuts & horn_cut & id_cut & jet_veto_cut & hem_mask
 
-    jet_veto = jet_veto_cut & hem_mask
+    jet_veto = jet_event_veto_cut & hem_mask
 
     standard_cuts = awkward.flatten(standard_cuts)
     id_cut = standard_cuts & awkward.flatten(id_cut)
