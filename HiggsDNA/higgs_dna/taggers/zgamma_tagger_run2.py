@@ -218,26 +218,15 @@ class ZGammaTaggerRun2(Tagger):
         )
 
         electrons_for_cleaning = electrons
-        if use_run3_nominal_corrections and "corrected_pt" in events.Electron.fields:
-            electrons_for_cleaning_source = awkward.with_field(events.Electron, events.Electron.corrected_pt, "pt")
-            electron_clean_cut = lepton_selections.select_electrons(
-                electrons = electrons_for_cleaning_source,
-                options = self.options["electrons"],
-                clean = {},
-                name = "JetCleaningElectron",
-                tagger = None,
-                year = self.year[:4]
+        if use_run3_nominal_corrections and "corrected_pt" in electrons.fields:
+            electrons_for_cleaning = awkward.with_field(
+                electrons_for_cleaning,
+                electrons.corrected_pt,
+                "pt"
             )
             electrons_for_cleaning = awkward.Array(
-                electrons_for_cleaning_source[electron_clean_cut],
+                electrons_for_cleaning,
                 with_name = "Momentum4D"
-            )
-            electron_clean_idx = awkward.local_index(events.Electron["pt"], axis=1)[electron_clean_cut]
-            electron_clean_idx = awkward.mask(electron_clean_idx, awkward.num(electron_clean_idx) > 0)
-            awkward_utils.add_field(
-                events = electrons_for_cleaning,
-                name = "Idx",
-                data = electron_clean_idx
             )
 
         # Muons
@@ -257,16 +246,16 @@ class ZGammaTaggerRun2(Tagger):
         )
 
         muons_for_cleaning = muons
-        if use_run3_nominal_corrections and "corrected_pt" in events.Muon.fields:
-            muons_for_cleaning_source = awkward.with_field(events.Muon, events.Muon.corrected_pt, "pt")
-            muon_clean_cut = lepton_selections.select_muons(
-                muons = muons_for_cleaning_source,
-                options = self.options["muons"],
-                clean = {},
-                name = "JetCleaningMuon",
-                tagger = None
+        if use_run3_nominal_corrections and "corrected_pt" in muons.fields:
+            muons_for_cleaning = awkward.with_field(
+                muons_for_cleaning,
+                muons.corrected_pt,
+                "pt"
             )
-            muons_for_cleaning = muons_for_cleaning_source[muon_clean_cut]
+            muons_for_cleaning = awkward.Array(
+                muons_for_cleaning,
+                with_name = "Momentum4D"
+            )
 
         if not self.is_data:
             # gen mu not reco
