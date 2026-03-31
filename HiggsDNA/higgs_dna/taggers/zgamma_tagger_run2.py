@@ -216,6 +216,14 @@ class ZGammaTaggerRun2(Tagger):
             and (int(self.year[:4]) > 2020)
             and (self.current_syst == NOMINAL_TAG)
         )
+        electron_clean_options = misc_utils.update_dict(
+            original = lepton_selections.DEFAULT_ELECTRONS,
+            new = self.options["electrons"]
+        )
+        muon_clean_options = misc_utils.update_dict(
+            original = lepton_selections.DEFAULT_MUONS,
+            new = self.options["muons"]
+        )
 
         electrons_for_cleaning = electrons
         if use_run3_nominal_corrections and "corrected_pt" in electrons.fields:
@@ -226,12 +234,12 @@ class ZGammaTaggerRun2(Tagger):
             )
             electrons_etasc = electrons_for_cleaning_source.eta + electrons_for_cleaning_source.deltaEtaSC
             electron_clean_cut = (
-                (electrons_for_cleaning_source.pt > self.options["electrons"]["pt"])
-                & (abs(electrons_etasc) <= self.options["electrons"]["etasc"])
-                & (abs(electrons_for_cleaning_source.dxy) <= self.options["electrons"]["dxy"])
-                & (abs(electrons_for_cleaning_source.dz) <= self.options["electrons"]["dz"])
+                (electrons_for_cleaning_source.pt > electron_clean_options["pt"])
+                & (abs(electrons_etasc) <= electron_clean_options["etasc"])
+                & (abs(electrons_for_cleaning_source.dxy) <= electron_clean_options["dxy"])
+                & (abs(electrons_for_cleaning_source.dz) <= electron_clean_options["dz"])
             )
-            electron_id = self.options["electrons"].get("id", "WPL")
+            electron_id = electron_clean_options.get("id", "WPL")
             if electron_id == "WP90":
                 electron_clean_cut = electron_clean_cut & (electrons_for_cleaning_source.mvaIso_WP90 == True)
             elif electron_id == "WP80":
@@ -249,7 +257,7 @@ class ZGammaTaggerRun2(Tagger):
                           | ((abs(electrons_etasc) > 1.479) & (electrons_for_cleaning_source.mvaHZZIso > points[5]))))
                 )
                 electron_clean_cut = electron_clean_cut & electron_id_cut
-            if self.options["electrons"].get("veto_transition", False):
+            if electron_clean_options.get("veto_transition", False):
                 electron_clean_cut = electron_clean_cut & (
                     (abs(electrons_for_cleaning_source.eta) < 1.4442)
                     | (abs(electrons_for_cleaning_source.eta) > 1.566)
@@ -286,19 +294,19 @@ class ZGammaTaggerRun2(Tagger):
                 "pt"
             )
             muon_clean_cut = (
-                (muons_for_cleaning_source.pt > self.options["muons"]["pt"])
-                & (abs(muons_for_cleaning_source.eta) <= self.options["muons"]["eta"])
-                & (abs(muons_for_cleaning_source.dxy) <= self.options["muons"]["dxy"])
-                & (abs(muons_for_cleaning_source.dz) <= self.options["muons"]["dz"])
-                & (muons_for_cleaning_source.pfRelIso03_all < self.options["muons"]["pfRelIso03_all"])
-                & (muons_for_cleaning_source.sip3d < self.options["muons"]["sip3d"])
+                (muons_for_cleaning_source.pt > muon_clean_options["pt"])
+                & (abs(muons_for_cleaning_source.eta) <= muon_clean_options["eta"])
+                & (abs(muons_for_cleaning_source.dxy) <= muon_clean_options["dxy"])
+                & (abs(muons_for_cleaning_source.dz) <= muon_clean_options["dz"])
+                & (muons_for_cleaning_source.pfRelIso03_all < muon_clean_options["pfRelIso03_all"])
+                & (muons_for_cleaning_source.sip3d < muon_clean_options["sip3d"])
             )
-            muon_id = self.options["muons"].get("id", "loose")
+            muon_id = muon_clean_options.get("id", "loose")
             if muon_id == "medium":
                 muon_clean_cut = muon_clean_cut & (muons_for_cleaning_source.mediumId == True)
             elif muon_id == "loose":
                 muon_clean_cut = muon_clean_cut & (muons_for_cleaning_source.looseId == True)
-            if self.options["muons"].get("global", False):
+            if muon_clean_options.get("global", False):
                 muon_clean_cut = muon_clean_cut & (
                     (muons_for_cleaning_source.isGlobal == True)
                     | (muons_for_cleaning_source.isTracker == True)
