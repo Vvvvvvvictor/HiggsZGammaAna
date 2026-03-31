@@ -232,6 +232,11 @@ class ZGammaTaggerRun2(Tagger):
                 events.Electron.corrected_pt,
                 "pt"
             )
+            electrons_for_cleaning_source = awkward.with_field(
+                electrons_for_cleaning_source,
+                events.Electron.pt,
+                "comparison_pt"
+            )
             electrons_etasc = electrons_for_cleaning_source.eta + electrons_for_cleaning_source.deltaEtaSC
             electron_clean_cut = (
                 (electrons_for_cleaning_source.pt > electron_clean_options["pt"])
@@ -292,6 +297,11 @@ class ZGammaTaggerRun2(Tagger):
                 events.Muon,
                 events.Muon.corrected_pt,
                 "pt"
+            )
+            muons_for_cleaning_source = awkward.with_field(
+                muons_for_cleaning_source,
+                events.Muon.pt,
+                "comparison_pt"
             )
             muon_clean_cut = (
                 (muons_for_cleaning_source.pt > muon_clean_options["pt"])

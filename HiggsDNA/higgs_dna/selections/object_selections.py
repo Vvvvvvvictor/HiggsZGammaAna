@@ -57,14 +57,43 @@ def select_objects(objects, cuts = {}, clean = {}, name = "none", tagger = None)
             new_jet = awkward.flatten(objects)[:, None]
             num_jet = awkward.num(objects)
             if other_objects in ["muons", "electrons"]:
-                new_obj = awkward.flatten(awkward.broadcast_arrays(awkward.unflatten(awkward.flatten(info["objects"]), [1]*awkward.fill_none(awkward.num(info["objects"]), 0))[:,None], objects.pt)[0])
-                mask = awkward.flatten(new_jet.pt[:, :, None] < 2*new_obj.pt, axis=-1)
+                clean_objects = info["objects"]
+                comparison_pt = clean_objects.comparison_pt if "comparison_pt" in clean_objects.fields else clean_objects.pt
+                new_obj = awkward.flatten(
+                    awkward.broadcast_arrays(
+                        awkward.unflatten(
+                            awkward.flatten(clean_objects),
+                            [1] * awkward.fill_none(awkward.num(clean_objects), 0),
+                        )[:, None],
+                        objects.pt,
+                    )[0]
+                )
+                new_obj_pt = awkward.flatten(
+                    awkward.broadcast_arrays(
+                        awkward.unflatten(
+                            awkward.flatten(comparison_pt),
+                            [1] * awkward.fill_none(awkward.num(comparison_pt), 0),
+                        )[:, None],
+                        objects.pt,
+                    )[0]
+                )
+                mask = awkward.flatten(new_jet.pt[:, :, None] < 2 * new_obj_pt, axis=-1)
                 cut_ = awkward.unflatten(awkward.flatten(delta_R_fsrlep(new_jet, new_obj[mask], info["min_dr"])), num_jet)
             elif other_objects in ["photons"]:
                 jet_idx = awkward.local_index(objects.pt, axis=1)
                 new_jet = awkward.unflatten(awkward.unflatten(awkward.flatten(jet_idx), [1]*awkward.sum(awkward.num(jet_idx))), awkward.num(jet_idx, axis=1))
-                # Replace empty lists in photons.jetIdx with [-1]
-                photons_jetIdx = awkward.where(awkward.num(info["objects"].jetIdx, axis=1) == 0, awkward.ones_like(awkward.num(info["objects"].jetIdx, axis=1))*-1, info["objects"].jetIdx)
+                if "jetIdx_11p9" in info["objects"].fields:
+                    photon_jet_idx = info["objects"].jetIdx_11p9
+                elif "jetIdx" in info["objects"].fields:
+                    photon_jet_idx = info["objects"].jetIdx
+                else:
+                    photon_jet_idx = awkward.zeros_like(info["objects"].pt, dtype=int) - 1
+                # Replace empty lists in photon jetIdx with [-1]
+                photons_jetIdx = awkward.where(
+                    awkward.num(photon_jet_idx, axis=1) == 0,
+                    awkward.ones_like(awkward.num(photon_jet_idx, axis=1)) * -1,
+                    photon_jet_idx,
+                )
                 new_pho = awkward.broadcast_arrays(photons_jetIdx[:, None], new_jet, depth_limit=2)[0]
                 photon_veto_cut = ~awkward.flatten(awkward.any(new_jet[:, :, None] == new_pho, axis=2), axis=-1)
                 cut_ = delta_R_fsrlep(objects, info["objects"], info["min_dr"]) & photon_veto_cut

@@ -69,8 +69,9 @@ def select_jets(jets, options, clean, year, name="none", tagger=None, event_runs
 
     if options["looseID"]:
         if int(year[:4]) >= 2022:
+            jet_id_bits = jets.jetId_11p9 if "jetId_11p9" in jets.fields else jets.jetId
             id_cut = (
-                ((jets.jetId & 0b010) > 0)
+                ((jet_id_bits & 0b010) > 0)
                 & (
                     (abs(jets.eta) <= 2.7)
                     | (
