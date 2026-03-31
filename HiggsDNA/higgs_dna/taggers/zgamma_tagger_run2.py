@@ -217,6 +217,29 @@ class ZGammaTaggerRun2(Tagger):
             and (self.current_syst == NOMINAL_TAG)
         )
 
+        electrons_for_cleaning = electrons
+        if use_run3_nominal_corrections and "corrected_pt" in events.Electron.fields:
+            electrons_for_cleaning_source = awkward.with_field(events.Electron, events.Electron.corrected_pt, "pt")
+            electron_clean_cut = lepton_selections.select_electrons(
+                electrons = electrons_for_cleaning_source,
+                options = self.options["electrons"],
+                clean = {},
+                name = "JetCleaningElectron",
+                tagger = None,
+                year = self.year[:4]
+            )
+            electrons_for_cleaning = awkward.Array(
+                electrons_for_cleaning_source[electron_clean_cut],
+                with_name = "Momentum4D"
+            )
+            electron_clean_idx = awkward.local_index(events.Electron["pt"], axis=1)[electron_clean_cut]
+            electron_clean_idx = awkward.mask(electron_clean_idx, awkward.num(electron_clean_idx) > 0)
+            awkward_utils.add_field(
+                events = electrons_for_cleaning,
+                name = "Idx",
+                data = electron_clean_idx
+            )
+
         # Muons
         muon_cut = lepton_selections.select_muons(
             muons = events.Muon,
@@ -232,6 +255,18 @@ class ZGammaTaggerRun2(Tagger):
             name = "SelectedMuon",
             data = events.Muon[muon_cut]
         )
+
+        muons_for_cleaning = muons
+        if use_run3_nominal_corrections and "corrected_pt" in events.Muon.fields:
+            muons_for_cleaning_source = awkward.with_field(events.Muon, events.Muon.corrected_pt, "pt")
+            muon_clean_cut = lepton_selections.select_muons(
+                muons = muons_for_cleaning_source,
+                options = self.options["muons"],
+                clean = {},
+                name = "JetCleaningMuon",
+                tagger = None
+            )
+            muons_for_cleaning = muons_for_cleaning_source[muon_clean_cut]
 
         if not self.is_data:
             # gen mu not reco
@@ -273,7 +308,7 @@ class ZGammaTaggerRun2(Tagger):
 
         photon_selection = self.select_photons(
                 photons = photons_for_selection,
-                electrons = electrons,
+                electrons = electrons_for_cleaning,
                 rho = rho,
                 options = self.options["photons"]
         )
@@ -281,8 +316,8 @@ class ZGammaTaggerRun2(Tagger):
         # Apply photon selection and lepton-photon overlap removal
         photons = photons_for_selection[photon_selection]
         clean_photon_mask = (
-            awkward.fill_none(object_selections.delta_R(photons, muons, 0.3), True) & 
-            awkward.fill_none(object_selections.delta_R(photons, electrons, 0.3), True)
+            awkward.fill_none(object_selections.delta_R(photons, muons_for_cleaning, 0.3), True) & 
+            awkward.fill_none(object_selections.delta_R(photons, electrons_for_cleaning, 0.3), True)
         )
         photons = photons[clean_photon_mask]
 
@@ -311,11 +346,11 @@ class ZGammaTaggerRun2(Tagger):
                 },
                 "electrons" : {
                     
-                    "objects" : electrons,
+                    "objects" : electrons_for_cleaning,
                     "min_dr" : self.options["jets"]["dr_electrons"]
                 },
                 "muons" : {
-                    "objects" : muons,
+                    "objects" : muons_for_cleaning,
                     "min_dr" : self.options["jets"]["dr_muons"]
                 }
             },
