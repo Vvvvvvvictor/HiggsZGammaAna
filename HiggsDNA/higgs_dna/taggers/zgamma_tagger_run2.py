@@ -433,10 +433,12 @@ class ZGammaTaggerRun2(Tagger):
         #     # logger.debug(f"[ZGammaTagger] Muons phi = {muons[i].phi}")
         #     # logger.debug(f"[ZGammaTagger] Jets after lepton removal pt = {lepton_removal_jet[i].pt}")
 
+        selected_jets = jets_for_selection[jet_cut]
+        selected_jets = selected_jets[awkward.argsort(selected_jets.pt, ascending=False, axis=1)]
         jets = awkward_utils.add_field(
             events = events,
             name = "SelectedJet",
-            data = jets_for_selection[jet_cut]
+            data = selected_jets
         )
   
         # Sort by pt and add photon properties
