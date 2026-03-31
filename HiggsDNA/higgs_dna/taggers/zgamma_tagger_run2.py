@@ -219,15 +219,48 @@ class ZGammaTaggerRun2(Tagger):
 
         electrons_for_cleaning = electrons
         if use_run3_nominal_corrections and "corrected_pt" in electrons.fields:
-            electrons_for_cleaning = awkward.with_field(
-                electrons_for_cleaning,
-                electrons.corrected_pt,
+            electrons_for_cleaning_source = awkward.with_field(
+                events.Electron,
+                events.Electron.corrected_pt,
                 "pt"
             )
+            electrons_etasc = electrons_for_cleaning_source.eta + electrons_for_cleaning_source.deltaEtaSC
+            electron_clean_cut = (
+                (electrons_for_cleaning_source.pt > self.options["electrons"]["pt"])
+                & (abs(electrons_etasc) <= self.options["electrons"]["etasc"])
+                & (abs(electrons_for_cleaning_source.dxy) <= self.options["electrons"]["dxy"])
+                & (abs(electrons_for_cleaning_source.dz) <= self.options["electrons"]["dz"])
+            )
+            electron_id = self.options["electrons"].get("id", "WPL")
+            if electron_id == "WP90":
+                electron_clean_cut = electron_clean_cut & (electrons_for_cleaning_source.mvaIso_WP90 == True)
+            elif electron_id == "WP80":
+                electron_clean_cut = electron_clean_cut & (electrons_for_cleaning_source.mvaIso_WP80 == True)
+            elif electron_id == "WPL":
+                points = 2.0 / (1.0 + numpy.exp(-2.0 * numpy.array([0.3685, 0.2662, -0.5444, 1.6339, 1.5499, 2.0629]))) - 1.0
+                electron_id_cut = (
+                    ((electrons_for_cleaning_source.pt > 10.0)
+                     & (((abs(electrons_etasc) < 0.8) & (electrons_for_cleaning_source.mvaHZZIso > points[0]))
+                        | ((abs(electrons_etasc) < 1.479) & (abs(electrons_etasc) > 0.8) & (electrons_for_cleaning_source.mvaHZZIso > points[1]))
+                        | ((abs(electrons_etasc) > 1.479) & (electrons_for_cleaning_source.mvaHZZIso > points[2]))))
+                    | ((electrons_for_cleaning_source.pt < 10.0)
+                       & (((abs(electrons_etasc) < 0.8) & (electrons_for_cleaning_source.mvaHZZIso > points[3]))
+                          | ((abs(electrons_etasc) < 1.479) & (abs(electrons_etasc) > 0.8) & (electrons_for_cleaning_source.mvaHZZIso > points[4]))
+                          | ((abs(electrons_etasc) > 1.479) & (electrons_for_cleaning_source.mvaHZZIso > points[5]))))
+                )
+                electron_clean_cut = electron_clean_cut & electron_id_cut
+            if self.options["electrons"].get("veto_transition", False):
+                electron_clean_cut = electron_clean_cut & (
+                    (abs(electrons_for_cleaning_source.eta) < 1.4442)
+                    | (abs(electrons_for_cleaning_source.eta) > 1.566)
+                )
             electrons_for_cleaning = awkward.Array(
-                electrons_for_cleaning,
+                electrons_for_cleaning_source[electron_clean_cut],
                 with_name = "Momentum4D"
             )
+            electron_clean_idx = awkward.local_index(events.Electron["pt"], axis=1)[electron_clean_cut]
+            electron_clean_idx = awkward.mask(electron_clean_idx, awkward.num(electron_clean_idx) > 0)
+            awkward_utils.add_field(events = electrons_for_cleaning, name = "Idx", data = electron_clean_idx)
 
         # Muons
         muon_cut = lepton_selections.select_muons(
@@ -247,13 +280,31 @@ class ZGammaTaggerRun2(Tagger):
 
         muons_for_cleaning = muons
         if use_run3_nominal_corrections and "corrected_pt" in muons.fields:
-            muons_for_cleaning = awkward.with_field(
-                muons_for_cleaning,
-                muons.corrected_pt,
+            muons_for_cleaning_source = awkward.with_field(
+                events.Muon,
+                events.Muon.corrected_pt,
                 "pt"
             )
+            muon_clean_cut = (
+                (muons_for_cleaning_source.pt > self.options["muons"]["pt"])
+                & (abs(muons_for_cleaning_source.eta) <= self.options["muons"]["eta"])
+                & (abs(muons_for_cleaning_source.dxy) <= self.options["muons"]["dxy"])
+                & (abs(muons_for_cleaning_source.dz) <= self.options["muons"]["dz"])
+                & (muons_for_cleaning_source.pfRelIso03_all < self.options["muons"]["pfRelIso03_all"])
+                & (muons_for_cleaning_source.sip3d < self.options["muons"]["sip3d"])
+            )
+            muon_id = self.options["muons"].get("id", "loose")
+            if muon_id == "medium":
+                muon_clean_cut = muon_clean_cut & (muons_for_cleaning_source.mediumId == True)
+            elif muon_id == "loose":
+                muon_clean_cut = muon_clean_cut & (muons_for_cleaning_source.looseId == True)
+            if self.options["muons"].get("global", False):
+                muon_clean_cut = muon_clean_cut & (
+                    (muons_for_cleaning_source.isGlobal == True)
+                    | (muons_for_cleaning_source.isTracker == True)
+                )
             muons_for_cleaning = awkward.Array(
-                muons_for_cleaning,
+                muons_for_cleaning_source[muon_clean_cut],
                 with_name = "Momentum4D"
             )
 
