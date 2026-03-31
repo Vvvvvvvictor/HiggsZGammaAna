@@ -438,7 +438,8 @@ class ZGammaTaggerRun2(Tagger):
         jets = awkward_utils.add_field(
             events = events,
             name = "SelectedJet",
-            data = selected_jets
+            data = selected_jets,
+            overwrite = True
         )
   
         # Sort by pt and add photon properties
@@ -594,7 +595,8 @@ class ZGammaTaggerRun2(Tagger):
                 name = "jet",
                 objects = jets,
                 n_objects = 4,
-                dummy_value = DUMMY_VALUE
+                dummy_value = DUMMY_VALUE,
+                overwrite = True
             )
 
         ee_pairs = awkward.combinations(electrons, 2, fields = ["LeadLepton", "SubleadLepton"])
