@@ -1,9 +1,14 @@
-import uproot
-import numpy as np
-import pandas as pd
+import argparse
+from pathlib import Path
 
-var_map = {
+import pandas as pd
+import uproot
+
+
+DEFAULT_BRANCH_MAP = {
     "event": "event",
+    "run": "run",
+    "luminosityBlock": "luminosityBlock",
     "n_jets": "n_jets",
     "nbdfm": "n_b_jets",
     "jet_1_pt": "jet_1_pt",
@@ -19,149 +24,220 @@ var_map = {
     "nmu": "n_muons",
 }
 
-# match the events with `event` variable in `zero_to_one_jet` tree
 
-# file1: /eos/user/j/jiehan/root/skimmed_ntuples_rui_new/Data/2023preBPix.root
-# file2: /eos/user/j/jiehan/root/skimmed_ntuples/Data/2023preBPix.root
-# var_map = {var in file1: var in file2}
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Compare DNA and nano2pico skimmed ntuples event-by-event."
+    )
+    parser.add_argument("--dna-file", required=True, help="DNA skimmed ROOT file")
+    parser.add_argument("--n2p-file", required=True, help="nano2pico skimmed ROOT file")
+    parser.add_argument("--output", required=True, help="Output text log path")
+    parser.add_argument("--dna-two-jet-tree", default="two_jet")
+    parser.add_argument("--dna-zero-one-tree", default="zero_to_one_jet")
+    parser.add_argument("--n2p-two-jet-tree", default="two_jet")
+    parser.add_argument("--n2p-zero-one-tree", default="zero_to_one_jet")
+    parser.add_argument(
+        "--mode",
+        choices=["both", "n2p_to_dna", "dna_to_n2p"],
+        default="both",
+        help="Which mismatch direction to dump",
+    )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=200,
+        help="Maximum number of mismatched events per direction",
+    )
+    return parser.parse_args()
 
-# store the following log in a text file with good formatting(\t) in /afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/synchronization_script/log/
 
-# for matched events in zero_to_one_jet tree in file1
-# print out var. value in one row in file1
-# then the value from file2
-# the difference value in the third row
-# a blank row between two event
+def load_tree(file_path, tree_name, requested_branches):
+    with uproot.open(file_path) as root_file:
+        if tree_name not in root_file:
+            raise KeyError(f"Tree '{tree_name}' not found in {file_path}")
+        tree = root_file[tree_name]
+        available = [branch for branch in requested_branches if branch in tree.keys()]
+        missing = [branch for branch in requested_branches if branch not in tree.keys()]
+        df = tree.arrays(available, library="pd")
+    if "event" not in df.columns:
+        raise KeyError(f"'event' branch missing in {file_path}:{tree_name}")
+    df = df.drop_duplicates(subset=["event"]).set_index("event", drop=False)
+    return df, available, missing
 
-# After finishing matched events
 
-# for non-matched events
-# find it in `inclusive` tree in file2
-# print out var. value in one row in file1
-# then the value from file2
-# the difference value in the third row
+def fmt_value(value):
+    if pd.isna(value):
+        return "nan"
+    if isinstance(value, bool):
+        return str(value)
+    if isinstance(value, int):
+        return str(value)
+    if isinstance(value, float):
+        return f"{value:.6f}"
+    return str(value)
 
-file1_path = "/eos/user/j/jiehan/root/skimmed_ntuples_rui_new/Data/2023postBPix.root"
-file2_path = "/eos/user/j/jiehan/root/skimmed_ntuples/Data/2023postBPix.root"
-log_file_path = "/afs/cern.ch/user/j/jiehan/private/HiggsZGammaAna/synchronization_script/log/event_comparison_2023postBPix.log"
 
-def get_df(file_path, tree_name, branches):
-    with uproot.open(file_path) as f:
-        tree = f[tree_name]
-        df = tree.arrays(branches, library="pd")
-    return df
+def describe_row(label, row, columns):
+    values = [f"{column}={fmt_value(row[column])}" for column in columns if column in row.index]
+    return f"{label}:\t" + "\t".join(values)
 
-def format_event_info(df, event_id, columns):
-    event_data = df[df["event"] == event_id]
-    if event_data.empty:
-        return "Event not found"
-    
-    info_str = f"Event: {event_id}\n"
-    for col in columns:
-        info_str += f"{col}: {event_data[col].iloc[0]:.4f}\t"
-    return info_str.strip()
 
-def format_diff_info(df1, df2, event_id, var_map):
-    event1 = df1[df1["event"] == event_id]
-    event2 = df2[df2["event"] == event_id]
-    if event1.empty or event2.empty:
-        return "Event not found in one of the files"
+def describe_diff(source_row, target_row, source_to_target_map):
+    diffs = []
+    for source_branch, target_branch in source_to_target_map.items():
+        if source_branch not in source_row.index or target_branch not in target_row.index:
+            continue
+        source_value = source_row[source_branch]
+        target_value = target_row[target_branch]
+        if pd.isna(source_value) and pd.isna(target_value):
+            continue
+        try:
+            delta = target_value - source_value
+            if abs(delta) > 1e-6:
+                diffs.append(f"{target_branch}-{source_branch}={delta:.6f}")
+        except TypeError:
+            if target_value != source_value:
+                diffs.append(
+                    f"{target_branch}-{source_branch}="
+                    f"{fmt_value(target_value)} vs {fmt_value(source_value)}"
+                )
+    if not diffs:
+        return "Diff:\tNo significant differences."
+    return "Diff:\t" + "\t".join(diffs)
 
-    diff_str = "Differences:\n"
-    has_diff = False
-    for var1, var2 in var_map.items():
-        val1 = event1[var1].iloc[0]
-        val2 = event2[var2].iloc[0]
-        diff = val1 - val2
-        if abs(diff) > 1e-6: # Use a threshold for float comparison
-            has_diff = True
-            diff_str += f"{var1}-{var2}: {diff:.4f}\t"
-    
-    if not has_diff:
-        return "No significant differences."
-    return diff_str.strip()
+
+def write_direction(
+    handle,
+    header,
+    source_df,
+    source_same_df,
+    target_same_df,
+    target_fallback_df,
+    source_label,
+    target_label,
+    source_same_tree,
+    target_same_tree,
+    target_fallback_tree,
+    source_columns,
+    target_columns,
+    branch_map,
+    limit,
+):
+    handle.write("=" * 100 + "\n")
+    handle.write(header + "\n")
+    handle.write("=" * 100 + "\n\n")
+
+    unmatched = sorted(set(source_same_df["event"]) - set(target_same_df["event"]))
+    if limit > 0:
+        unmatched = unmatched[:limit]
+
+    for event_id in unmatched:
+        handle.write(
+            f"--- Event {event_id} ({source_label}:{source_same_tree} -> "
+            f"{target_label}:{target_same_tree}/{target_fallback_tree}) ---\n"
+        )
+
+        source_row = source_df.loc[event_id]
+        handle.write(describe_row(f"{source_label} ({source_same_tree})", source_row, source_columns) + "\n")
+
+        if event_id in target_same_df.index:
+            target_row = target_same_df.loc[event_id]
+            handle.write(describe_row(f"{target_label} ({target_same_tree})", target_row, target_columns) + "\n")
+            handle.write(describe_diff(source_row, target_row, branch_map) + "\n\n")
+            continue
+
+        if event_id in target_fallback_df.index:
+            target_row = target_fallback_df.loc[event_id]
+            handle.write(describe_row(f"{target_label} ({target_fallback_tree})", target_row, target_columns) + "\n")
+            handle.write(describe_diff(source_row, target_row, branch_map) + "\n\n")
+            continue
+
+        handle.write(f"{target_label}:\tEvent not found in {target_same_tree} or {target_fallback_tree}\n\n")
 
 
 def main():
-    branches1 = list(var_map.keys())
-    branches2 = list(var_map.values())
+    args = parse_args()
 
-    df1_two_jet = get_df(file1_path, "two_jet", branches=branches1)
-    df2_two_jet = get_df(file2_path, "two_jet", branches=branches2)
+    dna_path = Path(args.dna_file)
+    n2p_path = Path(args.n2p_file)
+    output_path = Path(args.output)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    events1 = set(df1_two_jet["event"])
-    events2 = set(df2_two_jet["event"])
+    dna_branches = list(DEFAULT_BRANCH_MAP.values())
+    n2p_branches = list(DEFAULT_BRANCH_MAP.keys())
 
-    # The user wants to find events that are in file2 but not in file1.
-    unmatched_events = sorted(list(events2.difference(events1)))
+    dna_two_df, dna_two_available, dna_two_missing = load_tree(
+        dna_path, args.dna_two_jet_tree, dna_branches
+    )
+    dna_zero_one_df, dna_zero_one_available, dna_zero_one_missing = load_tree(
+        dna_path, args.dna_zero_one_tree, dna_branches
+    )
+    n2p_two_df, n2p_two_available, n2p_two_missing = load_tree(
+        n2p_path, args.n2p_two_jet_tree, n2p_branches
+    )
+    n2p_zero_one_df, n2p_zero_one_available, n2p_zero_one_missing = load_tree(
+        n2p_path, args.n2p_zero_one_tree, n2p_branches
+    )
 
-    with open(log_file_path, "w") as log_file:
-        log_file.write("="*50 + "\n")
-        log_file.write("Processing events in file2's two_jet but not in file1's\n")
-        log_file.write("="*50 + "\n\n")
+    branch_map = {
+        n2p_branch: dna_branch
+        for n2p_branch, dna_branch in DEFAULT_BRANCH_MAP.items()
+        if n2p_branch in n2p_two_available + n2p_zero_one_available
+        and dna_branch in dna_two_available + dna_zero_one_available
+    }
 
-        if unmatched_events:
-            # For these events, find them in file1's zero_to_one_jet tree
-            df1_fallback = get_df(file1_path, "zero_to_one_jet", branches=branches1)
-            events1_fallback = set(df1_fallback["event"])
+    with output_path.open("w") as handle:
+        handle.write(f"DNA file:\t{dna_path}\n")
+        handle.write(f"n2p file:\t{n2p_path}\n")
+        handle.write(f"DNA two_jet entries:\t{len(dna_two_df)}\n")
+        handle.write(f"DNA zero_to_one_jet entries:\t{len(dna_zero_one_df)}\n")
+        handle.write(f"n2p two_jet entries:\t{len(n2p_two_df)}\n")
+        handle.write(f"n2p zero_to_one_jet entries:\t{len(n2p_zero_one_df)}\n")
+        handle.write(f"DNA missing branches(two_jet):\t{', '.join(dna_two_missing) or 'none'}\n")
+        handle.write(f"DNA missing branches(zero_to_one_jet):\t{', '.join(dna_zero_one_missing) or 'none'}\n")
+        handle.write(f"n2p missing branches(two_jet):\t{', '.join(n2p_two_missing) or 'none'}\n")
+        handle.write(f"n2p missing branches(zero_to_one_jet):\t{', '.join(n2p_zero_one_missing) or 'none'}\n\n")
 
-            branches2_extra = branches2 + ['run', 'luminosityBlock', "Z_lead_lepton_pt", "Z_lead_lepton_eta", "Z_lead_lepton_phi", "Z_sublead_lepton_pt", "Z_sublead_lepton_eta", "Z_sublead_lepton_phi"]
-            df2_two_jet_extra = get_df(file2_path, "two_jet", branches=branches2_extra)
+        if args.mode in ("both", "n2p_to_dna"):
+            write_direction(
+                handle=handle,
+                header="Events in n2p two_jet but not in DNA two_jet",
+                source_df=n2p_two_df,
+                source_same_df=n2p_two_df,
+                target_same_df=dna_two_df,
+                target_fallback_df=dna_zero_one_df,
+                source_label="n2p",
+                target_label="DNA",
+                source_same_tree=args.n2p_two_jet_tree,
+                target_same_tree=args.dna_two_jet_tree,
+                target_fallback_tree=args.dna_zero_one_tree,
+                source_columns=n2p_branches,
+                target_columns=dna_branches,
+                branch_map=branch_map,
+                limit=args.limit,
+            )
 
-            for event_id in unmatched_events:
-                if event_id in events1_fallback:
-                    log_file.write(f"--- Event: {event_id} (in file2:two_jet, in file1:zero_to_one_jet) ---\n")
+        if args.mode in ("both", "dna_to_n2p"):
+            write_direction(
+                handle=handle,
+                header="Events in DNA two_jet but not in n2p two_jet",
+                source_df=dna_two_df,
+                source_same_df=dna_two_df,
+                target_same_df=n2p_two_df,
+                target_fallback_df=n2p_zero_one_df,
+                source_label="DNA",
+                target_label="n2p",
+                source_same_tree=args.dna_two_jet_tree,
+                target_same_tree=args.n2p_two_jet_tree,
+                target_fallback_tree=args.n2p_zero_one_tree,
+                source_columns=dna_branches,
+                target_columns=n2p_branches,
+                branch_map={dna: n2p for n2p, dna in branch_map.items()},
+                limit=args.limit,
+            )
 
-                    # File 2 (two_jet)
-                    row2_str = "File2 (two_jet):\t"
-                    event2_data = df2_two_jet[df2_two_jet["event"] == event_id]
-                    for var in branches2:
-                        row2_str += f"{var}: {event2_data[var].iloc[0]:.4f}\t"
-                    log_file.write(row2_str + "\n")
+    print(f"Wrote mismatch report to {output_path}")
 
-                    # File 1 (zero_to_one_jet)
-                    row1_str = "File1 (zero_to_one_jet):\t"
-                    event1_data = df1_fallback[df1_fallback["event"] == event_id]
-                    for var in branches1:
-                        row1_str += f"{var}: {event1_data[var].iloc[0]:.4f}\t"
-                    log_file.write(row1_str + "\n")
-                    
-                    # extra info for file2
-                    event2_extra_data = df2_two_jet_extra[df2_two_jet_extra["event"] == event_id]
-                    extra_info = f"File2 extra info:\t"
-                    extra_info += f"run: {event2_extra_data['run'].iloc[0]}\t"
-                    extra_info += f"luminosityBlock: {event2_extra_data['luminosityBlock'].iloc[0]}\t"
-                    extra_info += f"event: {event2_extra_data['event'].iloc[0]}\n"
-                    extra_info += f"Z_lead_lepton_pt: {event2_extra_data['Z_lead_lepton_pt'].iloc[0]:.4f}\t"
-                    extra_info += f"Z_lead_lepton_eta: {event2_extra_data['Z_lead_lepton_eta'].iloc[0]:.4f}\t"
-                    extra_info += f"Z_lead_lepton_phi: {event2_extra_data['Z_lead_lepton_phi'].iloc[0]:.4f}\n"
-                    extra_info += f"Z_sublead_lepton_pt: {event2_extra_data['Z_sublead_lepton_pt'].iloc[0]:.4f}\t"
-                    extra_info += f"Z_sublead_lepton_eta: {event2_extra_data['Z_sublead_lepton_eta'].iloc[0]:.4f}\t"
-                    extra_info += f"Z_sublead_lepton_phi: {event2_extra_data['Z_sublead_lepton_phi'].iloc[0]:.4f}\n"
-                    log_file.write(extra_info)
-
-                    # Differences
-                    diff_row_str = "Diff:\t"
-                    has_diff = False
-                    for var1, var2 in var_map.items():
-                        val1 = event1_data[var1].iloc[0]
-                        val2 = event2_data[var2].iloc[0]
-                        diff = val1 - val2
-                        diff_row_str += f"{var1}-{var2}: {diff:.4f}\t"
-                        if abs(diff) > 1e-6:
-                            has_diff = True
-                    
-                    if has_diff:
-                        log_file.write(diff_row_str + "\n")
-                    else:
-                        log_file.write("Diff:\tNo significant differences.\n")
-
-                    log_file.write("\n")
-                else:
-                    log_file.write(f"--- Event: {event_id} (in file2:two_jet, NOT found in file1:zero_to_one_jet) ---\n\n")
-
-
-    print(f"Comparison finished. Log saved to {log_file_path}")
 
 if __name__ == "__main__":
     main()
