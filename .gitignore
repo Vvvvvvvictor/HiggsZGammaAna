@@ -200,3 +200,6 @@ HiggsDNA/Parquet
 .DS_Store
 HiggsDNA/.DS_Store
 HiggsDNA/higgs_dna/.DS_Store
+!synchronization_script/
+!synchronization_script/log/
+!synchronization_script/log/ggH_ebe_mismatch.log
