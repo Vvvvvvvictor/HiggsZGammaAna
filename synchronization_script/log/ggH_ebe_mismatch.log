@@ -2,7 +2,7 @@ DNA file:	/eos/home-p/pelai/HZgamma/root_P2Root/synchronization/ggH_M125/2023pos
 n2p two_jet file:	/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_input_redwood/v2/GGF_2023BPix_redwood_v2_vbf.root
 n2p zero_to_one_jet file:	/eos/project/h/htozg-dy-privatemc/rzou/bdt/BDT_input_redwood/v2/GGF_2023BPix_redwood_v2_ggf.root
 DNA two_jet entries:	6234
-DNA zero_to_one_jet entries:	50667
+DNA zero_to_one_jet entries:	50665
 n2p two_jet entries:	6762
 n2p zero_to_one_jet entries:	50704
 DNA missing branches(two_jet):	none
@@ -395,8 +395,8 @@ Diff:	n_jets-n_jets=-1.000000	jet_1_pt-jet_1_pt=-11.430579	jet_2_pt-jet_2_pt=-10
 
 --- Event 38169 (n2p:TreeS -> DNA:two_jet/zero_to_one_jet) ---
 n2p (TreeS):	event=38169.000000	n_jets=2.000000	n_b_jets=0.000000	jet_1_pt=41.537472	jet_1_eta=1.635498	jet_2_pt=32.911465	jet_2_eta=-3.203613	jet_2_phi=-2.292480	jet_3_pt=-999.000000	jet_3_eta=-999.000000	jet_3_phi=-999.000000	MET_pt=40.613777	n_electrons=2.000000	n_muons=0.000000
-DNA (zero_to_one_jet):	event=38169.000000	run=1.000000	luminosityBlock=39.000000	n_jets=1.000000	n_b_jets=0.000000	jet_1_pt=41.537475	jet_1_eta=1.635498	jet_2_pt=-999.000000	jet_2_eta=-999.000000	jet_2_phi=-999.000000	jet_3_pt=-999.000000	jet_3_eta=-999.000000	jet_3_phi=-999.000000	MET_pt=0.000000	n_electrons=2.000000	n_muons=0.000000
-Diff:	n_jets-n_jets=-1.000000	jet_1_pt-jet_1_pt=0.000004	jet_2_pt-jet_2_pt=-1031.911465	jet_2_eta-jet_2_eta=-995.796387	jet_2_phi-jet_2_phi=-996.707520	MET_pt-MET_pt=-40.613777
+DNA (zero_to_one_jet):	event=38169.000000	run=1.000000	luminosityBlock=39.000000	n_jets=1.000000	n_b_jets=0.000000	jet_1_pt=41.537475	jet_1_eta=1.635498	jet_2_pt=-999.000000	jet_2_eta=-999.000000	jet_2_phi=-999.000000	jet_3_pt=-999.000000	jet_3_eta=-999.000000	jet_3_phi=-999.000000	MET_pt=36.219269	n_electrons=2.000000	n_muons=0.000000
+Diff:	n_jets-n_jets=-1.000000	jet_1_pt-jet_1_pt=0.000004	jet_2_pt-jet_2_pt=-1031.911465	jet_2_eta-jet_2_eta=-995.796387	jet_2_phi-jet_2_phi=-996.707520	MET_pt-MET_pt=-4.394508
 
 --- Event 39057 (n2p:TreeS -> DNA:two_jet/zero_to_one_jet) ---
 n2p (TreeS):	event=39057.000000	n_jets=2.000000	n_b_jets=0.000000	jet_1_pt=43.546696	jet_1_eta=3.282715	jet_2_pt=37.063545	jet_2_eta=-1.070557	jet_2_phi=3.006836	jet_3_pt=-999.000000	jet_3_eta=-999.000000	jet_3_phi=-999.000000	MET_pt=49.378311	n_electrons=0.000000	n_muons=2.000000
@@ -879,7 +879,7 @@ n2p (TreeS):	event=5134.000000	n_jets=1.000000	n_b_jets=0.000000	jet_1_pt=38.872
 Diff:	n_jets-n_jets=-1.000000	jet_1_pt-jet_1_pt=-9.832117	jet_1_eta-jet_1_eta=7.219238	jet_2_pt-jet_2_pt=-1037.772661	jet_2_eta-jet_2_eta=-1002.898926	jet_2_phi-jet_2_phi=-996.010254	MET_pt-MET_pt=8.124924
 
 --- Event 5500 (DNA:two_jet -> n2p:TreeS/TreeS) ---
-DNA (two_jet):	event=5500.000000	run=1.000000	luminosityBlock=6.000000	n_jets=2.000000	n_b_jets=0.000000	jet_1_pt=36.501708	jet_1_eta=0.950439	jet_2_pt=32.007485	jet_2_eta=-3.851074	jet_2_phi=-0.199951	jet_3_pt=-999.000000	jet_3_eta=-999.000000	jet_3_phi=-999.000000	MET_pt=0.000000	n_electrons=0.000000	n_muons=2.000000
+DNA (two_jet):	event=5500.000000	run=1.000000	luminosityBlock=6.000000	n_jets=2.000000	n_b_jets=0.000000	jet_1_pt=36.501708	jet_1_eta=0.950439	jet_2_pt=32.007485	jet_2_eta=-3.851074	jet_2_phi=-0.199951	jet_3_pt=-999.000000	jet_3_eta=-999.000000	jet_3_phi=-999.000000	MET_pt=106.013518	n_electrons=0.000000	n_muons=2.000000
 n2p:	Event not found in TreeS or TreeS
 
 --- Event 9867 (DNA:two_jet -> n2p:TreeS/TreeS) ---
@@ -1034,9 +1034,9 @@ DNA (two_jet):	event=53062.000000	run=1.000000	luminosityBlock=54.000000	n_jets=
 n2p:	Event not found in TreeS or TreeS
 
 --- Event 53211 (DNA:two_jet -> n2p:TreeS/TreeS) ---
-DNA (two_jet):	event=53211.000000	run=1.000000	luminosityBlock=54.000000	n_jets=2.000000	n_b_jets=0.000000	jet_1_pt=48.032476	jet_1_eta=-1.985352	jet_2_pt=30.410053	jet_2_eta=-2.427734	jet_2_phi=0.015675	jet_3_pt=-999.000000	jet_3_eta=-999.000000	jet_3_phi=-999.000000	MET_pt=0.000000	n_electrons=0.000000	n_muons=2.000000
+DNA (two_jet):	event=53211.000000	run=1.000000	luminosityBlock=54.000000	n_jets=2.000000	n_b_jets=0.000000	jet_1_pt=48.032476	jet_1_eta=-1.985352	jet_2_pt=30.410053	jet_2_eta=-2.427734	jet_2_phi=0.015675	jet_3_pt=-999.000000	jet_3_eta=-999.000000	jet_3_phi=-999.000000	MET_pt=25.256366	n_electrons=0.000000	n_muons=2.000000
 n2p (TreeS):	event=53211.000000	n_jets=1.000000	n_b_jets=0.000000	jet_1_pt=48.032478	jet_1_eta=-1.985352	jet_2_pt=-999.000000	jet_2_eta=-999.000000	jet_2_phi=-999.000000	jet_3_pt=-999.000000	jet_3_eta=-999.000000	jet_3_phi=-999.000000	MET_pt=27.219814	n_electrons=0.000000	n_muons=2.000000
-Diff:	n_jets-n_jets=-1.000000	jet_1_pt-jet_1_pt=0.000002	jet_2_pt-jet_2_pt=-1029.410053	jet_2_eta-jet_2_eta=-996.572266	jet_2_phi-jet_2_phi=-999.015675	MET_pt-MET_pt=27.219814
+Diff:	n_jets-n_jets=-1.000000	jet_1_pt-jet_1_pt=0.000002	jet_2_pt-jet_2_pt=-1029.410053	jet_2_eta-jet_2_eta=-996.572266	jet_2_phi-jet_2_phi=-999.015675	MET_pt-MET_pt=1.963448
 
 --- Event 53488 (DNA:two_jet -> n2p:TreeS/TreeS) ---
 DNA (two_jet):	event=53488.000000	run=1.000000	luminosityBlock=54.000000	n_jets=2.000000	n_b_jets=0.000000	jet_1_pt=204.254239	jet_1_eta=0.103256	jet_2_pt=47.490745	jet_2_eta=-0.708740	jet_2_phi=-2.763672	jet_3_pt=-999.000000	jet_3_eta=-999.000000	jet_3_phi=-999.000000	MET_pt=25.737186	n_electrons=2.000000	n_muons=0.000000
@@ -1098,7 +1098,7 @@ n2p (TreeS):	event=69656.000000	n_jets=1.000000	n_b_jets=0.000000	jet_1_pt=44.75
 Diff:	n_jets-n_jets=-1.000000	jet_1_pt-jet_1_pt=0.000002	jet_2_pt-jet_2_pt=-1029.396828	jet_2_eta-jet_2_eta=-999.624268	jet_2_phi-jet_2_phi=-998.332764	MET_pt-MET_pt=0.355521
 
 --- Event 69965 (DNA:two_jet -> n2p:TreeS/TreeS) ---
-DNA (two_jet):	event=69965.000000	run=1.000000	luminosityBlock=70.000000	n_jets=2.000000	n_b_jets=0.000000	jet_1_pt=62.224178	jet_1_eta=3.962402	jet_2_pt=48.767299	jet_2_eta=2.078125	jet_2_phi=2.814941	jet_3_pt=-999.000000	jet_3_eta=-999.000000	jet_3_phi=-999.000000	MET_pt=0.000000	n_electrons=2.000000	n_muons=0.000000
+DNA (two_jet):	event=69965.000000	run=1.000000	luminosityBlock=70.000000	n_jets=2.000000	n_b_jets=0.000000	jet_1_pt=62.224178	jet_1_eta=3.962402	jet_2_pt=48.767299	jet_2_eta=2.078125	jet_2_phi=2.814941	jet_3_pt=-999.000000	jet_3_eta=-999.000000	jet_3_phi=-999.000000	MET_pt=26.586616	n_electrons=2.000000	n_muons=0.000000
 n2p:	Event not found in TreeS or TreeS
 
 --- Event 70238 (DNA:two_jet -> n2p:TreeS/TreeS) ---
@@ -1431,7 +1431,7 @@ n2p (TreeS):	event=171835.000000	n_jets=1.000000	n_b_jets=0.000000	jet_1_pt=35.3
 Diff:	n_jets-n_jets=-1.000000	jet_1_pt-jet_1_pt=0.000003	jet_2_pt-jet_2_pt=-1031.070441	jet_2_eta-jet_2_eta=-1002.324219	jet_2_phi-jet_2_phi=-1001.612793	MET_pt-MET_pt=-2.527142
 
 --- Event 173196 (DNA:two_jet -> n2p:TreeS/TreeS) ---
-DNA (two_jet):	event=173196.000000	run=1.000000	luminosityBlock=174.000000	n_jets=2.000000	n_b_jets=0.000000	jet_1_pt=60.159418	jet_1_eta=1.253418	jet_2_pt=59.765351	jet_2_eta=1.147217	jet_2_phi=1.650635	jet_3_pt=-999.000000	jet_3_eta=-999.000000	jet_3_phi=-999.000000	MET_pt=0.000000	n_electrons=2.000000	n_muons=0.000000
+DNA (two_jet):	event=173196.000000	run=1.000000	luminosityBlock=174.000000	n_jets=2.000000	n_b_jets=0.000000	jet_1_pt=60.159418	jet_1_eta=1.253418	jet_2_pt=59.765351	jet_2_eta=1.147217	jet_2_phi=1.650635	jet_3_pt=-999.000000	jet_3_eta=-999.000000	jet_3_phi=-999.000000	MET_pt=16.680636	n_electrons=2.000000	n_muons=0.000000
 n2p:	Event not found in TreeS or TreeS
 
 --- Event 175232 (DNA:two_jet -> n2p:TreeS/TreeS) ---
@@ -1630,18 +1630,18 @@ n2p (TreeS):	event=243887.000000	n_jets=1.000000	n_b_jets=0.000000	jet_1_pt=41.1
 Diff:	n_jets-n_jets=-1.000000	jet_2_pt-jet_2_pt=-1030.546588	jet_2_eta-jet_2_eta=-994.768555	jet_2_phi-jet_2_phi=-997.390381	MET_pt-MET_pt=9.191000
 
 --- Event 244888 (DNA:two_jet -> n2p:TreeS/TreeS) ---
-DNA (two_jet):	event=244888.000000	run=1.000000	luminosityBlock=245.000000	n_jets=2.000000	n_b_jets=0.000000	jet_1_pt=36.847041	jet_1_eta=-3.809082	jet_2_pt=31.155784	jet_2_eta=1.899658	jet_2_phi=1.347656	jet_3_pt=-999.000000	jet_3_eta=-999.000000	jet_3_phi=-999.000000	MET_pt=0.000000	n_electrons=0.000000	n_muons=2.000000
+DNA (two_jet):	event=244888.000000	run=1.000000	luminosityBlock=245.000000	n_jets=2.000000	n_b_jets=0.000000	jet_1_pt=36.847041	jet_1_eta=-3.809082	jet_2_pt=31.155784	jet_2_eta=1.899658	jet_2_phi=1.347656	jet_3_pt=-999.000000	jet_3_eta=-999.000000	jet_3_phi=-999.000000	MET_pt=10.411897	n_electrons=0.000000	n_muons=2.000000
 n2p (TreeS):	event=244888.000000	n_jets=1.000000	n_b_jets=0.000000	jet_1_pt=36.847034	jet_1_eta=-3.809082	jet_2_pt=-999.000000	jet_2_eta=-999.000000	jet_2_phi=-999.000000	jet_3_pt=-999.000000	jet_3_eta=-999.000000	jet_3_phi=-999.000000	MET_pt=15.114221	n_electrons=0.000000	n_muons=2.000000
-Diff:	n_jets-n_jets=-1.000000	jet_1_pt-jet_1_pt=-0.000006	jet_2_pt-jet_2_pt=-1030.155784	jet_2_eta-jet_2_eta=-1000.899658	jet_2_phi-jet_2_phi=-1000.347656	MET_pt-MET_pt=15.114221
+Diff:	n_jets-n_jets=-1.000000	jet_1_pt-jet_1_pt=-0.000006	jet_2_pt-jet_2_pt=-1030.155784	jet_2_eta-jet_2_eta=-1000.899658	jet_2_phi-jet_2_phi=-1000.347656	MET_pt-MET_pt=4.702323
 
 --- Event 244927 (DNA:two_jet -> n2p:TreeS/TreeS) ---
 DNA (two_jet):	event=244927.000000	run=1.000000	luminosityBlock=245.000000	n_jets=3.000000	n_b_jets=0.000000	jet_1_pt=169.164727	jet_1_eta=-0.445435	jet_2_pt=61.321690	jet_2_eta=2.994141	jet_2_phi=-0.757812	jet_3_pt=57.110229	jet_3_eta=2.216797	jet_3_phi=1.643066	MET_pt=49.624569	n_electrons=0.000000	n_muons=2.000000
 n2p:	Event not found in TreeS or TreeS
 
 --- Event 248003 (DNA:two_jet -> n2p:TreeS/TreeS) ---
-DNA (two_jet):	event=248003.000000	run=1.000000	luminosityBlock=249.000000	n_jets=2.000000	n_b_jets=0.000000	jet_1_pt=88.513835	jet_1_eta=1.972900	jet_2_pt=30.165610	jet_2_eta=-3.608398	jet_2_phi=-0.849609	jet_3_pt=-999.000000	jet_3_eta=-999.000000	jet_3_phi=-999.000000	MET_pt=0.000000	n_electrons=0.000000	n_muons=2.000000
+DNA (two_jet):	event=248003.000000	run=1.000000	luminosityBlock=249.000000	n_jets=2.000000	n_b_jets=0.000000	jet_1_pt=88.513835	jet_1_eta=1.972900	jet_2_pt=30.165610	jet_2_eta=-3.608398	jet_2_phi=-0.849609	jet_3_pt=-999.000000	jet_3_eta=-999.000000	jet_3_phi=-999.000000	MET_pt=43.321356	n_electrons=0.000000	n_muons=2.000000
 n2p (TreeS):	event=248003.000000	n_jets=1.000000	n_b_jets=0.000000	jet_1_pt=88.513832	jet_1_eta=1.972900	jet_2_pt=-999.000000	jet_2_eta=-999.000000	jet_2_phi=-999.000000	jet_3_pt=-999.000000	jet_3_eta=-999.000000	jet_3_phi=-999.000000	MET_pt=46.652756	n_electrons=0.000000	n_muons=2.000000
-Diff:	n_jets-n_jets=-1.000000	jet_1_pt-jet_1_pt=-0.000003	jet_2_pt-jet_2_pt=-1029.165610	jet_2_eta-jet_2_eta=-995.391602	jet_2_phi-jet_2_phi=-998.150391	MET_pt-MET_pt=46.652756
+Diff:	n_jets-n_jets=-1.000000	jet_1_pt-jet_1_pt=-0.000003	jet_2_pt-jet_2_pt=-1029.165610	jet_2_eta-jet_2_eta=-995.391602	jet_2_phi-jet_2_phi=-998.150391	MET_pt-MET_pt=3.331400
 
 --- Event 249428 (DNA:two_jet -> n2p:TreeS/TreeS) ---
 DNA (two_jet):	event=249428.000000	run=1.000000	luminosityBlock=250.000000	n_jets=2.000000	n_b_jets=0.000000	jet_1_pt=40.620186	jet_1_eta=0.641968	jet_2_pt=30.224586	jet_2_eta=-1.248291	jet_2_phi=-0.059494	jet_3_pt=-999.000000	jet_3_eta=-999.000000	jet_3_phi=-999.000000	MET_pt=10.380842	n_electrons=0.000000	n_muons=2.000000
