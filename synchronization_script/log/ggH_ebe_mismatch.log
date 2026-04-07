@@ -5,6 +5,12 @@ DNA two_jet entries:	6234
 DNA zero_to_one_jet entries:	50665
 n2p two_jet entries:	6762
 n2p zero_to_one_jet entries:	50704
+n2p two_jet entries comparable to DNA baseline:	6212
+n2p zero_to_one_jet entries comparable to DNA baseline:	50620
+n2p two_jet extra raw-only entries:	550
+n2p zero_to_one_jet extra raw-only entries:	84
+DNA - comparable n2p two_jet:	22
+DNA - comparable n2p zero_to_one_jet:	45
 DNA missing branches(two_jet):	none
 DNA missing branches(zero_to_one_jet):	none
 n2p missing branches(two_jet):	run, luminosityBlock
