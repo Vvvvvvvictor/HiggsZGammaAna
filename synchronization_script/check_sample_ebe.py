@@ -271,6 +271,25 @@ def load_tree(file_path, tree_name, branch_aliases):
     return df, available, missing, resolved_tree_name
 
 
+def _series_or_default(df, column, default_value):
+    if column in df.columns:
+        return df[column].fillna(default_value)
+    return pd.Series(default_value, index=df.index)
+
+
+def category_like_mask(df, category_name):
+    n_jets = _series_or_default(df, "n_jets", 0)
+    n_b_jets = _series_or_default(df, "n_b_jets", 0)
+    met_pt = _series_or_default(df, "MET_pt", 0.0)
+    n_leptons = _series_or_default(df, "n_electrons", 0) + _series_or_default(df, "n_muons", 0)
+
+    if category_name == "two_jet":
+        return (n_jets >= 2) & (n_b_jets == 0) & (n_leptons == 2)
+    if category_name == "zero_to_one_jet":
+        return (n_jets <= 1) & (met_pt < 90.0) & (n_leptons == 2)
+    raise ValueError(f"Unsupported category name: {category_name}")
+
+
 def fmt_value(value):
     if pd.isna(value):
         return "nan"
@@ -491,6 +510,11 @@ def main():
         n2p_zero_one_path, args.n2p_zero_one_tree, N2P_BRANCH_ALIASES
     )
 
+    n2p_two_category_like_df = n2p_two_df[category_like_mask(n2p_two_df, "two_jet")]
+    n2p_zero_one_category_like_df = n2p_zero_one_df[
+        category_like_mask(n2p_zero_one_df, "zero_to_one_jet")
+    ]
+
     n2p_to_dna_events = []
     dna_to_n2p_events = []
     if args.mode in ("both", "n2p_to_dna"):
@@ -543,6 +567,24 @@ def main():
         handle.write(f"DNA zero_to_one_jet entries:\t{len(dna_zero_one_df)}\n")
         handle.write(f"n2p two_jet entries:\t{len(n2p_two_df)}\n")
         handle.write(f"n2p zero_to_one_jet entries:\t{len(n2p_zero_one_df)}\n")
+        handle.write(
+            f"n2p two_jet entries comparable to DNA baseline:\t{len(n2p_two_category_like_df)}\n"
+        )
+        handle.write(
+            f"n2p zero_to_one_jet entries comparable to DNA baseline:\t{len(n2p_zero_one_category_like_df)}\n"
+        )
+        handle.write(
+            f"n2p two_jet extra raw-only entries:\t{len(n2p_two_df) - len(n2p_two_category_like_df)}\n"
+        )
+        handle.write(
+            f"n2p zero_to_one_jet extra raw-only entries:\t{len(n2p_zero_one_df) - len(n2p_zero_one_category_like_df)}\n"
+        )
+        handle.write(
+            f"DNA - comparable n2p two_jet:\t{len(dna_two_df) - len(n2p_two_category_like_df)}\n"
+        )
+        handle.write(
+            f"DNA - comparable n2p zero_to_one_jet:\t{len(dna_zero_one_df) - len(n2p_zero_one_category_like_df)}\n"
+        )
         handle.write(f"DNA missing branches(two_jet):\t{', '.join(dna_two_missing) or 'none'}\n")
         handle.write(f"DNA missing branches(zero_to_one_jet):\t{', '.join(dna_zero_one_missing) or 'none'}\n")
         handle.write(f"n2p missing branches(two_jet):\t{', '.join(n2p_two_missing) or 'none'}\n")
