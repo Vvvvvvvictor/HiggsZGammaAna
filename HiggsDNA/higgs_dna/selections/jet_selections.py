@@ -44,7 +44,7 @@ def select_jets(jets, options, clean, year, name="none", tagger=None, event_runs
         jets,
         {"eta": options["eta"]},
         clean,
-        "none",
+        "JetVetoBasis",
         None,
     )
 
