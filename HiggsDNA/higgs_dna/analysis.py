@@ -11,6 +11,9 @@ import re
 
 import uproot
 import awkward
+from higgs_dna.utils.parquet_compat import ensure_pyarrow_compat
+
+ensure_pyarrow_compat()
 try:
     import pyarrow.parquet as pyarrow_parquet
 except ModuleNotFoundError:

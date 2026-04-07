@@ -11,6 +11,9 @@ import awkward
 import numpy
 import sys
 from tqdm import tqdm
+from higgs_dna.utils.parquet_compat import ensure_pyarrow_compat
+
+ensure_pyarrow_compat()
 
 import logging
 # logger = logging.getLogger(__name__)

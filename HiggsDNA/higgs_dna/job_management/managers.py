@@ -5,6 +5,9 @@ import awkward
 import numpy
 import json
 import glob
+from higgs_dna.utils.parquet_compat import ensure_pyarrow_compat
+
+ensure_pyarrow_compat()
 try:
     import pyarrow  # noqa: F401
 except ModuleNotFoundError:
