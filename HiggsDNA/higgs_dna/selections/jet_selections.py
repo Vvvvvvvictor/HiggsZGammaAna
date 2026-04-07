@@ -40,12 +40,20 @@ def select_jets(jets, options, clean, year, name="none", tagger=None, event_runs
     standard_cuts, photon_removal, lepton_removal = object_selections.select_objects(
         jets, options, clean, name, tagger
     )
+    veto_event_basis, _, _ = object_selections.select_objects(
+        jets,
+        {"eta": options["eta"]},
+        clean,
+        "none",
+        None,
+    )
 
     # n2p uses a strict |eta| < 4.7 boundary.
     strict_eta_cut = abs(jets.eta) < options["eta"]
     standard_cuts = standard_cuts & strict_eta_cut
     photon_removal = photon_removal & strict_eta_cut
     lepton_removal = lepton_removal & strict_eta_cut
+    veto_event_basis = veto_event_basis & strict_eta_cut
 
     jet_pt_for_veto = jets.raw_pt if "raw_pt" in jets.fields else jets.pt
 
@@ -90,6 +98,11 @@ def select_jets(jets, options, clean, year, name="none", tagger=None, event_runs
     else:
         id_cut = jets.pt > 0
 
+    # n2p only turns on the Run3 jet veto map for jets that satisfy the
+    # "isgood_min" preselection: cross-cleaned, in-acceptance jets that pass jet ID,
+    # but before the final pt threshold and eta-horn veto are applied.
+    veto_event_basis = veto_event_basis & id_cut
+
     jet_veto_map_evaluator = _core.CorrectionSet.from_file(misc_utils.expand_path(JET_VETO_MAP_FILE[year]))
     n_jets = awkward.num(jets)
     jets_flattened = awkward.flatten(jets)
@@ -110,6 +123,7 @@ def select_jets(jets, options, clean, year, name="none", tagger=None, event_runs
         jet_veto_sf = numpy.where(
             (jet_pt_flattened_for_veto > 15.0)
             & (abs(jet_eta) < 5.191)
+            & awkward.to_numpy(awkward.flatten(veto_event_basis))
             & (
                 jet_veto_map_evaluator["jetvetomap"].evalv(
                     "jetvetomap",
